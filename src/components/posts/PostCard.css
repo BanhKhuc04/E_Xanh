@@ -1,0 +1,138 @@
+.post-card-ui {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(234, 245, 157, 0.62);
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.post-card-ui:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(79, 132, 40, 0.12);
+}
+
+.post-card-ui__media {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(234, 245, 157, 0.52), rgba(193, 217, 92, 0.18));
+}
+
+.post-card-ui__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.post-card-ui__category,
+.post-card-ui__save-button {
+  position: absolute;
+  top: 16px;
+  z-index: 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 20px rgba(79, 132, 40, 0.12);
+}
+
+.post-card-ui__category {
+  left: 16px;
+  padding: 8px 12px;
+  color: #336a29;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.post-card-ui__save-button {
+  right: 16px;
+  border: 0;
+  padding: 10px 12px;
+  color: #336a29;
+  font-weight: 700;
+}
+
+.post-card-ui__body {
+  display: grid;
+  gap: 16px;
+  flex: 1;
+  padding: 24px;
+}
+
+.post-card-ui__body h3 {
+  margin: 0;
+  font-size: 1.38rem;
+  line-height: 1.4;
+  letter-spacing: -0.03em;
+}
+
+.post-card-ui__body p {
+  margin: 0;
+  color: rgba(23, 55, 21, 0.74);
+  line-height: 1.72;
+}
+
+.post-card-ui__meta {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(79, 132, 40, 0.12);
+}
+
+.post-card-ui__author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.post-card-ui__avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #336a29;
+  background: #eaf59d;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.post-card-ui__author strong,
+.post-card-ui__author span,
+.post-card-ui__stats span {
+  display: block;
+}
+
+.post-card-ui__author span,
+.post-card-ui__stats {
+  color: rgba(23, 55, 21, 0.62);
+  font-size: 0.9rem;
+}
+
+.post-card-ui__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.post-card-ui__link {
+  width: fit-content;
+  color: #4f8428;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .post-card-ui__media {
+    height: 200px;
+  }
+
+  .post-card-ui__body {
+    padding: 20px;
+  }
+}

@@ -1,0 +1,525 @@
+.electricity-page {
+  display: grid;
+  gap: 44px;
+}
+
+.electricity-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.96fr);
+  gap: 40px;
+  align-items: center;
+}
+
+.electricity-hero__content {
+  display: grid;
+  gap: 22px;
+}
+
+.electricity-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: #4f8428;
+  background: rgba(128, 177, 85, 0.16);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.electricity-hero__content h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 5.8vw, 4.7rem);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+
+.electricity-hero__content p,
+.electricity-section__header p,
+.electricity-result-card p,
+.saving-suggestion-card p,
+.electricity-history__note,
+.electricity-formula__header p,
+.electricity-formula__example p {
+  margin: 0;
+  color: rgba(23, 55, 21, 0.72);
+  line-height: 1.8;
+}
+
+.electricity-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.electricity-hero__secondary,
+.electricity-tool-layout__reset {
+  color: #336a29;
+  background: #eaf59d;
+}
+
+.electricity-hero__visual {
+  position: relative;
+  min-height: 380px;
+  padding: 16px;
+  border-radius: 32px;
+  background: linear-gradient(135deg, rgba(193, 217, 92, 0.48), rgba(128, 177, 85, 0.2));
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+}
+
+.electricity-hero__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+}
+
+.electricity-floating {
+  position: absolute;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 24px rgba(79, 132, 40, 0.12);
+}
+
+.electricity-floating span {
+  display: block;
+  color: rgba(23, 55, 21, 0.62);
+  font-size: 0.8rem;
+}
+
+.electricity-floating strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+}
+
+.electricity-floating--cost {
+  top: 20px;
+  right: 20px;
+}
+
+.electricity-floating--top {
+  left: 14px;
+  bottom: 72px;
+}
+
+.electricity-floating--save {
+  right: 22px;
+  bottom: 24px;
+}
+
+.electricity-tool-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.86fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.electricity-tool-layout__left,
+.electricity-tool-layout__right {
+  display: grid;
+  gap: 18px;
+}
+
+.electricity-form,
+.device-usage-list,
+.electricity-result-card,
+.electricity-breakdown,
+.saving-suggestion-card,
+.electricity-history,
+.electricity-formula {
+  min-width: 0;
+}
+
+.electricity-form {
+  display: grid;
+  gap: 10px;
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+}
+
+.electricity-form h2,
+.electricity-section__header h2,
+.electricity-history h2,
+.electricity-formula__header h2 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.electricity-form p {
+  margin: 0 0 8px;
+  color: rgba(23, 55, 21, 0.68);
+}
+
+.electricity-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.electricity-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.electricity-form label span {
+  color: rgba(23, 55, 21, 0.68);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.electricity-form input,
+.electricity-form select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(115, 121, 106, 0.22);
+  border-radius: 14px;
+  padding: 13px 14px;
+  background: rgba(234, 245, 157, 0.22);
+  font: inherit;
+}
+
+.electricity-form__add {
+  width: 100%;
+  margin-top: 4px;
+  padding: 14px;
+  border: 2px dashed #4f8428;
+  border-radius: 14px;
+  color: #4f8428;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+}
+
+.device-usage-list {
+  display: grid;
+  gap: 12px;
+}
+
+.device-usage-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(234, 245, 157, 0.28);
+  border: 1px solid rgba(128, 177, 85, 0.18);
+}
+
+.device-usage-item__meta h3,
+.saving-suggestion-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.device-usage-item__meta p {
+  margin: 4px 0 0;
+  color: rgba(23, 55, 21, 0.66);
+  font-size: 0.92rem;
+}
+
+.device-usage-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.device-usage-item__actions button {
+  border: 0;
+  color: rgba(23, 55, 21, 0.68);
+  background: transparent;
+  font: inherit;
+}
+
+.electricity-tool-layout__buttons {
+  display: flex;
+  gap: 14px;
+}
+
+.electricity-tool-layout__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.electricity-tool-layout__save-button {
+  color: #336a29;
+  background: rgba(234, 245, 157, 0.9);
+}
+
+.electricity-tool-layout__save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.electricity-tool-layout__save-message {
+  color: #4f8428;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.electricity-tool-layout__primary {
+  flex: 1;
+}
+
+.electricity-result-card {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #eaf59d 0%, #caffb9 100%);
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+}
+
+.electricity-result-card__eyebrow {
+  color: rgba(51, 106, 41, 0.72);
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.electricity-result-card__price {
+  font-size: clamp(2.6rem, 4vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+}
+
+.electricity-result-card__stats {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.electricity-result-card__stats span,
+.electricity-history__head,
+.electricity-history__row span {
+  color: rgba(23, 55, 21, 0.66);
+}
+
+.electricity-result-card__stats strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.electricity-breakdown {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+}
+
+.electricity-breakdown h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.electricity-breakdown__list {
+  display: grid;
+  gap: 14px;
+}
+
+.electricity-breakdown__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.electricity-breakdown__bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(128, 177, 85, 0.18);
+}
+
+.electricity-breakdown__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.electricity-breakdown__fill--0 {
+  background: #336a29;
+}
+
+.electricity-breakdown__fill--1 {
+  background: #80b155;
+}
+
+.electricity-breakdown__fill--2 {
+  background: #d6a24a;
+}
+
+.electricity-section {
+  display: grid;
+  gap: 20px;
+}
+
+.saving-suggestions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.saving-suggestion-card {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+}
+
+.saving-suggestion-card__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #4f8428;
+  background: rgba(128, 177, 85, 0.14);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.electricity-history,
+.electricity-formula {
+  display: grid;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
+}
+
+.electricity-history__table {
+  display: grid;
+  gap: 10px;
+}
+
+.electricity-history__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.electricity-history__header a {
+  color: #336a29;
+  font-weight: 700;
+}
+
+.electricity-history__head,
+.electricity-history__row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: center;
+}
+
+.electricity-history__head {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.1);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.electricity-history__row {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.08);
+}
+
+.electricity-history__row strong {
+  color: #173715;
+}
+
+.electricity-formula__header {
+  text-align: center;
+}
+
+.electricity-formula__box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(234, 245, 157, 0.24);
+  border: 1px solid rgba(128, 177, 85, 0.16);
+}
+
+.electricity-formula__equation {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 22px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.electricity-formula__equation strong {
+  font-size: 1.4rem;
+  text-align: center;
+  letter-spacing: -0.03em;
+}
+
+.electricity-formula__equation b {
+  display: block;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid rgba(79, 132, 40, 0.14);
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.electricity-formula__example {
+  padding: 8px 6px;
+}
+
+@media (max-width: 1200px) {
+  .electricity-hero,
+  .electricity-tool-layout,
+  .electricity-formula__box {
+    grid-template-columns: 1fr;
+  }
+
+  .saving-suggestions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .electricity-form__grid,
+  .saving-suggestions,
+  .electricity-history__head,
+  .electricity-history__row {
+    grid-template-columns: 1fr;
+  }
+
+  .electricity-tool-layout__buttons,
+  .electricity-hero__actions,
+  .device-usage-item,
+  .device-usage-item__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .electricity-tool-layout__save,
+  .electricity-history__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

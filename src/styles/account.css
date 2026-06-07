@@ -1,0 +1,417 @@
+.account-page {
+  display: grid;
+  gap: 24px;
+}
+
+.account-page__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: rgba(23, 55, 21, 0.64);
+}
+
+.account-profile-header,
+.account-stats__card,
+.account-panel,
+.account-side-card,
+.account-guest-card {
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(79, 132, 40, 0.08);
+  box-shadow: var(--shadow-card);
+}
+
+.account-profile-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(234, 245, 157, 0.42), transparent 26%),
+    rgba(255, 255, 255, 0.96);
+}
+
+.account-profile-header__identity,
+.account-profile-header__meta,
+.account-profile-header__actions,
+.account-my-posts__meta,
+.account-my-posts__actions,
+.account-comments__footer {
+  display: flex;
+  align-items: center;
+}
+
+.account-profile-header__identity {
+  gap: 18px;
+}
+
+.account-profile-header__avatar {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
+}
+
+.account-profile-header__content h1 {
+  margin: 0 0 8px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.04em;
+}
+
+.account-profile-header__content p,
+.account-my-posts__meta,
+.account-saved-posts__item p,
+.account-comments__item span,
+.account-side-card__rows span,
+.account-history-list__item span,
+.account-side-card__empty,
+.account-settings__message,
+.account-side-card--tips p,
+.account-guest-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.account-profile-header__meta {
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.account-profile-header__badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--color-primary-500);
+  background: rgba(193, 217, 92, 0.28);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.account-profile-header__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.account-profile-header__secondary {
+  color: var(--color-primary-500);
+  background: rgba(234, 245, 157, 0.8);
+}
+
+.account-profile-header__logout {
+  color: #8a5a0b;
+  background: rgba(246, 224, 177, 0.42);
+  border-color: rgba(214, 162, 74, 0.22);
+}
+
+.account-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.account-stats__card {
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+}
+
+.account-stats__card span {
+  color: rgba(23, 55, 21, 0.64);
+}
+
+.account-stats__card strong {
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.92fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.account-layout__main,
+.account-layout__side,
+.account-my-posts,
+.account-saved-posts,
+.account-comments,
+.account-side-card__rows,
+.account-history-list,
+.account-settings {
+  display: grid;
+  gap: 16px;
+}
+
+.account-panel,
+.account-side-card {
+  padding: 22px;
+}
+
+.account-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.account-panel__header h2,
+.account-side-card h2,
+.account-guest-card h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: -0.03em;
+}
+
+.account-panel__header a {
+  color: var(--color-primary-500);
+  font-weight: 700;
+}
+
+.account-my-posts__item,
+.account-saved-posts__item,
+.account-comments__item,
+.account-history-list__item {
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(234, 245, 157, 0.22), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(79, 132, 40, 0.08);
+}
+
+.account-my-posts__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.account-my-posts__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.account-my-posts__top h3,
+.account-saved-posts__item h3 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.account-my-posts__status {
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.account-my-posts__status.is-approved {
+  color: var(--color-primary-500);
+  background: rgba(193, 217, 92, 0.3);
+}
+
+.account-my-posts__status.is-pending {
+  color: #8a5a0b;
+  background: rgba(246, 224, 177, 0.46);
+}
+
+.account-my-posts__meta,
+.account-my-posts__actions {
+  gap: 16px;
+}
+
+.account-my-posts__actions button,
+.account-comments__footer button,
+.account-saved-posts__item a {
+  border: 0;
+  padding: 0;
+  color: var(--color-primary-500);
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+}
+
+.account-saved-posts__category {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: var(--color-primary-500);
+  background: rgba(193, 217, 92, 0.24);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.account-saved-posts__item,
+.account-history-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-comments__item p {
+  margin: 0 0 10px;
+  line-height: 1.72;
+}
+
+.account-comments__footer {
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.account-side-card__rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.08);
+}
+
+.account-side-card__rows strong,
+.account-history-list__item strong,
+.account-history-list__item em {
+  font-style: normal;
+}
+
+.account-side-card__button {
+  width: 100%;
+  color: var(--color-primary-500);
+  background: rgba(193, 217, 92, 0.46);
+}
+
+.account-settings button {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  border: 0;
+  padding: 0;
+  color: var(--color-text);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+}
+
+.account-toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(115, 121, 106, 0.35);
+  transition: background-color 0.2s ease;
+}
+
+.account-toggle::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.account-toggle.is-on {
+  background: var(--color-primary-400);
+}
+
+.account-toggle.is-on::after {
+  transform: translateX(20px);
+}
+
+.account-settings__submit {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.account-settings__message {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.account-side-card--tips {
+  background:
+    radial-gradient(circle at top right, rgba(234, 245, 157, 0.42), transparent 30%),
+    linear-gradient(180deg, rgba(193, 217, 92, 0.2), rgba(255, 255, 255, 0.96));
+}
+
+.account-side-card--tips p {
+  line-height: 1.78;
+}
+
+.account-page--guest {
+  min-height: 60vh;
+  place-items: center;
+}
+
+.account-guest-card {
+  width: min(100%, 640px);
+  display: grid;
+  gap: 16px;
+  padding: 36px;
+  text-align: center;
+}
+
+.account-guest-card__actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1180px) {
+  .account-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .account-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .account-profile-header,
+  .account-my-posts__item,
+  .account-saved-posts__item,
+  .account-history-list__item,
+  .account-panel__header,
+  .account-side-card__rows div,
+  .account-comments__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .account-profile-header__actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .account-profile-header__actions .btn {
+    width: 100%;
+  }
+
+  .account-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .account-panel,
+  .account-side-card,
+  .account-profile-header,
+  .account-guest-card {
+    padding: 20px;
+  }
+}

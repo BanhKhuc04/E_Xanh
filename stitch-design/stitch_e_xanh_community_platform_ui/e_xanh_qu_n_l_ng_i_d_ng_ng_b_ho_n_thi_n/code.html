@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>E-XANH Admin - Quản lý người dùng</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#556500",
+                      "surface-variant": "#b4f3a1",
+                      "outline": "#73796a",
+                      "secondary-fixed": "#d5ee6e",
+                      "surface-dim": "#acea9a",
+                      "on-secondary-container": "#5a6b00",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#dfea93",
+                      "surface": "#edffe1",
+                      "inverse-on-surface": "#caffb9",
+                      "inverse-primary": "#a2d574",
+                      "on-primary-fixed": "#0d2000",
+                      "tertiary-fixed-dim": "#c3cd7a",
+                      "tertiary": "#5a631c",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface": "#002200",
+                      "on-tertiary-fixed-variant": "#434b03",
+                      "primary-fixed": "#bdf28e",
+                      "on-secondary-fixed-variant": "#3f4c00",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#3e6915",
+                      "on-tertiary-fixed": "#1a1e00",
+                      "on-primary-container": "#204100",
+                      "surface-container-high": "#baf9a7",
+                      "inverse-surface": "#003a00",
+                      "surface-container-highest": "#b4f3a1",
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#edffe1",
+                      "on-surface-variant": "#43493b",
+                      "on-primary-fixed-variant": "#285000",
+                      "error": "#ba1a1a",
+                      "primary-fixed-dim": "#a2d574",
+                      "surface-container": "#bfffac",
+                      "on-secondary": "#ffffff",
+                      "primary-container": "#80b155",
+                      "tertiary-container": "#9fa95a",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#d7ffc7",
+                      "secondary-container": "#d5ee6e",
+                      "secondary-fixed-dim": "#b9d155",
+                      "background": "#edffe1",
+                      "outline-variant": "#c3c9b7",
+                      "on-secondary-fixed": "#181e00",
+                      "on-tertiary-container": "#363d00",
+                      "primary": "#3e6915",
+                      "on-error-container": "#93000a",
+                      "on-background": "#002200"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "64px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "base": "8px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "body-md": [
+                              "Be Vietnam Pro"
+                      ],
+                      "body-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "headline-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "headline-md": [
+                              "Be Vietnam Pro"
+                      ],
+                      "label-md": [
+                              "Be Vietnam Pro"
+                      ],
+                      "headline-lg-mobile": [
+                              "Be Vietnam Pro"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "56px",
+                              {
+                                      "lineHeight": "64px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { background-color: #edffe1; overflow-x: hidden; }
+        .shadow-soft { box-shadow: 0px 4px 20px rgba(79, 132, 40, 0.08); }
+        .shadow-soft-hover:hover { box-shadow: 0px 12px 32px rgba(79, 132, 40, 0.12); }
+        .glass-panel { backdrop-filter: blur(12px); background-color: rgba(255, 255, 255, 0.7); }
+    </style>
+</head>
+<body class="font-body-md text-on-background flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 flex flex-col py-gutter bg-inverse-surface dark:bg-inverse-surface shadow-md z-50">
+<div class="px-6 mb-8 flex items-center gap-4"><img alt="Admin Avatar" class="w-12 h-12 rounded-full border-2 border-surface-bright" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYibVjokFaYi_9ZLpqfJcpIixBljXRvdpKuhtnpzMe46rrIWL9E0cHJOcqEQtoc7ijvQ61Tg6YbaIi48lgIoSaznL6qKrRuPEHvI8Hh3RKAzfPFhzbSSmeAtAl1SLPuzvDF_fGNXVbXNKevAeaMZu6nCPmxBW8FcdGJ1fGyNmQK7np0OPr8JK7eA1QiEvq7aii3ghmAYzr7ZA-t2eu3us43HAn3Q49fiAmNhjoap5OtW6f3td0G_Vl17kDQ_t5A7LQpic1jZwA2znK"/><div><h1 class="font-display-lg text-headline-md text-surface-bright leading-tight">E-XANH</h1><p class="text-surface-variant font-body-md text-sm">Admin Panel</p></div></div>
+<nav class="flex-1 overflow-y-auto font-body-lg text-body-lg">
+<a class="text-surface-variant hover:text-surface-bright mx-4 my-1 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-primary-container/20 rounded-xl scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Tổng quan
+            </a>
+<a class="text-surface-variant hover:text-surface-bright mx-4 my-1 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-primary-container/20 rounded-xl scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+                Duyệt bài viết
+            </a>
+<a class="text-surface-variant hover:text-surface-bright mx-4 my-1 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-primary-container/20 rounded-xl scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+                Quản lý bình luận
+            </a>
+<a class="text-on-secondary-fixed bg-secondary-fixed rounded-xl font-bold mx-4 my-1 px-4 py-3 flex items-center gap-3 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Quản lý người dùng
+            </a>
+<a class="text-surface-variant hover:text-surface-bright mx-4 my-1 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-primary-container/20 rounded-xl scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="electrical_services">electrical_services</span>
+                Quản lý thiết bị điện
+            </a>
+<a class="text-surface-variant hover:text-surface-bright mx-4 my-1 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-primary-container/20 rounded-xl scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+                Thống kê
+            </a>
+<a class="text-surface-variant hover:text-surface-bright mx-4 my-1 px-4 py-3 flex items-center gap-3 transition-colors hover:bg-primary-container/20 rounded-xl scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Cài đặt
+            </a>
+</nav>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="ml-64 w-[calc(100%-16rem)] flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-20 px-gutter z-40 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-lg sticky top-0 flat no shadows">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">Quản trị tài khoản</span>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-high rounded-full border-none focus:ring-2 focus:ring-primary text-sm w-64 outline-none text-on-surface" placeholder="Tìm kiếm..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high transition-colors rounded-full relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<img alt="Admin Profile Image" class="w-10 h-10 rounded-full border border-outline cursor-pointer hover:opacity-80 transition-opacity" data-alt="Admin profile avatar, small circle. Professional look. Light eco-tech theme UI element. Green tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTVHDJnY9xYR6QO94HEdFJGQPKH29lXtHehyjYLf3m8KYnCThlWmfBE_1CGUa_wkfsJNog6rFviOvMwr3fXl08t8EdUd-877qAmVTFdKM0YJuvYQ04t9XQmb7V17WLa0JSfzb-Q4lJ6vpXmDcmiDjZ7eO6Yi_9X4A2ipR5esRQtE2HRlD6fsdlezE1J6W7AWUWG0usupRkoJG4Iwlmb9O6x_wNgcYYWRCVViOLjxIWeNRoS04CzNnAaP9vZyccCK_9VRZbbVGHfddq"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-gutter max-w-container-max mx-auto w-full flex flex-col gap-8 pb-20">
+<!-- Page Header -->
+<div class="flex flex-col gap-2">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Quản lý người dùng</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Theo dõi tài khoản, phân quyền và xử lý người dùng vi phạm trong hệ thống E-XANH.</p>
+</div>
+<!-- Stats Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-container/10 rounded-full blur-xl"></div>
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="group" data-weight="fill">group</span>
+<h3 class="font-body-md text-on-surface-variant mt-2">Tổng người dùng</h3>
+<p class="font-headline-lg text-headline-lg text-on-background">1.240</p>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-container/20 rounded-full blur-xl"></div>
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="how_to_reg" data-weight="fill">how_to_reg</span>
+<h3 class="font-body-md text-on-surface-variant mt-2">Người dùng hoạt động</h3>
+<p class="font-headline-lg text-headline-lg text-on-background">856</p>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-error-container/30 rounded-full blur-xl"></div>
+<span class="material-symbols-outlined text-error text-3xl" data-icon="block" data-weight="fill">block</span>
+<h3 class="font-body-md text-on-surface-variant mt-2">Tài khoản bị khóa</h3>
+<p class="font-headline-lg text-headline-lg text-on-background">12</p>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-container/20 rounded-full blur-xl"></div>
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="admin_panel_settings" data-weight="fill">admin_panel_settings</span>
+<h3 class="font-body-md text-on-surface-variant mt-2">Admin / Moderator</h3>
+<p class="font-headline-lg text-headline-lg text-on-background">5</p>
+</div>
+</div>
+<!-- Filter Panel -->
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft flex flex-col md:flex-row gap-4 items-end flex-wrap">
+<div class="w-full md:flex-1 flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Tìm kiếm</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Tìm theo tên, email hoặc username..." type="text"/>
+</div>
+</div>
+<div class="w-full md:w-48 flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Vai trò</label>
+<select class="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+<option>Tất cả vai trò</option>
+<option>Người dùng</option>
+<option>Moderator</option>
+<option>Admin</option>
+</select>
+</div>
+<div class="w-full md:w-48 flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Trạng thái</label>
+<select class="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+<option>Tất cả trạng thái</option>
+<option>Đang hoạt động</option>
+<option>Bị khóa</option>
+<option>Chờ xác minh</option>
+</select>
+</div>
+<div class="w-full md:w-48 flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Hoạt động</label>
+<select class="w-full px-4 py-3 bg-surface-container-lowest rounded-xl border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
+<option>Hôm nay</option>
+<option>7 ngày qua</option>
+<option>Tháng này</option>
+</select>
+</div>
+<div class="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
+<button class="flex-1 md:flex-none px-6 py-3 bg-gradient-to-r from-primary-container to-primary text-on-primary rounded-xl font-label-md text-label-md hover:shadow-soft-hover transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+                        Lọc người dùng
+                    </button>
+<button class="px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-label-md text-label-md hover:bg-secondary-fixed-dim transition-colors flex items-center justify-center"><span class="material-symbols-outlined mr-2" data-icon="refresh">refresh</span> Làm mới</button>
+</div>
+</div>
+<!-- Bulk Action Bar -->
+<div class="bg-primary-container/10 border border-primary-fixed-dim rounded-xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+<span class="font-label-md text-label-md text-on-background">Đã chọn 2 người dùng</span>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 border border-secondary-fixed text-secondary rounded-lg font-label-md text-label-md hover:bg-secondary-container transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+                        Khóa đã chọn
+                    </button>
+<button class="px-4 py-2 bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="lock_open">lock_open</span>
+                        Mở khóa
+                    </button>
+<button class="px-4 py-2 bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="manage_accounts">manage_accounts</span>
+                        Gán vai trò
+                    </button>
+</div>
+</div>
+<!-- User List -->
+<div class="flex flex-col gap-4 w-full">
+<!-- User Card 1 -->
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all w-full flex flex-col lg:flex-row items-start lg:items-center gap-6">
+<div class="flex items-center gap-4 flex-1">
+<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary accent-primary" type="checkbox"/>
+<img alt="User Avatar" class="w-14 h-14 rounded-full border-2 border-surface-variant" data-alt="Profile picture of a normal user. Bright, modern eco-tech lighting. Green accents in background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn4YneY5dsviEpvMxNXPhFoYgXl9GcH2dPCOZ3QGwSD5fJnspF9K2gov6byrJSm2uy5PHGVrMBx4dsBcCfeFkItL7N1kBS__BGkRNw4EgYPrdiQSL1Qb-G9Z0ib8TajXgVa6O3aeo9FZ9TpNeEwvsecTiaK4WSnXAePi0Za5Od3m33s0KXFHCO6pB97V5tk7kl_NViBRimbcn4xo8y1J6hGVIQvVNuB0FQlublKWGkIboJ94lgpkmO3lTTcZdtLhYnaceKSbkSTtX0"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-background text-lg">Nguyễn Văn A</span>
+<span class="font-body-md text-sm text-on-surface-variant">nguyenvana@email.com</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 lg:w-48">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full font-label-md text-xs flex items-center gap-1">
+                            Người dùng
+                        </span>
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full font-label-md text-xs flex items-center gap-1">
+                            Đang hoạt động
+                        </span>
+</div>
+<div class="flex items-center gap-6 lg:w-64 text-on-surface-variant font-body-md text-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-on-background">8</span> bài
+                        </div>
+<div class="flex flex-col">
+<span class="font-label-md text-on-background">24</span> bình luận
+                        </div>
+<div class="flex flex-col text-xs">
+                            10 phút trước
+                        </div>
+</div>
+<div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-2">
+                             Xem chi tiết
+                        </button>
+<button class="p-2 text-error hover:bg-error-container rounded-xl transition-colors" title="Khóa">
+<span class="material-symbols-outlined" data-icon="block">block</span>
+</button>
+</div>
+</div>
+<!-- User Card 2 -->
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all w-full flex flex-col lg:flex-row items-start lg:items-center gap-6">
+<div class="flex items-center gap-4 flex-1">
+<input class="w-5 h-5 rounded border-outline text-primary focus:ring-primary accent-primary" type="checkbox"/>
+<img alt="User Avatar" class="w-14 h-14 rounded-full border-2 border-surface-variant" data-alt="Profile picture of a moderator. Bright, modern eco-tech lighting. Green accents in background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4nf_0qugZRXwuL1BLdzRdj7VelJFG5UQctGMFzxi6-4NyA4lHYhwFNq_oThuQu40c2U-ZFV32wZ0Rhwz_UBCUmsGcL2fQL6tc1O-sG4lWI2NRh1jtoYr-m5STHazwwX0OkHUoRKHTOG2CJ14eW7JAfrULHAVXdSA4Oaexp2lNHrdBc8TlsYljYEp7FyUXOLl_1UJUAsptixwxip4VNu8ZSz_FkxzOFlzZ2Da40IulMa6b6Ae7H9Xzn1vXQqI7Pxk1KW9czwrcMhzW"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-background text-lg">Minh Tuấn</span>
+<span class="font-body-md text-sm text-on-surface-variant">minhtuan@email.com</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 lg:w-48">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-full font-label-md text-xs flex items-center gap-1">
+                            Moderator
+                        </span>
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full font-label-md text-xs flex items-center gap-1">
+                            Đang hoạt động
+                        </span>
+</div>
+<div class="flex items-center gap-6 lg:w-64 text-on-surface-variant font-body-md text-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-on-background">45</span> bài
+                        </div>
+<div class="flex flex-col">
+<span class="font-label-md text-on-background">120</span> bình luận
+                        </div>
+<div class="flex flex-col text-xs">
+                            1 giờ trước
+                        </div>
+</div>
+<div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-2">
+                             Xem chi tiết
+                        </button>
+<button class="p-2 text-error hover:bg-error-container rounded-xl transition-colors" title="Khóa">
+<span class="material-symbols-outlined" data-icon="block">block</span>
+</button>
+</div>
+</div>
+<!-- User Card 3 (Locked) -->
+<div class="bg-surface-container-lowest opacity-75 rounded-[24px] p-6 shadow-soft w-full flex flex-col lg:flex-row items-start lg:items-center gap-6 border border-secondary-fixed">
+<div class="flex items-center gap-4 flex-1">
+<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary accent-primary" type="checkbox"/>
+<div class="relative">
+<img alt="User Avatar" class="w-14 h-14 rounded-full border-2 border-outline-variant grayscale" data-alt="Profile picture of a locked user. Grayscale, muted lighting. Eco-tech UI context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiRrTtpMI3J3q9LyrRtRVkBP8c704HJGWcM7T2RyIuHxPKh1arhvknJp2_y05pwPL3vXBfFcFoHQujd-dfarK_7uQLaEN0aOKP45C7bPCNXnQQFOCkvBujhgM9QhaOC_m53kxhJrb5mMMc9ubpWk6h4Qc90Hg4cZnn9WWXRo4WiWCaoNShU5nGscD_ZJy0lvHCkXDNTNxVPX7R-HzhfVhbsXQ1ioOsoFGI2fmdh3rM8xmCxTnVL873ormj7FU1UxMsMAeJ41qrOfiE"/>
+<div class="absolute inset-0 bg-error/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="lock">lock</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant text-lg">User_992</span>
+<span class="font-body-md text-sm text-outline">user992@email.com</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 lg:w-48">
+<span class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full font-label-md text-xs flex items-center gap-1">
+                            Người dùng
+                        </span>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full font-label-md text-xs flex items-center gap-1">
+                            Bị khóa
+                        </span>
+</div>
+<div class="flex items-center gap-6 lg:w-64 text-outline font-body-md text-sm">
+<div class="flex flex-col">
+<span class="font-label-md">2</span> bài
+                        </div>
+<div class="flex flex-col">
+<span class="font-label-md">0</span> bình luận
+                        </div>
+<div class="flex flex-col text-xs">
+                            5 ngày trước
+                        </div>
+</div>
+<div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-2">
+                             Xem chi tiết
+                        </button>
+<button class="p-2 text-primary hover:bg-primary-container/20 rounded-xl transition-colors" title="Mở khóa">
+<span class="material-symbols-outlined" data-icon="lock_open">lock_open</span>
+</button>
+</div>
+</div>
+<!-- User Card 4 (Admin) -->
+<div class="bg-surface-container-lowest rounded-[24px] p-6 shadow-soft shadow-soft-hover transition-all w-full flex flex-col lg:flex-row items-start lg:items-center gap-6">
+<div class="flex items-center gap-4 flex-1">
+<input class="w-5 h-5 rounded border-outline text-primary focus:ring-primary accent-primary" disabled="" type="checkbox"/>
+<img alt="Admin Avatar" class="w-14 h-14 rounded-full border-2 border-tertiary" data-alt="Profile picture of an Admin. Bright, modern eco-tech lighting. Green accents in background. Premium feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0g5h70T_RrzTFkbZCb5QaggKlE_B8Kp1_jPELPtbQXLEsAtoDA09DQMsRwsWxowNxTrT9rwENM2FDjJdxLC1rNYg0Ljuf8DCKMUMFzlL-VmtaTqBl_74IF9okRC31Wk0MX7oLnchui21Gi9EL-vuVfy86hVb6XDFhfAP6_ToJCcG3j4ci98OzDbyZI8DqABqq1Fn-bXfIUDSbVjY3GYzX2mjZUL7v8eEmEROmOJti2t0NraIia1do-TJS_VSB-KwzSsHLj9rg3HIU"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-background text-lg flex items-center gap-1">Admin E-XANH <span class="material-symbols-outlined text-tertiary text-[16px]" data-icon="verified" data-weight="fill">verified</span></span>
+<span class="font-body-md text-sm text-on-surface-variant">admin@e-xanh.vn</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 lg:w-48">
+<span class="px-3 py-1 bg-inverse-surface text-inverse-on-surface rounded-full font-label-md text-xs flex items-center gap-1">
+                            Admin
+                        </span>
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full font-label-md text-xs flex items-center gap-1">
+                            Đang hoạt động
+                        </span>
+</div>
+<div class="flex items-center gap-6 lg:w-64 text-on-surface-variant font-body-md text-sm">
+<div class="flex flex-col">
+<span class="font-label-md text-on-background">99+</span> bài
+                        </div>
+<div class="flex flex-col">
+<span class="font-label-md text-on-background">99+</span> bình luận
+                        </div>
+<div class="flex flex-col text-xs text-primary">
+                            Đang online
+                        </div>
+</div>
+<div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+<button class="px-4 py-2 border border-outline-variant text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-2">
+                             Xem chi tiết
+                        </button>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex justify-center items-center gap-2 mt-8">
+<button class="w-10 h-10 rounded-full flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-on-primary font-label-md">1</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md">2</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md">3</button>
+<span class="text-on-surface-variant">...</span>
+<button class="px-4 h-10 rounded-full flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md gap-1">
+                    Tiếp <span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-6 text-center border-t border-outline-variant/30 mt-auto">
+<p class="font-body-md text-sm text-on-surface-variant">© 2024 E-XANH Admin. Made by VanhKhucDev</p>
+</footer>
+</div>
+<!-- User Detail Drawer (Hidden state via Tailwind translate-x-full, toggle logic would go here) -->
+<div class="fixed inset-y-0 right-0 w-full md:w-[400px] bg-surface-container-lowest shadow-2xl z-[60] transform translate-x-full transition-transform duration-300 flex flex-col" id="detail-drawer">
+<!-- Drawer Header -->
+<div class="p-6 border-b border-outline-variant/30 flex justify-between items-center bg-surface/80 backdrop-blur-md sticky top-0">
+<h3 class="font-headline-md text-headline-md text-on-background">Chi tiết người dùng</h3>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors" onclick="document.getElementById('detail-drawer').classList.add('translate-x-full'); document.getElementById('drawer-overlay').classList.add('hidden');">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Drawer Content -->
+<div class="p-6 flex-1 overflow-y-auto flex flex-col gap-8">
+<!-- Profile Info -->
+<div class="flex items-center gap-6">
+<img alt="User Avatar Large" class="w-24 h-24 rounded-full border-4 border-surface-variant" data-alt="Large profile picture of a normal user. Bright, modern eco-tech lighting. Green accents in background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZkdjszgyPk9LysSulZw43LChD55y4I9FCYzEz3WPaJ-eQUNUBxWylr29DA7ucGohrTNTgy1HakGSB6GQ7tp9FjKEPUJD0AQmZ_fWfRmIlWPZG8GkQD3VFRrKu7fQFxJLk1kDWHBjqB-L-fg76P-SiEG1rua1ZqHegmknn7LS0JsNfBDe66MYuX0SzdOaVCNSBfzh3zrSGuRTjUiyOHidCi8CnHJ4D0B_hnkLKMFxH7vi506iBcpJ2avpMrxafx9SsRESoycFYCXea"/>
+<div class="flex flex-col gap-1">
+<h4 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">Nguyễn Văn A</h4>
+<p class="font-body-md text-on-surface-variant">nguyenvana@email.com</p>
+<div class="flex gap-2 mt-2">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded-full font-label-md text-xs">Người dùng</span>
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full font-label-md text-xs">Đang hoạt động</span>
+</div>
+</div>
+</div>
+<!-- Stats Grid Mini -->
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-surface-container-high p-4 rounded-2xl text-center">
+<p class="font-headline-md text-on-background">8</p>
+<p class="font-body-md text-xs text-on-surface-variant">Bài đăng</p>
+</div>
+<div class="bg-surface-container-high p-4 rounded-2xl text-center">
+<p class="font-headline-md text-on-background">24</p>
+<p class="font-body-md text-xs text-on-surface-variant">Bình luận</p>
+</div>
+<div class="bg-surface-container-high p-4 rounded-2xl text-center">
+<p class="font-headline-md text-on-background">15</p>
+<p class="font-body-md text-xs text-on-surface-variant">Đã lưu</p>
+</div>
+</div>
+<!-- Activity History -->
+<div class="flex flex-col gap-4">
+<h5 class="font-label-md text-label-md text-on-background uppercase tracking-wider">Lịch sử hoạt động gần đây</h5>
+<div class="relative pl-6 border-l-2 border-surface-variant flex flex-col gap-6">
+<div class="relative">
+<div class="absolute -left-[31px] top-0 w-4 h-4 bg-primary rounded-full border-4 border-surface-container-lowest"></div>
+<p class="font-body-md text-sm text-on-surface-variant mb-1">10 phút trước</p>
+<p class="font-body-md text-on-background"><span class="font-bold">Đã đăng bài:</span> "Cách tiết kiệm điện máy lạnh mùa hè"</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[31px] top-0 w-4 h-4 bg-secondary-container rounded-full border-4 border-surface-container-lowest"></div>
+<p class="font-body-md text-sm text-on-surface-variant mb-1">2 giờ trước</p>
+<p class="font-body-md text-on-background"><span class="font-bold">Đã bình luận</span> trong bài "Review thiết bị smarthome"</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[31px] top-0 w-4 h-4 bg-tertiary-container rounded-full border-4 border-surface-container-lowest"></div>
+<p class="font-body-md text-sm text-on-surface-variant mb-1">1 ngày trước</p>
+<p class="font-body-md text-on-background"><span class="font-bold">Đã lưu</span> bài viết "Top 5 mẹo vặt gia đình"</p>
+</div>
+</div>
+</div>
+<!-- Admin Notes -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-background uppercase tracking-wider">Ghi chú của Admin</label>
+<textarea class="w-full bg-surface-container-high border-none rounded-xl p-4 font-body-md text-on-background focus:ring-2 focus:ring-primary outline-none" placeholder="Thêm ghi chú về người dùng này..." rows="3"></textarea>
+</div>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="p-6 border-t border-outline-variant/30 flex flex-col sm:flex-row gap-4 bg-surface-container-lowest mt-auto"><div class="grid grid-cols-2 gap-3 w-full"><button class="px-4 py-3 border border-secondary-fixed text-on-secondary-container rounded-xl font-label-md text-label-md hover:bg-secondary-container transition-colors flex items-center justify-center gap-2"><span class="material-symbols-outlined" data-icon="lock">lock</span> Khóa tài khoản</button><button class="px-4 py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md hover:opacity-90 transition-colors flex items-center justify-center gap-2"><span class="material-symbols-outlined" data-icon="lock_open">lock_open</span> Mở khóa</button><button class="px-4 py-3 border border-primary text-primary rounded-xl font-label-md text-label-md hover:bg-primary-container/10 transition-colors flex items-center justify-center gap-2"><span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span> Đổi vai trò</button><button class="px-4 py-3 border border-outline-variant text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2"><span class="material-symbols-outlined" data-icon="article">article</span> Xem bài đăng</button><button class="col-span-2 px-4 py-3 border border-outline-variant text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2"><span class="material-symbols-outlined" data-icon="comment">comment</span> Xem bình luận</button></div></div>
+</div>
+<!-- Drawer overlay (Hidden) -->
+<div class="fixed inset-0 bg-on-background/20 backdrop-blur-sm z-[55] hidden" id="drawer-overlay" onclick="document.getElementById('detail-drawer').classList.add('translate-x-full'); this.classList.add('hidden');"></div>
+<!-- Script to demonstrate drawer interaction (Optional for UI mockup) -->
+<script>
+        // Simple script to toggle drawer for the first 'Xem chi tiết' button
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.innerText.includes('Xem chi tiết')) {
+                btn.addEventListener('click', () => {
+                    document.getElementById('detail-drawer').classList.remove('translate-x-full');
+                    document.getElementById('drawer-overlay').classList.remove('hidden');
+                });
+            }
+        });
+    </script>
+</body></html>

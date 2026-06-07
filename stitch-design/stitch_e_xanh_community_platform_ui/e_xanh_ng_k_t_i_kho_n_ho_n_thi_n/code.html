@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>E-XANH - Đăng nhập / Đăng ký</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#336A29",
+                        "primary-container": "#80B155",
+                        "on-primary": "#ffffff",
+                        "secondary": "#4F8428",
+                        "secondary-container": "#C1D95C",
+                        "tertiary": "#EAF59D",
+                        "background": "#F7FAEF",
+                        "surface": "#ffffff",
+                        "surface-container-low": "#F7FAEF",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#EAF59D",
+                        "on-surface": "#002200",
+                        "on-surface-variant": "#43493b",
+                        "outline-variant": "#c3c9b7",
+                        "outline": "#73796a"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .soft-shadow {
+            box-shadow: 0px 4px 20px rgba(79, 132, 40, 0.08);
+        }
+        .soft-shadow-hover:hover {
+            box-shadow: 0px 12px 32px rgba(79, 132, 40, 0.12);
+        }
+        .gradient-primary {
+            background: linear-gradient(135deg, #80B155 0%, #4F8428 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- Header -->
+<header class="bg-surface border-b border-outline-variant/30 sticky top-0 z-50">
+<div class="max-w-[1440px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+<!-- Logo -->
+<a class="flex items-center gap-2 group" href="#">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center soft-shadow group-hover:bg-secondary transition-colors">
+<span class="material-symbols-outlined text-white text-xl" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<span class="font-headline-md text-primary text-xl tracking-tight">E-XANH</span>
+</a>
+<!-- Navigation -->
+<nav class="hidden lg:flex items-center gap-8">
+<a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors" href="#">Trang chủ</a>
+<a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors" href="#">Mẹo tiết kiệm</a>
+<a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors" href="#">Cộng đồng</a>
+<a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors" href="#">Kiểm tra tiền điện</a>
+<a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors" href="#">Bài đã lưu</a>
+</nav>
+<!-- Actions -->
+<div class="flex items-center gap-3">
+<a class="hidden md:flex items-center justify-center px-4 py-2 border-2 border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 transition-colors bg-primary/10" href="#">Đăng nhập</a>
+<a class="flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-secondary transition-colors shadow-sm" href="#">Đăng bài</a>
+<!-- Mobile Menu Toggle -->
+<button class="lg:hidden p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-4 md:p-8 lg:p-16">
+<div class="max-w-[1440px] w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-stretch min-h-[80vh]">
+<!-- Left Column: Brand Visual -->
+<div class="hidden lg:flex flex-col relative rounded-3xl overflow-hidden bg-surface-container-low p-12 soft-shadow border border-white/40">
+<!-- Background Pattern/Gradient Hint -->
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary-container/20 rounded-full blur-3xl"></div>
+<div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-secondary-container/30 rounded-full blur-3xl"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="flex items-center gap-4 mb-12">
+<div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center soft-shadow">
+<span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<span class="font-headline-md text-primary tracking-tight">E-XANH</span>
+<div class="ml-4 px-3 py-1 bg-surface-container-highest rounded-full flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-sm font-semibold text-primary">Cộng đồng sống xanh</span>
+</div>
+</div>
+<div class="max-w-md mt-8">
+<h1 class="font-headline-lg text-on-surface mb-6 text-[40px] leading-[48px] font-bold tracking-[-0.01em]">Tham gia E-XANH để sống xanh hơn mỗi ngày</h1>
+<p class="font-body-lg text-on-surface-variant mb-12 text-[18px] leading-[28px]">Lưu lại mẹo tiết kiệm điện, chia sẻ kinh nghiệm, bình luận và theo dõi lịch sử kiểm tra tiền điện của bạn.</p>
+<div class="space-y-4 mb-12">
+<div class="glass-panel p-4 rounded-2xl flex items-center gap-4 soft-shadow-hover transition-all cursor-default">
+<div class="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</div>
+<span class="font-semibold text-on-surface">Lưu bài viết hữu ích</span>
+</div>
+<div class="glass-panel p-4 rounded-2xl flex items-center gap-4 soft-shadow-hover transition-all cursor-default">
+<div class="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">forum</span>
+</div>
+<span class="font-semibold text-on-surface">Bình luận và tương tác</span>
+</div>
+<div class="glass-panel p-4 rounded-2xl flex items-center gap-4 soft-shadow-hover transition-all cursor-default">
+<div class="w-10 h-10 bg-surface rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<span class="font-semibold text-on-surface">Theo dõi tiền điện hằng tháng</span>
+</div>
+</div>
+</div>
+<div class="mt-auto relative rounded-2xl overflow-hidden h-64 soft-shadow border border-white/50 bg-white">
+<img alt="A modern, minimalist flat illustration for the E-XANH login page." class="w-full h-full object-cover mix-blend-multiply" src="https://lh3.googleusercontent.com/aida/AP1WRLsyEXL8ygmkoBTmM7-tshvP-VQ4Z1sLXWVXyINN3y95prhrS-VUoerLyPXpIb7lsjyob8ZDfxxaq_XUsWGHXh4P411TzVXhV3i4-nxVYXFrJFGOBDmHONL5nCKnjnWoGp4OtdnMpYlKtKmhkgTIU_5yWU9mkwn-p_6STtwjQeW_RwnZWX3tuTnB28QsabrL990mkLkesFOYSp7_NacW-Z-CbeGbNLz3MKQwfzHFmNiKDu4PbVXOkSTPPND9"/>
+</div>
+</div>
+</div>
+<!-- Right Column: Auth Card -->
+<div class="flex flex-col justify-center items-center py-8 lg:py-0 w-full max-w-md mx-auto relative z-10">
+<div class="w-full bg-surface-container-lowest rounded-3xl p-8 lg:p-10 soft-shadow border border-outline-variant/20 relative">
+<!-- Mobile Logo (hidden on desktop) -->
+<div class="flex lg:hidden items-center gap-3 mb-8 justify-center">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center soft-shadow">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<span class="font-headline-md text-primary tracking-tight">E-XANH</span>
+</div>
+<div class="mb-8 text-center lg:text-left"><h2 class="font-headline-md text-on-surface mb-2 text-[24px] font-bold">Tạo tài khoản E-XANH</h2><p class="text-on-surface-variant font-body-md">Đăng ký để lưu bài viết, bình luận, đăng bài chia sẻ và theo dõi lịch sử kiểm tra tiền điện.</p></div>
+<!-- Tab Switcher -->
+<div class="flex p-1 bg-surface-container-highest/50 rounded-xl mb-8 relative">
+<button class="flex-1 py-2 text-center rounded-lg font-semibold transition-all text-sm relative z-10 text-on-surface-variant hover:text-primary" id="tab-login">
+                            Đăng nhập
+                        </button>
+<button class="flex-1 py-2 text-center rounded-lg font-semibold transition-all text-sm relative z-10 bg-primary text-white shadow-sm" id="tab-register">
+                            Đăng ký
+                        </button>
+</div>
+<!-- Login Form -->
+<form class="space-y-5 hidden" id="form-login">
+<div>
+<label class="block text-sm font-semibold text-on-surface mb-2">Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50">mail</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 pl-12 pr-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Nhập email của bạn" type="email"/>
+</div>
+</div>
+<div>
+<label class="block text-sm font-semibold text-on-surface mb-2">Mật khẩu</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50">lock</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 pl-12 pr-12 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Nhập mật khẩu" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50 hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined">visibility_off</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between text-sm">
+<label class="flex items-center gap-2 cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer h-5 w-5 border-2 border-outline-variant rounded bg-transparent text-primary focus:ring-primary focus:ring-offset-0 transition-all checked:border-primary" type="checkbox"/>
+</div>
+<span class="text-on-surface-variant group-hover:text-on-surface transition-colors">Ghi nhớ đăng nhập</span>
+</label>
+<a class="font-semibold text-primary hover:text-secondary transition-colors" href="#">Quên mật khẩu?</a>
+</div>
+<button class="w-full bg-primary text-white font-semibold py-3.5 rounded-xl soft-shadow-hover hover:bg-secondary transition-all transform active:scale-[0.98] mt-6" type="submit">
+                            Đăng nhập
+                        </button>
+<div class="text-center mt-4 text-sm">
+<span class="text-on-surface-variant">Chưa có tài khoản?</span>
+<a class="font-semibold text-primary hover:underline ml-1 cursor-pointer" onclick="switchTab(false)">Tạo tài khoản ngay</a>
+</div>
+</form>
+<!-- Registration Form (Hidden by default) -->
+<form class="space-y-4 block" id="form-register"><div><label class="block text-sm font-semibold text-on-surface mb-1.5">Họ và tên</label><input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Nhập họ và tên" type="text"/></div><div><label class="block text-sm font-semibold text-on-surface mb-1.5">Email</label><input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Nhập email của bạn" type="email"/></div><div><label class="block text-sm font-semibold text-on-surface mb-1.5">Mật khẩu</label><input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Tạo mật khẩu" type="password"/></div><div><label class="block text-sm font-semibold text-on-surface mb-1.5">Xác nhận mật khẩu</label><input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-shadow" placeholder="Nhập lại mật khẩu" type="password"/></div><label class="flex items-start gap-3 mt-4 cursor-pointer group"><input class="peer mt-1 h-5 w-5 border-2 border-outline-variant rounded bg-transparent text-primary focus:ring-primary focus:ring-offset-0 transition-all checked:border-primary" type="checkbox"/><span class="text-sm text-on-surface-variant">Tôi đồng ý với <a class="text-primary font-semibold hover:underline" href="#">điều khoản sử dụng</a> của E-XANH.</span></label><button class="w-full bg-primary text-white font-semibold py-3.5 rounded-xl soft-shadow-hover hover:bg-secondary transition-all transform active:scale-[0.98] mt-6" type="submit">Tạo tài khoản</button><div class="text-center mt-4 text-sm"><span class="text-on-surface-variant">Đã có tài khoản?</span><a class="font-semibold text-primary hover:underline ml-1 cursor-pointer" onclick="switchTab(true)">Đăng nhập</a></div></form>
+<!-- Divider -->
+<div class="relative my-8" id="auth-divider">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant/30"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="px-4 bg-surface-container-lowest text-on-surface-variant">hoặc</span>
+</div>
+</div>
+<!-- Social Login -->
+<div class="grid grid-cols-2 gap-4" id="social-login"><button class="flex items-center justify-center gap-2 py-2.5 border border-outline-variant/50 rounded-xl hover:bg-surface-container-low transition-colors text-sm font-semibold text-on-surface"><svg class="w-5 h-5" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></svg>Đăng ký với Google</button><button class="flex items-center justify-center gap-2 py-2.5 border border-outline-variant/50 rounded-xl hover:bg-surface-container-low transition-colors text-sm font-semibold text-on-surface"><svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" fill-rule="evenodd"></path></svg>Đăng ký với GitHub</button></div>
+</div>
+<!-- Trust Note -->
+<div class="mt-8 flex flex-col items-center justify-center text-center max-w-sm">
+<div class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="material-symbols-outlined text-lg">lock</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Bảo mật thông tin</span>
+</div>
+<p class="text-xs text-on-surface-variant">Khách chưa đăng nhập vẫn có thể xem bài viết và tính tiền điện. Đăng nhập giúp bạn lưu lại dữ liệu cá nhân hóa.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-[#336A29] flex flex-col items-center justify-center py-12 px-4 md:px-16 gap-6 text-[#EAF59D] font-body-md text-sm">
+<div class="text-[24px] font-bold text-[#EAF59D] mb-2 tracking-tight">E-XANH</div>
+<p class="text-[#EAF59D]/80 mb-2">Dùng điện thông minh, sống xanh bền vững.</p>
+<div class="flex flex-wrap justify-center gap-6 mb-4">
+<a class="text-[#EAF59D]/80 hover:text-[#EAF59D] transition-colors hover:underline decoration-[#EAF59D]" href="#">Về chúng tôi</a>
+<a class="text-[#EAF59D]/80 hover:text-[#EAF59D] transition-colors hover:underline decoration-[#EAF59D]" href="#">Mẹo tiết kiệm</a>
+<a class="text-[#EAF59D]/80 hover:text-[#EAF59D] transition-colors hover:underline decoration-[#EAF59D]" href="#">Cộng đồng</a>
+<a class="text-[#EAF59D]/80 hover:text-[#EAF59D] transition-colors hover:underline decoration-[#EAF59D]" href="#">Điều khoản</a>
+<a class="text-[#EAF59D]/80 hover:text-[#EAF59D] transition-colors hover:underline decoration-[#EAF59D]" href="#">Liên hệ</a>
+</div>
+<p class="text-[#EAF59D]/60 text-xs">© 2024 E-XANH. Made by VanhKhucDev</p>
+</footer>
+<script>
+        // Simple Vanilla JS for Tab Switching
+        const tabLoginBtn = document.getElementById('tab-login');
+        const tabRegisterBtn = document.getElementById('tab-register');
+        const formLogin = document.getElementById('form-login');
+        const formRegister = document.getElementById('form-register');
+        const authDivider = document.getElementById('auth-divider');
+        const socialLogin = document.getElementById('social-login');
+
+        const activeTabClass = ['text-white', 'bg-primary', 'shadow-sm'];
+        const inactiveTabClass = ['text-on-surface-variant', 'hover:text-primary'];
+
+        function switchTab(isLogin) {
+            if (isLogin) {
+                // Update Buttons
+                tabLoginBtn.classList.remove(...inactiveTabClass);
+                tabLoginBtn.classList.add(...activeTabClass);
+                tabRegisterBtn.classList.remove(...activeTabClass);
+                tabRegisterBtn.classList.add(...inactiveTabClass);
+                
+                // Update Forms & Sections
+                formLogin.classList.remove('hidden');
+                formLogin.classList.add('block');
+                formRegister.classList.remove('block');
+                formRegister.classList.add('hidden');
+                authDivider.classList.remove('hidden');
+                socialLogin.classList.remove('hidden');
+                socialLogin.classList.add('grid');
+                
+                document.querySelector('.mb-8.text-center h2').textContent = 'Chào mừng trở lại';
+                document.querySelector('.mb-8.text-center p').textContent = 'Đăng nhập để tiếp tục hành trình sống xanh cùng E-XANH.';
+            } else {
+                // Update Buttons
+                tabRegisterBtn.classList.remove(...inactiveTabClass);
+                tabRegisterBtn.classList.add(...activeTabClass);
+                tabLoginBtn.classList.remove(...activeTabClass);
+                tabLoginBtn.classList.add(...inactiveTabClass);
+                
+                // Update Forms & Sections
+                formRegister.classList.remove('hidden');
+                formRegister.classList.add('block');
+                formLogin.classList.remove('block');
+                formLogin.classList.add('hidden');
+                authDivider.classList.add('hidden');
+                socialLogin.classList.add('hidden');
+                socialLogin.classList.remove('grid');
+                
+                document.querySelector('.mb-8.text-center h2').textContent = 'Tạo tài khoản mới';
+                document.querySelector('.mb-8.text-center p').textContent = 'Bắt đầu hành trình sống xanh cùng E-XANH ngay hôm nay.';
+            }
+        }
+
+        tabLoginBtn.addEventListener('click', () => switchTab(true));
+        tabRegisterBtn.addEventListener('click', () => switchTab(false));
+    </script>
+</body></html>

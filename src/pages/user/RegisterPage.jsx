@@ -1,0 +1,226 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { registerUser } from '../../utils/authStorage'
+import '../../styles/auth.css'
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function getAvatarFromName(name) {
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (parts.length === 0) {
+    return 'EX'
+  }
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+}
+
+function RegisterPage() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    agree: false,
+  })
+  const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+
+  function handleChange(field, value) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+    setErrorMessage('')
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+
+    if (!form.name.trim()) {
+      setSuccessMessage('')
+      setErrorMessage('Vui lòng nhập họ và tên.')
+      return
+    }
+
+    if (!form.email.trim()) {
+      setSuccessMessage('')
+      setErrorMessage('Vui lòng nhập email.')
+      return
+    }
+
+    if (!emailPattern.test(form.email.trim())) {
+      setSuccessMessage('')
+      setErrorMessage('Email không hợp lệ.')
+      return
+    }
+
+    if (!form.password.trim()) {
+      setSuccessMessage('')
+      setErrorMessage('Vui lòng nhập mật khẩu.')
+      return
+    }
+
+    if (form.password.trim().length < 6) {
+      setSuccessMessage('')
+      setErrorMessage('Mật khẩu cần tối thiểu 6 ký tự.')
+      return
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setSuccessMessage('')
+      setErrorMessage('Xác nhận mật khẩu không khớp.')
+      return
+    }
+
+    if (!form.agree) {
+      setSuccessMessage('')
+      setErrorMessage('Vui lòng đồng ý với điều khoản sử dụng của E-XANH.')
+      return
+    }
+
+    registerUser({
+      id: `user-${Date.now()}`,
+      name: form.name.trim(),
+      email: form.email.trim(),
+      role: 'user',
+      avatar: getAvatarFromName(form.name),
+    })
+
+    setErrorMessage('')
+    setSuccessMessage('Tạo tài khoản thành công.')
+
+    window.setTimeout(() => {
+      navigate('/')
+    }, 700)
+  }
+
+  return (
+    <div className="auth-page">
+      <div className="auth-layout">
+        <section className="auth-visual">
+          <div className="auth-visual__top">
+            <div className="auth-visual__brand">
+              <span className="auth-visual__logo">E</span>
+              <strong>E-XANH</strong>
+            </div>
+            <span className="auth-visual__chip">Cộng đồng sống xanh</span>
+          </div>
+
+          <div className="auth-visual__content">
+            <h1>Tham gia E-XANH để sống xanh hơn mỗi ngày</h1>
+            <p>
+              Lưu lại mẹo tiết kiệm điện, chia sẻ kinh nghiệm, bình luận và theo dõi lịch sử kiểm tra tiền điện của bạn.
+            </p>
+          </div>
+
+          <div className="auth-visual__benefits">
+            <article>Lưu bài viết hữu ích</article>
+            <article>Bình luận và tương tác</article>
+            <article>Theo dõi tiền điện hằng tháng</article>
+          </div>
+
+          <div className="auth-visual__image">
+            <img
+              src="https://lh3.googleusercontent.com/aida/AP1WRLsyEXL8ygmkoBTmM7-tshvP-VQ4Z1sLXWVXyINN3y95prhrS-VUoerLyPXpIb7lsjyob8ZDfxxaq_XUsWGHXh4P411TzVXhV3i4-nxVYXFrJFGOBDmHONL5nCKnjnWoGp4OtdnMpYlKtKmhkgTIU_5yWU9mkwn-p_6STtwjQeW_RwnZWX3tuTnB28QsabrL990mkLkesFOYSp7_NacW-Z-CbeGbNLz3MKQwfzHFmNiKDu4PbVXOkSTPPND9"
+              alt="Minh họa đăng ký E-XANH"
+            />
+          </div>
+        </section>
+
+        <section className="auth-card">
+          <div className="auth-card__header">
+            <h2>Tạo tài khoản E-XANH</h2>
+            <p>Đăng ký để lưu bài viết, bình luận, đăng bài chia sẻ và theo dõi lịch sử kiểm tra tiền điện.</p>
+          </div>
+
+          <div className="auth-card__switcher">
+            <Link to="/dang-nhap">Đăng nhập</Link>
+            <span className="is-active">Đăng ký</span>
+          </div>
+
+          {errorMessage ? <div className="auth-card__message auth-card__message--error">{errorMessage}</div> : null}
+          {successMessage ? (
+            <div className="auth-card__message auth-card__message--success">{successMessage}</div>
+          ) : null}
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <label>
+              <span>Họ và tên</span>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(event) => handleChange('name', event.target.value)}
+                placeholder="Nhập họ và tên"
+              />
+            </label>
+
+            <label>
+              <span>Email</span>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(event) => handleChange('email', event.target.value)}
+                placeholder="Nhập email của bạn"
+              />
+            </label>
+
+            <label>
+              <span>Mật khẩu</span>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(event) => handleChange('password', event.target.value)}
+                placeholder="Tạo mật khẩu"
+              />
+            </label>
+
+            <label>
+              <span>Xác nhận mật khẩu</span>
+              <input
+                type="password"
+                value={form.confirmPassword}
+                onChange={(event) => handleChange('confirmPassword', event.target.value)}
+                placeholder="Nhập lại mật khẩu"
+              />
+            </label>
+
+            <label className="auth-form__checkbox">
+              <input
+                type="checkbox"
+                checked={form.agree}
+                onChange={(event) => handleChange('agree', event.target.checked)}
+              />
+              <span>Tôi đồng ý với điều khoản sử dụng của E-XANH</span>
+            </label>
+
+            <button type="submit" className="btn btn--primary auth-form__submit">
+              Tạo tài khoản
+            </button>
+          </form>
+
+          <p className="auth-card__alternate">
+            Đã có tài khoản? <Link to="/dang-nhap">Đăng nhập</Link>
+          </p>
+
+          <div className="auth-note">
+            <strong>Bảo mật thông tin</strong>
+            <p>
+              Khách chưa đăng nhập vẫn có thể xem bài viết và tính tiền điện. Đăng nhập giúp bạn lưu lại dữ liệu cá nhân hóa.
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  )
+}
+
+export default RegisterPage

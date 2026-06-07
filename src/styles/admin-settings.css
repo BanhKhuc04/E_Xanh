@@ -1,0 +1,553 @@
+/* ============================================================
+   Admin — Settings Page (admin-settings.css)
+   Đồng bộ palette E-XANH & admin.css
+   ============================================================ */
+
+/* ---- Page & Hero ---- */
+.st-page {
+  gap: 24px;
+}
+
+.st-page__hero {
+  display: grid;
+  gap: 14px;
+}
+
+.st-page__hero-copy h2 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  letter-spacing: -0.04em;
+}
+
+.st-page__hero-copy p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+/* ---- 2-Column Layout ---- */
+.st-layout {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.st-layout__main {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+
+.st-layout__sidebar {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+
+/* ---- Card ---- */
+.st-card {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(79, 132, 40, 0.08);
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(79, 132, 40, 0.08);
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.st-card__title {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.st-card__field {
+  display: grid;
+  gap: 6px;
+}
+
+.st-card__label {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--color-primary-500);
+}
+
+.st-card__input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: rgba(234, 245, 157, 0.1);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.st-card__input:focus {
+  border-color: var(--color-primary-200);
+  box-shadow: 0 0 0 4px rgba(193, 217, 92, 0.22);
+}
+
+.st-card__textarea {
+  resize: vertical;
+}
+
+.st-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.st-card__actions .btn {
+  font-size: 0.88rem;
+  padding: 10px 18px;
+}
+
+.st-card__toggles {
+  display: grid;
+  gap: 0;
+}
+
+/* ---- Toggle ---- */
+.st-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.06);
+  cursor: pointer;
+}
+
+.st-toggle:last-child {
+  border-bottom: 0;
+}
+
+.st-toggle__text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.st-toggle__label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.st-toggle__desc {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.st-toggle__switch {
+  flex-shrink: 0;
+}
+
+.st-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.st-toggle__track {
+  display: block;
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(160, 160, 160, 0.3);
+  transition: background-color 0.25s ease;
+}
+
+.st-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: transform 0.25s ease;
+}
+
+.st-toggle__switch.is-on .st-toggle__track {
+  background: linear-gradient(135deg, #80B155, #336A29);
+}
+
+.st-toggle__switch.is-on .st-toggle__thumb {
+  transform: translateX(20px);
+}
+
+/* ---- Login History ---- */
+.st-login-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.st-login-history li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(234, 245, 157, 0.12);
+  border: 1px solid rgba(79, 132, 40, 0.05);
+  font-size: 0.88rem;
+}
+
+.st-login-history__time {
+  font-weight: 600;
+  color: var(--color-primary-500);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.st-login-history__action {
+  color: var(--color-text-muted);
+}
+
+/* ---- Appearance Grid ---- */
+.st-appearance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.st-appearance-grid__item {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(234, 245, 157, 0.12);
+  border: 1px solid rgba(79, 132, 40, 0.06);
+}
+
+.st-appearance-grid__label {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.st-appearance-grid__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.st-appearance-grid__color-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #80B155, #336A29);
+  flex-shrink: 0;
+}
+
+/* Appearance Preview */
+.st-appearance-preview {
+  display: grid;
+  gap: 8px;
+}
+
+.st-appearance-preview__label {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.st-appearance-preview__card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(234, 245, 157, 0.25), rgba(193, 217, 92, 0.15));
+  border: 1px solid rgba(79, 132, 40, 0.1);
+}
+
+.st-appearance-preview__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(193, 217, 92, 0.5);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.st-appearance-preview__text {
+  display: grid;
+  gap: 2px;
+}
+
+.st-appearance-preview__text strong {
+  font-size: 0.95rem;
+}
+
+.st-appearance-preview__text span {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+/* ---- Profile Card ---- */
+.st-profile-card__top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.st-profile-card__avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: rgba(193, 217, 92, 0.5);
+  color: var(--color-primary-500);
+  font-weight: 700;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.st-profile-card__info {
+  display: grid;
+  gap: 2px;
+}
+
+.st-profile-card__info strong {
+  font-size: 1.05rem;
+}
+
+.st-profile-card__role {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.st-profile-card__details {
+  display: grid;
+  gap: 10px;
+}
+
+.st-profile-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+
+.st-profile-card__row > span:first-child {
+  color: var(--color-text-muted);
+}
+
+.st-logout-btn {
+  color: #8a5e2a;
+  border-color: rgba(180, 120, 60, 0.22);
+}
+
+.st-logout-btn:hover {
+  background: rgba(220, 170, 110, 0.12);
+}
+
+/* ---- Badge ---- */
+.st-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.st-badge--active {
+  color: #2a5e1f;
+  background: rgba(128, 177, 85, 0.26);
+}
+
+.st-badge--warning {
+  color: #8a5e2a;
+  background: rgba(214, 160, 90, 0.24);
+}
+
+/* ---- System Status ---- */
+.st-status-list {
+  display: grid;
+  gap: 10px;
+}
+
+.st-status-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.05);
+  font-size: 0.88rem;
+}
+
+.st-status-list__item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.st-status-list__label {
+  color: var(--color-text);
+}
+
+/* ---- Backup Grid ---- */
+.st-backup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.st-backup-grid__item {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(234, 245, 157, 0.12);
+  border: 1px solid rgba(79, 132, 40, 0.06);
+}
+
+.st-backup-grid__item span {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.st-backup-grid__item strong {
+  font-size: 0.95rem;
+}
+
+/* ---- Quick Actions ---- */
+.st-quick-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.st-quick-actions__btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(79, 132, 40, 0.12);
+  border-radius: 14px;
+  background: rgba(234, 245, 157, 0.14);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.st-quick-actions__btn:hover {
+  background: rgba(193, 217, 92, 0.25);
+  transform: translateY(-1px);
+}
+
+.st-quick-actions__btn--warning {
+  color: #8a5e2a;
+  border-color: rgba(180, 120, 60, 0.2);
+  background: rgba(220, 170, 110, 0.08);
+}
+
+.st-quick-actions__btn--warning:hover {
+  background: rgba(220, 170, 110, 0.16);
+}
+
+/* ---- Toast ---- */
+.st-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #336a29, #4f8428);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 16px 40px rgba(51, 106, 41, 0.3);
+  z-index: 100;
+  animation: st-toast-in 0.3s ease;
+}
+
+.st-toast svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* ---- Animations ---- */
+@keyframes st-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1100px) {
+  .st-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .st-layout__sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+}
+
+@media (max-width: 720px) {
+  .st-layout__sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .st-appearance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .st-backup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .st-login-history li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .st-card__actions {
+    flex-direction: column;
+  }
+
+  .st-card__actions .btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kiểm tra tiền điện - E-XANH</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#204100",
+                        "inverse-primary": "#a2d574",
+                        "inverse-on-surface": "#caffb9",
+                        "tertiary-container": "#9fa95a",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "background": "#edffe1",
+                        "surface-bright": "#edffe1",
+                        "outline-variant": "#c3c9b7",
+                        "surface-container-highest": "#b4f3a1",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#363d00",
+                        "on-secondary-container": "#5a6b00",
+                        "secondary": "#556500",
+                        "on-background": "#002200",
+                        "surface-container": "#bfffac",
+                        "secondary-container": "#d5ee6e",
+                        "on-secondary-fixed": "#181e00",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#d5ee6e",
+                        "primary-container": "#80b155",
+                        "surface": "#edffe1",
+                        "on-primary-fixed-variant": "#285000",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#5a631c",
+                        "on-surface": "#002200",
+                        "tertiary-fixed": "#dfea93",
+                        "on-primary-fixed": "#0d2000",
+                        "inverse-surface": "#003a00",
+                        "surface-container-high": "#baf9a7",
+                        "primary": "#3e6915",
+                        "primary-fixed": "#bdf28e",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#acea9a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#a2d574",
+                        "surface-tint": "#3e6915",
+                        "on-secondary-fixed-variant": "#3f4c00",
+                        "secondary-fixed-dim": "#b9d155",
+                        "outline": "#73796a",
+                        "tertiary-fixed-dim": "#c3cd7a",
+                        "on-surface-variant": "#43493b",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#b4f3a1",
+                        "surface-container-low": "#d7ffc7",
+                        "on-tertiary-fixed": "#1a1e00",
+                        "on-tertiary-fixed-variant": "#434b03"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "container-max": "1440px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Be Vietnam Pro"],
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F7FAEF; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .eco-shadow {
+            box-shadow: 0px 4px 20px rgba(79, 132, 40, 0.08);
+        }
+        .eco-shadow-hover:hover {
+            box-shadow: 0px 12px 32px rgba(79, 132, 40, 0.12);
+        }
+        .gradient-primary {
+            background: linear-gradient(135deg, #80B155 0%, #4F8428 100%);
+        }
+        .gradient-result {
+            background: linear-gradient(135deg, #EAF59D 0%, #caffb9 100%);
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-20">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto bg-surface/80 dark:bg-surface-container-low/80 backdrop-blur-xl shadow-[0px_4px_20px_rgba(79,132,40,0.08)]">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+            E-XANH
+        </div>
+<nav class="hidden md:flex gap-8 items-center font-label-md text-label-md">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors hover:bg-primary-container/10 dark:hover:bg-primary-container/20 rounded-lg px-3 py-2" href="#">Trang chủ</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors hover:bg-primary-container/10 dark:hover:bg-primary-container/20 rounded-lg px-3 py-2" href="#">Mẹo tiết kiệm</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors hover:bg-primary-container/10 dark:hover:bg-primary-container/20 rounded-lg px-3 py-2" href="#">Cộng đồng</a>
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 hover:bg-primary-container/10 dark:hover:bg-primary-container/20 rounded-lg px-3 pt-2" href="#">Kiểm tra tiền điện</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors hover:bg-primary-container/10 dark:hover:bg-primary-container/20 rounded-lg px-3 py-2" href="#">Bài đã lưu</a>
+</nav>
+<div class="flex gap-4 font-label-md text-label-md">
+<button class="text-primary hover:bg-primary-container/10 px-4 py-2 rounded-full transition-colors">Đăng nhập</button>
+<button class="gradient-primary text-on-primary px-6 py-2 rounded-full shadow-md hover:shadow-lg transition-all hover:brightness-110">Đăng bài</button>
+</div>
+</header>
+<main class="flex-grow flex flex-col gap-16 pb-20">
+<!-- Hero Section -->
+<section class="max-w-container-max mx-auto px-margin-desktop pt-12 w-full">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="flex flex-col gap-6">
+<div class="inline-flex items-center gap-2 bg-primary-container/20 text-primary-container px-4 py-2 rounded-full w-max">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-label-md text-label-md">Công cụ thông minh</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface">Kiểm tra tiền điện hằng tháng</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Nhập thiết bị bạn đang sử dụng để ước tính chi phí điện, tìm thiết bị tiêu hao nhiều nhất và nhận gợi ý tiết kiệm phù hợp.
+                    </p>
+<div class="flex gap-4 mt-4">
+<button class="gradient-primary text-on-primary font-label-md text-label-md px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">Bắt đầu tính</button>
+<button class="bg-[#EAF59D] text-[#336A29] font-label-md text-label-md px-8 py-3 rounded-full hover:bg-secondary-container transition-colors">Xem cách hoạt động</button>
+</div>
+</div>
+<div class="relative h-[400px] w-full rounded-[32px] bg-surface-container overflow-hidden eco-shadow flex items-center justify-center">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-highest to-surface-container-high opacity-50"></div>
+<!-- Decorative Illustration Placeholder -->
+<div class="relative z-10 w-full h-full p-8" data-alt="A modern, eco-tech flat vector illustration showing a sleek smart electric meter surrounded by simplified icons of an air conditioner, a modern laptop, a desk lamp, and a futuristic smart fridge. The background features abstract energy waves and green circular charts indicating power usage. Hovering above these elements are three translucent, glassmorphism-style UI cards containing text 'Dự kiến: 420.000đ/tháng', 'Tốn nhất: Điều hòa', and 'Tiết kiệm gợi ý: 15%'. The overall color palette is bright and fresh, using primarily vibrant eco-greens, soft whites, and subtle lime accents, set against a very light mint-green background. Lighting is soft and bright, emphasizing a clean, optimistic, and technologically advanced mood.">
+<img alt="Minh họa tiết kiệm điện E-XANH" class="w-full h-full object-cover rounded-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCow35s7JJ7pIZIyBLPj_7Ig_r8NO416G87hKH58v1xZ2OnnBi8etNvKkPyaQRmXjFoMu1jBYIE00kCx_RYb35UgZirRiDJRGtTHq7GT3E2D4S1TNAqEjQCseKxQVvqbsUteHHmPlqHvq0ljJ6EZ9MGQFWdDKLnpCEyuIF72J-7hgf-fscm7hjK4jPndtk8xPhIqFvxBjRzGJ-FCYT5jvm8bSPfsxfLjkFvPX-JAb9cZduYfem9BFDHVC4bP5CLDcqRkr9yjbuFPb6y"/>
+</div>
+<!-- Floating Cards (Simulated in HTML overlaying the image) -->
+<div class="absolute top-8 right-8 glass-panel rounded-xl p-4 eco-shadow z-20 flex items-center gap-3"><div class="bg-primary-container/20 p-2 rounded-full text-primary-container"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span></div><div><p class="text-xs text-on-surface-variant">Dự kiến</p><p class="font-label-md text-label-md text-on-surface">520.000đ/tháng</p></div></div>
+<div class="absolute bottom-16 left-8 glass-panel rounded-xl p-4 eco-shadow z-20 flex items-center gap-3">
+<div class="bg-error/10 p-2 rounded-full text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">ac_unit</span>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant">Tốn nhất</p>
+<p class="font-label-md text-label-md text-on-surface">Điều hòa</p>
+</div>
+</div>
+<div class="absolute bottom-8 right-12 glass-panel rounded-xl p-4 eco-shadow z-20 flex items-center gap-3">
+<div class="bg-tertiary-container/20 p-2 rounded-full text-tertiary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant">Tiết kiệm gợi ý</p>
+<p class="font-label-md text-label-md text-tertiary">15%</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Tool Area -->
+<section class="max-w-container-max mx-auto px-margin-desktop w-full">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column (Input) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-[24px] p-8 eco-shadow relative">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Thiết bị của bạn</h2>
+<p class="text-on-surface-variant mb-8">Thêm các thiết bị điện bạn dùng thường xuyên để E-XANH ước tính chi phí.</p>
+<form class="grid grid-cols-2 gap-4 mb-8">
+<div class="col-span-2 sm:col-span-1">
+<label class="block text-sm font-medium text-on-surface-variant mb-1">Loại thiết bị</label>
+<select class="w-full bg-surface rounded-xl border-none focus:ring-2 focus:ring-primary h-12 px-4 text-on-surface">
+<option>Điều hòa</option>
+<option>Laptop</option>
+<option>Quạt</option>
+<option>Đèn học</option>
+<option>Tủ lạnh</option>
+<option>Máy giặt</option>
+<option>Khác</option>
+</select>
+</div>
+<div class="col-span-2 sm:col-span-1">
+<label class="block text-sm font-medium text-on-surface-variant mb-1">Công suất (W)</label>
+<input class="w-full bg-surface rounded-xl border-none focus:ring-2 focus:ring-primary h-12 px-4 text-on-surface" placeholder="Ví dụ: 1000" type="number"/>
+</div>
+<div class="col-span-2 sm:col-span-1">
+<label class="block text-sm font-medium text-on-surface-variant mb-1">Giờ dùng / Ngày</label>
+<input class="w-full bg-surface rounded-xl border-none focus:ring-2 focus:ring-primary h-12 px-4 text-on-surface" placeholder="Ví dụ: 8" type="number"/>
+</div>
+<div class="col-span-2 sm:col-span-1">
+<label class="block text-sm font-medium text-on-surface-variant mb-1">Ngày dùng / Tháng</label>
+<input class="w-full bg-surface rounded-xl border-none focus:ring-2 focus:ring-primary h-12 px-4 text-on-surface" placeholder="Ví dụ: 30" type="number"/>
+</div>
+<div class="col-span-2 mt-2">
+<button class="w-full border-2 border-primary border-dashed text-primary font-label-md text-label-md py-3 rounded-xl hover:bg-primary-container/5 transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined">add</span>
+                                Thêm thiết bị
+                            </button>
+</div>
+</form>
+<div class="space-y-3 mb-8">
+<!-- Device Item -->
+<div class="flex items-center justify-between p-4 bg-surface rounded-xl border border-surface-container">
+<div class="flex items-center gap-4">
+<div class="bg-primary-container/10 p-3 rounded-full text-primary">
+<span class="material-symbols-outlined">ac_unit</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Điều hòa 9000BTU</h4>
+<p class="text-sm text-on-surface-variant">850W • 8h/ngày • 30 ngày</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-md text-label-md text-on-surface text-right">204 kWh</span>
+<button class="text-outline hover:text-error transition-colors p-2"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+<!-- Device Item -->
+<div class="flex items-center justify-between p-4 bg-surface rounded-xl border border-surface-container">
+<div class="flex items-center gap-4">
+<div class="bg-primary-container/10 p-3 rounded-full text-primary">
+<span class="material-symbols-outlined">laptop_mac</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Laptop</h4>
+<p class="text-sm text-on-surface-variant">65W • 10h/ngày • 22 ngày</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-md text-label-md text-on-surface text-right">14,3 kWh</span>
+<button class="text-outline hover:text-error transition-colors p-2"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 gradient-primary text-on-primary font-label-md text-label-md py-4 rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">Tính tiền điện</button>
+<button class="px-8 bg-surface-container text-on-surface-variant font-label-md text-label-md py-4 rounded-xl hover:bg-surface-container-high transition-colors">Làm mới</button>
+</div>
+</div>
+<!-- Right Column (Result) -->
+<div class="lg:col-span-5 h-full">
+<div class="gradient-result rounded-[24px] p-8 eco-shadow h-full flex flex-col relative overflow-hidden">
+<!-- Background decoration -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-12 -left-12 w-48 h-48 bg-[#80B155]/20 rounded-full blur-2xl"></div>
+<div class="relative z-10 flex-grow flex flex-col">
+<div class="mb-8">
+<h3 class="text-on-secondary-container font-label-md mb-2 uppercase tracking-wider">Tiền điện dự kiến</h3>
+<div class="text-[48px] leading-[56px] font-extrabold text-on-secondary-container">520.000<span class="text-[24px]">đ</span></div>
+<p class="text-on-secondary-container/80 mt-1">Dựa trên đơn giá điện sinh hoạt bậc thang</p>
+</div>
+<div class="glass-panel rounded-2xl p-6 flex flex-col gap-4 mb-8">
+<div class="flex justify-between items-center pb-4 border-b border-white/30">
+<span class="text-on-surface">Tổng điện năng</span>
+<span class="font-label-md text-label-md text-on-surface">218,3 kWh</span>
+</div>
+<div class="flex justify-between items-center pb-4 border-b border-white/30">
+<span class="text-on-surface">Thiết bị tốn nhất</span>
+<span class="font-label-md text-label-md text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-error">warning</span>
+                                        Điều hòa
+                                    </span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface">Có thể tiết kiệm</span>
+<span class="font-label-md text-label-md text-primary-container bg-white px-3 py-1 rounded-full">15–20%</span>
+</div>
+</div>
+<div class="mt-auto">
+<h4 class="font-label-md text-label-md text-on-secondary-container mb-4">Phân bổ tiêu thụ</h4>
+<div class="space-y-4"><div><div class="flex justify-between text-sm mb-1 text-on-secondary-container"><span class="">Điều hòa</span><span class="font-bold">93%</span></div><div class="w-full bg-white/40 rounded-full h-2"><div class="bg-[#336A29] h-2 rounded-full" style="width: 93%"></div></div></div><div><div class="flex justify-between text-sm mb-1 text-on-secondary-container"><span class="">Laptop</span><span class="font-bold">7%</span></div><div class="w-full bg-white/40 rounded-full h-2"><div class="bg-[#4F8428] h-2 rounded-full" style="width: 7%"></div></div></div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Tips Section -->
+<section class="max-w-container-max mx-auto px-margin-desktop w-full">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Gợi ý tiết kiệm dành cho bạn</h2>
+<p class="text-on-surface-variant mt-2">Dựa trên các thiết bị bạn đang sử dụng</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Tip 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-[24px] eco-shadow eco-shadow-hover transition-all duration-300">
+<div class="bg-primary-container/10 w-12 h-12 rounded-full flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">thermostat</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-2">Đặt điều hòa 26–28°C</h4>
+<p class="text-sm text-on-surface-variant">Tăng 1 độ C có thể giúp giảm tới 3% điện năng tiêu thụ của máy lạnh.</p>
+</div>
+<!-- Tip 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-[24px] eco-shadow eco-shadow-hover transition-all duration-300">
+<div class="bg-primary-container/10 w-12 h-12 rounded-full flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">battery_charging_full</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-2">Không sạc thiết bị qua đêm</h4>
+<p class="text-sm text-on-surface-variant">Ngắt sạc laptop, điện thoại khi đầy để tránh rò rỉ điện và chai pin.</p>
+</div>
+<!-- Tip 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-[24px] eco-shadow eco-shadow-hover transition-all duration-300">
+<div class="bg-primary-container/10 w-12 h-12 rounded-full flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">power_settings_new</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-2">Tắt thiết bị ở chế độ chờ</h4>
+<p class="text-sm text-on-surface-variant">Rút phích cắm Tivi, loa khi không dùng vì chế độ chờ vẫn tiêu thụ điện ngầm.</p>
+</div>
+<!-- Tip 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-[24px] eco-shadow eco-shadow-hover transition-all duration-300">
+<div class="bg-primary-container/10 w-12 h-12 rounded-full flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">light_mode</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-2">Tận dụng ánh sáng tự nhiên</h4>
+<p class="text-sm text-on-surface-variant">Mở cửa sổ thay vì bật đèn vào ban ngày để giảm tải hệ thống chiếu sáng.</p>
+</div>
+</div>
+</section>
+<!-- Calculation Guide -->
+<section class="max-w-container-max mx-auto px-margin-desktop w-full mb-16"><div class="bg-surface-container-lowest rounded-[24px] p-8 eco-shadow"><h2 class="font-headline-md text-headline-md text-on-surface mb-6">Lịch sử kiểm tra gần đây</h2><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead class="text-on-surface-variant border-b border-surface-container"><tr class="font-label-md text-label-md"><th class="py-4 px-2">Ngày</th><th class="py-4 px-2">Thiết bị</th><th class="py-4 px-2">Tiêu thụ</th><th class="py-4 px-2">Thành tiền</th><th class="py-4 px-2"></th></tr></thead><tbody class="text-on-surface"><tr class="border-b border-surface-container/50 hover:bg-surface transition-colors"><td class="py-4 px-2">12/06/2024</td><td class="py-4 px-2">3 thiết bị</td><td class="py-4 px-2">218,3 kWh</td><td class="py-4 px-2 font-bold">520.000đ</td><td class="py-4 px-2 text-right"><button class="text-primary font-label-md hover:underline">Xem lại</button></td></tr><tr class="border-b border-surface-container/50 hover:bg-surface transition-colors"><td class="py-4 px-2">08/06/2024</td><td class="py-4 px-2">4 thiết bị</td><td class="py-4 px-2">156 kWh</td><td class="py-4 px-2 font-bold">420.000đ</td><td class="py-4 px-2 text-right"><button class="text-primary font-label-md hover:underline">Xem lại</button></td></tr></tbody></table></div><p class="text-sm text-on-surface-variant mt-4 italic">Đăng nhập để lưu lại lịch sử kiểm tra tiền điện của bạn.</p></div></section><section class="max-w-container-max mx-auto px-margin-desktop w-full">
+<div class="bg-surface-container-lowest rounded-[24px] p-8 lg:p-12 eco-shadow">
+<div class="text-center max-w-2xl mx-auto mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">E-XANH tính như thế nào?</h2>
+<p class="text-on-surface-variant">Công thức tiêu chuẩn giúp bạn dễ dàng tự tính toán chi phí điện cho bất kỳ thiết bị nào.</p>
+</div>
+<div class="flex flex-col md:flex-row items-center justify-center gap-8 p-8 bg-surface rounded-2xl border border-surface-container">
+<div class="text-center p-6 bg-primary-container/5 rounded-xl border border-primary-container/20">
+<p class="text-on-surface-variant mb-2">Số điện tiêu thụ (kWh)</p>
+<div class="text-2xl font-bold text-primary flex items-center gap-4">
+<span class="">Công suất (W)</span>
+<span class="material-symbols-outlined text-sm">close</span>
+<span class="">Thời gian (h)</span>
+</div>
+<div class="w-full h-[1px] bg-outline-variant my-2"></div>
+<div class="text-xl font-bold text-on-surface-variant">1000</div>
+</div>
+<span class="material-symbols-outlined text-4xl text-outline-variant hidden md:block">arrow_forward</span>
+<div class="text-left max-w-sm">
+<p class="font-label-md text-label-md text-on-surface mb-2">Ví dụ: Một chiếc quạt 50W bật 10 tiếng</p>
+<ul class="space-y-2 text-sm text-on-surface-variant">
+<li class="">• Điện năng = (50 x 10) / 1000 = 0.5 kWh</li>
+<li class="">• Mỗi ngày dùng nửa số điện.</li>
+<li class="">• 30 ngày = 15 số điện (~45.000đ).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="w-full bg-[#336A29] text-white px-margin-desktop py-16 mt-auto"><div class="max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-start gap-12"><div class="flex flex-col gap-6 max-w-sm"><div class="text-2xl font-bold tracking-tight">E-XANH</div><p class="text-white/80 font-body-md">Dùng điện thông minh, sống xanh bền vững.</p></div><div class="grid grid-cols-2 sm:grid-cols-3 gap-12 md:ml-auto"><div class="flex flex-col gap-2"><h4 class="font-bold text-lg">Khám phá</h4><a class="text-white/70 hover:text-white transition-colors" href="#">Về chúng tôi</a><a class="text-white/70 hover:text-white transition-colors" href="#">Mẹo tiết kiệm</a><a class="text-white/70 hover:text-white transition-colors" href="#">Cộng đồng</a></div><div class="flex flex-col gap-2"><h4 class="font-bold text-lg">Hỗ trợ</h4><a class="text-white/70 hover:text-white transition-colors" href="#">Điều khoản</a><a class="text-white/70 hover:text-white transition-colors" href="#">Liên hệ</a></div></div></div><div class="max-w-container-max mx-auto mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/60 text-sm"><p class="">© 2024 E-XANH. Made by VanhKhucDev</p><div class="flex gap-6"><a class="hover:text-white transition-colors" href="#">Facebook</a><a class="hover:text-white transition-colors" href="#">Instagram</a><a class="hover:text-white transition-colors" href="#">LinkedIn</a></div></div></footer>
+</body></html>

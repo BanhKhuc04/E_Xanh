@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Duyệt bài viết - E-XANH Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#43493b",
+                        "on-error": "#ffffff",
+                        "primary-container": "#80b155",
+                        "inverse-surface": "#003a00",
+                        "on-secondary-fixed": "#181e00",
+                        "tertiary": "#5a631c",
+                        "tertiary-container": "#9fa95a",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#d7ffc7",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#1a1e00",
+                        "on-tertiary-container": "#363d00",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#3e6915",
+                        "secondary": "#556500",
+                        "surface-bright": "#edffe1",
+                        "on-secondary-fixed-variant": "#3f4c00",
+                        "on-primary-container": "#204100",
+                        "surface-container-highest": "#b4f3a1",
+                        "on-tertiary-fixed-variant": "#434b03",
+                        "secondary-container": "#d5ee6e",
+                        "background": "#edffe1",
+                        "on-primary-fixed": "#0d2000",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#bdf28e",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#b4f3a1",
+                        "on-primary-fixed-variant": "#285000",
+                        "tertiary-fixed-dim": "#c3cd7a",
+                        "on-secondary-container": "#5a6b00",
+                        "outline-variant": "#c3c9b7",
+                        "tertiary-fixed": "#dfea93",
+                        "surface": "#edffe1",
+                        "primary-fixed-dim": "#a2d574",
+                        "surface-dim": "#acea9a",
+                        "secondary-fixed": "#d5ee6e",
+                        "inverse-on-surface": "#caffb9",
+                        "secondary-fixed-dim": "#b9d155",
+                        "surface-container": "#bfffac",
+                        "surface-container-high": "#baf9a7",
+                        "outline": "#73796a",
+                        "on-surface": "#002200",
+                        "inverse-primary": "#a2d574",
+                        "primary": "#3e6915",
+                        "on-background": "#002200"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "display-lg": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F7FAEF; } /* Custom brand background */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .soft-shadow {
+            box-shadow: 0px 4px 20px rgba(79, 132, 40, 0.08);
+        }
+        .hover-shadow:hover {
+            box-shadow: 0px 12px 32px rgba(79, 132, 40, 0.12);
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #80B155 0%, #4F8428 100%);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface flex min-h-screen">
+<!-- SideNavBar Component -->
+<nav class="h-screen w-64 fixed left-0 top-0 bg-inverse-surface dark:bg-on-surface shadow-md z-50 flex flex-col">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary-fixed">E-XANH</h1>
+<p class="text-xs text-primary-fixed-dim">Cộng đồng năng lượng xanh</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col h-full py-6 gap-4 overflow-y-auto"><a class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:text-on-primary-fixed-variant mx-2 hover:bg-primary/10 transition-colors duration-200 rounded-xl" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Tổng quan</span></a><a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-xl mx-2 hover:bg-primary/10 transition-colors duration-200 scale-[0.98] transition-transform" href="#"><span class="material-symbols-outlined">fact_check</span><span class="font-label-md text-label-md">Duyệt bài viết</span></a><a class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:text-on-primary-fixed-variant mx-2 hover:bg-primary/10 transition-colors duration-200 rounded-xl" href="#"><span class="material-symbols-outlined">forum</span><span class="font-label-md text-label-md">Quản lý bình luận</span></a><a class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:text-on-primary-fixed-variant mx-2 hover:bg-primary/10 transition-colors duration-200 rounded-xl" href="#"><span class="material-symbols-outlined">group</span><span class="font-label-md text-label-md">Quản lý người dùng</span></a><a class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:text-on-primary-fixed-variant mx-2 hover:bg-primary/10 transition-colors duration-200 rounded-xl" href="#"><span class="material-symbols-outlined">devices</span><span class="font-label-md text-label-md">Quản lý thiết bị điện</span></a><a class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:text-on-primary-fixed-variant mx-2 hover:bg-primary/10 transition-colors duration-200 rounded-xl" href="#"><span class="material-symbols-outlined">analytics</span><span class="font-label-md text-label-md">Thống kê</span></a><a class="flex items-center gap-3 px-4 py-3 text-surface-variant hover:text-on-primary-fixed-variant mx-2 hover:bg-primary/10 transition-colors duration-200 rounded-xl mt-auto" href="#"><span class="material-symbols-outlined">settings</span><span class="font-label-md text-label-md">Cài đặt</span></a></div>
+</nav>
+<!-- Main Content Area -->
+<div class="ml-64 flex-1 flex flex-col min-w-0">
+<!-- TopNavBar Component -->
+<header class="docked full-width top-0 sticky bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl shadow-sm z-40">
+<div class="flex justify-between items-center h-16 px-8">
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Quản trị nội dung</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative focus-within:ring-2 focus-within:ring-primary rounded-full">
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-4 pr-10 text-on-surface focus:ring-0 w-64" placeholder="Tìm kiếm..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-on-surface-variant">search</span>
+</div>
+<div class="flex gap-4">
+<button class="text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all p-2 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all p-2 rounded-full">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden flex items-center justify-center">
+<img alt="Admin Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoyKD5G5aHWemsGrWhPjrev8Gd14Fru4z4UdXtd9y9e4CYOAi493UFAUfpqPg2mqmF0PZUfjzGpQHuszrF1XS6sGD4HTiSE2gy_GfgKfQNTIt16i9sXW49feijYIJUDjqMe9BiVuA5ND594rvVOsXNJXMTM13jbeKQWJ-p5YGi2ytL9IsBi3bD-LrYBeFRk406L1mCRsvAPfgqMnbYyEewVcXCBwIX73iKNr_6VpYF84xTdVolN_gZ4hstQHthsc8tn9D3KdVvnlyU"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<main class="flex-1 p-gutter max-w-container-max mx-auto w-full">
+<!-- Page Header -->
+<div class="mb-8">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">Duyệt bài viết</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Kiểm tra và xử lý các bài viết người dùng gửi lên trước khi hiển thị công khai.</p>
+</div>
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow hover-shadow transition-shadow flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Chờ duyệt</p>
+<p class="font-headline-lg text-headline-lg text-primary">18</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container text-2xl">pending_actions</span>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow hover-shadow transition-shadow flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Đã duyệt</p>
+<p class="font-headline-lg text-headline-lg text-primary">126</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-2xl">check_circle</span>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow hover-shadow transition-shadow flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Bị từ chối</p>
+<p class="font-headline-lg text-headline-lg text-primary">9</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-error-container text-2xl">cancel</span>
+</div>
+</div>
+<!-- Stat Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow hover-shadow transition-shadow flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Bài mới hôm nay</p>
+<p class="font-headline-lg text-headline-lg text-primary">5</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl">new_releases</span>
+</div>
+</div>
+</div>
+<!-- Main Workspace Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: List (65% ~ 8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Filter Panel -->
+<div class="bg-surface-container-lowest rounded-xl p-6 soft-shadow flex flex-wrap items-center gap-4">
+<div class="flex-1 min-w-[200px]">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Tìm tên bài, tác giả..." type="text"/>
+</div>
+<select class="bg-surface-bright border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none">
+<option>Tất cả loại bài</option>
+<option>Mẹo tiết kiệm</option>
+<option>Hỏi đáp</option>
+</select>
+<select class="bg-surface-bright border border-outline-variant rounded-lg px-4 py-2 text-on-surface focus:border-primary outline-none">
+<option>Trạng thái: Chờ duyệt</option>
+<option>Trạng thái: Đã duyệt</option>
+<option>Trạng thái: Bị từ chối</option>
+</select>
+<div class="flex gap-2">
+<button class="gradient-btn text-on-primary font-label-md text-label-md px-6 py-2 rounded-lg hover:shadow-lg transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_alt</span> Lọc bài
+                            </button>
+<button class="border border-outline text-on-surface font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-surface-container-low transition-colors">
+                                Làm mới
+                            </button>
+</div>
+</div>
+<!-- Bulk Actions Bar -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center justify-between border border-outline-variant border-dashed">
+<div class="flex items-center gap-3">
+<input checked="" class="rounded text-primary focus:ring-primary w-5 h-5 ml-2" type="checkbox"/>
+<span class="font-label-md text-label-md text-primary">Đã chọn 1 bài</span>
+</div>
+<div class="flex gap-2">
+<button class="bg-primary text-on-primary font-label-md px-4 py-1.5 rounded-lg text-sm hover:bg-primary/90">Duyệt đã chọn</button>
+<button class="bg-error-container text-on-error-container font-label-md px-4 py-1.5 rounded-lg text-sm hover:bg-error-container/90">Từ chối đã chọn</button>
+</div>
+</div>
+<!-- Article List -->
+<div class="flex flex-col gap-4"><div class="bg-surface-container-lowest rounded-xl p-4 soft-shadow hover-shadow transition-shadow flex gap-4 items-center border-2 border-primary ring-4 ring-primary/10 cursor-pointer"><input checked="" class="rounded text-primary focus:ring-primary w-5 h-5 ml-2" type="checkbox"/><div class="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-secondary-container flex items-center justify-center"><span class="material-symbols-outlined text-secondary text-3xl">ac_unit</span></div><div class="flex-1"><div class="flex justify-between items-start mb-1"><h3 class="font-label-md text-label-md text-on-surface text-lg">5 cách dùng điều hòa tiết kiệm điện mùa nóng</h3><span class="bg-secondary-container text-on-secondary-container text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> Chờ duyệt</span></div><div class="flex items-center gap-4 text-sm text-on-surface-variant mb-2"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">person</span> Nguyễn Văn A</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">category</span> Mẹo tiết kiệm</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">calendar_today</span> Hôm nay</span></div><p class="text-sm text-on-surface-variant line-clamp-1">Mùa hè oi bức khiến nhu cầu sử dụng điều hòa tăng cao...</p></div></div><div class="bg-surface-container-lowest rounded-xl p-4 soft-shadow hover-shadow transition-shadow flex gap-4 items-center border border-transparent hover:border-outline-variant cursor-pointer"><input class="rounded text-primary focus:ring-primary w-5 h-5 ml-2" type="checkbox"/><div class="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-tertiary-container flex items-center justify-center"><span class="material-symbols-outlined text-tertiary text-3xl">battery_charging_full</span></div><div class="flex-1"><div class="flex justify-between items-start mb-1"><h3 class="font-label-md text-label-md text-on-surface text-lg">Có nên rút sạc laptop khi pin đầy?</h3><span class="bg-secondary-container text-on-secondary-container text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> Chờ duyệt</span></div><div class="flex items-center gap-4 text-sm text-on-surface-variant mb-2"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">person</span> Lan Anh</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">category</span> Hỏi đáp</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">calendar_today</span> 11/06/2024</span></div><p class="text-sm text-on-surface-variant line-clamp-1">Nhiều người thắc mắc việc cắm sạc laptop liên tục...</p></div></div><div class="bg-surface-container-lowest rounded-xl p-4 soft-shadow hover-shadow transition-shadow flex gap-4 items-center border border-transparent hover:border-outline-variant cursor-pointer"><input class="rounded text-primary focus:ring-primary w-5 h-5 ml-2" type="checkbox"/><div class="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-primary text-3xl">assignment_turned_in</span></div><div class="flex-1"><div class="flex justify-between items-start mb-1"><h3 class="font-label-md text-label-md text-on-surface text-lg">Checklist 30 giây trước khi rời phòng</h3><span class="bg-secondary-container text-on-secondary-container text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> Chờ duyệt</span></div><div class="flex items-center gap-4 text-sm text-on-surface-variant mb-2"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">person</span> Minh Tuấn</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">category</span> Cộng đồng</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">calendar_today</span> 10/06/2024</span></div><p class="text-sm text-on-surface-variant line-clamp-1">Thói quen nhỏ giúp tiết kiệm điện năng đáng kể...</p></div></div><div class="bg-surface-container-lowest rounded-xl p-4 soft-shadow hover-shadow transition-shadow flex gap-4 items-center border border-transparent hover:border-outline-variant cursor-pointer"><input class="rounded text-primary focus:ring-primary w-5 h-5 ml-2" type="checkbox"/><div class="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-primary-container flex items-center justify-center"><span class="material-symbols-outlined text-on-primary-container text-3xl">kitchen</span></div><div class="flex-1"><div class="flex justify-between items-start mb-1"><h3 class="font-label-md text-label-md text-on-surface text-lg">Cách đặt tủ lạnh giúp giảm hao phí điện</h3><span class="bg-primary text-on-primary text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check_circle</span> Đã duyệt</span></div><div class="flex items-center gap-4 text-sm text-on-surface-variant mb-2"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">person</span> Hoàng Tuấn</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">category</span> Mẹo tiết kiệm</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">calendar_today</span> 09/06/2024</span></div><p class="text-sm text-on-surface-variant line-clamp-1">Vị trí đặt tủ lạnh ảnh hưởng trực tiếp đến hiệu suất...</p></div></div><div class="bg-surface-container-lowest rounded-xl p-4 soft-shadow hover-shadow transition-shadow flex gap-4 items-center border border-transparent hover:border-outline-variant cursor-pointer"><input class="rounded text-primary focus:ring-primary w-5 h-5 ml-2" type="checkbox"/><div class="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-error-container flex items-center justify-center"><span class="material-symbols-outlined text-on-error-container text-3xl">report_problem</span></div><div class="flex-1"><div class="flex justify-between items-start mb-1"><h3 class="font-label-md text-label-md text-on-surface text-lg">Thiết bị nào trong phòng trọ tốn điện nhất?</h3><span class="bg-error-container text-on-error-container text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">cancel</span> Bị từ chối</span></div><div class="flex items-center gap-4 text-sm text-on-surface-variant mb-2"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">person</span> Minh Đức</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">category</span> Review thiết bị</span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">calendar_today</span> 08/06/2024</span></div><p class="text-sm text-on-surface-variant line-clamp-1">Phân tích các thiết bị điện phổ biến trong phòng trọ...</p></div></div></div>
+</div>
+<!-- Right Column: Preview (35% ~ 4 cols) -->
+<div class="lg:col-span-4">
+<div class="bg-surface-container-lowest rounded-xl soft-shadow overflow-hidden sticky top-24 flex flex-col max-h-[calc(100vh-8rem)]">
+<!-- Preview Header -->
+<div class="p-4 border-b border-outline-variant bg-surface-bright flex justify-between items-center">
+<h3 class="font-headline-md text-lg text-on-surface">Xem trước bài viết</h3>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">open_in_new</span></button>
+</div>
+<!-- Preview Content (Scrollable) -->
+<div class="p-6 overflow-y-auto flex-1">
+<div class="w-full h-40 bg-surface-container rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+<div class="w-full h-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-5xl opacity-50">image</span>
+</div>
+</div>
+<h2 class="font-headline-md text-xl text-on-surface mb-2 leading-tight">5 cách dùng điều hòa tiết kiệm điện mùa nóng</h2>
+<div class="flex flex-wrap gap-3 mb-6 border-b border-outline-variant pb-4">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-xs font-bold text-on-primary-fixed">N</div>
+<span class="text-sm font-semibold text-on-surface">Nguyễn Văn A</span>
+</div>
+<span class="text-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> 12/06/2024</span>
+</div>
+<div class="prose prose-sm text-on-surface-variant mb-6">
+<p class="">Mùa hè oi bức khiến nhu cầu sử dụng điều hòa tăng cao, kéo theo hóa đơn tiền điện chóng mặt. Hãy áp dụng ngay 5 mẹo nhỏ sau để vừa mát mẻ vừa bảo vệ ví tiền của bạn:</p>
+<ol class="list-decimal pl-4 mt-2 space-y-2">
+<li class=""><strong>Để nhiệt độ hợp lý:</strong> Mức 26-28 độ C là lý tưởng.</li>
+<li class=""><strong>Dùng kết hợp quạt:</strong> Giúp luân chuyển không khí lạnh nhanh hơn.</li>
+<li class=""><strong>Vệ sinh màng lọc định kỳ:</strong> Giúp máy hoạt động hiệu quả, đỡ tốn điện.</li>
+</ol>
+<p class="text-primary italic mt-2 text-xs cursor-pointer">[Xem toàn bộ nội dung...]</p>
+</div>
+<!-- Admin Note Area -->
+<div class="mt-6 pt-6"><label class="block font-label-md text-sm text-on-surface-variant flex items-center gap-1 mb-2"><span class="material-symbols-outlined text-[16px]">edit_note</span> Ghi chú admin</label><textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Nhập lý do từ chối hoặc ghi chú kiểm duyệt..." rows="3"></textarea></div></div>
+<!-- Preview Actions -->
+<div class="p-4 border-t border-outline-variant bg-surface-bright flex flex-col gap-3"><button class="w-full bg-primary text-on-primary font-label-md py-3 rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 text-lg"><span class="material-symbols-outlined">check_circle</span> Duyệt bài</button><div class="grid grid-cols-2 gap-3"><button class="w-full border border-outline text-on-surface-variant font-label-md py-2 rounded-xl hover:bg-surface-container-low transition-colors flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">close</span> Từ chối</button><button class="w-full bg-secondary-container text-on-secondary-container font-label-md py-2 rounded-xl hover:bg-secondary-fixed-dim transition-colors flex items-center justify-center gap-1"><span class="material-symbols-outlined text-sm">visibility</span> Xem chi tiết</button></div><button class="w-full border border-outline-variant text-on-surface-variant font-label-md py-2 rounded-xl hover:bg-surface-container-low transition-colors text-sm flex items-center justify-center gap-1 mt-1"><span class="material-symbols-outlined text-sm">visibility_off</span> Ẩn bài</button></div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-12 py-6 border-t border-outline-variant/30 text-center text-sm text-on-surface-variant flex items-center justify-center gap-2">
+<span class="">© 2024 E-XANH Admin. Made by VanhKhucDev</span>
+<span class="material-symbols-outlined text-primary text-sm">eco</span>
+</footer>
+</main>
+</div>
+</body></html>

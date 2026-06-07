@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cài đặt - E-XANH Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .soft-shadow {
+            box-shadow: 0px 4px 20px rgba(79, 132, 40, 0.08);
+        }
+        .soft-shadow-hover:hover {
+            box-shadow: 0px 12px 32px rgba(79, 132, 40, 0.12);
+        }
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #80b155;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #80b155;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c3c9b7",
+                      "on-tertiary-fixed-variant": "#434b03",
+                      "on-secondary-fixed-variant": "#3f4c00",
+                      "inverse-on-surface": "#caffb9",
+                      "on-secondary-container": "#5a6b00",
+                      "on-surface": "#002200",
+                      "tertiary-fixed-dim": "#c3cd7a",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#9fa95a",
+                      "primary-container": "#80b155",
+                      "on-tertiary-fixed": "#1a1e00",
+                      "surface-bright": "#edffe1",
+                      "outline": "#73796a",
+                      "surface-container-low": "#d7ffc7",
+                      "secondary-container": "#d5ee6e",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#363d00",
+                      "on-background": "#002200",
+                      "secondary": "#556500",
+                      "on-surface-variant": "#43493b",
+                      "inverse-primary": "#a2d574",
+                      "primary-fixed-dim": "#a2d574",
+                      "on-primary-fixed-variant": "#285000",
+                      "tertiary": "#5a631c",
+                      "surface-container-high": "#baf9a7",
+                      "surface-dim": "#acea9a",
+                      "on-primary-fixed": "#0d2000",
+                      "background": "#F7FAEF", /* Nền chung #F7FAEF */
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#b9d155",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#bfffac",
+                      "on-primary-container": "#204100",
+                      "surface-tint": "#3e6915",
+                      "surface-variant": "#b4f3a1",
+                      "on-secondary-fixed": "#181e00",
+                      "tertiary-fixed": "#dfea93",
+                      "error": "#ba1a1a",
+                      "surface": "#ffffff",
+                      "inverse-surface": "#003a00",
+                      "surface-container-highest": "#b4f3a1",
+                      "primary-fixed": "#bdf28e",
+                      "primary": "#3e6915",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#d5ee6e",
+                      "on-error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "64px",
+                      "gutter": "24px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Be Vietnam Pro"],
+                      "headline-lg-mobile": ["Be Vietnam Pro"],
+                      "display-lg": ["Be Vietnam Pro"],
+                      "body-lg": ["Be Vietnam Pro"],
+                      "body-md": ["Be Vietnam Pro"],
+                      "headline-lg": ["Be Vietnam Pro"],
+                      "label-md": ["Be Vietnam Pro"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "headline-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "display-lg": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-64 z-30 flex justify-between items-center px-8 py-4 bg-background/80 backdrop-blur-xl shadow-sm border-b border-surface-variant/30">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Thiết lập hệ thống</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
+<input class="w-64 bg-surface rounded-full pl-10 pr-4 py-2 border border-outline-variant focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all" placeholder="Tìm kiếm..." type="text"/>
+</div>
+<button aria-label="notifications" class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full p-2 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="help" class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full p-2 transition-all">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border-2 border-primary-container">
+<img alt="Avatar Admin" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa2v66IPtYdc0RTuPYx65uwGnwTjCxC7fJV0OT03jBsj76Rd3Pcu3CTowwe2_j0ypCrr1DHIgudS2JSJIH10oITNLHCLcx5gfDjA5JylaZlN46HisiTNHJWTuRGMc4ypmXbS1QVE3Bt4Nb2P1WNuFO4ecTL8PYVLoQ3_0E6FKqc_rm8KAVNpv_tvvz2_7tLn_z82om7fIv8Cif9K1FyF194t2D1jlmn_tmxqdLdcSG9qJrZ9B_Qa5Nd7pxlaYrCW1RMO5RMoyudhKV"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full z-40 py-6 w-64 bg-[#336A29] shadow-md flex flex-col text-white">
+<div class="px-6 mb-8 flex flex-col items-center">
+<div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-4 shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-white text-[32px]" data-icon="eco">eco</span>
+</div>
+<div class="font-headline-md text-[20px] font-bold text-white text-center">E-XANH</div>
+<div class="text-xs text-white/80 text-center mt-1 uppercase tracking-wider">Admin Panel</div>
+</div>
+<div class="flex-1 overflow-y-auto px-2 space-y-1">
+<a class="flex items-center gap-3 text-white/80 px-4 py-3 mx-2 my-1 hover:bg-white/10 transition-colors rounded-xl font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Tổng quan</span>
+</a>
+<a class="flex items-center gap-3 text-white/80 px-4 py-3 mx-2 my-1 hover:bg-white/10 transition-colors rounded-xl font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="article">article</span>
+<span>Duyệt bài viết</span>
+</a>
+<a class="flex items-center gap-3 text-white/80 px-4 py-3 mx-2 my-1 hover:bg-white/10 transition-colors rounded-xl font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span>Quản lý bình luận</span>
+</a>
+<a class="flex items-center gap-3 text-white/80 px-4 py-3 mx-2 my-1 hover:bg-white/10 transition-colors rounded-xl font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Quản lý người dùng</span>
+</a>
+<a class="flex items-center gap-3 text-white/80 px-4 py-3 mx-2 my-1 hover:bg-white/10 transition-colors rounded-xl font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="router">router</span>
+<span>Quản lý thiết bị điện</span>
+</a>
+<a class="flex items-center gap-3 text-white/80 px-4 py-3 mx-2 my-1 hover:bg-white/10 transition-colors rounded-xl font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Thống kê</span>
+</a>
+<a class="flex items-center gap-3 bg-white text-[#336A29] rounded-xl px-4 py-3 mx-2 my-1 font-label-md text-label-md shadow-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Cài đặt</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="ml-64 pt-24 px-8 pb-12 flex-1">
+<div class="max-w-[1440px] mx-auto">
+<div class="mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Cài đặt hệ thống</h2>
+<p class="text-on-surface-variant">Quản lý thông tin nền tảng, quyền quản trị, bảo mật và cấu hình hoạt động của E-XANH.</p>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+<!-- Left Column (65%) -->
+<div class="xl:col-span-8 space-y-6">
+<!-- Thông tin nền tảng Card -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<div class="flex items-center gap-3 mb-6 border-b border-surface-variant/50 pb-4">
+<div class="p-2 bg-[#F0F5EB] rounded-lg text-[#336A29]">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+</div>
+<h2 class="font-label-md text-lg text-on-surface">Thông tin nền tảng</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div class="space-y-2">
+<label class="font-label-md text-sm text-on-surface-variant">Tên nền tảng</label>
+<input class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] focus:border-transparent transition-all" type="text" value="E-XANH"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-sm text-on-surface-variant">Email liên hệ</label>
+<input class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] focus:border-transparent transition-all" type="email" value="support@exanh.vn"/>
+</div>
+<div class="space-y-2 md:col-span-2">
+<label class="font-label-md text-sm text-on-surface-variant">Slogan</label>
+<input class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] focus:border-transparent transition-all" type="text" value="Dùng điện thông minh, sống xanh bền vững."/>
+</div>
+<div class="space-y-2 md:col-span-2">
+<label class="font-label-md text-sm text-on-surface-variant">Mô tả nền tảng</label>
+<textarea class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] focus:border-transparent transition-all" rows="3">E-XANH giúp người trẻ tiết kiệm điện, chia sẻ kinh nghiệm sống xanh và theo dõi chi phí điện hằng tháng.</textarea>
+</div>
+</div>
+<div class="flex justify-end">
+<button class="px-6 py-2.5 bg-[#336A29] text-white rounded-xl font-label-md text-sm shadow-sm hover:shadow-md transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="save">save</span>
+                                Lưu thay đổi
+                            </button>
+</div>
+</div>
+<!-- Cấu hình duyệt nội dung -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<div class="flex items-center gap-3 mb-6 border-b border-surface-variant/50 pb-4">
+<div class="p-2 bg-[#F0F5EB] rounded-lg text-[#336A29]">
+<span class="material-symbols-outlined" data-icon="gpp_maybe">gpp_maybe</span>
+</div>
+<h2 class="font-label-md text-lg text-on-surface">Cấu hình duyệt nội dung</h2>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Bật duyệt bài trước khi hiển thị</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle1"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Bật kiểm duyệt bình luận</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle2"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Cho phép người dùng báo cáo nội dung</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle3" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle3"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Ẩn bài viết khi bị báo cáo nhiều lần</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle4" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle4"></label>
+</div>
+</div>
+</div>
+</div>
+<!-- Thông báo hệ thống -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<div class="flex items-center gap-3 mb-6 border-b border-surface-variant/50 pb-4">
+<div class="p-2 bg-[#F0F5EB] rounded-lg text-[#336A29]">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</div>
+<h2 class="font-label-md text-lg text-on-surface">Thông báo hệ thống</h2>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Thông báo khi có bài mới chờ duyệt</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle-tb1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle-tb1"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Thông báo khi có bình luận bị báo cáo</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle-tb2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle-tb2"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Thông báo khi có người dùng mới đăng ký</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle-tb3" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle-tb3"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Gửi email tổng hợp hằng tuần cho admin</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle-tb4" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle-tb4"></label>
+</div>
+</div>
+</div>
+<div class="flex justify-end">
+<button class="px-6 py-2.5 bg-[#336A29] text-white rounded-xl font-label-md text-sm shadow-sm hover:shadow-md transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="update">update</span>
+                                Cập nhật thông báo
+                            </button>
+</div>
+</div>
+<!-- Bảo mật admin -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<div class="flex items-center gap-3 mb-6 border-b border-surface-variant/50 pb-4">
+<div class="p-2 bg-[#F0F5EB] rounded-lg text-[#336A29]">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</div>
+<h2 class="font-label-md text-lg text-on-surface">Bảo mật admin</h2>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Đổi mật khẩu</h3>
+</div>
+<button class="text-[#336A29] font-label-md text-sm hover:underline">Thay đổi</button>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Bật xác minh 2 bước</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle-bm1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle-bm1"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-[#F7FAEF] rounded-xl border border-surface-variant hover:border-[#80b155] transition-colors">
+<div>
+<h3 class="font-label-md text-sm text-on-surface mb-1">Tự động đăng xuất sau 30 phút không hoạt động</h3>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 transition-transform duration-200 ease-in-out" id="toggle-bm2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle-bm2"></label>
+</div>
+</div>
+</div>
+<h3 class="font-label-md text-sm text-on-surface mb-3">Lịch sử đăng nhập gần đây</h3>
+<div class="space-y-2 mb-6">
+<div class="flex justify-between items-center text-sm p-3 bg-surface border border-outline-variant rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#336A29]" data-icon="computer">computer</span>
+<span>Windows 11, Chrome</span>
+</div>
+<span class="text-on-surface-variant">10:45 - 24/10/2024</span>
+</div>
+<div class="flex justify-between items-center text-sm p-3 bg-surface border border-outline-variant rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="smartphone">smartphone</span>
+<span>iPhone 14 Pro, Safari</span>
+</div>
+<span class="text-on-surface-variant">08:12 - 23/10/2024</span>
+</div>
+<div class="flex justify-between items-center text-sm p-3 bg-surface border border-outline-variant rounded-lg">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="computer">computer</span>
+<span>MacOS, Safari</span>
+</div>
+<span class="text-on-surface-variant">16:30 - 20/10/2024</span>
+</div>
+</div>
+<div class="flex justify-end">
+<button class="px-6 py-2.5 bg-[#336A29] text-white rounded-xl font-label-md text-sm shadow-sm hover:shadow-md transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield">shield</span>
+                                Cập nhật bảo mật
+                            </button>
+</div>
+</div>
+<!-- Giao diện hệ thống -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<div class="flex items-center gap-3 mb-6 border-b border-surface-variant/50 pb-4">
+<div class="p-2 bg-[#F0F5EB] rounded-lg text-[#336A29]">
+<span class="material-symbols-outlined" data-icon="palette">palette</span>
+</div>
+<h2 class="font-label-md text-lg text-on-surface">Giao diện hệ thống</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-4">
+<div class="space-y-2">
+<label class="font-label-md text-sm text-on-surface-variant">Chế độ giao diện</label>
+<select class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] text-sm">
+<option>Sáng</option>
+<option>Tối</option>
+<option>Theo hệ thống</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-sm text-on-surface-variant">Màu chủ đạo</label>
+<div class="flex gap-2">
+<div class="w-8 h-8 rounded-full bg-[#336A29] border-2 border-white shadow-sm ring-2 ring-[#336A29] cursor-pointer"></div>
+<div class="w-8 h-8 rounded-full bg-blue-600 border-2 border-white shadow-sm cursor-pointer hover:ring-2 ring-blue-600"></div>
+<div class="w-8 h-8 rounded-full bg-teal-600 border-2 border-white shadow-sm cursor-pointer hover:ring-2 ring-teal-600"></div>
+</div>
+<span class="text-xs text-[#336A29] mt-1 block">Xanh E-XANH</span>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-sm text-on-surface-variant">Bo góc</label>
+<select class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] text-sm">
+<option>Mềm (Bo nhiều)</option>
+<option>Vừa</option>
+<option>Vuông</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-sm text-on-surface-variant">Mật độ</label>
+<select class="w-full bg-[#F7FAEF] border border-outline-variant rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#336A29] text-sm">
+<option>Rộng rãi</option>
+<option>Vừa phải</option>
+<option>Dày đặc</option>
+</select>
+</div>
+</div>
+<div>
+<label class="font-label-md text-sm text-on-surface-variant block mb-2">Xem trước</label>
+<div class="p-4 bg-[#F7FAEF] rounded-2xl border border-outline-variant shadow-sm h-full flex flex-col justify-center items-center">
+<div class="w-full bg-white p-4 rounded-xl shadow-sm mb-3">
+<div class="w-1/2 h-4 bg-surface-variant rounded mb-2"></div>
+<div class="w-full h-2 bg-surface-variant rounded"></div>
+</div>
+<button class="px-4 py-2 bg-[#336A29] text-white rounded-lg text-sm w-full">Nút mẫu</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (35%) -->
+<div class="xl:col-span-4 space-y-6">
+<!-- Hồ sơ admin -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-24 bg-[#EAF59D] opacity-40"></div>
+<div class="relative z-10 flex flex-col items-center text-center mt-4">
+<div class="w-24 h-24 rounded-full border-4 border-white shadow-sm mb-4 overflow-hidden bg-white relative">
+<img alt="Avatar Admin" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa2v66IPtYdc0RTuPYx65uwGnwTjCxC7fJV0OT03jBsj76Rd3Pcu3CTowwe2_j0ypCrr1DHIgudS2JSJIH10oITNLHCLcx5gfDjA5JylaZlN46HisiTNHJWTuRGMc4ypmXbS1QVE3Bt4Nb2P1WNuFO4ecTL8PYVLoQ3_0E6FKqc_rm8KAVNpv_tvvz2_7tLn_z82om7fIv8Cif9K1FyF194t2D1jlmn_tmxqdLdcSG9qJrZ9B_Qa5Nd7pxlaYrCW1RMO5RMoyudhKV"/>
+</div>
+<h3 class="font-headline-md text-[20px] font-bold text-on-surface mb-1">Admin E-XANH</h3>
+<div class="flex flex-col items-center gap-1 mb-6">
+<span class="text-sm text-on-surface-variant">admin@exanh.vn</span>
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-[#EAF59D] text-[#336A29] font-label-md text-xs mt-1">
+<span class="material-symbols-outlined text-[14px] mr-1" data-icon="verified_user">verified_user</span>
+                                    Quản trị viên cấp cao
+                                </span>
+<span class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant mt-1">
+<span class="w-2 h-2 rounded-full bg-[#336A29]"></span> Đang hoạt động
+                                </span>
+</div>
+<div class="flex gap-3 w-full">
+<button class="flex-1 py-2 bg-[#F7FAEF] border border-[#336A29]/30 text-[#336A29] rounded-xl font-label-md text-sm hover:bg-[#F0F5EB] transition-colors">
+                                    Chỉnh sửa hồ sơ
+                                </button>
+<button class="flex-1 py-2 bg-white border border-[#D97706] text-[#D97706] rounded-xl font-label-md text-sm hover:bg-[#FFFBEB] transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
+                                    Đăng xuất
+                                </button>
+</div>
+</div>
+</div>
+<!-- Trạng thái hệ thống -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<h3 class="font-label-md text-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[#336A29]" data-icon="dns">dns</span>
+                            Trạng thái hệ thống
+                        </h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="api">api</span>
+<span class="text-sm font-medium text-on-surface">API hệ thống</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF59D] text-[#336A29] text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#336A29]"></span>
+                                    Hoạt động
+                                </span>
+</div>
+<div class="flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="database">database</span>
+<span class="text-sm font-medium text-on-surface">Cơ sở dữ liệu</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF59D] text-[#336A29] text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#336A29]"></span>
+                                    Hoạt động
+                                </span>
+</div>
+<div class="flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="cloud">cloud</span>
+<span class="text-sm font-medium text-on-surface">Lưu trữ ảnh</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF59D] text-[#336A29] text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#336A29]"></span>
+                                    Hoạt động
+                                </span>
+</div>
+<div class="flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="gavel">gavel</span>
+<span class="text-sm font-medium text-on-surface">Kiểm duyệt nội dung</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF59D] text-[#336A29] text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#336A29]"></span>
+                                    Bật
+                                </span>
+</div>
+<div class="flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
+<span class="text-sm font-medium text-on-surface">Bảo mật</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF59D] text-[#336A29] text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#336A29]"></span>
+                                    Tốt
+                                </span>
+</div>
+</div>
+</div>
+<!-- Sao lưu dữ liệu -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<h3 class="font-label-md text-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[#336A29]" data-icon="backup">backup</span>
+                            Sao lưu dữ liệu
+                        </h3>
+<div class="bg-[#F7FAEF] p-4 rounded-xl border border-surface-variant/50 mb-4">
+<div class="grid grid-cols-2 gap-4 text-sm">
+<div>
+<span class="text-on-surface-variant block mb-1">Lần sao lưu:</span>
+<span class="font-medium">12/06/2024 — 09:30</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Dung lượng:</span>
+<span class="font-medium">128 MB</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Bài viết:</span>
+<span class="font-medium">186</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Người dùng:</span>
+<span class="font-medium">1.240</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 py-2 bg-[#336A29] text-white rounded-xl font-label-md text-sm hover:bg-[#336A29]/90 transition-colors">
+                                Sao lưu ngay
+                            </button>
+<button class="flex-1 py-2 bg-white border border-[#336A29] text-[#336A29] rounded-xl font-label-md text-sm hover:bg-[#F0F5EB] transition-colors">
+                                Tải bản sao lưu
+                            </button>
+</div>
+</div>
+<!-- Thao tác nhanh -->
+<div class="bg-surface rounded-[24px] p-6 soft-shadow soft-shadow-hover transition-all">
+<h3 class="font-label-md text-lg text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[#336A29]" data-icon="bolt">bolt</span>
+                            Thao tác nhanh
+                        </h3>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50 hover:bg-[#EAF59D]/30 transition-colors text-left">
+<span class="text-sm font-medium text-on-surface">Xóa cache hệ thống</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50 hover:bg-[#EAF59D]/30 transition-colors text-left">
+<span class="text-sm font-medium text-on-surface">Kiểm tra dữ liệu</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 bg-[#F7FAEF] rounded-xl border border-surface-variant/50 hover:bg-[#EAF59D]/30 transition-colors text-left">
+<span class="text-sm font-medium text-on-surface">Xuất báo cáo</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 bg-white rounded-xl border border-[#D97706] text-[#D97706] hover:bg-[#FFFBEB] transition-colors text-left mt-2">
+<span class="text-sm font-medium">Khôi phục mặc định</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="settings_backup_restore">settings_backup_restore</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="ml-64 py-6 border-t border-surface-variant/30 text-center text-sm text-on-surface-variant bg-surface">
+<p>© 2024 E-XANH Admin. Made by VanhKhucDev</p>
+</footer>
+<script>
+        // Simple toggle logic interaction
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                const label = e.target.nextElementSibling;
+                if(e.target.checked) {
+                    label.style.backgroundColor = '#80b155';
+                } else {
+                    label.style.backgroundColor = '';
+                }
+            });
+        });
+    </script>
+</body></html>
