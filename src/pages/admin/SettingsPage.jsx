@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   platformInfo,
   contentSettings,
@@ -38,6 +38,28 @@ function SettingsPage() {
   )
   const [security, setSecurity] = useState(initialSecurity)
   const [toast, setToast] = useState('')
+  const [profileData, setProfileData] = useState(adminProfile)
+
+  useEffect(() => {
+    async function loadAdminProfile() {
+      const { getCurrentSession, getCurrentUserProfile } = await import('../../services/authService')
+      const session = await getCurrentSession()
+      if (session?.user) {
+        const profile = await getCurrentUserProfile(session.user.id)
+        if (profile) {
+          const name = profile.name || session.user.email || 'Admin E-XANH'
+          setProfileData({
+            avatar: name.slice(0, 2).toUpperCase(),
+            name: name,
+            role: profile.role === 'admin' ? 'Quản trị viên cấp cao' : 'Kiểm duyệt viên',
+            email: session.user.email,
+            status: 'Đang hoạt động',
+          })
+        }
+      }
+    }
+    loadAdminProfile()
+  }, [])
 
   const showToast = useCallback((message) => {
     setToast(message)
@@ -99,7 +121,7 @@ function SettingsPage() {
         </div>
 
         <div className="st-layout__sidebar">
-          <AdminProfileCard profile={adminProfile} />
+          <AdminProfileCard profile={profileData} />
           <AdminSystemStatusCard statuses={systemStatus} />
           <AdminBackupCard
             backup={backupInfo}

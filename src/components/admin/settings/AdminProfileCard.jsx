@@ -24,7 +24,15 @@ function AdminProfileCard({ profile }) {
         <button type="button" className="btn btn--primary">
           Chỉnh sửa hồ sơ
         </button>
-        <button type="button" className="btn btn--ghost st-logout-btn">
+        <button 
+          type="button" 
+          className="btn btn--ghost st-logout-btn"
+          onClick={async () => {
+            const { signOut } = await import('../../../services/authService')
+            await signOut()
+            window.location.href = '/admin/dang-nhap'
+          }}
+        >
           Đăng xuất
         </button>
       </div>

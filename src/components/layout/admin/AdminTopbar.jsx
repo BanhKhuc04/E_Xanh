@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const topbarMeta = {
@@ -66,6 +67,27 @@ function AdminTopbar() {
   const location = useLocation()
   const meta = topbarMeta[location.pathname] ?? topbarMeta['/admin']
 
+  const [adminName, setAdminName] = useState('Admin E-XANH')
+  const [adminInitials, setAdminInitials] = useState('AD')
+  const [adminRole, setAdminRole] = useState('Quản trị hệ thống')
+
+  useEffect(() => {
+    async function loadAdmin() {
+      const { getCurrentSession, getCurrentUserProfile } = await import('../../../services/authService')
+      const session = await getCurrentSession()
+      if (session?.user) {
+        const profile = await getCurrentUserProfile(session.user.id)
+        if (profile) {
+          const name = profile.name || session.user.email || 'Admin E-XANH'
+          setAdminName(name)
+          setAdminInitials(name.slice(0, 2).toUpperCase())
+          setAdminRole(profile.role === 'admin' ? 'Quản trị viên' : 'Điều hành viên')
+        }
+      }
+    }
+    loadAdmin()
+  }, [])
+
   return (
     <header className="admin-topbar">
       <div className="admin-topbar__summary">
@@ -92,11 +114,22 @@ function AdminTopbar() {
         </button>
 
         <div className="admin-topbar__profile">
-          <span className="admin-topbar__avatar">AD</span>
+          <span className="admin-topbar__avatar">{adminInitials}</span>
           <div>
-            <strong>Admin E-XANH</strong>
-            <small>Quản trị hệ thống</small>
+            <strong>{adminName}</strong>
+            <small>{adminRole}</small>
           </div>
+          <button 
+            type="button" 
+            onClick={async () => {
+              const { signOut } = await import('../../../services/authService')
+              await signOut()
+              window.location.href = '/admin/dang-nhap'
+            }}
+            style={{ marginLeft: '16px', background: 'transparent', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+          >
+            Đăng xuất
+          </button>
         </div>
       </div>
     </header>

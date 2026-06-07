@@ -1,7 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom'
+import AdminRoute from '../components/auth/AdminRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
+import AdminLoginPage from '../pages/admin/AdminLoginPage'
+import AdminAccessDeniedPage from '../pages/admin/AdminAccessDeniedPage'
 import PostApprovalPage from '../pages/admin/PostApprovalPage'
 import CommentManagementPage from '../pages/admin/CommentManagementPage'
 import UserManagementPage from '../pages/admin/UserManagementPage'
@@ -88,36 +91,50 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/admin/dang-nhap',
+    element: <AdminLoginPage />,
+  },
+  {
+    path: '/admin/khong-co-quyen',
+    element: <AdminAccessDeniedPage />,
+  },
+  {
     path: '/admin',
-    element: <AdminLayout />,
+    element: <AdminRoute />,
     children: [
       {
-        index: true,
-        element: <AdminDashboardPage />,
-      },
-      {
-        path: 'duyet-bai-viet',
-        element: <PostApprovalPage />,
-      },
-      {
-        path: 'quan-ly-binh-luan',
-        element: <CommentManagementPage />,
-      },
-      {
-        path: 'quan-ly-nguoi-dung',
-        element: <UserManagementPage />,
-      },
-      {
-        path: 'quan-ly-thiet-bi',
-        element: <DeviceManagementPage />,
-      },
-      {
-        path: 'thong-ke',
-        element: <StatisticsPage />,
-      },
-      {
-        path: 'cai-dat',
-        element: <SettingsPage />,
+        path: '',
+        element: <AdminLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminDashboardPage />,
+          },
+          {
+            path: 'duyet-bai-viet',
+            element: <PostApprovalPage />,
+          },
+          {
+            path: 'quan-ly-binh-luan',
+            element: <CommentManagementPage />,
+          },
+          {
+            path: 'quan-ly-nguoi-dung',
+            element: <UserManagementPage />,
+          },
+          {
+            path: 'quan-ly-thiet-bi',
+            element: <DeviceManagementPage />,
+          },
+          {
+            path: 'thong-ke',
+            element: <StatisticsPage />,
+          },
+          {
+            path: 'cai-dat',
+            element: <SettingsPage />,
+          },
+        ],
       },
     ],
   },
