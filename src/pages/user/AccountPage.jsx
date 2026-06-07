@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import ProfileHeader from '../../components/account/ProfileHeader'
 import ProfileStats from '../../components/account/ProfileStats'
 import MyPostsList from '../../components/account/MyPostsList'
@@ -9,8 +10,13 @@ import AccountSettingsCard from '../../components/account/AccountSettingsCard'
 import RecentElectricityHistoryCard from '../../components/account/RecentElectricityHistoryCard'
 import { savedPosts } from '../../data/posts'
 import { formatCurrency, formatHistoryDate, formatKwh } from '../../data/electricity'
-import { getCurrentUser, logoutUser } from '../../utils/authStorage'
 import { getElectricityHistories } from '../../utils/electricityStorage'
+import {
+  getCurrentSession,
+  getCurrentUserProfile,
+  onAuthStateChange,
+  signOut,
+} from '../../services/authService'
 import '../../styles/account.css'
 
 const profileStats = [
@@ -62,14 +68,73 @@ const recentComments = [
   },
 ]
 
+function getAvatar(name, email, avatarUrl) {
+  if (avatarUrl) return avatarUrl
+  if (name) {
+    const parts = name.trim().split(/\s+/).filter(Boolean)
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+    if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+  }
+  if (email) return email.slice(0, 2).toUpperCase()
+  return 'EX'
+}
+
 function AccountPage() {
   const navigate = useNavigate()
-  const currentUser = getCurrentUser()
   const recentHistory = getElectricityHistories().slice(0, 3)
+  const [currentUser, setCurrentUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  function handleLogout() {
-    logoutUser()
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadUser(session) {
+      if (!session?.user) {
+        if (isMounted) {
+          setCurrentUser(null)
+          setLoading(false)
+        }
+        return
+      }
+      const profile = await getCurrentUserProfile(session.user.id)
+      if (isMounted) {
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: profile?.name || session.user.email.split('@')[0],
+          avatar: getAvatar(profile?.name, session.user.email, profile?.avatar_url),
+          role: profile?.role || 'user',
+          bio: profile?.bio,
+          created_at: profile?.created_at,
+        })
+        setLoading(false)
+      }
+    }
+
+    async function initAuth() {
+      const session = await getCurrentSession()
+      loadUser(session)
+    }
+
+    initAuth()
+
+    const unsubscribe = onAuthStateChange((event, session) => {
+      loadUser(session)
+    })
+
+    return () => {
+      isMounted = false
+      unsubscribe?.()
+    }
+  }, [])
+
+  async function handleLogout() {
+    await signOut()
     navigate('/')
+  }
+
+  if (loading) {
+    return <div className="account-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
   }
 
   if (!currentUser) {

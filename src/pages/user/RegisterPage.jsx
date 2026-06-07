@@ -1,26 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { registerUser } from '../../utils/authStorage'
+import { signUpWithEmail } from '../../services/authService'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function getAvatarFromName(name) {
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-
-  if (parts.length === 0) {
-    return 'EX'
-  }
-
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase()
-  }
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-}
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -42,7 +25,7 @@ function RegisterPage() {
     setErrorMessage('')
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     if (!form.name.trim()) {
@@ -87,21 +70,29 @@ function RegisterPage() {
       return
     }
 
-    registerUser({
-      id: `user-${Date.now()}`,
+    const { data, error } = await signUpWithEmail({
       name: form.name.trim(),
       email: form.email.trim(),
-      role: 'user',
-      avatar: getAvatarFromName(form.name),
+      password: form.password,
     })
 
+    if (error) {
+      setErrorMessage(`Lỗi đăng ký: ${error.message}`)
+      return
+    }
+
     setErrorMessage('')
-    setSuccessMessage('Tạo tài khoản thành công.')
+    setSuccessMessage('Đăng ký thành công. Vui lòng kiểm tra email nếu hệ thống yêu cầu xác nhận.')
 
     window.setTimeout(() => {
-      navigate('/')
-    }, 700)
+      if (data?.session) {
+        navigate('/tai-khoan')
+      } else {
+        navigate('/')
+      }
+    }, 2000)
   }
+
 
   return (
     <div className="auth-page">

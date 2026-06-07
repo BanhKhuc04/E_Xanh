@@ -1,19 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { loginUser } from '../../utils/authStorage'
+import { signInWithEmail } from '../../services/authService'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function createDemoUser(email, name = 'Nguyễn Văn A', avatar = 'NA') {
-  return {
-    id: 'user-001',
-    name,
-    email,
-    role: 'user',
-    avatar,
-  }
-}
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -33,17 +23,7 @@ function LoginPage() {
     setErrorMessage('')
   }
 
-  function finishLogin(user) {
-    loginUser(user)
-    setErrorMessage('')
-    setSuccessMessage('Đăng nhập thành công.')
-
-    window.setTimeout(() => {
-      navigate('/')
-    }, 700)
-  }
-
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     if (!form.email.trim()) {
@@ -64,17 +44,28 @@ function LoginPage() {
       return
     }
 
-    finishLogin(createDemoUser(form.email.trim()))
+    const { error } = await signInWithEmail({
+      email: form.email.trim(),
+      password: form.password,
+    })
+
+    if (error) {
+      setErrorMessage('Email hoặc mật khẩu không đúng.')
+      return
+    }
+
+    setErrorMessage('')
+    setSuccessMessage('Đăng nhập thành công.')
+
+    window.setTimeout(() => {
+      navigate('/')
+    }, 700)
   }
 
-  function handleSocialLogin(provider) {
-    const socialUser =
-      provider === 'google'
-        ? createDemoUser('nguyenvana@email.com', 'Nguyễn Văn A', 'NA')
-        : createDemoUser('nguyenvana@github.com', 'Nguyễn Văn A', 'NA')
-
-    finishLogin(socialUser)
+  function handleSocialLogin() {
+    setErrorMessage('Chức năng đăng nhập bằng MXH đang được phát triển.')
   }
+
 
   return (
     <div className="auth-page">

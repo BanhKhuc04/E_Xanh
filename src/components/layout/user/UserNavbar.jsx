@@ -3,44 +3,76 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import BrandLogo from '../../common/BrandLogo'
 import { userNavLinks } from '../../../data/navigation'
 import {
-  getAuthChangeEventName,
-  getCurrentUser,
-  logoutUser,
-} from '../../../utils/authStorage'
+  getCurrentSession,
+  getCurrentUserProfile,
+  onAuthStateChange,
+  signOut,
+} from '../../../services/authService'
 
-function getShortName(name) {
-  if (!name) {
-    return 'Người dùng'
+function getShortName(name, email) {
+  if (name) {
+    const parts = name.trim().split(/\s+/)
+    if (parts.length === 1) return parts[0]
+    return `${parts[parts.length - 2]} ${parts[parts.length - 1]}`
   }
-
-  const parts = name.trim().split(/\s+/)
-
-  if (parts.length === 1) {
-    return parts[0]
+  if (email) {
+    return email.split('@')[0]
   }
+  return 'Người dùng'
+}
 
-  return `${parts[parts.length - 2]} ${parts[parts.length - 1]}`
+function getAvatar(name, email, avatarUrl) {
+  if (avatarUrl) return avatarUrl // Can be handled as img if we support it later
+
+  if (name) {
+    const parts = name.trim().split(/\s+/).filter(Boolean)
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+    if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+  }
+  if (email) return email.slice(0, 2).toUpperCase()
+  return 'EX'
 }
 
 function UserNavbar() {
   const navigate = useNavigate()
   const dropdownRef = useRef(null)
-  const [currentUser, setCurrentUser] = useState(() => getCurrentUser())
+  const [currentUser, setCurrentUser] = useState(null)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    function syncUser() {
-      setCurrentUser(getCurrentUser())
+    let isMounted = true
+
+    async function loadUser(session) {
+      if (!session?.user) {
+        if (isMounted) setCurrentUser(null)
+        return
+      }
+      const profile = await getCurrentUserProfile(session.user.id)
+      if (isMounted) {
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email,
+          name: profile?.name,
+          avatar: getAvatar(profile?.name, session.user.email, profile?.avatar_url),
+          role: profile?.role || 'user',
+        })
+      }
     }
 
-    const authEventName = getAuthChangeEventName()
+    async function initAuth() {
+      const session = await getCurrentSession()
+      loadUser(session)
+    }
 
-    window.addEventListener('storage', syncUser)
-    window.addEventListener(authEventName, syncUser)
+    initAuth()
+
+    const unsubscribe = onAuthStateChange((event, session) => {
+      loadUser(session)
+    })
 
     return () => {
-      window.removeEventListener('storage', syncUser)
-      window.removeEventListener(authEventName, syncUser)
+      isMounted = false
+      unsubscribe?.()
     }
   }, [])
 
@@ -58,11 +90,12 @@ function UserNavbar() {
     }
   }, [])
 
-  function handleLogout() {
-    logoutUser()
+  async function handleLogout() {
+    await signOut()
     setIsOpen(false)
     navigate('/')
   }
+
 
   return (
     <header className="user-navbar">
@@ -92,8 +125,8 @@ function UserNavbar() {
                 className="user-navbar__user-trigger"
                 onClick={() => setIsOpen((current) => !current)}
               >
-                <span className="user-navbar__avatar">{currentUser.avatar ?? 'NA'}</span>
-                <span className="user-navbar__user-name">{getShortName(currentUser.name)}</span>
+                <span className="user-navbar__avatar">{currentUser.avatar}</span>
+                <span className="user-navbar__user-name">{getShortName(currentUser.name, currentUser.email)}</span>
               </button>
 
               {isOpen ? (
