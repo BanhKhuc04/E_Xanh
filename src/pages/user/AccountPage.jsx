@@ -81,7 +81,7 @@ function getAvatar(name, email, avatarUrl) {
 
 function AccountPage() {
   const navigate = useNavigate()
-  const recentHistory = getElectricityHistories().slice(0, 3)
+  const [recentHistory, setRecentHistory] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -114,6 +114,27 @@ function AccountPage() {
     async function initAuth() {
       const session = await getCurrentSession()
       loadUser(session)
+      
+      if (session?.user) {
+        const { getMyElectricityChecks } = await import('../../services/electricityService')
+        const { data } = await getMyElectricityChecks()
+        if (data && isMounted) {
+          const formatted = data.map(dbItem => ({
+            id: dbItem.id,
+            checkedAt: dbItem.checked_at,
+            deviceCount: dbItem.items?.length || 0,
+            totalKwh: Number(dbItem.total_kwh),
+            estimatedCost: Number(dbItem.estimated_cost),
+            highestDevice: dbItem.highest_device,
+            savingPercent: dbItem.saving_percent,
+          }))
+          setRecentHistory(formatted.slice(0, 3))
+        } else if (isMounted) {
+          setRecentHistory(getElectricityHistories().slice(0, 3))
+        }
+      } else if (isMounted) {
+        setRecentHistory(getElectricityHistories().slice(0, 3))
+      }
     }
 
     initAuth()

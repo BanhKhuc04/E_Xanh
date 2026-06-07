@@ -86,6 +86,27 @@ function ElectricityCheckPage() {
   const [form, setForm] = useState(createInitialForm())
   const [feedbackMessage, setFeedbackMessage] = useState(initialNotice)
 
+  const [dbDeviceOptions, setDbDeviceOptions] = useState(deviceOptions)
+
+  useEffect(() => {
+    async function loadDevices() {
+      const { getVisibleDevices } = await import('../../services/electricityService')
+      const { data } = await getVisibleDevices()
+      if (data && data.length > 0) {
+        const options = data.map((d) => ({
+          label: d.name,
+          value: d.name,
+          defaultPower: d.default_power,
+          tone: d.icon === 'snowflake' ? 'teal' : d.icon === 'laptop' ? 'lime' : 'green',
+        }))
+        // Ensure "Khác" is always at the bottom
+        options.push({ label: 'Khác', value: 'Khác', defaultPower: '', tone: 'gray' })
+        setDbDeviceOptions(options)
+      }
+    }
+    loadDevices()
+  }, [])
+
   useEffect(() => {
     if (!feedbackMessage) {
       return undefined
@@ -151,10 +172,11 @@ function ElectricityCheckPage() {
   }
 
   function handleSelectDevice(name) {
+    const defaultPower = dbDeviceOptions.find(d => d.value === name)?.defaultPower ?? ''
     setForm((current) => ({
       ...current,
       name,
-      power: getDefaultPowerByName(name),
+      power: defaultPower,
     }))
   }
 
@@ -165,13 +187,15 @@ function ElectricityCheckPage() {
       return
     }
 
+    const tone = dbDeviceOptions.find(d => d.value === form.name)?.tone ?? 'green'
+
     const nextDevice = buildDevice({
       id: `${form.name}-${Date.now()}`,
       name: form.name,
       power: Number(form.power),
       hoursPerDay: Number(form.hoursPerDay),
       daysPerMonth: Number(form.daysPerMonth),
-      tone: getDeviceTone(form.name),
+      tone,
     })
 
     setDevices((current) => [...current, nextDevice])
@@ -195,30 +219,43 @@ function ElectricityCheckPage() {
     })
   }
 
-  function handleSaveHistory() {
+  async function handleSaveHistory() {
     if (devices.length === 0) {
       return
     }
 
-    const historyPayload = {
-      id: `history-${Date.now()}`,
-      checkedAt: new Date().toISOString().slice(0, 10),
-      deviceCount: devices.length,
-      totalKwh: Number(summary.totalKwh.toFixed(1)),
-      estimatedCost: Math.round(summary.estimatedCost),
-      highestDevice: summary.topDevice?.name ?? '',
-      savingPercent: summary.savingRange,
-      items: devices.map((device) => ({
-        deviceName: device.name,
-        power: device.power,
-        hoursPerDay: device.hoursPerDay,
-        daysPerMonth: device.daysPerMonth,
-        kwh: Number(device.kwh.toFixed(1)),
-      })),
-    }
+    const { getCurrentSession } = await import('../../services/authService')
+    const session = await getCurrentSession()
 
-    saveElectricityHistory(historyPayload)
-    setFeedbackMessage('Đã lưu lịch sử kiểm tra thành công')
+    if (session?.user) {
+      const { saveElectricityCheck } = await import('../../services/electricityService')
+      const { error } = await saveElectricityCheck({ summary, devices })
+      if (error) {
+        setFeedbackMessage('Lỗi lưu lịch sử: ' + error.message)
+      } else {
+        setFeedbackMessage('Đã lưu lịch sử kiểm tra lên hệ thống')
+      }
+    } else {
+      const historyPayload = {
+        id: `history-${Date.now()}`,
+        checkedAt: new Date().toISOString().slice(0, 10),
+        deviceCount: devices.length,
+        totalKwh: Number(summary.totalKwh.toFixed(1)),
+        estimatedCost: Math.round(summary.estimatedCost),
+        highestDevice: summary.topDevice?.name ?? '',
+        savingPercent: summary.savingRange,
+        items: devices.map((device) => ({
+          deviceName: device.name,
+          power: device.power,
+          hoursPerDay: device.hoursPerDay,
+          daysPerMonth: device.daysPerMonth,
+          kwh: Number(device.kwh.toFixed(1)),
+        })),
+      }
+
+      saveElectricityHistory(historyPayload)
+      setFeedbackMessage('Đã lưu lịch sử kiểm tra cục bộ (hãy đăng nhập để đồng bộ)')
+    }
   }
 
   return (
@@ -259,7 +296,7 @@ function ElectricityCheckPage() {
         <div className="electricity-tool-layout__left">
           <DeviceInputForm
             form={form}
-            deviceOptions={deviceOptions}
+            deviceOptions={dbDeviceOptions}
             onChange={handleFormChange}
             onSelectDevice={handleSelectDevice}
             onSubmit={handleAddDevice}

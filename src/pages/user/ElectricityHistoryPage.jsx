@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   electricityHistory,
@@ -45,25 +45,65 @@ function isWithinDays(dateString, days) {
 
 function ElectricityHistoryPage() {
   const navigate = useNavigate()
-  const [histories, setHistories] = useState(() => getDisplayHistories())
+  const [histories, setHistories] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState(defaultFilters)
   const [appliedFilters, setAppliedFilters] = useState(defaultFilters)
   const [selectedHistory, setSelectedHistory] = useState(null)
 
+  useEffect(() => {
+    async function fetchHistories() {
+      const { getCurrentSession } = await import('../../services/authService')
+      const session = await getCurrentSession()
+      
+      if (session?.user) {
+        const { getMyElectricityChecks } = await import('../../services/electricityService')
+        const { data } = await getMyElectricityChecks()
+        if (data) {
+          const formatted = data.map(dbItem => ({
+            id: dbItem.id,
+            checkedAt: dbItem.checked_at,
+            deviceCount: dbItem.items?.length || 0,
+            totalKwh: Number(dbItem.total_kwh),
+            estimatedCost: Number(dbItem.estimated_cost),
+            highestDevice: dbItem.highest_device,
+            savingPercent: dbItem.saving_percent,
+            items: (dbItem.items || []).map(item => ({
+              deviceName: item.device_name,
+              power: item.power,
+              hoursPerDay: Number(item.hours_per_day),
+              daysPerMonth: item.days_per_month,
+              kwh: Number(item.kwh)
+            }))
+          }))
+          setHistories(formatted)
+        } else {
+          setHistories(getDisplayHistories())
+        }
+      } else {
+        setHistories(getDisplayHistories())
+      }
+      setLoading(false)
+    }
+
+    fetchHistories()
+  }, [])
+
   const visibleHistories = useMemo(() => {
     return histories.filter((history) => {
       const keyword = appliedFilters.searchValue.trim().toLowerCase()
+      const dateStr = history.checkedAt ?? history.date
       const matchesSearch =
         keyword.length === 0 ||
-        formatHistoryDate(history.checkedAt ?? history.date).toLowerCase().includes(keyword) ||
-        history.highestDevice?.toLowerCase().includes(keyword)
+        (dateStr && formatHistoryDate(dateStr).toLowerCase().includes(keyword)) ||
+        (history.highestDevice && history.highestDevice.toLowerCase().includes(keyword))
 
       const matchesTime =
         appliedFilters.timeFilter === 'Tất cả thời gian' ||
         (appliedFilters.timeFilter === '7 ngày gần đây' &&
-          isWithinDays(history.checkedAt ?? history.date, 7)) ||
+          isWithinDays(dateStr, 7)) ||
         (appliedFilters.timeFilter === '30 ngày gần đây' &&
-          isWithinDays(history.checkedAt ?? history.date, 30))
+          isWithinDays(dateStr, 30))
 
       const matchesCost =
         appliedFilters.costFilter === 'Tất cả mức chi phí' ||
@@ -104,9 +144,23 @@ function ElectricityHistoryPage() {
     }
   }, [visibleHistories])
 
-  function handleDelete(id) {
-    const next = deleteElectricityHistory(id)
-    setHistories(next)
+  async function handleDelete(id) {
+    const { getCurrentSession } = await import('../../services/authService')
+    const session = await getCurrentSession()
+    
+    if (session?.user) {
+      const { deleteElectricityCheck } = await import('../../services/electricityService')
+      const { error } = await deleteElectricityCheck(id)
+      if (!error) {
+        setHistories(current => current.filter(h => h.id !== id))
+      } else {
+        alert('Lỗi xóa lịch sử: ' + error.message)
+      }
+    } else {
+      const next = deleteElectricityHistory(id)
+      setHistories(next)
+    }
+
     if (selectedHistory?.id === id) {
       setSelectedHistory(null)
     }
@@ -115,7 +169,6 @@ function ElectricityHistoryPage() {
   function handleResetFilters() {
     setFilters(defaultFilters)
     setAppliedFilters(defaultFilters)
-    setHistories(getDisplayHistories())
   }
 
   function handleRecalculate(history) {
@@ -129,6 +182,16 @@ function ElectricityHistoryPage() {
     setRecalculateDevices(itemsToReuse)
     setScrollToResultFlag()
     navigate('/kiem-tra-tien-dien')
+  }
+
+  if (loading) {
+    return (
+      <div className="electricity-history-page">
+        <div style={{ padding: '60px', textAlign: 'center', color: '#666' }}>
+          Đang tải dữ liệu lịch sử...
+        </div>
+      </div>
+    )
   }
 
   const fallbackSummary = electricityHistory.slice(0, 3)
