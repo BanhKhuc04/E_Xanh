@@ -27,9 +27,15 @@ function CreatePostSidebar({ form, previewHighlight }) {
       <section className={`create-post-sidebar__card ${previewHighlight ? 'is-highlighted' : ''}`}>
         <h2>Xem trước bài viết</h2>
         <div className="create-post-sidebar__preview">
-          <div className="create-post-sidebar__preview-cover">
-            <span>Ảnh bìa</span>
-            <em>Chờ duyệt</em>
+          <div className="create-post-sidebar__preview-cover" style={{ padding: form.coverPreview ? '0' : undefined, overflow: 'hidden' }}>
+            {form.coverPreview ? (
+              <img src={form.coverPreview} alt="Preview" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <>
+                <span>Ảnh bìa</span>
+                <em>Chờ duyệt</em>
+              </>
+            )}
           </div>
 
           <div className="create-post-sidebar__preview-body">

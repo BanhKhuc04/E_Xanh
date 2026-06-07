@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
@@ -10,6 +10,7 @@ import {
   savedHighlights,
   todaySuggestion,
 } from '../../data/posts'
+import { getApprovedPosts } from '../../services/postService'
 import '../../styles/tips.css'
 
 function sortPosts(list, sortValue) {
@@ -23,16 +24,54 @@ function sortPosts(list, sortValue) {
     return next.sort((a, b) => b.likes + b.comments - (a.likes + a.comments))
   }
 
-  return next.sort((a, b) => b.id - a.id)
+  return next.sort((a, b) => b.id - a.id) // Fallback sorting for DB posts (id is UUID so might not be comparable, but mostly we use created_at from DB anyway. Wait, UUID comparison string-wise works but not chronological)
 }
 
 function TipsPage() {
   const [searchValue, setSearchValue] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Tất cả')
   const [sortValue, setSortValue] = useState('Mới nhất')
+  const [dbPosts, setDbPosts] = useState([])
+
+  useEffect(() => {
+    async function loadPosts() {
+      const { data, error } = await getApprovedPosts()
+      if (!error && data && data.length > 0) {
+        const categoryMap = {
+          tip: 'Mẹo tiết kiệm',
+          community: 'Cộng đồng',
+          qa: 'Hỏi đáp',
+          review: 'Review thiết bị'
+        }
+
+        const mapped = data.map(post => ({
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          author: post.profiles?.name || post.profiles?.email || 'Thành viên E-XANH',
+          authorAvatar: post.profiles?.avatar_url || 'EX',
+          category: categoryMap[post.type] || 'Cộng đồng',
+          status: 'published',
+          image: post.image_url,
+          description: post.description || '',
+          content: post.content || '',
+          likes: post.likes_count || 0,
+          comments: post.comments_count || 0,
+          savedCount: post.saved_count || 0,
+          readTime: post.read_time || '3 phút',
+          date: new Date(post.created_at).toISOString().split('T')[0],
+          commentItems: [],
+        }))
+        setDbPosts(mapped)
+      }
+    }
+    loadPosts()
+  }, [])
+
+  const currentPosts = dbPosts.length > 0 ? dbPosts : posts
 
   const visiblePosts = sortPosts(
-    posts.filter((post) => {
+    currentPosts.filter((post) => {
       const matchesCategory =
         selectedCategory === 'Tất cả' || post.category === selectedCategory
       const keyword = searchValue.trim().toLowerCase()

@@ -34,10 +34,10 @@ function CreatePostForm({
           <span>Loại bài viết</span>
           <select value={form.type} onChange={(event) => onChange('type', event.target.value)}>
             <option value="">Chọn loại bài...</option>
-            <option value="Mẹo tiết kiệm">Mẹo tiết kiệm</option>
-            <option value="Chia sẻ cộng đồng">Chia sẻ cộng đồng</option>
-            <option value="Hỏi đáp">Hỏi đáp</option>
-            <option value="Review thiết bị">Review thiết bị</option>
+            <option value="tip">Mẹo tiết kiệm</option>
+            <option value="community">Chia sẻ cộng đồng</option>
+            <option value="qa">Hỏi đáp</option>
+            <option value="review">Review thiết bị</option>
           </select>
         </label>
 
@@ -68,11 +68,16 @@ function CreatePostForm({
 
       <label className="create-post-form__field">
         <span>Ảnh bìa</span>
-        <input className="create-post-form__file-input" type="file" accept="image/*" onChange={onCoverChange} />
-        <div className="create-post-form__upload-box">
-          <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
-          <small>Hỗ trợ JPG, PNG. Kích thước tối đa 5MB</small>
-          {form.coverName ? <em>{form.coverName}</em> : null}
+        <input className="create-post-form__file-input" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={onCoverChange} />
+        <div className="create-post-form__upload-box" style={{ padding: form.coverPreview ? '0' : undefined, overflow: 'hidden' }}>
+          {form.coverPreview ? (
+            <img src={form.coverPreview} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <>
+              <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
+              <small>Hỗ trợ JPG, PNG, WEBP. Kích thước tối đa 5MB</small>
+            </>
+          )}
         </div>
       </label>
 

@@ -50,12 +50,30 @@ function AdminPostList({
                 className="ap-list__checkbox"
               />
 
-              <img
-                className="ap-list__thumb"
-                src={post.thumbnail}
-                alt=""
-                loading="lazy"
-              />
+              {post.thumbnail && !post.thumbnail.includes('images.unsplash.com') ? (
+                <img
+                  className="ap-list__thumb"
+                  src={post.thumbnail}
+                  alt=""
+                  loading="lazy"
+                  style={{ aspectRatio: '16/9', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+
+              {(!post.thumbnail || post.thumbnail.includes('images.unsplash.com')) && (
+                <div className="ap-list__thumb" style={{ background: 'rgba(234, 245, 157, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f8428' }}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style={{ width: 24, height: 24, stroke: 'currentColor', fill: 'none', strokeWidth: 1.5 }}>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+              )}
 
               <div className="ap-list__content">
                 <h4 className="ap-list__title">{post.title}</h4>

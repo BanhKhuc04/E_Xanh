@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import CreatePostForm from '../../components/community/CreatePostForm'
 import CreatePostSidebar from '../../components/community/CreatePostSidebar'
+import { getCurrentSession, onAuthStateChange } from '../../services/authService'
+import { createPost } from '../../services/postService'
 import '../../styles/create-post.css'
 
 const initialForm = {
@@ -9,6 +12,8 @@ const initialForm = {
   category: '',
   description: '',
   coverName: '',
+  coverFile: null,
+  coverPreview: '',
   content: '',
   tags: '',
 }
@@ -19,6 +24,33 @@ function CreatePostPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
   const [previewHighlight, setPreviewHighlight] = useState(false)
+  
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+    async function loadAuth() {
+      const session = await getCurrentSession()
+      if (isMounted) {
+        setUser(session?.user || null)
+        setAuthLoading(false)
+      }
+    }
+    loadAuth()
+
+    const subscription = onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => {
+      isMounted = false
+      subscription?.unsubscribe?.()
+      if (form.coverPreview) {
+        URL.revokeObjectURL(form.coverPreview)
+      }
+    }
+  }, [form.coverPreview])
 
   useEffect(() => {
     if (!successMessage && !infoMessage) {
@@ -46,11 +78,32 @@ function CreatePostPage() {
 
   function handleCoverChange(event) {
     const file = event.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('Kích thước ảnh vượt quá 5MB. Vui lòng chọn ảnh nhẹ hơn.')
+      return
+    }
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      setErrorMessage('Định dạng ảnh không hợp lệ. Chỉ hỗ trợ JPG, PNG, WEBP.')
+      return
+    }
+
+    if (form.coverPreview) {
+      URL.revokeObjectURL(form.coverPreview)
+    }
+
+    const previewUrl = URL.createObjectURL(file)
 
     setForm((current) => ({
       ...current,
-      coverName: file?.name ?? '',
+      coverName: file.name,
+      coverFile: file,
+      coverPreview: previewUrl,
     }))
+    setErrorMessage('')
   }
 
   function handleSaveDraft() {
@@ -66,30 +119,57 @@ function CreatePostPage() {
     setPreviewHighlight(true)
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setInfoMessage('')
     setPreviewHighlight(false)
+    setErrorMessage('')
+    setSuccessMessage('')
 
     if (!form.title.trim()) {
-      setSuccessMessage('')
       setErrorMessage('Vui lòng nhập tiêu đề bài viết.')
       return
     }
 
     if (!form.content.trim()) {
-      setSuccessMessage('')
       setErrorMessage('Vui lòng nhập nội dung bài viết.')
       return
     }
 
     if (form.content.trim().length < 50) {
-      setSuccessMessage('')
       setErrorMessage('Nội dung bài viết cần tối thiểu 50 ký tự.')
       return
     }
 
+    const { data, error } = await createPost(form)
+    
+    if (error) {
+      console.error('Lỗi khi đăng bài:', error)
+      setErrorMessage(`Lỗi đăng bài: ${error.message}`)
+      return
+    }
+
+    console.log('Post created successfully:', data)
     setErrorMessage('')
     setSuccessMessage('Bài viết đã được gửi và đang chờ duyệt.')
+    setForm(initialForm)
+  }
+
+  if (authLoading) {
+    return <div className="create-post-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
+  }
+
+  if (!user) {
+    return (
+      <div className="create-post-page">
+        <section className="create-post-page__hero">
+          <div className="create-post-page__hero-content" style={{ textAlign: 'center', margin: '0 auto' }}>
+            <h1>Bạn cần đăng nhập để đăng bài chia sẻ.</h1>
+            <p style={{ marginBottom: '20px' }}>Vui lòng đăng nhập để tham gia chia sẻ bài viết với cộng đồng E-XANH.</p>
+            <Link to="/dang-nhap" className="btn btn--primary">Đăng nhập ngay</Link>
+          </div>
+        </section>
+      </div>
+    )
   }
 
   return (

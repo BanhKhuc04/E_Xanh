@@ -118,13 +118,13 @@ function AccountPage() {
 
     initAuth()
 
-    const unsubscribe = onAuthStateChange((event, session) => {
+    const subscription = onAuthStateChange((event, session) => {
       loadUser(session)
     })
 
     return () => {
       isMounted = false
-      unsubscribe?.()
+      subscription?.unsubscribe?.()
     }
   }, [])
 

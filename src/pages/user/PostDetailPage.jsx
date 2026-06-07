@@ -1,16 +1,69 @@
 import { Link, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import ArticleActions from '../../components/posts/ArticleActions'
 import ArticleContent from '../../components/posts/ArticleContent'
 import ArticleHeader from '../../components/posts/ArticleHeader'
 import CommentSection from '../../components/posts/CommentSection'
 import PostCard from '../../components/posts/PostCard'
 import RelatedPosts from '../../components/posts/RelatedPosts'
-import { featuredTopics, getPostBySlug, posts } from '../../data/posts'
+import { featuredTopics, getPostBySlug as getMockPostBySlug, posts } from '../../data/posts'
+import { getPostBySlug } from '../../services/postService'
 import '../../styles/post-detail.css'
 
 function PostDetailPage() {
   const { slug } = useParams()
-  const post = getPostBySlug(slug)
+  const [post, setPost] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadPost() {
+      setLoading(true)
+      const { data, error } = await getPostBySlug(slug)
+      if (!error && data) {
+        const categoryMap = {
+          tip: 'Mẹo tiết kiệm',
+          community: 'Cộng đồng',
+          qa: 'Hỏi đáp',
+          review: 'Review thiết bị'
+        }
+
+        setPost({
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          author: data.profiles?.name || data.profiles?.email || 'Thành viên E-XANH',
+          authorAvatar: data.profiles?.avatar_url || 'EX',
+          authorBio: data.profiles?.bio || 'Thành viên cộng đồng E-XANH',
+          category: categoryMap[data.type] || 'Cộng đồng',
+          status: 'published',
+          image: data.image_url,
+          description: data.description || '',
+          content: data.content || '',
+          contentSections: [
+            {
+              heading: 'Nội dung bài viết',
+              body: data.content || ''
+            }
+          ],
+          likes: data.likes_count || 0,
+          comments: data.comments_count || 0,
+          savedCount: data.saved_count || 0,
+          readTime: data.read_time || '3 phút',
+          date: new Date(data.created_at).toISOString().split('T')[0],
+          commentItems: [],
+        })
+      } else {
+        const localPost = getMockPostBySlug(slug)
+        setPost(localPost || null)
+      }
+      setLoading(false)
+    }
+    loadPost()
+  }, [slug])
+
+  if (loading) {
+    return <div className="post-detail-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
+  }
 
   if (!post) {
     return (

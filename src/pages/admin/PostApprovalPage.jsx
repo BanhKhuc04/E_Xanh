@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react'
-import { adminPosts as initialPosts, adminPostStats } from '../../data/adminPosts'
+import { useState, useCallback, useEffect } from 'react'
+import { adminPostStats } from '../../data/adminPosts'
 import AdminPostStats from '../../components/admin/posts/AdminPostStats'
 import AdminPostFilter from '../../components/admin/posts/AdminPostFilter'
 import AdminPostBulkAction from '../../components/admin/posts/AdminPostBulkAction'
 import AdminPostList from '../../components/admin/posts/AdminPostList'
 import AdminPostPreview from '../../components/admin/posts/AdminPostPreview'
+import { getAllAdminPosts, updatePostStatus } from '../../services/postService'
 import '../../styles/admin-posts.css'
 
 const statusLabelToKey = {
@@ -15,7 +16,9 @@ const statusLabelToKey = {
 }
 
 function PostApprovalPage() {
-  const [posts, setPosts] = useState(initialPosts)
+  const [posts, setPosts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState('')
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('Tất cả')
   const [status, setStatus] = useState('Tất cả')
@@ -28,6 +31,37 @@ function PostApprovalPage() {
     setToast(message)
     setTimeout(() => setToast(''), 2500)
   }, [])
+
+  useEffect(() => {
+    async function fetchPosts() {
+      setIsLoading(true)
+      setErrorMsg('')
+      const { data, error } = await getAllAdminPosts()
+      if (error) {
+        console.error('Fetch posts error:', error)
+        setErrorMsg('Không tải được bài viết từ Supabase. Kiểm tra RLS hoặc quyền admin.')
+        showToast('Lỗi tải dữ liệu: ' + error.message)
+      } else if (data) {
+        const mapped = data.map(post => ({
+          id: post.id,
+          title: post.title,
+          author: post.profiles?.name || 'Người dùng ẩn danh',
+          type: post.type,
+          category: post.type,
+          submittedAt: new Date(post.created_at).toISOString().split('T')[0],
+          status: post.status,
+          thumbnail: post.image_url || 'https://images.unsplash.com/photo-1631545806609-3c480b4bb12a?w=400&h=260&fit=crop',
+          description: post.description || '',
+          contentPreview: post.content || '',
+          likes: post.likes_count || 0,
+          comments: post.comments_count || 0,
+        }))
+        setPosts(mapped)
+      }
+      setIsLoading(false)
+    }
+    fetchPosts()
+  }, [showToast])
 
   const filteredPosts = posts.filter((post) => {
     const matchSearch =
@@ -83,14 +117,22 @@ function PostApprovalPage() {
     setActivePostId(id)
   }
 
-  const handleChangeStatus = (id, newStatus) => {
+  const handleChangeStatus = async (id, newStatus, adminNote = null) => {
+    const { error } = await updatePostStatus(id, newStatus, adminNote)
+    if (error) {
+      showToast('Tài khoản hiện tại chưa có quyền admin. Hãy cập nhật role = admin trong bảng profiles.')
+      return
+    }
     setPosts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p)),
     )
     showToast('Đã cập nhật trạng thái bài viết.')
   }
 
-  const handleBulkApprove = () => {
+  const handleBulkApprove = async () => {
+    for (const id of selectedIds) {
+      await updatePostStatus(id, 'approved')
+    }
     setPosts((prev) =>
       prev.map((p) =>
         selectedIds.includes(p.id) ? { ...p, status: 'approved' } : p,
@@ -100,7 +142,10 @@ function PostApprovalPage() {
     showToast('Đã duyệt các bài viết đã chọn.')
   }
 
-  const handleBulkReject = () => {
+  const handleBulkReject = async () => {
+    for (const id of selectedIds) {
+      await updatePostStatus(id, 'rejected')
+    }
     setPosts((prev) =>
       prev.map((p) =>
         selectedIds.includes(p.id) ? { ...p, status: 'rejected' } : p,
@@ -133,41 +178,55 @@ function PostApprovalPage() {
         </div>
       </section>
 
-      <AdminPostStats stats={adminPostStats} />
+      {isLoading ? (
+        <div style={{ padding: '40px', textAlign: 'center' }}>Đang tải dữ liệu...</div>
+      ) : errorMsg ? (
+        <div style={{ padding: '40px', textAlign: 'center', color: '#dc3545', fontWeight: 'bold' }}>
+          {errorMsg}
+        </div>
+      ) : posts.length === 0 ? (
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+          Chưa có bài viết nào cần duyệt.
+        </div>
+      ) : (
+        <>
+          <AdminPostStats stats={adminPostStats} />
 
-      <AdminPostFilter
-        search={search}
-        onSearchChange={setSearch}
-        category={category}
-        onCategoryChange={setCategory}
-        status={status}
-        onStatusChange={setStatus}
-        dateRange={dateRange}
-        onDateRangeChange={setDateRange}
-        onFilter={() => {}}
-        onReset={handleReset}
-      />
+          <AdminPostFilter
+            search={search}
+            onSearchChange={setSearch}
+            category={category}
+            onCategoryChange={setCategory}
+            status={status}
+            onStatusChange={setStatus}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            onFilter={() => {}}
+            onReset={handleReset}
+          />
 
-      <AdminPostBulkAction
-        selectedCount={selectedIds.length}
-        onBulkApprove={handleBulkApprove}
-        onBulkReject={handleBulkReject}
-      />
+          <AdminPostBulkAction
+            selectedCount={selectedIds.length}
+            onBulkApprove={handleBulkApprove}
+            onBulkReject={handleBulkReject}
+          />
 
-      <section className="ap-page__workspace">
-        <AdminPostList
-          posts={filteredPosts}
-          selectedIds={selectedIds}
-          onToggleSelect={handleToggleSelect}
-          onSelectAll={handleSelectAll}
-          activePostId={activePostId}
-          onViewPost={handleViewPost}
-        />
-        <AdminPostPreview
-          post={activePost}
-          onChangeStatus={handleChangeStatus}
-        />
-      </section>
+          <section className="ap-page__workspace">
+            <AdminPostList
+              posts={filteredPosts}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
+              onSelectAll={handleSelectAll}
+              activePostId={activePostId}
+              onViewPost={handleViewPost}
+            />
+            <AdminPostPreview
+              post={activePost}
+              onChangeStatus={handleChangeStatus}
+            />
+          </section>
+        </>
+      )}
 
       {toast && (
         <div className="ap-toast" role="alert" aria-live="assertive">
