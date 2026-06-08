@@ -54,10 +54,12 @@ function CommunityPage() {
   useEffect(() => {
     async function loadData() {
       // Load user
+      let userId = null
       try {
         const { getCurrentSession, getCurrentUserProfile } = await import('../../services/authService')
         const session = await getCurrentSession()
         if (session?.user) {
+          userId = session.user.id
           const profile = await getCurrentUserProfile(session.user.id)
           setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null })
         }
@@ -71,6 +73,18 @@ function CommunityPage() {
         const { data, error } = await getCommunityPosts()
         
         if (!error && data) {
+          let likedMap = {}
+          let savedMap = {}
+          if (userId) {
+            const { supabase } = await import('../../lib/supabase')
+            const [{ data: likes }, { data: saves }] = await Promise.all([
+              supabase.from('post_likes').select('post_id').eq('user_id', userId),
+              supabase.from('saved_posts').select('post_id').eq('user_id', userId)
+            ])
+            likes?.forEach(l => likedMap[l.post_id] = true)
+            saves?.forEach(s => savedMap[s.post_id] = true)
+          }
+
           const formattedPosts = data.map(p => ({
             id: p.id,
             author: p.profiles?.name || 'Ẩn danh',
@@ -87,8 +101,8 @@ function CommunityPage() {
             commentsCount: p.comments_count || 0,
             savedCount: p.saved_count || 0,
             shares: 0,
-            isLiked: false, 
-            isSaved: false  
+            isLiked: !!likedMap[p.id], 
+            isSaved: !!savedMap[p.id]  
           }))
           setPosts(formattedPosts)
         }
@@ -114,36 +128,86 @@ function CommunityPage() {
     setVisibleCount(3)
   }
 
-  function handleToggleLike(postId) {
+  async function handleToggleLike(postId) {
+    if (!currentUser) {
+      alert('Vui lòng đăng nhập để thích bài viết.')
+      return
+    }
+
+    const postToUpdate = posts.find(p => p.id === postId)
+    if (!postToUpdate) return
+    const isCurrentlyLiked = postToUpdate.isLiked
+
+    // Optimistic UI update
     setPosts((current) =>
       current.map((post) => {
-        if (post.id !== postId) {
-          return post
-        }
-
+        if (post.id !== postId) return post
         return {
           ...post,
-          isLiked: !post.isLiked,
-          likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+          isLiked: !isCurrentlyLiked,
+          likes: isCurrentlyLiked ? post.likes - 1 : post.likes + 1,
         }
-      }),
+      })
     )
+
+    const { likePost, unlikePost } = await import('../../services/interactionService')
+    const { error } = isCurrentlyLiked ? await unlikePost(postId) : await likePost(postId)
+
+    if (error) {
+      // Revert on error
+      setPosts((current) =>
+        current.map((post) => {
+          if (post.id !== postId) return post
+          return {
+            ...post,
+            isLiked: isCurrentlyLiked,
+            likes: isCurrentlyLiked ? post.likes + 1 : post.likes - 1,
+          }
+        })
+      )
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
   }
 
-  function handleToggleSave(postId) {
+  async function handleToggleSave(postId) {
+    if (!currentUser) {
+      alert('Vui lòng đăng nhập để lưu bài viết.')
+      return
+    }
+
+    const postToUpdate = posts.find(p => p.id === postId)
+    if (!postToUpdate) return
+    const isCurrentlySaved = postToUpdate.isSaved
+
+    // Optimistic UI update
     setPosts((current) =>
       current.map((post) => {
-        if (post.id !== postId) {
-          return post
-        }
-
+        if (post.id !== postId) return post
         return {
           ...post,
-          isSaved: !post.isSaved,
-          savedCount: post.isSaved ? post.savedCount - 1 : post.savedCount + 1,
+          isSaved: !isCurrentlySaved,
+          savedCount: isCurrentlySaved ? post.savedCount - 1 : post.savedCount + 1,
         }
-      }),
+      })
     )
+
+    const { savePost, unsavePost } = await import('../../services/interactionService')
+    const { error } = isCurrentlySaved ? await unsavePost(postId) : await savePost(postId)
+
+    if (error) {
+      // Revert on error
+      setPosts((current) =>
+        current.map((post) => {
+          if (post.id !== postId) return post
+          return {
+            ...post,
+            isSaved: isCurrentlySaved,
+            savedCount: isCurrentlySaved ? post.savedCount + 1 : post.savedCount - 1,
+          }
+        })
+      )
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
   }
 
   async function handleToggleComment(postId) {

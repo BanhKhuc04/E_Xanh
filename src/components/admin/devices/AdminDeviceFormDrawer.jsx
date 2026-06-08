@@ -1,14 +1,12 @@
 import { useState, useMemo } from 'react'
-import { deviceGroupOptions, deviceLevelOptions } from '../../../data/adminDevices'
+import { deviceGroupOptions } from '../../../data/adminDevices'
 
 const emptyForm = {
   name: '',
-  group: 'Điều hòa',
-  power: '',
-  suggestedHoursPerDay: '',
-  level: 'low',
-  savingTip: '',
-  status: 'active',
+  category: 'Điều hòa',
+  default_power: '',
+  tips: '',
+  is_visible: true,
   icon: '⚡',
 }
 
@@ -19,13 +17,11 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
     if (device) {
       return {
         name: device.name,
-        group: device.group,
-        power: device.power,
-        suggestedHoursPerDay: device.suggestedHoursPerDay,
-        level: device.level,
-        savingTip: device.savingTip,
-        status: device.status,
-        icon: device.icon,
+        category: device.category || 'Khác',
+        default_power: device.default_power,
+        tips: device.tips || '',
+        is_visible: device.is_visible,
+        icon: device.icon || '⚡',
       }
     }
     return emptyForm
@@ -42,10 +38,10 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
   const validate = () => {
     const newErrors = {}
     if (!form.name.trim()) newErrors.name = 'Vui lòng nhập tên thiết bị.'
-    if (!form.power || Number(form.power) <= 0)
-      newErrors.power = 'Công suất phải lớn hơn 0.'
-    if (!form.savingTip.trim())
-      newErrors.savingTip = 'Vui lòng nhập gợi ý tiết kiệm.'
+    if (!form.default_power || Number(form.default_power) <= 0)
+      newErrors.default_power = 'Công suất phải lớn hơn 0.'
+    if (!form.tips.trim())
+      newErrors.tips = 'Vui lòng nhập gợi ý tiết kiệm.'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -54,13 +50,11 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
     if (!validate()) return
     onSave({
       ...form,
-      power: Number(form.power),
-      suggestedHoursPerDay: Number(form.suggestedHoursPerDay) || 1,
+      default_power: Number(form.default_power),
     })
   }
 
-  const levelLabelToKey = { 'Thấp': 'low', 'Trung bình': 'medium', 'Cao': 'high' }
-  const levelKeyToLabel = { low: 'Thấp', medium: 'Trung bình', high: 'Cao' }
+
 
   return (
     <>
@@ -97,8 +91,8 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
             <label className="ad-drawer__label">Nhóm thiết bị</label>
             <select
               className="ad-drawer__input"
-              value={form.group}
-              onChange={(e) => handleChange('group', e.target.value)}
+              value={form.category}
+              onChange={(e) => handleChange('category', e.target.value)}
             >
               {deviceGroupOptions.filter((g) => g !== 'Tất cả').map((g) => (
                 <option key={g} value={g}>{g}</option>
@@ -111,49 +105,35 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
               <label className="ad-drawer__label">Công suất mặc định (W)</label>
               <input
                 type="number"
-                className={`ad-drawer__input${errors.power ? ' is-error' : ''}`}
-                value={form.power}
-                onChange={(e) => handleChange('power', e.target.value)}
+                className={`ad-drawer__input${errors.default_power ? ' is-error' : ''}`}
+                value={form.default_power}
+                onChange={(e) => handleChange('default_power', e.target.value)}
                 placeholder="VD: 850"
                 min="1"
               />
-              {errors.power && <span className="ad-drawer__error">{errors.power}</span>}
+              {errors.default_power && <span className="ad-drawer__error">{errors.default_power}</span>}
             </div>
 
             <div className="ad-drawer__field">
-              <label className="ad-drawer__label">Số giờ gợi ý/ngày</label>
+              <label className="ad-drawer__label">Icon (Emoji)</label>
               <input
-                type="number"
+                type="text"
                 className="ad-drawer__input"
-                value={form.suggestedHoursPerDay}
-                onChange={(e) => handleChange('suggestedHoursPerDay', e.target.value)}
-                placeholder="VD: 8"
-                min="0"
-                max="24"
+                value={form.icon}
+                onChange={(e) => handleChange('icon', e.target.value)}
+                placeholder="VD: ⚡"
+                maxLength="2"
               />
             </div>
           </div>
 
           <div className="ad-drawer__row">
             <div className="ad-drawer__field">
-              <label className="ad-drawer__label">Mức tiêu thụ</label>
-              <select
-                className="ad-drawer__input"
-                value={levelKeyToLabel[form.level] ?? 'Thấp'}
-                onChange={(e) => handleChange('level', levelLabelToKey[e.target.value] ?? 'low')}
-              >
-                {deviceLevelOptions.filter((l) => l !== 'Tất cả').map((l) => (
-                  <option key={l} value={l}>{l}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="ad-drawer__field">
               <label className="ad-drawer__label">Trạng thái</label>
               <select
                 className="ad-drawer__input"
-                value={form.status}
-                onChange={(e) => handleChange('status', e.target.value)}
+                value={form.is_visible ? 'active' : 'hidden'}
+                onChange={(e) => handleChange('is_visible', e.target.value === 'active')}
               >
                 <option value="active">Đang dùng</option>
                 <option value="hidden">Đã ẩn</option>
@@ -164,13 +144,13 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
           <div className="ad-drawer__field">
             <label className="ad-drawer__label">Gợi ý tiết kiệm</label>
             <textarea
-              className={`ad-drawer__input ad-drawer__textarea${errors.savingTip ? ' is-error' : ''}`}
+              className={`ad-drawer__input ad-drawer__textarea${errors.tips ? ' is-error' : ''}`}
               rows="3"
-              value={form.savingTip}
-              onChange={(e) => handleChange('savingTip', e.target.value)}
+              value={form.tips}
+              onChange={(e) => handleChange('tips', e.target.value)}
               placeholder="VD: Đặt nhiệt độ 26–28°C để giảm điện năng..."
             />
-            {errors.savingTip && <span className="ad-drawer__error">{errors.savingTip}</span>}
+            {errors.tips && <span className="ad-drawer__error">{errors.tips}</span>}
           </div>
         </div>
 
@@ -185,7 +165,7 @@ function AdminDeviceFormDrawer({ device, onClose, onSave, onToggleStatus }) {
               className="btn btn--ghost"
               onClick={() => onToggleStatus(device.id)}
             >
-              {device.status === 'hidden' ? 'Hiện lại' : 'Ẩn thiết bị'}
+              {!device.is_visible ? 'Hiện lại' : 'Ẩn thiết bị'}
             </button>
           )}
 

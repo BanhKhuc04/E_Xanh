@@ -17,9 +17,11 @@ function CommunityPostDetailPage() {
 
   useEffect(() => {
     async function loadData() {
+      let userId = null
       try {
         const session = await getCurrentSession()
         if (session?.user) {
+          userId = session.user.id
           const profile = await getCurrentUserProfile(session.user.id)
           setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null })
         }
@@ -31,6 +33,18 @@ function CommunityPostDetailPage() {
       try {
         const { data, error } = await getPostById(id)
         if (!error && data) {
+          let isLiked = false
+          let isSaved = false
+          if (userId) {
+            const { isPostLiked, isPostSaved } = await import('../../services/interactionService')
+            const [likedRes, savedRes] = await Promise.all([
+              isPostLiked(id),
+              isPostSaved(id)
+            ])
+            isLiked = likedRes.data || false
+            isSaved = savedRes.data || false
+          }
+
           const formattedPost = {
             id: data.id,
             author: data.profiles?.name || 'Ẩn danh',
@@ -46,8 +60,8 @@ function CommunityPostDetailPage() {
             commentsCount: data.comments_count || 0,
             savedCount: data.saved_count || 0,
             shares: 0,
-            isLiked: false,
-            isSaved: false
+            isLiked,
+            isSaved
           }
           setPost(formattedPost)
         }
@@ -113,26 +127,72 @@ function CommunityPostDetailPage() {
     return true
   }
 
-  function handleToggleLike() {
+  async function handleToggleLike() {
+    if (!currentUser) {
+      alert('Vui lòng đăng nhập để thích bài viết.')
+      return
+    }
+    
+    if (!post) return
+    const isCurrentlyLiked = post.isLiked
+
     setPost(current => {
       if (!current) return current
       return {
         ...current,
-        isLiked: !current.isLiked,
-        likes: current.isLiked ? current.likes - 1 : current.likes + 1,
+        isLiked: !isCurrentlyLiked,
+        likes: isCurrentlyLiked ? current.likes - 1 : current.likes + 1,
       }
     })
+
+    const { likePost, unlikePost } = await import('../../services/interactionService')
+    const { error } = isCurrentlyLiked ? await unlikePost(post.id) : await likePost(post.id)
+
+    if (error) {
+      setPost(current => {
+        if (!current) return current
+        return {
+          ...current,
+          isLiked: isCurrentlyLiked,
+          likes: isCurrentlyLiked ? current.likes + 1 : current.likes - 1,
+        }
+      })
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
   }
 
-  function handleToggleSave() {
+  async function handleToggleSave() {
+    if (!currentUser) {
+      alert('Vui lòng đăng nhập để lưu bài viết.')
+      return
+    }
+
+    if (!post) return
+    const isCurrentlySaved = post.isSaved
+
     setPost(current => {
       if (!current) return current
       return {
         ...current,
-        isSaved: !current.isSaved,
-        savedCount: current.isSaved ? current.savedCount - 1 : current.savedCount + 1,
+        isSaved: !isCurrentlySaved,
+        savedCount: isCurrentlySaved ? current.savedCount - 1 : current.savedCount + 1,
       }
     })
+
+    const { savePost, unsavePost } = await import('../../services/interactionService')
+    const { error } = isCurrentlySaved ? await unsavePost(post.id) : await savePost(post.id)
+
+    if (error) {
+      setPost(current => {
+        if (!current) return current
+        return {
+          ...current,
+          isSaved: isCurrentlySaved,
+          savedCount: isCurrentlySaved ? current.savedCount + 1 : current.savedCount - 1,
+        }
+      })
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
   }
 
   return (

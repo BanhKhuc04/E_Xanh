@@ -1,4 +1,13 @@
-import { deviceLevelMap, deviceStatusMap } from '../../../data/adminDevices'
+const deviceLevelMap = {
+  low: { label: 'Thấp', className: 'is-low' },
+  medium: { label: 'Trung bình', className: 'is-medium' },
+  high: { label: 'Cao', className: 'is-high' },
+}
+
+const deviceStatusMap = {
+  active: { label: 'Đang dùng', className: 'is-active' },
+  hidden: { label: 'Đã ẩn', className: 'is-hidden' },
+}
 
 function AdminDeviceList({
   devices,
@@ -44,9 +53,13 @@ function AdminDeviceList({
 
       <div className="ad-list__items">
         {devices.map((device) => {
-          const levelInfo = deviceLevelMap[device.level] ?? deviceLevelMap.low
-          const statusInfo = deviceStatusMap[device.status] ?? deviceStatusMap.active
-          const isHidden = device.status === 'hidden'
+          let levelKey = 'low'
+          if (device.default_power > 800) levelKey = 'high'
+          else if (device.default_power > 100) levelKey = 'medium'
+          
+          const levelInfo = deviceLevelMap[levelKey]
+          const isHidden = !device.is_visible
+          const statusInfo = isHidden ? deviceStatusMap.hidden : deviceStatusMap.active
 
           return (
             <article key={device.id} className="ad-list__card">
@@ -65,14 +78,10 @@ function AdminDeviceList({
 
                 <div className="ad-list__info">
                   <strong>{device.name}</strong>
-                  <span className="ad-list__group">{device.group}</span>
+                  <span className="ad-list__group">{device.category}</span>
                 </div>
 
-                <span className="ad-list__power">{device.power}W</span>
-
-                <span className="ad-list__hours">
-                  {device.suggestedHoursPerDay}h/ngày
-                </span>
+                <span className="ad-list__power">{device.default_power}W</span>
 
                 <span className={`ad-level-badge ${levelInfo.className}`}>
                   {levelInfo.label}
@@ -84,7 +93,7 @@ function AdminDeviceList({
               </div>
 
               <div className="ad-list__card-bottom">
-                <p className="ad-list__tip">{device.savingTip}</p>
+                <p className="ad-list__tip">{device.tips}</p>
 
                 <div className="ad-list__actions">
                   <button

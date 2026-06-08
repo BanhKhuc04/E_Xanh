@@ -50,7 +50,11 @@ function LoginPage() {
     })
 
     if (error) {
-      setErrorMessage('Email hoặc mật khẩu không đúng.')
+      let viError = 'Email hoặc mật khẩu không đúng.'
+      if (error.message && !error.message.includes('Invalid login credentials')) {
+        viError = `Lỗi đăng nhập: ${error.message}`
+      }
+      setErrorMessage(viError)
       return
     }
 
@@ -78,41 +82,41 @@ function LoginPage() {
     }, 700)
   }
 
-  function handleSocialLogin() {
-    setErrorMessage('Chức năng đăng nhập bằng MXH đang được phát triển.')
-  }
-
 
   return (
     <div className="auth-page">
       <div className="auth-layout">
         <section className="auth-visual">
-          <div className="auth-visual__top">
-            <div className="auth-visual__brand">
-              <span className="auth-visual__logo">E</span>
-              <strong>E-XANH</strong>
+          <div className="auth-visual__main">
+            <div className="auth-visual__top">
+              <div className="auth-visual__brand">
+                <span className="auth-visual__logo">E</span>
+                <strong>E-XANH</strong>
+              </div>
+              <span className="auth-visual__chip">Cộng đồng sống xanh</span>
             </div>
-            <span className="auth-visual__chip">Cộng đồng sống xanh</span>
+
+            <div className="auth-visual__content">
+              <h1>
+                Tham gia E-XANH<br />
+                để sống xanh hơn<br />
+                mỗi ngày
+              </h1>
+              <p>
+                Một tài khoản E-XANH giúp bạn lưu bài viết, tham gia cộng đồng và theo dõi thói quen sử dụng điện cá nhân.
+              </p>
+              <div className="auth-visual__inline-features">
+                 <span>Lưu bài viết</span>
+                 <span className="dot">•</span>
+                 <span>Bình luận</span>
+                 <span className="dot">•</span>
+                 <span>Theo dõi điện năng</span>
+              </div>
+            </div>
           </div>
 
-          <div className="auth-visual__content">
-            <h1>Tham gia E-XANH để sống xanh hơn mỗi ngày</h1>
-            <p>
-              Lưu lại mẹo tiết kiệm điện, chia sẻ kinh nghiệm, bình luận và theo dõi lịch sử kiểm tra tiền điện của bạn.
-            </p>
-          </div>
-
-          <div className="auth-visual__benefits">
-            <article>Lưu bài viết hữu ích</article>
-            <article>Bình luận và tương tác</article>
-            <article>Theo dõi tiền điện hằng tháng</article>
-          </div>
-
-          <div className="auth-visual__image">
-            <img
-              src="https://lh3.googleusercontent.com/aida/AP1WRLsyEXL8ygmkoBTmM7-tshvP-VQ4Z1sLXWVXyINN3y95prhrS-VUoerLyPXpIb7lsjyob8ZDfxxaq_XUsWGHXh4P411TzVXhV3i4-nxVYXFrJFGOBDmHONL5nCKnjnWoGp4OtdnMpYlKtKmhkgTIU_5yWU9mkwn-p_6STtwjQeW_RwnZWX3tuTnB28QsabrL990mkLkesFOYSp7_NacW-Z-CbeGbNLz3MKQwfzHFmNiKDu4PbVXOkSTPPND9"
-              alt="Minh họa đăng nhập E-XANH"
-            />
+          <div className="auth-carousel-placeholder">
+            <span>Ảnh minh họa đang cập nhật</span>
           </div>
         </section>
 
@@ -177,16 +181,6 @@ function LoginPage() {
             Chưa có tài khoản? <Link to="/dang-ky">Tạo tài khoản ngay</Link>
           </p>
 
-          <div className="auth-card__divider">hoặc</div>
-
-          <div className="auth-card__socials">
-            <button type="button" onClick={() => handleSocialLogin('google')}>
-              Đăng nhập với Google
-            </button>
-            <button type="button" onClick={() => handleSocialLogin('github')}>
-              Đăng nhập với GitHub
-            </button>
-          </div>
 
           <div className="auth-note">
             <strong>Bảo mật thông tin</strong>

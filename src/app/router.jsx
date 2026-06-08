@@ -1,4 +1,5 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import ScrollToTop from '../components/common/ScrollToTop'
 import AdminRoute from '../components/auth/AdminRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
@@ -29,7 +30,15 @@ import TipsPage from '../pages/user/TipsPage'
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    element: (
+      <>
+        <ScrollToTop />
+        <Outlet />
+      </>
+    ),
+    children: [
+      {
+        path: '/',
     element: <UserLayout />,
     children: [
       {
@@ -142,9 +151,11 @@ const router = createBrowserRouter([
       },
     ],
   },
-  {
-    path: '*',
-    element: <NotFoundPage />,
+      {
+        path: '*',
+        element: <NotFoundPage />,
+      },
+    ],
   },
 ])
 

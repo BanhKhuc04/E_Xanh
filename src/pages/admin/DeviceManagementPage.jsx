@@ -1,10 +1,15 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
-  adminDevices as initialDevices,
   adminDeviceStats,
-  deviceStatusMap,
   savingTipsHighlight,
 } from '../../data/adminDevices'
+import { 
+  getAllDevicesAdmin, 
+  createDevice, 
+  updateDevice, 
+  bulkUpdateDeviceVisibility, 
+  bulkDeleteDevices 
+} from '../../services/deviceService'
 import AdminDeviceStats from '../../components/admin/devices/AdminDeviceStats'
 import AdminDeviceFilter from '../../components/admin/devices/AdminDeviceFilter'
 import AdminDeviceBulkAction from '../../components/admin/devices/AdminDeviceBulkAction'
@@ -24,10 +29,9 @@ const statusLabelToKey = {
   'Đã ẩn': 'hidden',
 }
 
-let nextId = 100
-
 function DeviceManagementPage() {
-  const [devices, setDevices] = useState(initialDevices)
+  const [devices, setDevices] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [group, setGroup] = useState('Tất cả')
   const [level, setLevel] = useState('Tất cả')
@@ -42,19 +46,37 @@ function DeviceManagementPage() {
     setTimeout(() => setToast(''), 2500)
   }, [])
 
+  const loadDevices = useCallback(async () => {
+    const { data, error } = await getAllDevicesAdmin()
+    if (!error && data) {
+      setDevices(data)
+    }
+    setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadDevices()
+  }, [loadDevices])
+
   const filteredDevices = devices.filter((device) => {
     const matchSearch =
       search === '' ||
       device.name.toLowerCase().includes(search.toLowerCase())
 
     const matchGroup =
-      group === 'Tất cả' || device.group === group
+      group === 'Tất cả' || device.category === group
+
+    let deviceLevelKey = 'low'
+    if (device.default_power > 800) deviceLevelKey = 'high'
+    else if (device.default_power > 100) deviceLevelKey = 'medium'
 
     const matchLevel =
-      level === 'Tất cả' || device.level === levelLabelToKey[level]
+      level === 'Tất cả' || deviceLevelKey === levelLabelToKey[level]
 
+    let deviceStatusKey = device.is_visible ? 'active' : 'hidden'
     const matchStatus =
-      status === 'Tất cả' || device.status === statusLabelToKey[status]
+      status === 'Tất cả' || deviceStatusKey === statusLabelToKey[status]
 
     return matchSearch && matchGroup && matchLevel && matchStatus
   })
@@ -77,81 +99,87 @@ function DeviceManagementPage() {
     }
   }
 
-  const handleChangeStatus = (id, newStatus) => {
-    setDevices((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d)),
-    )
-    showToast(
-      `Đã cập nhật thiết bị: ${deviceStatusMap[newStatus]?.label ?? newStatus}.`,
-    )
-  }
-
-  const handleQuickToggleStatus = (id) => {
+  const handleQuickToggleStatus = async (id) => {
     const device = devices.find((d) => d.id === id)
     if (!device) return
-    const newStatus = device.status === 'hidden' ? 'active' : 'hidden'
-    handleChangeStatus(id, newStatus)
+    const newStatus = !device.is_visible
+    
+    // Optimistic update
+    setDevices(prev => prev.map(d => d.id === id ? { ...d, is_visible: newStatus } : d))
+    showToast(`Đã ${newStatus ? 'hiện' : 'ẩn'} thiết bị.`)
+    
+    await updateDevice(id, { is_visible: newStatus })
   }
 
-  const handleDrawerToggleStatus = (id) => {
+  const handleDrawerToggleStatus = async (id) => {
     const device = devices.find((d) => d.id === id)
     if (!device) return
-    const newStatus = device.status === 'hidden' ? 'active' : 'hidden'
-    setDevices((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d)),
-    )
+    const newStatus = !device.is_visible
+    
+    setDevices(prev => prev.map(d => d.id === id ? { ...d, is_visible: newStatus } : d))
     setDrawerMode(null)
     setEditDeviceId(null)
-    showToast(
-      `Đã cập nhật thiết bị: ${deviceStatusMap[newStatus]?.label ?? newStatus}.`,
-    )
+    showToast(`Đã ${newStatus ? 'hiện' : 'ẩn'} thiết bị.`)
+    
+    await updateDevice(id, { is_visible: newStatus })
   }
 
-  const handleSave = (formData) => {
+  const handleSave = async (formData) => {
     if (drawerMode === 'edit' && editDeviceId) {
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.id === editDeviceId ? { ...d, ...formData } : d,
-        ),
-      )
-      showToast('Đã cập nhật thiết bị.')
-    } else {
-      nextId += 1
-      const newDevice = {
-        id: `dev-new-${nextId}`,
-        ...formData,
+      const { error } = await updateDevice(editDeviceId, formData)
+      if (!error) {
+        setDevices((prev) =>
+          prev.map((d) =>
+            d.id === editDeviceId ? { ...d, ...formData } : d,
+          ),
+        )
+        showToast('Đã cập nhật thiết bị.')
+      } else {
+        showToast('Lỗi cập nhật thiết bị.')
       }
-      setDevices((prev) => [newDevice, ...prev])
-      showToast('Đã thêm thiết bị mới.')
+    } else {
+      const { data, error } = await createDevice(formData)
+      if (!error && data) {
+        setDevices((prev) => [data, ...prev])
+        showToast('Đã thêm thiết bị mới.')
+      } else {
+        showToast('Lỗi thêm thiết bị mới.')
+      }
     }
     setDrawerMode(null)
     setEditDeviceId(null)
   }
 
-  const handleBulkHide = () => {
+  const handleBulkHide = async () => {
     setDevices((prev) =>
       prev.map((d) =>
-        selectedIds.includes(d.id) ? { ...d, status: 'hidden' } : d,
+        selectedIds.includes(d.id) ? { ...d, is_visible: false } : d,
       ),
     )
-    setSelectedIds([])
     showToast('Đã ẩn các thiết bị đã chọn.')
+    const ids = [...selectedIds]
+    setSelectedIds([])
+    await bulkUpdateDeviceVisibility(ids, false)
   }
 
-  const handleBulkShow = () => {
+  const handleBulkShow = async () => {
     setDevices((prev) =>
       prev.map((d) =>
-        selectedIds.includes(d.id) ? { ...d, status: 'active' } : d,
+        selectedIds.includes(d.id) ? { ...d, is_visible: true } : d,
       ),
     )
-    setSelectedIds([])
     showToast('Đã hiện lại các thiết bị đã chọn.')
+    const ids = [...selectedIds]
+    setSelectedIds([])
+    await bulkUpdateDeviceVisibility(ids, true)
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     setDevices((prev) => prev.filter((d) => !selectedIds.includes(d.id)))
-    setSelectedIds([])
     showToast('Đã xóa các thiết bị đã chọn.')
+    const ids = [...selectedIds]
+    setSelectedIds([])
+    await bulkDeleteDevices(ids)
   }
 
   const handleReset = () => {
@@ -219,15 +247,21 @@ function DeviceManagementPage() {
         onBulkDelete={handleBulkDelete}
       />
 
-      <AdminDeviceList
-        devices={filteredDevices}
-        selectedIds={selectedIds}
-        onToggleSelect={handleToggleSelect}
-        onSelectAll={handleSelectAll}
-        onEdit={openEditDrawer}
-        onQuickToggleStatus={handleQuickToggleStatus}
-        onAddDevice={openAddDrawer}
-      />
+      {isLoading ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          Đang tải dữ liệu thiết bị...
+        </div>
+      ) : (
+        <AdminDeviceList
+          devices={filteredDevices}
+          selectedIds={selectedIds}
+          onToggleSelect={handleToggleSelect}
+          onSelectAll={handleSelectAll}
+          onEdit={openEditDrawer}
+          onQuickToggleStatus={handleQuickToggleStatus}
+          onAddDevice={openAddDrawer}
+        />
+      )}
 
       <AdminDeviceTipsCard tips={savingTipsHighlight} />
 
