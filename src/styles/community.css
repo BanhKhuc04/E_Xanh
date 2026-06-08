@@ -308,14 +308,93 @@
 
 .community-post-card__actions button {
   border: 0;
-  padding: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
   color: rgba(23, 55, 21, 0.76);
   background: transparent;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.community-post-card__actions button:hover {
+  background: rgba(193, 217, 92, 0.15);
+  color: var(--color-primary-500);
 }
 
 .community-post-card__actions button.is-active {
   color: var(--color-primary-500);
+  background: rgba(193, 217, 92, 0.1);
+}
+
+.community-post-card__comment-input-area {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: flex-start;
+}
+
+.community-post-card__comment-input-area img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.community-post-card__comment-input-area textarea {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid rgba(79, 132, 40, 0.15);
+  border-radius: 12px;
+  resize: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: rgba(250, 250, 250, 0.9);
+}
+
+.community-post-card__comment-input-area textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  background: #fff;
+}
+
+.community-post-card__share-modal {
+  position: absolute;
+  background: #fff;
+  border: 1px solid rgba(79, 132, 40, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  min-width: 200px;
+}
+
+.community-post-card__share-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-weight: 500;
+  color: #333;
+  transition: background 0.2s;
+}
+
+.community-post-card__share-option:hover {
+  background: rgba(193, 217, 92, 0.15);
 }
 
 .community-sidebar-panel__card {

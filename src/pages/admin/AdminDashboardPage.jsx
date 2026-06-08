@@ -163,17 +163,29 @@ function AdminDashboardPage() {
           ) : (
             <ul className="admin-comment-list">
               {statsData.pendingPostsList.map((post) => (
-                <li key={post.id} className="admin-comment-item" style={{ alignItems: 'flex-start' }}>
-                  <div className="admin-comment-item__content" style={{ flex: 1 }}>
-                    <div className="admin-comment-item__meta">
-                      <strong>{post.title}</strong>
+                <li key={post.id} className="admin-comment-item" style={{ alignItems: 'center', padding: '16px 0', gap: '16px' }}>
+                  <div className="admin-comment-item__content" style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ 
+                      display: '-webkit-box', 
+                      WebkitLineClamp: 2, 
+                      WebkitBoxOrient: 'vertical', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis',
+                      lineHeight: '1.4',
+                      marginBottom: '6px'
+                    }}>
+                      {post.title}
+                    </strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#666', flexWrap: 'wrap' }}>
+                      <span>Bởi: <strong>{post.profiles?.name || 'Ẩn danh'}</strong></span>
+                      <span>•</span>
+                      <span>{new Date(post.created_at).toLocaleDateString('vi-VN')}</span>
+                      <span>•</span>
+                      <span className="ap-badge ap-badge--pending" style={{ padding: '2px 8px', fontSize: '0.75rem' }}>Chờ duyệt</span>
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
-                      Bởi: {post.profiles?.name || 'Ẩn danh'} - {new Date(post.created_at).toLocaleDateString('vi-VN')}
-                    </p>
                   </div>
-                  <Link to="/admin/quan-ly-bai-viet" className="btn btn--primary" style={{ padding: '4px 12px', fontSize: '0.85rem' }}>
-                    Duyệt
+                  <Link to="/admin/quan-ly-bai-viet" className="btn btn--primary" style={{ padding: '6px 16px', fontSize: '0.85rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    Quản lý
                   </Link>
                 </li>
               ))}

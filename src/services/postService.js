@@ -129,9 +129,34 @@ export async function getApprovedPosts() {
 export async function getPostBySlug(slug) {
   const { data, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url, bio)`)
+    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
     .eq('slug', slug)
     .single()
+
+  return { data, error }
+}
+
+export async function getPostById(id) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
+    .eq('id', id)
+    .single()
+
+  return { data, error }
+}
+
+export async function getCommunityPosts() {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *, 
+      profiles:author_id (name, avatar_url, role)
+    `)
+    .eq('status', 'approved')
+    .eq('type', 'community')
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
 
   return { data, error }
 }

@@ -108,3 +108,28 @@ export async function getDashboardStats() {
 
   return result
 }
+
+export async function getPendingPostsOverview() {
+  const result = {
+    count: 0,
+    posts: []
+  }
+
+  try {
+    const { data, count, error } = await supabase
+      .from('posts')
+      .select(`id, title, profiles:author_id(name)`, { count: 'exact' })
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(3)
+    
+    if (!error && data) {
+      result.posts = data
+      result.count = count || data.length
+    }
+  } catch (err) {
+    console.warn('Exception lấy pending posts topbar:', err)
+  }
+
+  return result
+}

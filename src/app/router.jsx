@@ -13,6 +13,7 @@ import SettingsPage from '../pages/admin/SettingsPage'
 import AccountPage from '../pages/user/AccountPage'
 import AboutPage from '../pages/user/AboutPage'
 import CommunityPage from '../pages/user/CommunityPage'
+import CommunityPostDetailPage from '../pages/user/CommunityPostDetailPage'
 import ContactPage from '../pages/user/ContactPage'
 import CreatePostPage from '../pages/user/CreatePostPage'
 import ElectricityCheckPage from '../pages/user/ElectricityCheckPage'
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
       {
         path: 'cong-dong',
         element: <CommunityPage />,
+      },
+      {
+        path: 'cong-dong/:id',
+        element: <CommunityPostDetailPage />,
       },
       {
         path: 'dang-bai',

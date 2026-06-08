@@ -1,0 +1,4 @@
+playwright-report/
+playwright.config.js
+node_modules/
+dist/
