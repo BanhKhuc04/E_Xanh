@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { signInWithEmail } from '../../services/authService'
+import { signInWithEmail, getCurrentUserProfile } from '../../services/authService'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -44,7 +44,7 @@ function LoginPage() {
       return
     }
 
-    const { error } = await signInWithEmail({
+    const { data, error } = await signInWithEmail({
       email: form.email.trim(),
       password: form.password,
     })
@@ -54,11 +54,27 @@ function LoginPage() {
       return
     }
 
+    let role = 'user'
+    if (data?.user) {
+      try {
+        const profile = await getCurrentUserProfile(data.user.id)
+        if (profile && profile.role) {
+          role = profile.role
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy thông tin profile:', err)
+      }
+    }
+
     setErrorMessage('')
     setSuccessMessage('Đăng nhập thành công.')
 
     window.setTimeout(() => {
-      navigate('/')
+      if (role === 'admin' || role === 'moderator') {
+        navigate('/admin')
+      } else {
+        navigate('/')
+      }
     }, 700)
   }
 

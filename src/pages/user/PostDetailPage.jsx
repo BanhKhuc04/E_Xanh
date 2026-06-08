@@ -97,8 +97,8 @@ function PostDetailPage() {
         <article className="post-detail-main">
           <ArticleHeader post={post} />
           <ArticleContent post={post} />
-          <ArticleActions />
-          <CommentSection comments={post.commentItems.slice(0, 2)} />
+          <ArticleActions post={post} />
+          <CommentSection post={post} comments={post.commentItems.slice(0, 2)} />
         </article>
 
         <aside className="post-detail-sidebar">

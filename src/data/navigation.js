@@ -8,7 +8,7 @@ export const userNavLinks = [
 
 export const adminNavLinks = [
   { to: '/admin', label: 'Tổng quan', shortLabel: 'TG' },
-  { to: '/admin/duyet-bai-viet', label: 'Duyệt bài viết', shortLabel: 'DB' },
+  { to: '/admin/quan-ly-bai-viet', label: 'Quản lý bài viết', shortLabel: 'BV' },
   { to: '/admin/quan-ly-binh-luan', label: 'Quản lý bình luận', shortLabel: 'BL' },
   { to: '/admin/quan-ly-nguoi-dung', label: 'Quản lý người dùng', shortLabel: 'ND' },
   { to: '/admin/quan-ly-thiet-bi', label: 'Quản lý thiết bị điện', shortLabel: 'TB' },

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './PostCard.css'
 
@@ -12,6 +13,45 @@ function getAuthorInitials(author) {
 }
 
 function PostCard({ post }) {
+  const [isSaved, setIsSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    async function checkSaved() {
+      if (!post?.id) return
+      // Skip check for mock IDs (UUID length is 36)
+      if (String(post.id).length < 30) return
+      
+      const { isPostSaved } = await import('../../services/interactionService')
+      const { data } = await isPostSaved(post.id)
+      if (data) setIsSaved(true)
+    }
+    checkSaved()
+  }, [post?.id])
+
+  async function handleToggleSave(e) {
+    e.preventDefault() // prevent navigating if it's inside a link or just clicking button
+    if (isSaving) return
+    if (!post?.id || String(post.id).length < 30) {
+      alert('Chức năng lưu bài chỉ hỗ trợ bài viết thật trên hệ thống.')
+      return
+    }
+
+    setIsSaving(true)
+    const { savePost, unsavePost } = await import('../../services/interactionService')
+    
+    if (isSaved) {
+      const { error } = await unsavePost(post.id)
+      if (!error) setIsSaved(false)
+      else alert(error.message)
+    } else {
+      const { error } = await savePost(post.id)
+      if (!error) setIsSaved(true)
+      else alert(error.message)
+    }
+    setIsSaving(false)
+  }
+
   return (
     <article className="post-card-ui">
       <div className="post-card-ui__media">
@@ -36,8 +76,14 @@ function PostCard({ post }) {
           </svg>
         </div>
         <span className="post-card-ui__category">{post.category}</span>
-        <button type="button" className="post-card-ui__save-button" aria-label={`Lưu bài ${post.title}`}>
-          Lưu
+        <button 
+          type="button" 
+          className="post-card-ui__save-button" 
+          aria-label={`Lưu bài ${post.title}`}
+          onClick={handleToggleSave}
+          style={{ opacity: isSaved ? 1 : undefined, background: isSaved ? '#4f8428' : undefined, color: isSaved ? '#fff' : undefined }}
+        >
+          {isSaved ? 'Đã lưu' : 'Lưu'}
         </button>
       </div>
 

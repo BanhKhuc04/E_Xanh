@@ -1,14 +1,88 @@
-function CommentSection({ comments }) {
+import { useState, useEffect } from 'react'
+
+function CommentSection({ comments: mockComments, post }) {
+  const [comments, setComments] = useState(mockComments || [])
+  const [content, setContent] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    async function init() {
+      const { getCurrentSession } = await import('../../services/authService')
+      const session = await getCurrentSession()
+      setUser(session?.user || null)
+      
+      if (post?.id && String(post.id).length > 30) {
+        const { getCommentsByPostId } = await import('../../services/interactionService')
+        const { data } = await getCommentsByPostId(post.id)
+        if (data) {
+          setComments(data.map(c => ({
+            id: c.id,
+            author: c.profiles?.name || c.profiles?.email || 'Người dùng ẩn danh',
+            time: new Date(c.created_at).toLocaleDateString('vi-VN'),
+            content: c.content,
+            likes: c.likes_count || 0
+          })))
+        }
+      } else {
+        setComments(mockComments || [])
+      }
+    }
+    init()
+  }, [post?.id, mockComments])
+
+  async function handleSubmit() {
+    if (!content.trim() || isSubmitting) return
+    if (!user) {
+      alert('Bạn cần đăng nhập để bình luận.')
+      return
+    }
+    if (!post?.id || String(post.id).length < 30) {
+      alert('Không thể bình luận trên bài viết mẫu.')
+      return
+    }
+
+    setIsSubmitting(true)
+    const { addComment } = await import('../../services/interactionService')
+    const { data, error } = await addComment(post.id, content)
+    if (error) {
+      alert(error.message)
+    } else if (data) {
+      setContent('')
+      setComments(prev => [...prev, {
+        id: data.id,
+        author: data.profiles?.name || data.profiles?.email || 'Bạn',
+        time: 'Vừa xong',
+        content: data.content,
+        likes: 0
+      }])
+    }
+    setIsSubmitting(false)
+  }
+
   return (
     <section className="comment-section">
       <h2>Bình luận</h2>
 
       <div className="comment-section__composer">
-        <span className="comment-section__avatar">B</span>
+        <span className="comment-section__avatar">
+          {user ? (user.user_metadata?.name?.[0] || user.email?.[0] || 'U').toUpperCase() : '?'}
+        </span>
         <div className="comment-section__form">
-          <textarea placeholder="Chia sẻ suy nghĩ của bạn..." rows="4"></textarea>
+          <textarea 
+            placeholder={user ? "Chia sẻ suy nghĩ của bạn..." : "Bạn cần đăng nhập để bình luận"} 
+            rows="4"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            disabled={!user}
+          ></textarea>
           <div className="comment-section__actions">
-            <button type="button" className="btn btn--primary">
+            <button 
+              type="button" 
+              className="btn btn--primary" 
+              onClick={handleSubmit} 
+              disabled={isSubmitting || !user || !content.trim()}
+            >
               Gửi bình luận
             </button>
           </div>

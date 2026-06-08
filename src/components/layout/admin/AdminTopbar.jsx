@@ -124,7 +124,7 @@ function AdminTopbar() {
             onClick={async () => {
               const { signOut } = await import('../../../services/authService')
               await signOut()
-              window.location.href = '/admin/dang-nhap'
+              window.location.href = '/dang-nhap'
             }}
             style={{ marginLeft: '16px', background: 'transparent', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
           >

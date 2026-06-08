@@ -12,7 +12,6 @@ Website giúp người trẻ đọc mẹo tiết kiệm điện, chia sẻ kinh 
 | Vite | Build tool & Dev server |
 | React Router DOM v6 | Điều hướng SPA |
 | CSS | Styling thuần (không framework CSS) |
-| localStorage | Lưu trữ dữ liệu tạm trên trình duyệt |
 | Supabase | Backend-as-a-Service (Auth, Database, Storage) |
 
 ---
@@ -26,24 +25,21 @@ Website giúp người trẻ đọc mẹo tiết kiệm điện, chia sẻ kinh 
 - **Chi tiết bài viết** — Xem nội dung bài viết, thích, lưu, bình luận
 - **Bài đã lưu** — Quản lý các bài viết đã lưu
 - **Cộng đồng** — Bài chia sẻ từ cộng đồng người dùng
-- **Đăng bài chia sẻ** — Tạo bài viết mới gửi lên cộng đồng
+- **Đăng bài chia sẻ** — Tạo bài viết mới gửi lên cộng đồng (cần duyệt)
 - **Kiểm tra tiền điện** — Nhập thiết bị, tính chi phí điện ước tính
 - **Lịch sử kiểm tra tiền điện** — Xem lại các lần kiểm tra đã lưu, tính lại
-- **Đăng nhập / Đăng ký** — Xác thực giả lập bằng localStorage
-- **Tài khoản của tôi** — Xem và chỉnh sửa thông tin cá nhân
+- **Đăng nhập / Đăng ký** — Hệ thống xác thực bằng Email/Password qua Supabase Auth
+- **Tài khoản của tôi** — Xem thông tin cá nhân và thiết lập
 - **Về chúng tôi** — Giới thiệu đội ngũ phát triển
 - **Điều khoản** — Điều khoản sử dụng nền tảng
 - **Liên hệ** — Form liên hệ hỗ trợ
 
-### Phía quản trị (Admin)
+### Phía quản trị (Admin / Moderator)
 
-- **Dashboard** — Tổng quan hoạt động, biểu đồ tương tác, bình luận mới
-- **Duyệt bài viết** — Duyệt / từ chối bài viết chờ kiểm duyệt
-- **Quản lý bình luận** — Duyệt, ẩn, xóa bình luận vi phạm
-- **Quản lý người dùng** — Xem, khóa / mở khóa, đổi vai trò người dùng
-- **Quản lý thiết bị điện** — Thêm, sửa, ẩn thiết bị và gợi ý tiết kiệm
-- **Thống kê** — Biểu đồ CSS, top thiết bị, bài viết, người dùng tích cực
-- **Cài đặt hệ thống** — Thông tin nền tảng, toggle duyệt nội dung, bảo mật, giao diện
+- **Dashboard** — (Chỉ Admin) Tổng quan hệ thống dữ liệu thực (Bài viết, Users, Saved Posts...)
+- **Quản lý bài viết** — (Admin/Moderator) Duyệt, từ chối, ẩn bài. Admin có thể Xóa bài viết.
+- **Quản lý người dùng** — (Chỉ Admin) Xem danh sách người dùng, khóa tài khoản, cấp quyền (Moderator, Admin).
+- **Phân quyền chặt chẽ (RLS)** — Không cho Moderator xóa bài. Không cho Moderator vào trang người dùng. Không cho Admin tự khóa hay hạ quyền nếu là Admin duy nhất.
 
 ---
 
@@ -70,49 +66,21 @@ npm run lint
 
 ## 🔑 Tài khoản demo
 
-| Vai trò | Cách truy cập |
+Hệ thống đã kết nối hoàn chỉnh với Supabase Auth. Bạn cần tạo tài khoản thực tế bằng Email.
+
+| Vai trò | Cơ chế |
 |---------|---------------|
-| **User** | Nhập email hợp lệ bất kỳ + mật khẩu bất kỳ tại `/dang-nhap` |
-| **Admin** | Truy cập trực tiếp `/admin` trên trình duyệt |
+| **User** | Đăng ký tài khoản bình thường tại `/dang-ky`. Mặc định được cấp role `user`. |
+| **Moderator / Admin** | Đăng ký tài khoản thường, sau đó phải dùng tài khoản Admin (hoặc set trong bảng `profiles` ở Supabase) để nâng quyền lên `moderator` hoặc `admin`. |
 
 ---
 
-## 📁 Cấu trúc thư mục chính
-
-```
-src/
-├── app/              # Router config
-├── components/       # Component tái sử dụng
-│   ├── admin/        # Component admin (devices, settings, statistics, users, ...)
-│   ├── common/       # Component dùng chung (BrandLogo, ...)
-│   ├── electricity/  # Component kiểm tra tiền điện
-│   └── layout/       # Layout component (admin sidebar/topbar, user navbar/footer)
-├── data/             # Mock data tĩnh
-├── layouts/          # AdminLayout, UserLayout
-├── lib/              # Supabase client, test connection
-├── pages/            # Tất cả page component
-│   ├── admin/        # 7 trang admin
-│   ├── shared/       # NotFoundPage
-│   └── user/         # 14 trang user
-├── styles/           # CSS files
-└── utils/            # authStorage, electricityStorage
-
-supabase/
-├── schema.sql        # SQL tạo 11 bảng database
-├── seed.sql          # Dữ liệu mẫu (categories, devices, settings)
-└── policies.sql      # Row Level Security policies
-```
-
----
-
-## 🗄️ Nâng cấp Supabase backend
+## 🗄️ Tích hợp Supabase backend
 
 ### Bước 1: Tạo project Supabase
 
 1. Vào [supabase.com](https://supabase.com) → **New Project**
-2. Chọn region: **Southeast Asia (Singapore)**
-3. Đặt password database → lưu lại
-4. Đợi project khởi tạo (~2 phút)
+2. Đợi project khởi tạo.
 
 ### Bước 2: Tạo file `.env.local`
 
@@ -136,25 +104,11 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
 Vào **SQL Editor** trong Supabase Dashboard, chạy **đúng thứ tự**:
 
 1. **`supabase/schema.sql`** — Tạo 11 bảng + trigger tự tạo profile
-2. **`supabase/policies.sql`** — Thiết lập Row Level Security
-3. **`supabase/seed.sql`** — Nhập dữ liệu mẫu (categories, devices, settings)
+2. **`supabase/policies.sql`** — Thiết lập Row Level Security (RLS) bảo vệ dữ liệu.
+3. **`supabase/seed.sql`** — (Tùy chọn) Nhập dữ liệu mẫu (categories, devices, settings).
 
-### Bước 4: Test kết nối
-
-Mở `src/main.jsx` và thêm tạm:
-
-```javascript
-import { testSupabaseConnection } from './lib/testSupabaseConnection'
-testSupabaseConnection()
-```
-
-Chạy `npm run dev`, mở console trình duyệt. Nếu thấy:
-
-```
-[E-XANH] Kết nối thành công! Dữ liệu categories: [...]
-```
-
-→ Kết nối OK ✅. **Nhớ xóa dòng test sau khi kiểm tra xong.**
+### Bước 4: Tự thiết lập Admin đầu tiên
+Vào Supabase -> Table Editor -> `profiles`, tìm row của tài khoản bạn vừa tạo, sửa cột `role` thành `admin`.
 
 ### Bước 5: Deploy lên Vercel
 
@@ -171,13 +125,12 @@ Sau đó redeploy.
 
 ## 📝 Ghi chú
 
-- Dự án hiện đang dùng **mock data** và **localStorage** để mô phỏng chức năng. Supabase backend đang trong quá trình tích hợp.
 - Toàn bộ giao diện bằng **tiếng Việt**.
 - Palette màu chủ đạo: `#EAF59D` · `#C1D95C` · `#80B155` · `#4F8428` · `#336A29`
 - Font chữ: **Be Vietnam Pro** (Google Fonts).
 - Responsive cơ bản cho Desktop, Tablet, Mobile.
+- Tích hợp 100% API cho Auth, Posts và Profiles.
 
 ---
 
-**© 2024 E-XANH. Made by VanhKhucDev**
-
+**© 2024 E-XANH**

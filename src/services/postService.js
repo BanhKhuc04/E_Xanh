@@ -72,16 +72,14 @@ export async function createPost(postData) {
     description: postData.description,
     content: postData.content,
     type: validType,
-    status: 'pending',
+    status: postData.status || 'pending',
     image_url: imageUrl,
     // category_id: mapped if possible, null for now since form category is text
   }
 
-  console.log('Debug: Inserting payload', payload)
-
   const { data, error } = await supabase
     .from('posts')
-    .insert(payload)
+    .insert([payload])
     .select()
     .single()
 
@@ -166,18 +164,59 @@ export async function hidePost(postId) {
   return updatePostStatus(postId, 'hidden')
 }
 
-// Dùng tạm để debug, xem bài mới nhất có vào db thật không
-export async function debugListRecentPosts() {
+
+export async function updatePost(postId, postData) {
+  const normalizedTypeMap = {
+    'Mẹo tiết kiệm': 'tip',
+    'Cộng đồng': 'community',
+    'Chia sẻ cộng đồng': 'community',
+    'Hỏi đáp': 'qa',
+    'Review thiết bị': 'review',
+    'tip': 'tip',
+    'community': 'community',
+    'qa': 'qa',
+    'review': 'review',
+  }
+  
+  const payload = {
+    title: postData.title,
+    description: postData.description,
+    content: postData.content,
+  }
+
+  if (postData.type) {
+    payload.type = normalizedTypeMap[postData.type] || 'community'
+  }
+
+  if (postData.status) {
+    payload.status = postData.status
+  }
+
+  // Nếu có ảnh mới upload
+  if (postData.coverFile) {
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (sessionData?.session) {
+      const { publicUrl, error: uploadError } = await uploadPostImage(postData.coverFile, sessionData.session.user.id)
+      if (!uploadError) {
+        payload.image_url = publicUrl
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from('posts')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(10)
-  
-  if (error) {
-    console.error('Debug: Error fetching recent posts', error)
-  } else {
-    console.log('Debug: 10 Recent Posts:', data)
-  }
-  return data
+    .update(payload)
+    .eq('id', postId)
+    .select()
+
+  return { data, error }
+}
+
+export async function deletePost(postId) {
+  const { data, error } = await supabase
+    .from('posts')
+    .delete()
+    .eq('id', postId)
+
+  return { data, error }
 }

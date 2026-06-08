@@ -8,14 +8,25 @@ function AdminUserDrawer({
   onChangeRole,
 }) {
   const [adminNote, setAdminNote] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
 
   if (!user) return null
 
   const roleInfo = userRoleMap[user.role] ?? userRoleMap.user
   const statusInfo = userStatusMap[user.status] ?? userStatusMap.active
   const isLocked = user.status === 'locked'
+  
+  const handleRoleChange = async (e) => {
+    setIsUpdating(true)
+    await onChangeRole(user.id, e.target.value)
+    setIsUpdating(false)
+  }
 
-  const nextRole = user.role === 'user' ? 'moderator' : user.role === 'moderator' ? 'user' : null
+  const handleStatusChange = async (newStatus) => {
+    setIsUpdating(true)
+    await onChangeStatus(user.id, newStatus)
+    setIsUpdating(false)
+  }
 
   return (
     <>
@@ -113,7 +124,8 @@ function AdminUserDrawer({
             <button
               type="button"
               className="btn btn--primary"
-              onClick={() => onChangeStatus(user.id, 'active')}
+              onClick={() => handleStatusChange('active')}
+              disabled={isUpdating}
             >
               Mở khóa
             </button>
@@ -121,21 +133,26 @@ function AdminUserDrawer({
             <button
               type="button"
               className="btn btn--ghost au-drawer__lock-btn"
-              onClick={() => onChangeStatus(user.id, 'locked')}
+              onClick={() => handleStatusChange('locked')}
+              disabled={isUpdating}
             >
               Khóa tài khoản
             </button>
           )}
 
-          {nextRole && (
-            <button
-              type="button"
-              className="btn btn--secondary"
-              onClick={() => onChangeRole(user.id, nextRole)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 'bold' }}>Đổi vai trò:</span>
+            <select
+              value={user.role}
+              onChange={handleRoleChange}
+              disabled={isUpdating}
+              style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc' }}
             >
-              Đổi vai trò
-            </button>
-          )}
+              <option value="user">Người dùng</option>
+              <option value="moderator">Moderator</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
 
           <button type="button" className="btn btn--ghost" onClick={() => {}}>
             Xem bài đã đăng

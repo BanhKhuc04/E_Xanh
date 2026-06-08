@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { postStatusMap } from '../../../data/adminPosts'
 
-function AdminPostPreview({ post, onChangeStatus }) {
+function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, currentUserRole }) {
   const [adminNote, setAdminNote] = useState('')
 
   if (!post) {
@@ -129,6 +129,26 @@ function AdminPostPreview({ post, onChangeStatus }) {
             >
               Xem chi tiết
             </button>
+
+            <button
+              type="button"
+              className="btn btn--ghost"
+              style={{ color: '#1976d2' }}
+              onClick={() => onEditPost(post)}
+            >
+              Sửa bài
+            </button>
+
+            {currentUserRole === 'admin' && (
+              <button
+                type="button"
+                className="btn btn--ghost"
+                style={{ color: '#d32f2f' }}
+                onClick={() => onDeletePost(post.id)}
+              >
+                Xóa bài
+              </button>
+            )}
           </div>
         </div>
       </div>

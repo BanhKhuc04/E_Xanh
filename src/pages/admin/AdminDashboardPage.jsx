@@ -1,18 +1,13 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  contentTypes,
-  dashboardStats,
-  quickActions,
-  recentActivities,
-  recentComments,
-  weeklyInteractions,
-} from '../../data/adminDashboard'
+import { getDashboardStats } from '../../services/adminStatsService'
+import { postStatusMap } from '../../data/adminPosts'
 
 function DashboardIcon({ icon }) {
   const icons = {
-    pending: (
+    total: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
+        <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
       </svg>
     ),
     approved: (
@@ -20,9 +15,14 @@ function DashboardIcon({ icon }) {
         <path d="M7 12.5 10 15l7-7M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
       </svg>
     ),
-    comment: (
+    pending: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M5 6h14v10H9l-4 3V6zM9 10h6M9 13h4" />
+        <path d="M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
+      </svg>
+    ),
+    rejected: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-13v4m0 3.5h.01" />
       </svg>
     ),
     users: (
@@ -30,9 +30,9 @@ function DashboardIcon({ icon }) {
         <path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM16 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 20a5.5 5.5 0 0 1 11 0M14 20a4 4 0 0 1 6.5-3.1" />
       </svg>
     ),
-    energy: (
+    saved: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m13 2-7 10h5l-1 10 8-12h-5V2z" />
+        <path d="M5 6h14v10H9l-4 3V6zM9 10h6M9 13h4" />
       </svg>
     ),
   }
@@ -40,36 +40,49 @@ function DashboardIcon({ icon }) {
   return icons[icon] ?? null
 }
 
-function buildDonutGradient(items) {
-  let current = 0
-  const stops = items.map((item) => {
-    const start = current
-    const end = current + item.value
-    current = end
-    return `${item.color} ${start}% ${end}%`
-  })
-
-  return `conic-gradient(${stops.join(', ')})`
-}
-
 function AdminDashboardPage() {
-  const donutStyle = {
-    background: buildDonutGradient(contentTypes),
+  const [statsData, setStatsData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+    async function loadStats() {
+      const data = await getDashboardStats()
+      if (isMounted) {
+        setStatsData(data)
+        setIsLoading(false)
+      }
+    }
+    loadStats()
+    return () => { isMounted = false }
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="admin-dashboard page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <p style={{ fontSize: '1.2rem', color: '#666' }}>Đang tải dữ liệu tổng quan...</p>
+      </div>
+    )
   }
 
-  const weeklyMax = Math.max(
-    ...weeklyInteractions.flatMap((item) => [item.likes, item.comments, item.saves]),
-  )
+  // Cấu trúc lại danh sách card từ dữ liệu fetch được
+  const dashboardStats = [
+    { label: 'Tổng bài viết', value: statsData.totalPosts, icon: 'total', accent: 'green', change: '' },
+    { label: 'Đã duyệt', value: statsData.approvedPosts, icon: 'approved', accent: 'blue', change: '' },
+    { label: 'Chờ duyệt', value: statsData.pendingPosts, icon: 'pending', accent: 'yellow', change: '' },
+    { label: 'Từ chối / Ẩn', value: statsData.rejectedHiddenPosts, icon: 'rejected', accent: 'red', change: '' },
+    { label: 'Tổng người dùng', value: statsData.totalUsers, icon: 'users', accent: 'purple', change: '' },
+    { label: 'Lượt lưu bài', value: statsData.totalSavedPosts, icon: 'saved', accent: 'orange', change: '' },
+  ]
 
   return (
     <div className="admin-dashboard page">
       <section className="admin-dashboard__hero">
         <span className="page-badge page-badge--soft">Bảng điều khiển quản trị</span>
         <div className="admin-dashboard__hero-copy">
-          <h2>Tổng quan quản trị</h2>
+          <h2>Tổng quan hệ thống</h2>
           <p>
-            Theo dõi bài viết, bình luận, người dùng và lượt kiểm tra tiền điện trong hệ
-            thống.
+            Theo dõi tình trạng bài viết, người dùng và các hoạt động đang diễn ra.
           </p>
         </div>
       </section>
@@ -91,147 +104,83 @@ function AdminDashboardPage() {
         ))}
       </section>
 
-      <section className="admin-dashboard__insights">
-        <article className="admin-panel admin-panel--chart">
-          <div className="admin-panel__header">
-            <div>
-              <h3>Lượt tương tác trong tuần</h3>
-              <p>Like, bình luận và lưu bài trong 7 ngày gần nhất.</p>
-            </div>
-          </div>
-
-          <div className="admin-chart-legend" aria-label="Chú thích biểu đồ">
-            <span>
-              <i className="is-like" aria-hidden="true"></i>
-              Like
-            </span>
-            <span>
-              <i className="is-comment" aria-hidden="true"></i>
-              Bình luận
-            </span>
-            <span>
-              <i className="is-save" aria-hidden="true"></i>
-              Lưu bài
-            </span>
-          </div>
-
-          <div className="admin-weekly-chart" aria-hidden="true">
-            {weeklyInteractions.map((item) => (
-              <div key={item.day} className="admin-weekly-chart__group">
-                <div className="admin-weekly-chart__bars">
-                  <span
-                    className="bar-like"
-                    style={{ height: `${(item.likes / weeklyMax) * 100}%` }}
-                  ></span>
-                  <span
-                    className="bar-comment"
-                    style={{ height: `${(item.comments / weeklyMax) * 100}%` }}
-                  ></span>
-                  <span
-                    className="bar-save"
-                    style={{ height: `${(item.saves / weeklyMax) * 100}%` }}
-                  ></span>
-                </div>
-                <small>{item.day}</small>
-              </div>
-            ))}
-          </div>
-        </article>
-
+      <section className="admin-dashboard__secondary" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '32px' }}>
+        
+        {/* Khu vực 5 bài viết mới nhất */}
         <article className="admin-panel">
           <div className="admin-panel__header">
             <div>
-              <h3>Loại nội dung phổ biến</h3>
-              <p>Phân bổ nội dung đang được cộng đồng quan tâm nhất.</p>
+              <h3>Bài viết gần đây</h3>
+              <p>5 bài viết mới được thêm vào hệ thống (mọi trạng thái).</p>
             </div>
+            <Link to="/admin/quan-ly-bai-viet" className="btn btn--ghost" style={{ fontSize: '0.85rem' }}>Quản lý</Link>
           </div>
 
-          <div className="admin-content-share">
-            <div className="admin-donut-chart" style={donutStyle} aria-hidden="true">
-              <div className="admin-donut-chart__center">
-                <strong>186 bài</strong>
-              </div>
-            </div>
+          {statsData.recentPosts.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: '#666' }}>Chưa có bài viết nào.</div>
+          ) : (
+            <ul className="admin-comment-list">
+              {statsData.recentPosts.map((post) => {
+                const statusInfo = postStatusMap[post.status] ?? postStatusMap.pending
+                return (
+                  <li key={post.id} className="admin-comment-item" style={{ alignItems: 'flex-start' }}>
+                    <div className="admin-comment-item__content" style={{ flex: 1 }}>
+                      <div className="admin-comment-item__meta" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <strong>{post.title}</strong>
+                      </div>
+                      <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
+                        Bởi <strong>{post.profiles?.name || 'Ẩn danh'}</strong> - Ngày: {new Date(post.created_at).toLocaleDateString('vi-VN')}
+                      </p>
+                    </div>
+                    <span className={`ap-badge ${statusInfo.className}`} style={{ marginLeft: '12px' }}>
+                      {statusInfo.label}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </article>
 
-            <ul className="admin-content-list">
-              {contentTypes.map((item) => (
-                <li key={item.label}>
-                  <span className="admin-content-list__label">
-                    <i style={{ backgroundColor: item.color }} aria-hidden="true"></i>
-                    {item.label}
-                  </span>
-                  <strong>{item.value}%</strong>
+        {/* Khu vực bài cần duyệt ngay */}
+        <article className="admin-panel">
+          <div className="admin-panel__header">
+            <div>
+              <h3>Cần phê duyệt ngay</h3>
+              <p>Các bài viết đang ở trạng thái chờ duyệt.</p>
+            </div>
+            <span className="admin-panel__count">{statsData.pendingPostsList.length}</span>
+          </div>
+
+          {statsData.pendingPostsList.length === 0 ? (
+            <div style={{ padding: '40px 24px', textAlign: 'center', color: '#4f8428', background: '#f1f8e9', borderRadius: '8px', margin: '16px' }}>
+              <svg viewBox="0 0 24 24" style={{ width: 48, height: 48, fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, margin: '0 auto 12px' }}>
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p style={{ fontWeight: 600 }}>Thật tuyệt!</p>
+              <span style={{ fontSize: '0.9rem' }}>Không có bài viết nào đang chờ duyệt lúc này.</span>
+            </div>
+          ) : (
+            <ul className="admin-comment-list">
+              {statsData.pendingPostsList.map((post) => (
+                <li key={post.id} className="admin-comment-item" style={{ alignItems: 'flex-start' }}>
+                  <div className="admin-comment-item__content" style={{ flex: 1 }}>
+                    <div className="admin-comment-item__meta">
+                      <strong>{post.title}</strong>
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '4px' }}>
+                      Bởi: {post.profiles?.name || 'Ẩn danh'} - {new Date(post.created_at).toLocaleDateString('vi-VN')}
+                    </p>
+                  </div>
+                  <Link to="/admin/quan-ly-bai-viet" className="btn btn--primary" style={{ padding: '4px 12px', fontSize: '0.85rem' }}>
+                    Duyệt
+                  </Link>
                 </li>
               ))}
             </ul>
-          </div>
-        </article>
-      </section>
-
-      <section className="admin-dashboard__secondary">
-        <article className="admin-panel">
-          <div className="admin-panel__header">
-            <div>
-              <h3>Bình luận mới</h3>
-              <p>Những thảo luận cần theo dõi trong cộng đồng E-XANH.</p>
-            </div>
-            <span className="admin-panel__count">4</span>
-          </div>
-
-          <ul className="admin-comment-list">
-            {recentComments.map((comment) => (
-              <li key={comment.id} className="admin-comment-item">
-                <span className="admin-comment-item__avatar">{comment.avatar}</span>
-                <div className="admin-comment-item__content">
-                  <div className="admin-comment-item__meta">
-                    <strong>{comment.author}</strong>
-                    <span>{comment.time}</span>
-                  </div>
-                  <p>{comment.content}</p>
-                </div>
-                <button type="button" className="admin-comment-item__action">
-                  Xem
-                </button>
-              </li>
-            ))}
-          </ul>
+          )}
         </article>
 
-        <article className="admin-panel">
-          <div className="admin-panel__header">
-            <div>
-              <h3>Hoạt động gần đây</h3>
-              <p>Các cập nhật mới nhất trong khu vực quản trị và cộng đồng.</p>
-            </div>
-          </div>
-
-          <ol className="admin-timeline">
-            {recentActivities.map((activity) => (
-              <li key={activity}>{activity}</li>
-            ))}
-          </ol>
-        </article>
-      </section>
-
-      <section className="admin-dashboard__quick">
-        <div className="admin-dashboard__section-title">
-          <h3>Truy cập nhanh</h3>
-          <p>Đi tới các tác vụ quản trị được dùng thường xuyên trong ngày.</p>
-        </div>
-
-        <div className="admin-quick-grid">
-          {quickActions.map((action) => (
-            <Link key={action.to} to={action.to} className="admin-quick-card">
-              <span className="admin-quick-card__icon" aria-hidden="true">
-                <DashboardIcon icon={action.icon} />
-              </span>
-              <div>
-                <strong>{action.title}</strong>
-                <p>{action.description}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
       </section>
     </div>
   )

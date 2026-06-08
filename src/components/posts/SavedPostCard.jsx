@@ -10,14 +10,20 @@ function getAuthorBadge(author) {
     .toUpperCase()
 }
 
-function SavedPostCard({ post }) {
+function SavedPostCard({ post, onUnsave }) {
   return (
     <article className="saved-post-card">
       <div className="saved-post-card__media">
         <img src={post.image} alt={post.title} />
         <span className="saved-post-card__tag">{post.savedCategoryLabel}</span>
-        <button type="button" className="saved-post-card__bookmark" aria-label={`Bỏ lưu bài ${post.title}`}>
-          Lưu
+        <button 
+          type="button" 
+          className="saved-post-card__bookmark" 
+          aria-label={`Bỏ lưu bài ${post.title}`}
+          onClick={() => onUnsave && onUnsave(post.id)}
+          style={{ opacity: 1, background: '#4f8428', color: '#fff' }}
+        >
+          Đã lưu
         </button>
       </div>
 
@@ -32,7 +38,11 @@ function SavedPostCard({ post }) {
         </div>
 
         <div className="saved-post-card__actions">
-          <button type="button" className="saved-post-card__remove">
+          <button 
+            type="button" 
+            className="saved-post-card__remove"
+            onClick={() => onUnsave && onUnsave(post.id)}
+          >
             Bỏ lưu
           </button>
           <Link to={`/meo-tiet-kiem/${post.slug}`} className="saved-post-card__read">

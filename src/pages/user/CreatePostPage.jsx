@@ -140,15 +140,13 @@ function CreatePostPage() {
       return
     }
 
-    const { data, error } = await createPost(form)
+    const { error } = await createPost(form)
     
     if (error) {
-      console.error('Lỗi khi đăng bài:', error)
       setErrorMessage(`Lỗi đăng bài: ${error.message}`)
       return
     }
 
-    console.log('Post created successfully:', data)
     setErrorMessage('')
     setSuccessMessage('Bài viết đã được gửi và đang chờ duyệt.')
     setForm(initialForm)

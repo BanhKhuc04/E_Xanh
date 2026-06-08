@@ -44,7 +44,7 @@ function AdminRoute() {
   }
 
   if (!user) {
-    return <Navigate to="/admin/dang-nhap" replace />
+    return <Navigate to="/dang-nhap" replace />
   }
 
   if (!isAdmin) {

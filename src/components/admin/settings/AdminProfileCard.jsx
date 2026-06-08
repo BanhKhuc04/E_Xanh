@@ -30,7 +30,7 @@ function AdminProfileCard({ profile }) {
           onClick={async () => {
             const { signOut } = await import('../../../services/authService')
             await signOut()
-            window.location.href = '/admin/dang-nhap'
+            window.location.href = '/dang-nhap'
           }}
         >
           Đăng xuất

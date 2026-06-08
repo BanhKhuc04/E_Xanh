@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SavedPostCard from '../../components/posts/SavedPostCard'
 import SavedPostsFilter from '../../components/posts/SavedPostsFilter'
@@ -30,11 +30,49 @@ function SavedPostsPage() {
   const [searchValue, setSearchValue] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('Tất cả')
   const [sortValue, setSortValue] = useState('Mới lưu nhất')
+  
+  const [dbSavedPosts, setDbSavedPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadSavedPosts() {
+      const { getCurrentSession } = await import('../../services/authService')
+      const session = await getCurrentSession()
+      if (session?.user) {
+        const { getMySavedPosts } = await import('../../services/interactionService')
+        const { data, error } = await getMySavedPosts()
+        if (data) {
+          setDbSavedPosts(data)
+        } else {
+          setDbSavedPosts([])
+          if (error) console.error('Lỗi lấy bài lưu:', error.message)
+        }
+      } else {
+        setDbSavedPosts(savedPosts)
+      }
+      setLoading(false)
+    }
+    loadSavedPosts()
+  }, [])
+
+  async function handleUnsave(postId) {
+    if (String(postId).length < 30) {
+      setDbSavedPosts(prev => prev.filter(p => p.id !== postId))
+      return
+    }
+    const { unsavePost } = await import('../../services/interactionService')
+    const { error } = await unsavePost(postId)
+    if (!error) {
+      setDbSavedPosts(prev => prev.filter(p => p.id !== postId))
+    } else {
+      alert(error.message)
+    }
+  }
 
   const visiblePosts = useMemo(() => {
     const keyword = searchValue.trim().toLowerCase()
 
-    const filtered = savedPosts.filter((post) => {
+    const filtered = dbSavedPosts.filter((post) => {
       const matchesSearch =
         keyword.length === 0 ||
         post.title.toLowerCase().includes(keyword) ||
@@ -48,13 +86,17 @@ function SavedPostsPage() {
     })
 
     return sortSavedPosts(filtered, sortValue)
-  }, [searchValue, selectedFilter, sortValue])
+  }, [searchValue, selectedFilter, sortValue, dbSavedPosts])
 
   const stats = [
-    { value: '12', label: 'bài đã lưu' },
-    { value: '8', label: 'mẹo tiết kiệm' },
-    { value: '4', label: 'bài cộng đồng' },
+    { value: dbSavedPosts.length.toString(), label: 'bài đã lưu' },
+    { value: dbSavedPosts.filter(p => p.category === 'Mẹo tiết kiệm').length.toString(), label: 'mẹo tiết kiệm' },
+    { value: dbSavedPosts.filter(p => p.category === 'Cộng đồng').length.toString(), label: 'bài cộng đồng' },
   ]
+
+  if (loading) {
+    return <div className="saved-posts-page"><div style={{ padding: '60px', textAlign: 'center', color: '#666' }}>Đang tải...</div></div>
+  }
 
   return (
     <div className="saved-posts-page">
@@ -106,7 +148,7 @@ function SavedPostsPage() {
           {visiblePosts.length > 0 ? (
             <div className="saved-posts-grid">
               {visiblePosts.map((post) => (
-                <SavedPostCard key={post.id} post={post} />
+                <SavedPostCard key={post.id} post={post} onUnsave={handleUnsave} />
               ))}
             </div>
           ) : (

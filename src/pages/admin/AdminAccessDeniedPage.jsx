@@ -6,7 +6,7 @@ function AdminAccessDeniedPage() {
 
   const handleLogoutAndSwitch = async () => {
     await signOut()
-    navigate('/admin/dang-nhap')
+    navigate('/dang-nhap')
   }
 
   return (

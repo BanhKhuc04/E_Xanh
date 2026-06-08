@@ -1,6 +1,5 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import {
-  adminComments as initialComments,
   adminCommentStats,
   commentStatusMap,
 } from '../../data/adminComments'
@@ -19,7 +18,8 @@ const statusLabelToKey = {
 }
 
 function CommentManagementPage() {
-  const [comments, setComments] = useState(initialComments)
+  const [comments, setComments] = useState([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('Tất cả')
   const [postFilter, setPostFilter] = useState('Tất cả')
@@ -27,6 +27,27 @@ function CommentManagementPage() {
   const [selectedIds, setSelectedIds] = useState([])
   const [drawerCommentId, setDrawerCommentId] = useState(null)
   const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    async function loadComments() {
+      const { getAllCommentsAdmin } = await import('../../services/interactionService')
+      const { data } = await getAllCommentsAdmin()
+      if (data) {
+        setComments(data.map(c => ({
+          id: c.id,
+          content: c.content,
+          userName: c.profiles?.name || c.profiles?.email || 'N/A',
+          userAvatar: c.profiles?.avatar_url || 'EX',
+          postTitle: c.posts?.title || 'Không rõ',
+          createdAt: c.created_at,
+          status: c.status,
+          reports: c.reports_count || 0,
+        })))
+      }
+      setLoading(false)
+    }
+    loadComments()
+  }, [])
 
   const showToast = useCallback((message) => {
     setToast(message)
@@ -88,22 +109,48 @@ function CommentManagementPage() {
     }
   }
 
-  const handleChangeStatus = (id, newStatus) => {
-    setComments((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
-    )
-    showToast(
-      `Đã cập nhật bình luận: ${commentStatusMap[newStatus]?.label ?? newStatus}.`,
-    )
+  const handleChangeStatus = async (id, newStatus) => {
+    if (String(id).length < 30) {
+      // Mock data
+      setComments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
+      )
+      showToast(`Đã cập nhật bình luận: ${commentStatusMap[newStatus]?.label ?? newStatus}.`)
+      return
+    }
+
+    const { updateCommentStatusAdmin } = await import('../../services/interactionService')
+    const { error } = await updateCommentStatusAdmin(id, newStatus)
+    if (!error) {
+      setComments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
+      )
+      showToast(`Đã cập nhật bình luận: ${commentStatusMap[newStatus]?.label ?? newStatus}.`)
+    } else {
+      showToast('Lỗi: ' + error.message)
+    }
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    if (String(id).length > 30) {
+      const { deleteCommentAdmin } = await import('../../services/interactionService')
+      const { error } = await deleteCommentAdmin(id)
+      if (error) {
+        showToast('Lỗi xóa: ' + error.message)
+        return
+      }
+    }
+
     setComments((prev) => prev.filter((c) => c.id !== id))
     setDrawerCommentId(null)
     showToast('Đã xóa bình luận.')
   }
 
-  const handleBulkHide = () => {
+  const handleBulkHide = async () => {
+    const { updateCommentStatusAdmin } = await import('../../services/interactionService')
+    for (const id of selectedIds) {
+      if (String(id).length > 30) await updateCommentStatusAdmin(id, 'hidden')
+    }
     setComments((prev) =>
       prev.map((c) =>
         selectedIds.includes(c.id) ? { ...c, status: 'hidden' } : c,
@@ -113,7 +160,11 @@ function CommentManagementPage() {
     showToast('Đã ẩn các bình luận đã chọn.')
   }
 
-  const handleBulkSpam = () => {
+  const handleBulkSpam = async () => {
+    const { updateCommentStatusAdmin } = await import('../../services/interactionService')
+    for (const id of selectedIds) {
+      if (String(id).length > 30) await updateCommentStatusAdmin(id, 'spam')
+    }
     setComments((prev) =>
       prev.map((c) =>
         selectedIds.includes(c.id) ? { ...c, status: 'spam' } : c,
@@ -123,7 +174,11 @@ function CommentManagementPage() {
     showToast('Đã đánh dấu spam các bình luận đã chọn.')
   }
 
-  const handleBulkRestore = () => {
+  const handleBulkRestore = async () => {
+    const { updateCommentStatusAdmin } = await import('../../services/interactionService')
+    for (const id of selectedIds) {
+      if (String(id).length > 30) await updateCommentStatusAdmin(id, 'visible')
+    }
     setComments((prev) =>
       prev.map((c) =>
         selectedIds.includes(c.id) ? { ...c, status: 'visible' } : c,
@@ -143,6 +198,16 @@ function CommentManagementPage() {
 
   const drawerComment =
     comments.find((c) => c.id === drawerCommentId) ?? null
+
+  if (loading) {
+    return (
+      <div className="ac-page page">
+        <div style={{ padding: '60px', textAlign: 'center', color: '#666' }}>
+          Đang tải bình luận...
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="ac-page page">

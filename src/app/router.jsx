@@ -1,11 +1,10 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AdminRoute from '../components/auth/AdminRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
-import AdminLoginPage from '../pages/admin/AdminLoginPage'
 import AdminAccessDeniedPage from '../pages/admin/AdminAccessDeniedPage'
-import PostApprovalPage from '../pages/admin/PostApprovalPage'
+import PostManagementPage from '../pages/admin/PostManagementPage'
 import CommentManagementPage from '../pages/admin/CommentManagementPage'
 import UserManagementPage from '../pages/admin/UserManagementPage'
 import DeviceManagementPage from '../pages/admin/DeviceManagementPage'
@@ -91,10 +90,6 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/admin/dang-nhap',
-    element: <AdminLoginPage />,
-  },
-  {
     path: '/admin/khong-co-quyen',
     element: <AdminAccessDeniedPage />,
   },
@@ -111,8 +106,12 @@ const router = createBrowserRouter([
             element: <AdminDashboardPage />,
           },
           {
+            path: 'quan-ly-bai-viet',
+            element: <PostManagementPage />,
+          },
+          {
             path: 'duyet-bai-viet',
-            element: <PostApprovalPage />,
+            element: <Navigate to="/admin/quan-ly-bai-viet" replace />,
           },
           {
             path: 'quan-ly-binh-luan',
