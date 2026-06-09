@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import ScrollToTop from '../components/common/ScrollToTop'
+import DevelopmentNotice from '../components/common/DevelopmentNotice'
 import AdminRoute from '../components/auth/AdminRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
     element: (
       <>
         <ScrollToTop />
+        <DevelopmentNotice />
         <Outlet />
       </>
     ),
