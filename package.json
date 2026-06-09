@@ -14,9 +14,11 @@
     "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.17.0",
     "bootstrap": "^5.3.8",
+    "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.6",
+    "react-easy-crop": "^5.5.7",
     "react-redux": "^9.3.0",
     "react-router-dom": "^6.30.1"
   },

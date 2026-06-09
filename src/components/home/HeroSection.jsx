@@ -1,7 +1,33 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { homeHero } from '../../data/home'
+import { fetchBanners } from '../../services/bannerService'
+import BannerCarousel from '../common/BannerCarousel'
 
 function HeroSection() {
+  const [banners, setBanners] = useState([])
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { data, error } = await fetchBanners('home', true)
+        if (error) {
+          console.error('Lỗi khi tải banner trang chủ từ Supabase:', error)
+        }
+        if (data && data.length > 0) {
+          setBanners(data)
+        } else {
+          // Fallback
+          setBanners([{ image_url: homeHero.image, title: homeHero.imageAlt }])
+        }
+      } catch (err) {
+        console.error('Lỗi hệ thống khi tải banner:', err)
+        setBanners([{ image_url: homeHero.image, title: homeHero.imageAlt }])
+      }
+    }
+    load()
+  }, [])
+
   return (
     <section className="home-hero">
       <div className="home-hero__glow home-hero__glow--left" aria-hidden="true"></div>
@@ -41,8 +67,8 @@ function HeroSection() {
         </div>
 
         <div className="home-hero__visual">
-          <div className="home-hero__image-shell">
-            <img src={homeHero.image} alt={homeHero.imageAlt} />
+          <div className="home-hero__image-shell" style={{ overflow: 'hidden' }}>
+            <BannerCarousel banners={banners} />
           </div>
 
           <div className="home-floating-card home-floating-card--savings">

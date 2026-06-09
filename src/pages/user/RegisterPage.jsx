@@ -1,6 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signUpWithEmail } from '../../services/authService'
+import { fetchBanners } from '../../services/bannerService'
+import BannerCarousel from '../../components/common/BannerCarousel'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -16,6 +18,15 @@ function RegisterPage() {
   })
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [banners, setBanners] = useState([])
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await fetchBanners('auth', true)
+      if (data) setBanners(data)
+    }
+    load()
+  }, [])
 
   function handleChange(field, value) {
     setForm((current) => ({
@@ -134,8 +145,12 @@ function RegisterPage() {
             </div>
           </div>
 
-          <div className="auth-carousel-placeholder">
-            <span>Ảnh minh họa đang cập nhật</span>
+          <div className="auth-carousel-placeholder" style={{ padding: 0, overflow: 'hidden' }}>
+            {banners.length > 0 ? (
+              <BannerCarousel banners={banners} />
+            ) : (
+              <span style={{ display: 'grid', placeItems: 'center', height: '100%' }}>Ảnh minh họa đang cập nhật</span>
+            )}
           </div>
         </section>
 

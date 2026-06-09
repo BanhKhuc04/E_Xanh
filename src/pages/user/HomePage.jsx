@@ -4,7 +4,7 @@ import FeaturedPosts from '../../components/home/FeaturedPosts'
 import ElectricityPreview from '../../components/home/ElectricityPreview'
 import CommunityPreview from '../../components/home/CommunityPreview'
 import HomeCTA from '../../components/home/HomeCTA'
-import { homeCommunity, homeFeaturedPosts, homeFeatures } from '../../data/home'
+import { homeFeatures } from '../../data/home'
 import '../../styles/home.css'
 
 function HomePage() {
@@ -21,8 +21,8 @@ function HomePage() {
       </section>
 
       <ElectricityPreview />
-      <FeaturedPosts posts={homeFeaturedPosts} />
-      <CommunityPreview community={homeCommunity} />
+      <FeaturedPosts />
+      <CommunityPreview />
       <HomeCTA />
     </div>
   )

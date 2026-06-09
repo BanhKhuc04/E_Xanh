@@ -6,14 +6,14 @@ import ArticleHeader from '../../components/posts/ArticleHeader'
 import CommentSection from '../../components/posts/CommentSection'
 import PostCard from '../../components/posts/PostCard'
 import RelatedPosts from '../../components/posts/RelatedPosts'
-import { featuredTopics, getPostBySlug as getMockPostBySlug, posts } from '../../data/posts'
-import { getPostBySlug } from '../../services/postService'
+import { getPostBySlug, getApprovedPosts } from '../../services/postService'
 import '../../styles/post-detail.css'
 
 function PostDetailPage() {
   const { slug } = useParams()
   const [post, setPost] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [relatedPosts, setRelatedPosts] = useState([])
 
   useEffect(() => {
     async function loadPost() {
@@ -27,10 +27,11 @@ function PostDetailPage() {
           review: 'Review thiết bị'
         }
 
-        setPost({
+        const postData = {
           id: data.id,
           title: data.title,
           slug: data.slug,
+          type: data.type,
           author: data.profiles?.name || data.profiles?.email || 'Thành viên E-XANH',
           authorAvatar: data.profiles?.avatar_url || 'EX',
           authorBio: data.profiles?.bio || 'Thành viên cộng đồng E-XANH',
@@ -51,10 +52,35 @@ function PostDetailPage() {
           readTime: data.read_time || '3 phút',
           date: new Date(data.created_at).toISOString().split('T')[0],
           commentItems: [],
-        })
+        }
+        setPost(postData)
+
+        // Fetch related posts based on type
+        const { data: allPosts } = await getApprovedPosts()
+        if (allPosts) {
+          const related = allPosts
+            .filter(p => p.type === data.type && p.id !== data.id)
+            .slice(0, 6)
+            .map(p => ({
+              id: p.id,
+              title: p.title,
+              slug: p.slug,
+              author: p.profiles?.name || 'Thành viên',
+              authorAvatar: p.profiles?.avatar_url || 'EX',
+              category: categoryMap[p.type] || 'Cộng đồng',
+              status: 'published',
+              image: p.image_url,
+              description: p.description || '',
+              likes: p.likes_count || 0,
+              comments: p.comments_count || 0,
+              savedCount: p.saved_count || 0,
+              readTime: p.read_time || '3 phút',
+              date: new Date(p.created_at).toISOString().split('T')[0],
+            }))
+          setRelatedPosts(related)
+        }
       } else {
-        const localPost = getMockPostBySlug(slug)
-        setPost(localPost || null)
+        setPost(null)
       }
       setLoading(false)
     }
@@ -80,15 +106,19 @@ function PostDetailPage() {
     )
   }
 
-  const relatedPosts = posts.filter((item) => item.slug !== post.slug).slice(0, 3)
-  const likedPosts = posts.filter((item) => item.slug !== post.slug).slice(0, 3)
+  const sidebarRelated = relatedPosts.slice(0, 3)
+  const bottomSuggested = relatedPosts.slice(3, 6)
+
+  const isCommunity = post.type === 'community'
+  const parentLink = isCommunity ? '/cong-dong' : '/meo-tiet-kiem'
+  const parentName = isCommunity ? 'Cộng đồng' : 'Mẹo tiết kiệm'
 
   return (
     <div className="post-detail-page">
       <nav className="post-breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>/</span>
-        <Link to="/meo-tiet-kiem">Mẹo tiết kiệm</Link>
+        <Link to={parentLink}>{parentName}</Link>
         <span>/</span>
         <span>Chi tiết bài viết</span>
       </nav>
@@ -103,27 +133,34 @@ function PostDetailPage() {
 
         <aside className="post-detail-sidebar">
           <section className="post-side-card post-side-card--author">
-            <span className="post-side-card__author-avatar">{post.author.slice(0, 2).toUpperCase()}</span>
+            {post.authorAvatar === 'EX' ? (
+              <span className="post-side-card__author-avatar">{post.author.slice(0, 2).toUpperCase()}</span>
+            ) : (
+              <img src={post.authorAvatar} alt={post.author} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px' }} />
+            )}
             <h2>{post.author}</h2>
             <p>{post.authorBio}</p>
             <button type="button">Theo dõi</button>
           </section>
 
-          <RelatedPosts title="Bài viết liên quan" posts={relatedPosts} compact />
+          {sidebarRelated.length > 0 ? (
+            <RelatedPosts title="Bài viết liên quan" posts={sidebarRelated} compact />
+          ) : (
+            <section className="post-side-card">
+              <h2>Bài viết liên quan</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Chưa có bài viết liên quan.</p>
+            </section>
+          )}
 
           <section className="post-side-card">
             <h2>Chủ đề nổi bật</h2>
-            <div className="post-side-card__topics">
-              {featuredTopics.map((topic) => (
-                <span key={topic}>{topic}</span>
-              ))}
-            </div>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Đang cập nhật...</p>
           </section>
 
           <section className="post-side-card post-side-card--cta">
             <h2>Bạn có mẹo hay?</h2>
             <p>Chia sẻ kinh nghiệm tiết kiệm điện của bạn để lan tỏa lối sống xanh.</p>
-            <Link className="btn btn--light" to="/cong-dong">
+            <Link className="btn btn--light" to="/dang-bai">
               Đăng bài chia sẻ
             </Link>
           </section>
@@ -132,11 +169,15 @@ function PostDetailPage() {
 
       <section className="post-detail-suggestions">
         <h2>Có thể bạn cũng thích</h2>
-        <div className="post-detail-suggestions__grid">
-          {likedPosts.map((item) => (
-            <PostCard key={item.id} post={item} />
-          ))}
-        </div>
+        {bottomSuggested.length > 0 ? (
+          <div className="post-detail-suggestions__grid">
+            {bottomSuggested.map((item) => (
+              <PostCard key={item.id} post={item} />
+            ))}
+          </div>
+        ) : (
+          <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '20px' }}>Chưa có bài viết đề xuất.</p>
+        )}
       </section>
     </div>
   )

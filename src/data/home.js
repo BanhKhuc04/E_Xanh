@@ -1,11 +1,12 @@
+import heroImage from '../assets/hero.png'
+
 export const homeHero = {
   badge: 'Nền tảng sống xanh cho sinh viên',
   title: 'Dùng điện thông minh,',
   highlight: 'sống xanh bền vững',
   description:
     'Khám phá mẹo tiết kiệm điện, chia sẻ kinh nghiệm hữu ích và ước tính chi phí điện mỗi tháng cùng cộng đồng E-XANH.',
-  image:
-    'https://lh3.googleusercontent.com/aida/AP1WRLsaoVT9lqr-gSzNKZEJj6oAVr0OfN9pL_kXiyNDN8LGLyXpgtOvdl9MsO763q0nOR0XdrTaCrbdPyuQB5dlc8uOXCUJN1zGvtHBRolbbHQTV1Qa7evFDeYj8VSB6ES2zqWWs44E6VRslvXqXtpVBFTkYnRlBkx_VSXEABQiv9Mq4NTRjFWlvNdggOInZe5po1S0W1yc4aCcnnsq3sHC6WAKPNlywuGmowfp_VtWp3Z2KsyIPrhzkmkC_n6y',
+  image: heroImage,
   imageAlt: 'Minh họa không gian sống xanh và học tập thân thiện',
   stats: [
     { value: '120+', label: 'Bài viết' },

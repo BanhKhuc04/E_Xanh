@@ -6,11 +6,10 @@ import {
   featuredTopics,
   postCategories,
   postSortOptions,
-  posts,
   savedHighlights,
   todaySuggestion,
 } from '../../data/posts'
-import { getApprovedPosts } from '../../services/postService'
+import { getTipPosts } from '../../services/postService'
 import '../../styles/tips.css'
 
 function sortPosts(list, sortValue) {
@@ -24,7 +23,7 @@ function sortPosts(list, sortValue) {
     return next.sort((a, b) => b.likes + b.comments - (a.likes + a.comments))
   }
 
-  return next.sort((a, b) => b.id - a.id) // Fallback sorting for DB posts (id is UUID so might not be comparable, but mostly we use created_at from DB anyway. Wait, UUID comparison string-wise works but not chronological)
+  return next.sort((a, b) => new Date(b.date) - new Date(a.date))
 }
 
 function TipsPage() {
@@ -35,8 +34,8 @@ function TipsPage() {
 
   useEffect(() => {
     async function loadPosts() {
-      const { data, error } = await getApprovedPosts()
-      if (!error && data && data.length > 0) {
+      const { data, error } = await getTipPosts()
+      if (!error && data) {
         const categoryMap = {
           tip: 'Mẹo tiết kiệm',
           community: 'Cộng đồng',
@@ -50,7 +49,7 @@ function TipsPage() {
           slug: post.slug,
           author: post.profiles?.name || post.profiles?.email || 'Thành viên E-XANH',
           authorAvatar: post.profiles?.avatar_url || 'EX',
-          category: categoryMap[post.type] || 'Cộng đồng',
+          category: categoryMap[post.type] || 'Mẹo tiết kiệm',
           status: 'published',
           image: post.image_url,
           description: post.description || '',
@@ -68,7 +67,7 @@ function TipsPage() {
     loadPosts()
   }, [])
 
-  const currentPosts = dbPosts.length > 0 ? dbPosts : posts
+  const currentPosts = dbPosts
 
   const visiblePosts = sortPosts(
     currentPosts.filter((post) => {

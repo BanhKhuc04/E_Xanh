@@ -2,7 +2,7 @@ export const postStatusMap = {
   pending: { label: 'Chờ duyệt', className: 'is-pending' },
   approved: { label: 'Đã duyệt', className: 'is-approved' },
   rejected: { label: 'Bị từ chối', className: 'is-rejected' },
-  hidden: { label: 'Đã ẩn', className: 'is-hidden' },
+  blocked: { label: 'Đã khóa', className: 'is-hidden' },
 }
 
 export const postCategories = [
@@ -18,7 +18,7 @@ export const postStatusOptions = [
   'Chờ duyệt',
   'Đã duyệt',
   'Bị từ chối',
-  'Đã ẩn',
+  'Đã khóa',
 ]
 
 export const postDateOptions = [

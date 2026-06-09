@@ -11,6 +11,7 @@ import UserManagementPage from '../pages/admin/UserManagementPage'
 import DeviceManagementPage from '../pages/admin/DeviceManagementPage'
 import StatisticsPage from '../pages/admin/StatisticsPage'
 import SettingsPage from '../pages/admin/SettingsPage'
+import ThemeSettingsPage from '../pages/admin/ThemeSettingsPage'
 import AccountPage from '../pages/user/AccountPage'
 import AboutPage from '../pages/user/AboutPage'
 import CommunityPage from '../pages/user/CommunityPage'
@@ -146,6 +147,10 @@ const router = createBrowserRouter([
           {
             path: 'cai-dat',
             element: <SettingsPage />,
+          },
+          {
+            path: 'cai-dat-giao-dien',
+            element: <ThemeSettingsPage />,
           },
         ],
       },

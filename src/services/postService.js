@@ -126,6 +126,17 @@ export async function getApprovedPosts() {
   return { data, error }
 }
 
+export async function getTipPosts() {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
+    .eq('status', 'approved')
+    .eq('type', 'tip')
+    .order('created_at', { ascending: false })
+
+  return { data, error }
+}
+
 export async function getPostBySlug(slug) {
   const { data, error } = await supabase
     .from('posts')
@@ -161,6 +172,77 @@ export async function getCommunityPosts() {
   return { data, error }
 }
 
+export async function getRecentCommunityPosts(limitCount = 2) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *, 
+      profiles:author_id (name, avatar_url, role)
+    `)
+    .eq('status', 'approved')
+    .eq('type', 'community')
+    .order('created_at', { ascending: false })
+    .limit(limitCount)
+
+  return { data, error }
+}
+
+export async function getTopActiveMembers(limitCount = 3) {
+  const { data: posts, error } = await supabase
+    .from('posts')
+    .select('author_id')
+    .eq('status', 'approved')
+
+  if (error) return { data: null, error }
+
+  const counts = {}
+  posts.forEach(p => {
+    if (p.author_id) {
+      counts[p.author_id] = (counts[p.author_id] || 0) + 1
+    }
+  })
+
+  const topIds = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limitCount)
+    .map(entry => entry[0])
+
+  if (topIds.length === 0) return { data: [], error: null }
+
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, name, avatar_url')
+    .in('id', topIds)
+
+  if (profileError) return { data: null, error: profileError }
+
+  const result = topIds.map(id => {
+    const profile = profiles.find(p => p.id === id) || { name: 'Ẩn danh', avatar_url: null }
+    return {
+      id,
+      name: profile.name || 'Ẩn danh',
+      avatar_url: profile.avatar_url,
+      approved_posts_count: counts[id]
+    }
+  })
+
+  return { data: result, error: null }
+}
+
+export async function getFeaturedPosts() {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *, 
+      profiles:author_id (name, avatar_url, role)
+    `)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(3)
+
+  return { data, error }
+}
+
 export async function updatePostStatus(postId, status, adminNote = null) {
   const updatePayload = { status }
   
@@ -174,6 +256,10 @@ export async function updatePostStatus(postId, status, adminNote = null) {
     .eq('id', postId)
     .select()
 
+  if (!error && (!data || data.length === 0)) {
+    return { data: null, error: new Error('Không tìm thấy bài viết hoặc bạn không có quyền cập nhật.') }
+  }
+
   return { data, error }
 }
 
@@ -185,8 +271,8 @@ export async function rejectPost(postId, adminNote) {
   return updatePostStatus(postId, 'rejected', adminNote)
 }
 
-export async function hidePost(postId) {
-  return updatePostStatus(postId, 'hidden')
+export async function blockPost(postId) {
+  return updatePostStatus(postId, 'blocked')
 }
 
 

@@ -271,7 +271,7 @@ function CommunityPage() {
           <p>{communityHero.description}</p>
 
           <div className="community-page__hero-actions">
-            <Link className="btn btn--primary" to="/dang-bai">
+            <Link className="btn btn--primary" to="/dang-bai" state={{ defaultType: 'community' }}>
               Viết bài chia sẻ
             </Link>
             <a className="btn btn--secondary" href="#cong-dong-feed">

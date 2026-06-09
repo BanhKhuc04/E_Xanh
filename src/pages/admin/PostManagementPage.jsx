@@ -13,7 +13,7 @@ const statusLabelToKey = {
   'Chờ duyệt': 'pending',
   'Đã duyệt': 'approved',
   'Bị từ chối': 'rejected',
-  'Đã ẩn': 'hidden',
+  'Đã khóa': 'blocked',
 }
 
 function PostManagementPage() {
@@ -153,36 +153,26 @@ function PostManagementPage() {
       showToast('Tài khoản hiện tại không có quyền duyệt bài này.')
       return
     }
-    setPosts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p)),
-    )
     showToast('Đã cập nhật trạng thái bài viết.')
+    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleBulkApprove = async () => {
     for (const id of selectedIds) {
       await updatePostStatus(id, 'approved')
     }
-    setPosts((prev) =>
-      prev.map((p) =>
-        selectedIds.includes(p.id) ? { ...p, status: 'approved' } : p,
-      ),
-    )
     setSelectedIds([])
     showToast('Đã duyệt các bài viết đã chọn.')
+    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleBulkReject = async () => {
     for (const id of selectedIds) {
       await updatePostStatus(id, 'rejected')
     }
-    setPosts((prev) =>
-      prev.map((p) =>
-        selectedIds.includes(p.id) ? { ...p, status: 'rejected' } : p,
-      ),
-    )
     setSelectedIds([])
     showToast('Đã từ chối các bài viết đã chọn.')
+    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleReset = () => {
@@ -395,7 +385,7 @@ function PostManagementPage() {
                   <option value="pending">Chờ duyệt</option>
                   <option value="approved">Đã duyệt</option>
                   <option value="rejected">Bị từ chối</option>
-                  <option value="hidden">Đã ẩn</option>
+                  <option value="blocked">Đã khóa</option>
                 </select>
               </label>
 

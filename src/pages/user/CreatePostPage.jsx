@@ -1,24 +1,26 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import CreatePostForm from '../../components/community/CreatePostForm'
 import CreatePostSidebar from '../../components/community/CreatePostSidebar'
 import { getCurrentSession, onAuthStateChange } from '../../services/authService'
 import { createPost } from '../../services/postService'
 import '../../styles/create-post.css'
 
-const initialForm = {
-  title: '',
-  type: '',
-  category: '',
-  description: '',
-  coverName: '',
-  coverFile: null,
-  coverPreview: '',
-  content: '',
-  tags: '',
-}
-
 function CreatePostPage() {
+  const location = useLocation()
+  
+  const initialForm = {
+    title: '',
+    type: location.state?.defaultType || '',
+    category: '',
+    description: '',
+    coverName: '',
+    coverFile: null,
+    coverPreview: '',
+    content: '',
+    tags: '',
+  }
+
   const [form, setForm] = useState(initialForm)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')

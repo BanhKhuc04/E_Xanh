@@ -92,7 +92,7 @@ function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, curr
           </div>
 
           <div className="ap-preview__actions">
-            {(post.status === 'pending' || post.status === 'rejected' || post.status === 'hidden') && (
+            {(post.status === 'pending' || post.status === 'rejected' || post.status === 'blocked') && (
               <button
                 type="button"
                 className="btn btn--primary"
@@ -116,9 +116,9 @@ function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, curr
               <button
                 type="button"
                 className="btn btn--ghost"
-                onClick={() => { onChangeStatus(post.id, 'hidden', adminNote); setAdminNote('') }}
+                onClick={() => { onChangeStatus(post.id, 'blocked', adminNote); setAdminNote('') }}
               >
-                Ẩn bài
+                Khóa bài
               </button>
             )}
             

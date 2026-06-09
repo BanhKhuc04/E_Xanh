@@ -39,6 +39,13 @@ function SidebarIcon({ iconKey }) {
         <path d="M12 4v3M12 17v3M4 12h3M17 12h3M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M8.5 15.5l-2 2M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
       </svg>
     ),
+    GD: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="9" y1="21" x2="9" y2="9" />
+      </svg>
+    ),
   }
 
   return icons[iconKey] ?? <span>{iconKey}</span>
