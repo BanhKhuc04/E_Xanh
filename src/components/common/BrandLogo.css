@@ -1,0 +1,49 @@
+.brand-logo {
+  display: block;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.brand-logo__image {
+  width: var(--logo-width);
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* small size */
+.brand-logo--small {
+  --logo-width: 110px;
+}
+
+/* medium size (Navbar) - responsive */
+.brand-logo--medium {
+  --logo-width: 110px; /* Mobile */
+}
+@media (min-width: 768px) {
+  .brand-logo--medium {
+    --logo-width: 140px; /* Desktop */
+  }
+}
+
+/* large size (Loading / 404 / About) */
+.brand-logo--large {
+  --logo-width: 220px;
+}
+
+/* auth size (Login / Register) */
+.brand-logo--auth {
+  --logo-width: 200px;
+}
+
+/* admin size (Admin sidebar) */
+.brand-logo--admin {
+  --logo-width: 160px;
+}
+
+/* footer size */
+.brand-logo--footer {
+  --logo-width: 160px;
+}

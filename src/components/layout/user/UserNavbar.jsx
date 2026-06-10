@@ -100,7 +100,7 @@ function UserNavbar() {
   return (
     <header className="user-navbar">
       <div className="shell shell--wide user-navbar__inner">
-        <BrandLogo to="/" />
+        <BrandLogo to="/" size="medium" />
 
         <nav className="user-navbar__links" aria-label="Điều hướng người dùng">
           {userNavLinks.map((item) => (

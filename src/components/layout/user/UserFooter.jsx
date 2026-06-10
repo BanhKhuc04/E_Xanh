@@ -7,7 +7,7 @@ function UserFooter() {
     <footer className="user-footer">
       <div className="shell shell--wide user-footer__content">
         <div className="user-footer__brand">
-          <BrandLogo to="/" light />
+          <BrandLogo to="/" size="footer" />
           <p>Dùng điện thông minh, sống xanh bền vững.</p>
         </div>
 

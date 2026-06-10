@@ -55,7 +55,7 @@ function AdminSidebar() {
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar__brand">
-        <BrandLogo to="/admin" subtitle="Admin Panel" light />
+        <BrandLogo to="/admin" size="admin" />
       </div>
 
       <nav className="admin-sidebar__nav" aria-label="Điều hướng quản trị">

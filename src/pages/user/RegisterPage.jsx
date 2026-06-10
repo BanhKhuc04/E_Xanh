@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { signUpWithEmail } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
 import BannerCarousel from '../../components/common/BannerCarousel'
+import BrandLogo from '../../components/common/BrandLogo'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -119,9 +120,8 @@ function RegisterPage() {
         <section className="auth-visual">
           <div className="auth-visual__main">
             <div className="auth-visual__top">
-              <div className="auth-visual__brand">
-                <span className="auth-visual__logo">E</span>
-                <strong>E-XANH</strong>
+              <div className="auth-visual__brand" style={{ marginBottom: '8px' }}>
+                <BrandLogo to="/" size="auth" />
               </div>
               <span className="auth-visual__chip">Cộng đồng sống xanh</span>
             </div>

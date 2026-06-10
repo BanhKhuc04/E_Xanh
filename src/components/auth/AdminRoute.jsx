@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
+import BrandLogo from '../../components/common/BrandLogo'
 
 function AdminRoute() {
   const [loading, setLoading] = useState(true)
@@ -37,8 +38,9 @@ function AdminRoute() {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <h2>Đang kiểm tra quyền truy cập...</h2>
+      <div style={{ padding: '40px', textAlign: 'center', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <BrandLogo to="/admin" size="large" />
+        <h2 style={{ marginTop: '24px' }}>Đang kiểm tra quyền truy cập...</h2>
       </div>
     )
   }
