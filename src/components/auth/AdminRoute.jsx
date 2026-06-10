@@ -12,20 +12,34 @@ function AdminRoute() {
     let isMounted = true
 
     async function checkAuth() {
-      const session = await getCurrentSession()
-      if (!session?.user) {
-        if (isMounted) setLoading(false)
-        return
-      }
-
-      if (isMounted) setUser(session.user)
-      const profile = await getCurrentUserProfile(session.user.id)
-      
-      if (isMounted) {
-        if (profile && (profile.role === 'admin' || profile.role === 'moderator')) {
-          setIsAdmin(true)
+      const timeoutId = setTimeout(() => {
+        if (isMounted && loading) {
+          setLoading(false)
         }
-        setLoading(false)
+      }, 6000)
+
+      try {
+        const session = await getCurrentSession()
+        if (!session?.user) {
+          if (isMounted) setLoading(false)
+          clearTimeout(timeoutId)
+          return
+        }
+
+        if (isMounted) setUser(session.user)
+        const profile = await getCurrentUserProfile(session.user.id)
+        
+        if (isMounted) {
+          if (profile && (profile.role === 'admin' || profile.role === 'moderator')) {
+            setIsAdmin(true)
+          }
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error("AdminRoute error:", err)
+        if (isMounted) setLoading(false)
+      } finally {
+        clearTimeout(timeoutId)
       }
     }
 
@@ -34,7 +48,7 @@ function AdminRoute() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [loading])
 
   if (loading) {
     return (
@@ -50,7 +64,13 @@ function AdminRoute() {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/admin/khong-co-quyen" replace />
+    return (
+      <div style={{ padding: '40px', textAlign: 'center', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <BrandLogo to="/" size="large" />
+        <h2 style={{ marginTop: '24px', color: 'var(--color-error)' }}>Từ chối truy cập</h2>
+        <p style={{ marginTop: '12px' }}>Bạn không có quyền truy cập vào khu vực này.</p>
+      </div>
+    )
   }
 
   return <Outlet />

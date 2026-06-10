@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 function CreatePostForm({
   form,
   errorMessage,
@@ -8,7 +10,28 @@ function CreatePostForm({
   onSaveDraft,
   onPreview,
   onSubmit,
+  isSubmitting,
 }) {
+  const [isDragging, setIsDragging] = useState(false)
+
+  function handleDragOver(e) {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setIsDragging(false)
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      onCoverChange({ target: { files: e.dataTransfer.files } })
+    }
+  }
+
   return (
     <div className="create-post-form">
       <div className="create-post-form__messages">
@@ -66,12 +89,26 @@ function CreatePostForm({
         />
       </label>
 
-      <label className="create-post-form__field">
+      <label 
+        className="create-post-form__field"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <span>Ảnh bìa</span>
-        <input className="create-post-form__file-input" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={onCoverChange} />
-        <div className="create-post-form__upload-box" style={{ padding: form.coverPreview ? '0' : undefined, overflow: 'hidden' }}>
+        <input data-testid="post-image-input" className="create-post-form__file-input" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={onCoverChange} />
+        <div 
+          data-testid="post-upload-area"
+          className="create-post-form__upload-box" 
+          style={{ 
+            padding: form.coverPreview ? '0' : undefined, 
+            overflow: 'hidden',
+            backgroundColor: isDragging ? 'rgba(193, 217, 92, 0.15)' : undefined,
+            borderColor: isDragging ? 'var(--color-primary-500)' : undefined
+          }}
+        >
           {form.coverPreview ? (
-            <img src={form.coverPreview} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
+            <img src={form.coverPreview} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'contain', display: 'block', backgroundColor: '#f1f1f1' }} />
           ) : (
             <>
               <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
@@ -103,14 +140,14 @@ function CreatePostForm({
       </label>
 
       <div className="create-post-form__actions">
-        <button type="button" className="btn create-post-form__draft" onClick={onSaveDraft}>
+        <button type="button" className="btn create-post-form__draft" onClick={onSaveDraft} disabled={isSubmitting}>
           Lưu nháp
         </button>
-        <button type="button" className="btn btn--secondary" onClick={onPreview}>
+        <button type="button" className="btn btn--secondary" onClick={onPreview} disabled={isSubmitting}>
           Xem trước
         </button>
-        <button type="button" className="btn btn--primary" onClick={onSubmit}>
-          Gửi bài chờ duyệt
+        <button type="button" className="btn btn--primary" onClick={onSubmit} disabled={isSubmitting}>
+          {isSubmitting ? 'Đang gửi...' : 'Gửi bài chờ duyệt'}
         </button>
       </div>
     </div>

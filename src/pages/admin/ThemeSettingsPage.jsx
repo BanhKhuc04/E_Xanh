@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, Trash2, Power, PowerOff, Image as ImageIcon, ArrowUp, ArrowDown } from 'lucide-react'
+import { Plus, Trash2, Power, PowerOff, ArrowUp, ArrowDown } from 'lucide-react'
 import Cropper from 'react-easy-crop'
 import getCroppedImg from '../../utils/cropImage'
 import { fetchBanners, uploadBannerImage, addBanner, updateBanner, deleteBanner } from '../../services/bannerService'
@@ -180,7 +179,7 @@ function ThemeSettingsPage() {
     }
   }
 
-  function renderBannerList(banners, pageKey) {
+  function renderBannerList(banners) {
     if (loading) return <p>Đang tải...</p>
     if (banners.length === 0) return <p className="text-muted">Chưa có banner nào. Hãy upload ảnh mới.</p>
 
@@ -274,7 +273,7 @@ function ThemeSettingsPage() {
               />
             </label>
           </div>
-          {renderBannerList(homeBanners, 'home')}
+          {renderBannerList(homeBanners)}
         </section>
 
         <section className="admin-section">
@@ -292,7 +291,7 @@ function ThemeSettingsPage() {
               />
             </label>
           </div>
-          {renderBannerList(authBanners, 'auth')}
+          {renderBannerList(authBanners)}
         </section>
       </div>
 

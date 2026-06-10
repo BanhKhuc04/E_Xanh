@@ -20,7 +20,7 @@
   border-radius: 20px;
   padding: 24px;
   width: 380px;
-  max-width: calc(100vw - 48px);
+  max-width: calc(100% - 48px);
   animation: slideUpFade 0.4s ease-out;
   position: relative;
   backdrop-filter: blur(8px);

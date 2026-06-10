@@ -34,6 +34,7 @@
 .community-page__feed {
   display: grid;
   gap: 20px;
+  min-width: 0;
 }
 
 .community-page__badge {
@@ -85,7 +86,7 @@
 
 .community-page__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 24px;
   align-items: start;
 }
@@ -128,6 +129,12 @@
   border-radius: 16px;
   color: rgba(51, 106, 41, 0.7);
   background: linear-gradient(90deg, rgba(234, 245, 157, 0.42), rgba(193, 217, 92, 0.18));
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.community-composer__prompt:hover {
+  opacity: 0.8;
 }
 
 .community-composer__button {
@@ -142,6 +149,15 @@
   border-top: 1px solid rgba(79, 132, 40, 0.1);
   color: var(--color-text);
   font-size: 0.95rem;
+}
+
+.community-composer__actions a {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.community-composer__actions a:hover {
+  color: var(--color-primary-500);
 }
 
 .community-filter-bar {
@@ -167,10 +183,17 @@
   box-shadow: 0 10px 20px rgba(79, 132, 40, 0.14);
 }
 
-.community-page__posts,
+.community-page__posts {
+  display: grid;
+  gap: 18px;
+}
+
 .community-sidebar-panel {
   display: grid;
   gap: 18px;
+  width: 100%;
+  position: sticky;
+  top: 96px;
 }
 
 .community-post-card {
@@ -250,6 +273,14 @@
   background: rgba(193, 217, 92, 0.3);
 }
 
+.community-post-card__body h2,
+.community-post-card__body p,
+.community-post-card__comment p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
+}
+
 .community-post-card__body h2 {
   margin: 0 0 10px;
   font-size: clamp(1.6rem, 3vw, 2.3rem);
@@ -270,8 +301,9 @@
 .community-post-card__media img {
   display: block;
   width: 100%;
-  max-height: 360px;
+  max-height: 520px;
   object-fit: cover;
+  border-radius: 18px;
 }
 
 .community-post-card__comments {
@@ -504,9 +536,18 @@
 }
 
 @media (max-width: 1180px) {
-  .community-page__hero,
+  .community-page__hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
   .community-page__layout {
     grid-template-columns: 1fr;
+  }
+
+  .community-sidebar-panel {
+    position: static;
   }
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import CreatePostForm from '../../components/community/CreatePostForm'
 import CreatePostSidebar from '../../components/community/CreatePostSidebar'
 import { getCurrentSession, onAuthStateChange } from '../../services/authService'
@@ -26,9 +26,34 @@ function CreatePostPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
   const [previewHighlight, setPreviewHighlight] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
+  // eslint-disable-next-line no-unused-vars
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+
+  // Khôi phục nháp khi mở trang
+  useEffect(() => {
+    try {
+      const draftStr = localStorage.getItem('exanh_draft_post')
+      if (draftStr) {
+        const draft = JSON.parse(draftStr)
+        // eslint-disable-next-line
+        setForm(current => ({
+          ...current,
+          title: draft.title || '',
+          type: draft.type || current.type,
+          category: draft.category || '',
+          description: draft.description || '',
+          content: draft.content || '',
+          tags: draft.tags || ''
+        }))
+        setInfoMessage('Đã tự động khôi phục bản nháp chưa gửi của bạn.')
+      }
+    } catch {
+      console.warn('Lỗi khôi phục bản nháp')
+    }
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -63,7 +88,7 @@ function CreatePostPage() {
       setSuccessMessage('')
       setInfoMessage('')
       setPreviewHighlight(false)
-    }, 3000)
+    }, 4000)
 
     return () => {
       window.clearTimeout(timeoutId)
@@ -111,7 +136,20 @@ function CreatePostPage() {
   function handleSaveDraft() {
     setErrorMessage('')
     setSuccessMessage('')
-    setInfoMessage('Bản nháp của bạn đã được lưu tạm trên biểu mẫu.')
+    try {
+      const draftToSave = {
+        title: form.title,
+        type: form.type,
+        category: form.category,
+        description: form.description,
+        content: form.content,
+        tags: form.tags
+      }
+      localStorage.setItem('exanh_draft_post', JSON.stringify(draftToSave))
+      setInfoMessage('Đã lưu nháp')
+    } catch {
+      setErrorMessage('Không thể lưu bản nháp lúc này.')
+    }
   }
 
   function handlePreview() {
@@ -121,19 +159,20 @@ function CreatePostPage() {
     setPreviewHighlight(true)
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event) {
+    event.preventDefault()
     setInfoMessage('')
     setPreviewHighlight(false)
     setErrorMessage('')
     setSuccessMessage('')
 
     if (!form.title.trim()) {
-      setErrorMessage('Vui lòng nhập tiêu đề bài viết.')
+      setErrorMessage('Vui lòng nhập tiêu đề')
       return
     }
 
     if (!form.content.trim()) {
-      setErrorMessage('Vui lòng nhập nội dung bài viết.')
+      setErrorMessage('Vui lòng nhập nội dung')
       return
     }
 
@@ -142,34 +181,29 @@ function CreatePostPage() {
       return
     }
 
+    setIsSubmitting(true)
     const { error } = await createPost(form)
     
     if (error) {
       setErrorMessage(`Lỗi đăng bài: ${error.message}`)
+      setIsSubmitting(false)
       return
     }
 
+    // Gửi thành công: xoá nháp, reset form
+    localStorage.removeItem('exanh_draft_post')
     setErrorMessage('')
-    setSuccessMessage('Bài viết đã được gửi và đang chờ duyệt.')
+    setSuccessMessage('Bài viết đã được gửi thành công và đang chờ duyệt!')
     setForm(initialForm)
+    setIsSubmitting(false)
   }
 
   if (authLoading) {
     return <div className="create-post-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
   }
 
-  if (!user) {
-    return (
-      <div className="create-post-page">
-        <section className="create-post-page__hero">
-          <div className="create-post-page__hero-content" style={{ textAlign: 'center', margin: '0 auto' }}>
-            <h1>Bạn cần đăng nhập để đăng bài chia sẻ.</h1>
-            <p style={{ marginBottom: '20px' }}>Vui lòng đăng nhập để tham gia chia sẻ bài viết với cộng đồng E-XANH.</p>
-            <Link to="/dang-nhap" className="btn btn--primary">Đăng nhập ngay</Link>
-          </div>
-        </section>
-      </div>
-    )
+  if (authLoading) {
+    return <div className="create-post-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
   }
 
   return (
@@ -209,6 +243,7 @@ function CreatePostPage() {
           onSaveDraft={handleSaveDraft}
           onPreview={handlePreview}
           onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
         />
 
         <CreatePostSidebar form={form} previewHighlight={previewHighlight} />

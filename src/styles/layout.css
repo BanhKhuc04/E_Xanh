@@ -646,20 +646,40 @@
     flex-wrap: wrap;
   }
 
+  .user-navbar__mobile-toggle {
+    display: block !important;
+    background: none;
+    border: none;
+    color: var(--color-primary-500);
+    padding: 8px;
+    cursor: pointer;
+    order: 2;
+  }
+
   .user-navbar__links {
     order: 3;
     width: 100%;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 14px;
+    display: none;
   }
 
   .user-navbar__actions {
-    margin-left: auto;
+    order: 4;
+    width: 100%;
+    flex-direction: column;
+    display: none;
+  }
+
+  .user-navbar__links.is-mobile-open,
+  .user-navbar__actions.is-mobile-open {
+    display: flex;
   }
 
   .user-navbar__dropdown {
     right: auto;
     left: 0;
+    width: 100%;
   }
 
   .admin-topbar__search {

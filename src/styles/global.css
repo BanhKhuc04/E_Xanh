@@ -177,3 +177,37 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.community-layout,
+.community-feed,
+.community-sidebar,
+.post-card,
+.community-post-card,
+.tip-card,
+.admin-layout,
+.admin-main {
+  min-width: 0;
+}
+
+.post-title,
+.post-content,
+.comment-content,
+.community-post-card__title,
+.community-post-card__excerpt,
+.tip-card__title,
+.tip-card__excerpt {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

@@ -19,6 +19,8 @@ function LoginPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [banners, setBanners] = useState([])
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   useEffect(() => {
     async function load() {
       const { data } = await fetchBanners('auth', true)
@@ -56,6 +58,8 @@ function LoginPage() {
       return
     }
 
+    setIsSubmitting(true)
+
     const { data, error } = await signInWithEmail({
       email: form.email.trim(),
       password: form.password,
@@ -67,6 +71,7 @@ function LoginPage() {
         viError = `Lỗi đăng nhập: ${error.message}`
       }
       setErrorMessage(viError)
+      setIsSubmitting(false)
       return
     }
 
@@ -84,6 +89,7 @@ function LoginPage() {
 
     setErrorMessage('')
     setSuccessMessage('Đăng nhập thành công.')
+    setIsSubmitting(false)
 
     window.setTimeout(() => {
       if (role === 'admin' || role === 'moderator') {
@@ -187,8 +193,8 @@ function LoginPage() {
               </button>
             </div>
 
-            <button type="submit" className="btn btn--primary auth-form__submit">
-              Đăng nhập
+            <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
 

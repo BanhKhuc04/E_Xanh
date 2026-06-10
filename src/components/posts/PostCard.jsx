@@ -53,7 +53,7 @@ function PostCard({ post }) {
   }
 
   return (
-    <article className="post-card-ui">
+    <article className="post-card-ui" data-testid="tip-card">
       <div className="post-card-ui__media">
         {post.image ? (
           <img 
@@ -109,7 +109,7 @@ function PostCard({ post }) {
           </div>
         </div>
 
-        <Link className="post-card-ui__link" to={`/meo-tiet-kiem/${post.slug}`}>
+        <Link className="post-card-ui__link" to={`/meo-tiet-kiem/${post.slug}`} data-testid="tip-card-link">
           Đọc tiếp
         </Link>
       </div>

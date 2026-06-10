@@ -10,9 +10,9 @@ function PostComposer() {
           alt="Avatar người dùng"
         />
 
-        <div className="community-composer__prompt">
+        <Link className="community-composer__prompt" to="/dang-bai" style={{ textDecoration: 'none' }}>
           Bạn muốn chia sẻ mẹo tiết kiệm điện nào?
-        </div>
+        </Link>
 
         <Link className="btn btn--primary community-composer__button" to="/dang-bai">
           Viết bài chia sẻ
@@ -20,9 +20,9 @@ function PostComposer() {
       </div>
 
       <div className="community-composer__actions">
-        <span>Anh</span>
-        <span>Chủ đề</span>
-        <span>Mẹo nhanh</span>
+        <Link to="/dang-bai" style={{ textDecoration: 'none', color: 'inherit' }}>Ảnh</Link>
+        <Link to="/dang-bai" style={{ textDecoration: 'none', color: 'inherit' }}>Chủ đề</Link>
+        <Link to="/dang-bai" style={{ textDecoration: 'none', color: 'inherit' }}>Mẹo nhanh</Link>
       </div>
     </section>
   )

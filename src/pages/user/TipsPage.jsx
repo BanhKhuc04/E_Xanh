@@ -31,40 +31,60 @@ function TipsPage() {
   const [selectedCategory, setSelectedCategory] = useState('Tất cả')
   const [sortValue, setSortValue] = useState('Mới nhất')
   const [dbPosts, setDbPosts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  // eslint-disable-next-line no-unused-vars
+  const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
+    let isMounted = true
     async function loadPosts() {
-      const { data, error } = await getTipPosts()
-      if (!error && data) {
-        const categoryMap = {
-          tip: 'Mẹo tiết kiệm',
-          community: 'Cộng đồng',
-          qa: 'Hỏi đáp',
-          review: 'Review thiết bị'
-        }
+      // Timeout fallback
+      const timer = setTimeout(() => {
+        if (isMounted && isLoading) setIsLoading(false)
+      }, 4500)
 
-        const mapped = data.map(post => ({
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          author: post.profiles?.name || post.profiles?.email || 'Thành viên E-XANH',
-          authorAvatar: post.profiles?.avatar_url || 'EX',
-          category: categoryMap[post.type] || 'Mẹo tiết kiệm',
-          status: 'published',
-          image: post.image_url,
-          description: post.description || '',
-          content: post.content || '',
-          likes: post.likes_count || 0,
-          comments: post.comments_count || 0,
-          savedCount: post.saved_count || 0,
-          readTime: post.read_time || '3 phút',
-          date: new Date(post.created_at).toISOString().split('T')[0],
-          commentItems: [],
-        }))
-        setDbPosts(mapped)
+      try {
+        const { data, error } = await getTipPosts()
+        if (error) throw error
+        if (data && isMounted) {
+          const categoryMap = {
+            tip: 'Mẹo tiết kiệm',
+            community: 'Cộng đồng',
+            qa: 'Hỏi đáp',
+            review: 'Review thiết bị'
+          }
+
+          const mapped = data.map(post => ({
+            id: post.id || Math.random().toString(),
+            title: post.title || 'Bài viết',
+            slug: post.slug || '',
+            author: post.profiles?.name || post.profiles?.email || 'Thành viên E-XANH',
+            authorAvatar: post.profiles?.avatar_url || 'EX',
+            category: categoryMap[post.type] || 'Mẹo tiết kiệm',
+            status: 'published',
+            image: post.image_url || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&h=260&fit=crop',
+            description: post.description || '',
+            content: post.content || '',
+            likes: post.likes_count || 0,
+            comments: post.comments_count || 0,
+            savedCount: post.saved_count || 0,
+            readTime: post.read_time || '3 phút',
+            date: post.created_at ? new Date(post.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            commentItems: [],
+          }))
+          setDbPosts(mapped)
+        }
+      } catch (err) {
+        console.error("Lỗi fetch posts:", err)
+        if (isMounted) setErrorMsg('Không thể tải bài viết lúc này.')
+      } finally {
+        if (isMounted) setIsLoading(false)
+        clearTimeout(timer)
       }
     }
     loadPosts()
+    return () => { isMounted = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const currentPosts = dbPosts

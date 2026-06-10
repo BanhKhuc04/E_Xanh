@@ -93,7 +93,7 @@ function CommunityPostCard({
 
 
   return (
-    <article className="community-post-card" id={post.id}>
+    <article className="community-post-card" id={post.id} data-testid="community-post-card">
       <div className="community-post-card__header">
         <div className="community-post-card__author">
           <img src={post.avatar} alt={post.author} />
@@ -113,7 +113,7 @@ function CommunityPostCard({
       </div>
 
       <div className="community-post-card__body">
-        <Link to={`/cong-dong/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link to={`/cong-dong/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }} data-testid="community-post-link">
           <h2>{post.title}</h2>
           <p>{post.excerpt}</p>
         </Link>

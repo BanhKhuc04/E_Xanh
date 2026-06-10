@@ -38,6 +38,7 @@ function UserNavbar() {
   const dropdownRef = useRef(null)
   const [currentUser, setCurrentUser] = useState(null)
   const [isOpen, setIsOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -102,7 +103,23 @@ function UserNavbar() {
       <div className="shell shell--wide user-navbar__inner">
         <BrandLogo to="/" size="medium" />
 
-        <nav className="user-navbar__links" aria-label="Điều hướng người dùng">
+        {/* Mobile Menu Toggle Button */}
+        <button 
+          className="user-navbar__mobile-toggle"
+          aria-label={isMobileMenuOpen ? "Đóng menu" : "Mở menu"}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          style={{ display: 'none' }} // Styled via CSS later to show only on mobile
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none">
+            {isMobileMenuOpen ? (
+              <path d="M18 6L6 18M6 6l12 12" />
+            ) : (
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+
+        <nav className={`user-navbar__links ${isMobileMenuOpen ? 'is-mobile-open' : ''}`} aria-label="Điều hướng người dùng">
           {userNavLinks.map((item) => (
             <NavLink
               key={item.to}
@@ -111,13 +128,14 @@ function UserNavbar() {
               className={({ isActive }) =>
                 `user-navbar__link${isActive ? ' is-active' : ''}`
               }
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="user-navbar__actions">
+        <div className={`user-navbar__actions ${isMobileMenuOpen ? 'is-mobile-open' : ''}`}>
           {currentUser ? (
             <div ref={dropdownRef} className="user-navbar__user-menu">
               <button
@@ -134,21 +152,21 @@ function UserNavbar() {
                   <Link
                     to="/tai-khoan"
                     className="user-navbar__dropdown-link"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { setIsOpen(false); setIsMobileMenuOpen(false); }}
                   >
                     Tài khoản của tôi
                   </Link>
                   <Link
                     to="/bai-da-luu"
                     className="user-navbar__dropdown-link"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { setIsOpen(false); setIsMobileMenuOpen(false); }}
                   >
                     Bài viết đã lưu
                   </Link>
                   <Link
                     to="/lich-su-kiem-tra"
                     className="user-navbar__dropdown-link"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { setIsOpen(false); setIsMobileMenuOpen(false); }}
                   >
                     Lịch sử kiểm tra
                   </Link>
@@ -163,12 +181,12 @@ function UserNavbar() {
               ) : null}
             </div>
           ) : (
-            <Link to="/dang-nhap" className="btn btn--ghost user-navbar__login">
+            <Link to="/dang-nhap" className="btn btn--ghost user-navbar__login" onClick={() => setIsMobileMenuOpen(false)}>
               Đăng nhập
             </Link>
           )}
 
-          <Link to="/dang-bai" className="btn btn--primary user-navbar__publish">
+          <Link to="/dang-bai" className="btn btn--primary user-navbar__publish" onClick={() => setIsMobileMenuOpen(false)}>
             Đăng bài
           </Link>
         </div>

@@ -184,6 +184,26 @@ function ElectricityCheckPage() {
     event.preventDefault()
 
     if (!form.name || !form.power || !form.hoursPerDay || !form.daysPerMonth) {
+      setFeedbackMessage('Vui lòng nhập đầy đủ thông tin thiết bị.')
+      return
+    }
+
+    const power = Number(form.power)
+    const hours = Number(form.hoursPerDay)
+    const days = Number(form.daysPerMonth)
+
+    if (isNaN(power) || power <= 0) {
+      setFeedbackMessage('Công suất phải là số lớn hơn 0.')
+      return
+    }
+
+    if (isNaN(hours) || hours <= 0 || hours > 24) {
+      setFeedbackMessage('Số giờ dùng mỗi ngày phải lớn hơn 0 và tối đa 24.')
+      return
+    }
+
+    if (isNaN(days) || days <= 0 || days > 31) {
+      setFeedbackMessage('Số ngày dùng mỗi tháng phải lớn hơn 0 và tối đa 31.')
       return
     }
 
@@ -192,14 +212,15 @@ function ElectricityCheckPage() {
     const nextDevice = buildDevice({
       id: `${form.name}-${Date.now()}`,
       name: form.name,
-      power: Number(form.power),
-      hoursPerDay: Number(form.hoursPerDay),
-      daysPerMonth: Number(form.daysPerMonth),
+      power,
+      hoursPerDay: hours,
+      daysPerMonth: days,
       tone,
     })
 
     setDevices((current) => [...current, nextDevice])
     setForm(createInitialForm())
+    setFeedbackMessage('')
   }
 
   function handleRemoveDevice(id) {

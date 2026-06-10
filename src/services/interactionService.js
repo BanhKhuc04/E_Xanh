@@ -302,3 +302,60 @@ export async function deleteCommentAdmin(commentId) {
   }
   return { error: null }
 }
+
+export async function followUser(followingId) {
+  const session = await getCurrentSession()
+  if (!session?.user) return { error: new Error('Bạn cần đăng nhập để theo dõi.') }
+
+  if (session.user.id === followingId) {
+    return { error: new Error('Không thể tự theo dõi chính mình.') }
+  }
+
+  const { error } = await supabase
+    .from('user_follows')
+    .insert({ follower_id: session.user.id, following_id: followingId })
+
+  if (error && error.code !== '23505') {
+    console.error('[E-XANH] Lỗi theo dõi người dùng:', error)
+    return { error }
+  }
+
+  return { error: null }
+}
+
+export async function unfollowUser(followingId) {
+  const session = await getCurrentSession()
+  if (!session?.user) return { error: new Error('Bạn cần đăng nhập.') }
+
+  const { error } = await supabase
+    .from('user_follows')
+    .delete()
+    .eq('follower_id', session.user.id)
+    .eq('following_id', followingId)
+
+  if (error) {
+    console.error('[E-XANH] Lỗi hủy theo dõi người dùng:', error)
+    return { error }
+  }
+
+  return { error: null }
+}
+
+export async function checkFollowStatus(followingId) {
+  const session = await getCurrentSession()
+  if (!session?.user) return { data: false, error: null }
+
+  const { data, error } = await supabase
+    .from('user_follows')
+    .select('following_id')
+    .eq('follower_id', session.user.id)
+    .eq('following_id', followingId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[E-XANH] Lỗi kiểm tra theo dõi:', error)
+    return { data: false, error }
+  }
+  
+  return { data: !!data, error: null }
+}

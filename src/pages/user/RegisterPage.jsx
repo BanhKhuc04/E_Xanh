@@ -21,6 +21,8 @@ function RegisterPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [banners, setBanners] = useState([])
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   useEffect(() => {
     async function load() {
       const { data } = await fetchBanners('auth', true)
@@ -82,6 +84,8 @@ function RegisterPage() {
       return
     }
 
+    setIsSubmitting(true)
+
     const { data, error } = await signUpWithEmail({
       name: form.name.trim(),
       email: form.email.trim(),
@@ -98,11 +102,13 @@ function RegisterPage() {
         viError = error.message
       }
       setErrorMessage(`Lỗi đăng ký: ${viError}`)
+      setIsSubmitting(false)
       return
     }
 
     setErrorMessage('')
     setSuccessMessage('Đăng ký thành công. Vui lòng kiểm tra email nếu hệ thống yêu cầu xác nhận.')
+    setIsSubmitting(false)
 
     window.setTimeout(() => {
       if (data?.session) {
@@ -230,8 +236,8 @@ function RegisterPage() {
               </span>
             </label>
 
-            <button type="submit" className="btn btn--primary auth-form__submit">
-              Tạo tài khoản
+            <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
             </button>
           </form>
 

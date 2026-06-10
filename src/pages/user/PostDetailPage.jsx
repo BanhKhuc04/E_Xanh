@@ -27,8 +27,28 @@ function PostDetailPage() {
           review: 'Review thiết bị'
         }
 
+        let isLiked = false
+        let isSaved = false
+        let isFollowing = false
+        try {
+          const { getCurrentSession } = await import('../../services/authService')
+          const session = await getCurrentSession()
+          if (session?.user) {
+            const { isPostLiked, isPostSaved, checkFollowStatus } = await import('../../services/interactionService')
+            const [likedRes, savedRes, followRes] = await Promise.all([
+              isPostLiked(data.id),
+              isPostSaved(data.id),
+              checkFollowStatus(data.author_id)
+            ])
+            isLiked = likedRes.data || false
+            isSaved = savedRes.data || false
+            isFollowing = followRes.data || false
+          }
+        } catch(e) { console.error('Error fetching interaction status', e) }
+
         const postData = {
           id: data.id,
+          author_id: data.author_id,
           title: data.title,
           slug: data.slug,
           type: data.type,
@@ -52,6 +72,9 @@ function PostDetailPage() {
           readTime: data.read_time || '3 phút',
           date: new Date(data.created_at).toISOString().split('T')[0],
           commentItems: [],
+          isLiked,
+          isSaved,
+          isFollowing
         }
         setPost(postData)
 
@@ -106,6 +129,117 @@ function PostDetailPage() {
     )
   }
 
+  async function handleToggleLike() {
+    const { getCurrentSession } = await import('../../services/authService')
+    const session = await getCurrentSession()
+    if (!session?.user) {
+      alert('Vui lòng đăng nhập để thích bài viết.')
+      return
+    }
+    
+    if (!post) return
+    const isCurrentlyLiked = post.isLiked
+
+    setPost(current => {
+      if (!current) return current
+      return {
+        ...current,
+        isLiked: !isCurrentlyLiked,
+        likes: isCurrentlyLiked ? Math.max(0, current.likes - 1) : current.likes + 1,
+      }
+    })
+
+    const { likePost, unlikePost } = await import('../../services/interactionService')
+    const { error } = isCurrentlyLiked ? await unlikePost(post.id) : await likePost(post.id)
+
+    if (error) {
+      setPost(current => {
+        if (!current) return current
+        return {
+          ...current,
+          isLiked: isCurrentlyLiked,
+          likes: isCurrentlyLiked ? current.likes + 1 : Math.max(0, current.likes - 1),
+        }
+      })
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
+  }
+
+  async function handleToggleSave() {
+    const { getCurrentSession } = await import('../../services/authService')
+    const session = await getCurrentSession()
+    if (!session?.user) {
+      alert('Vui lòng đăng nhập để lưu bài viết.')
+      return
+    }
+
+    if (!post) return
+    const isCurrentlySaved = post.isSaved
+
+    setPost(current => {
+      if (!current) return current
+      return {
+        ...current,
+        isSaved: !isCurrentlySaved,
+        savedCount: isCurrentlySaved ? Math.max(0, current.savedCount - 1) : current.savedCount + 1,
+      }
+    })
+
+    const { savePost, unsavePost } = await import('../../services/interactionService')
+    const { error } = isCurrentlySaved ? await unsavePost(post.id) : await savePost(post.id)
+
+    if (error) {
+      setPost(current => {
+        if (!current) return current
+        return {
+          ...current,
+          isSaved: isCurrentlySaved,
+          savedCount: isCurrentlySaved ? current.savedCount + 1 : Math.max(0, current.savedCount - 1),
+        }
+      })
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
+  }
+
+  async function handleToggleFollow() {
+    const { getCurrentSession } = await import('../../services/authService')
+    const session = await getCurrentSession()
+    if (!session?.user) {
+      alert('Vui lòng đăng nhập để theo dõi người dùng này.')
+      return
+    }
+    
+    if (session.user.id === post.author_id) {
+      alert('Bạn không thể tự theo dõi chính mình.')
+      return
+    }
+
+    if (!post) return
+    const isCurrentlyFollowing = post.isFollowing
+
+    setPost(current => {
+      if (!current) return current
+      return {
+        ...current,
+        isFollowing: !isCurrentlyFollowing,
+      }
+    })
+
+    const { followUser, unfollowUser } = await import('../../services/interactionService')
+    const { error } = isCurrentlyFollowing ? await unfollowUser(post.author_id) : await followUser(post.author_id)
+
+    if (error) {
+      setPost(current => {
+        if (!current) return current
+        return {
+          ...current,
+          isFollowing: isCurrentlyFollowing,
+        }
+      })
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+    }
+  }
+
   const sidebarRelated = relatedPosts.slice(0, 3)
   const bottomSuggested = relatedPosts.slice(3, 6)
 
@@ -127,7 +261,7 @@ function PostDetailPage() {
         <article className="post-detail-main">
           <ArticleHeader post={post} />
           <ArticleContent post={post} />
-          <ArticleActions post={post} />
+          <ArticleActions post={post} onToggleLike={handleToggleLike} onToggleSave={handleToggleSave} />
           <CommentSection post={post} comments={post.commentItems.slice(0, 2)} />
         </article>
 
@@ -140,7 +274,13 @@ function PostDetailPage() {
             )}
             <h2>{post.author}</h2>
             <p>{post.authorBio}</p>
-            <button type="button">Theo dõi</button>
+            <button 
+              type="button" 
+              className={`btn ${post.isFollowing ? 'btn--secondary' : 'btn--primary'}`}
+              onClick={handleToggleFollow}
+            >
+              {post.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
+            </button>
           </section>
 
           {sidebarRelated.length > 0 ? (
