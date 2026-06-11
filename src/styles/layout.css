@@ -25,6 +25,10 @@
   padding: 8px 0;
 }
 
+.user-navbar__mobile-toggle {
+  display: none;
+}
+
 .user-navbar__links,
 .user-navbar__actions {
   display: flex;
@@ -181,6 +185,38 @@
   margin: 0;
   color: rgba(255, 255, 255, 0.64);
   font-size: 0.78rem;
+}
+
+.user-footer__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 4px 6px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e53935, #b71c1c);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(183, 28, 28, 0.3);
+}
+
+.user-footer__badge-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #da251d;
+  flex-shrink: 0;
+}
+
+.user-footer__badge-icon svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  display: block;
 }
 
 .hero-panel,

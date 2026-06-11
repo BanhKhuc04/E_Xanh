@@ -45,5 +45,11 @@
 
 /* footer size */
 .brand-logo--footer {
-  --logo-width: 160px;
+  --logo-width: 180px; /* Mobile */
 }
+@media (min-width: 768px) {
+  .brand-logo--footer {
+    --logo-width: 280px; /* Desktop (approx 1.75x of 160px) */
+  }
+}
+
