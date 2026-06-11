@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const HeartIcon = ({ isLiked }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -41,6 +41,12 @@ function CommunityPostCard({
   const [toast, setToast] = useState('')
   const shareRef = useRef(null)
   const commentRef = useRef(null)
+  const navigate = useNavigate()
+
+  const handleCardClick = (e) => {
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
+    navigate(`/cong-dong/${post.id}`);
+  }
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -93,7 +99,7 @@ function CommunityPostCard({
 
 
   return (
-    <article className="community-post-card" id={post.id} data-testid="community-post-card">
+    <article className="community-post-card" id={post.id} data-testid="community-post-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
       <div className="community-post-card__header">
         <div className="community-post-card__author">
           <img src={post.avatar} alt={post.author} />
@@ -122,7 +128,7 @@ function CommunityPostCard({
       {post.image ? (
         <div className="community-post-card__media">
           <Link to={`/cong-dong/${post.id}`}>
-            <img src={post.image} alt={post.title} />
+            <img src={post.image} alt={post.title} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/fallback-green.jpg'; }} />
           </Link>
         </div>
       ) : null}

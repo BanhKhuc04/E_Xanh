@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import CreatePostForm from '../../components/community/CreatePostForm'
 import CreatePostSidebar from '../../components/community/CreatePostSidebar'
 import { getCurrentSession, onAuthStateChange } from '../../services/authService'
@@ -8,6 +8,7 @@ import '../../styles/create-post.css'
 
 function CreatePostPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   
   const initialForm = {
     title: '',
@@ -60,7 +61,11 @@ function CreatePostPage() {
     async function loadAuth() {
       const session = await getCurrentSession()
       if (isMounted) {
-        setUser(session?.user || null)
+        if (!session?.user) {
+          navigate('/dang-nhap', { state: { message: "Vui lòng đăng nhập để đăng bài" } })
+          return
+        }
+        setUser(session.user)
         setAuthLoading(false)
       }
     }
@@ -219,7 +224,7 @@ function CreatePostPage() {
 
         <div className="create-post-page__hero-visual">
           <img
-            src="https://lh3.googleusercontent.com/aida/AP1WRLtpJjTm__j83GOUfzCEatime_6k6N8-w8fEefsiI-Lus8iHT_b61LMTmM_Bcc69Plh848bFko5xaHVs6fv2BcN74fwRsoAhlOJ1ZkP618NwsrjgLSz-wL3FwzkvkVxAOKv5wvq-5nB67EqoDEZlvRerY746S-L3WOKa-spymW1X9bOGvTnYMh-eB12O39CbwEv3QROuBbdreSnfwktdHuA_mr29o-RssSGB1pvcgZX0YrgcElfsy5qjgVci"
+            src='/images/fallback-green.jpg'
             alt="Minh họa người dùng đang viết bài chia sẻ sống xanh"
           />
         </div>

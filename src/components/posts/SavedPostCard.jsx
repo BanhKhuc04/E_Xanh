@@ -14,7 +14,7 @@ function SavedPostCard({ post, onUnsave }) {
   return (
     <article className="saved-post-card">
       <div className="saved-post-card__media">
-        <img src={post.image} alt={post.title} />
+        <img src={post.image} alt={post.title} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/fallback-green.jpg'; }} />
         <span className="saved-post-card__tag">{post.savedCategoryLabel}</span>
         <button 
           type="button" 

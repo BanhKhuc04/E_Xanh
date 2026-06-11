@@ -6,7 +6,7 @@ function PostComposer() {
       <div className="community-composer__top">
         <img
           className="community-composer__avatar"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgGqptEc6hx0B_i3nnODz0Ggz6jQRYWkjnoguyaHQDFCRKkx8LXdWrcVItikcTBES7RhJCFADJN1k7EQ8vtA89flWlrMJfVy9uen6LajunIUVpbwQ3EE1qMngoigbUV2vL2-LZzdWDkhV96lVGAMuSXccTvTsn2qaQ9sJ-imI2sZ2tKPysK5Aud8uyEs6leCl_sMdBT5lFx9BtHG4DpoX-OdWPv5-hS3_FAz_efeE5f5o-wq7SUcf38232HxIrawlN1gR-EFY1TjJO"
+          src='/images/fallback-green.jpg'
           alt="Avatar người dùng"
         />
 
@@ -14,7 +14,7 @@ function PostComposer() {
           Bạn muốn chia sẻ mẹo tiết kiệm điện nào?
         </Link>
 
-        <Link className="btn btn--primary community-composer__button" to="/dang-bai">
+        <Link className="btn btn--primary community-composer__button" to="/dang-bai" data-testid="community-write-post-button">
           Viết bài chia sẻ
         </Link>
       </div>

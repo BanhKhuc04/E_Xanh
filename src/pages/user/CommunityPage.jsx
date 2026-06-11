@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import CommunitySidebar from '../../components/community/CommunitySidebar'
@@ -41,6 +41,7 @@ function sortCommunityPosts(posts, activeFilter) {
 }
 
 function CommunityPage() {
+  const navigate = useNavigate()
   const [activeFilter, setActiveFilter] = useState('Tất cả')
   const [posts, setPosts] = useState([])
   const [visibleCount, setVisibleCount] = useState(3)
@@ -130,7 +131,7 @@ function CommunityPage() {
 
   async function handleToggleLike(postId) {
     if (!currentUser) {
-      alert('Vui lòng đăng nhập để thích bài viết.')
+      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để thích bài viết.' } })
       return
     }
 
@@ -171,7 +172,7 @@ function CommunityPage() {
 
   async function handleToggleSave(postId) {
     if (!currentUser) {
-      alert('Vui lòng đăng nhập để lưu bài viết.')
+      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để lưu bài viết.' } })
       return
     }
 
@@ -211,6 +212,11 @@ function CommunityPage() {
   }
 
   async function handleToggleComment(postId) {
+    if (!currentUser) {
+      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để bình luận bài viết.' } })
+      return
+    }
+
     if (activeCommentPostId === postId) {
       setActiveCommentPostId(null)
       return

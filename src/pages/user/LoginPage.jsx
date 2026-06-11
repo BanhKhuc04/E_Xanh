@@ -152,15 +152,16 @@ function LoginPage() {
             <Link to="/dang-ky">Đăng ký</Link>
           </div>
 
-          {errorMessage ? <div className="auth-card__message auth-card__message--error">{errorMessage}</div> : null}
+          {errorMessage ? <div className="auth-card__message auth-card__message--error" role="alert" data-testid="login-error">{errorMessage}</div> : null}
           {successMessage ? (
             <div className="auth-card__message auth-card__message--success">{successMessage}</div>
           ) : null}
 
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <label>
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            <label htmlFor="login-email">
               <span>Email</span>
               <input
+                id="login-email"
                 type="email"
                 value={form.email}
                 onChange={(event) => handleChange('email', event.target.value)}
@@ -168,9 +169,10 @@ function LoginPage() {
               />
             </label>
 
-            <label>
+            <label htmlFor="login-password">
               <span>Mật khẩu</span>
               <input
+                id="login-password"
                 type="password"
                 value={form.password}
                 onChange={(event) => handleChange('password', event.target.value)}
@@ -179,8 +181,9 @@ function LoginPage() {
             </label>
 
             <div className="auth-form__row">
-              <label className="auth-form__checkbox">
+              <label className="auth-form__checkbox" htmlFor="login-remember">
                 <input
+                  id="login-remember"
                   type="checkbox"
                   checked={form.remember}
                   onChange={(event) => handleChange('remember', event.target.checked)}

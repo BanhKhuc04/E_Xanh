@@ -107,8 +107,8 @@ function UserNavbar() {
         <button 
           className="user-navbar__mobile-toggle"
           aria-label={isMobileMenuOpen ? "Đóng menu" : "Mở menu"}
+          data-testid="mobile-menu-toggle"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          style={{ display: 'none' }} // Styled via CSS later to show only on mobile
         >
           <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none">
             {isMobileMenuOpen ? (

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import SavedPostCard from '../../components/posts/SavedPostCard'
 import SavedPostsFilter from '../../components/posts/SavedPostsFilter'
 import SavedSidebar from '../../components/posts/SavedSidebar'
@@ -27,6 +27,7 @@ function sortSavedPosts(items, sortValue) {
 }
 
 function SavedPostsPage() {
+  const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('Tất cả')
   const [sortValue, setSortValue] = useState('Mới lưu nhất')
@@ -38,17 +39,17 @@ function SavedPostsPage() {
     async function loadSavedPosts() {
       const { getCurrentSession } = await import('../../services/authService')
       const session = await getCurrentSession()
-      if (session?.user) {
-        const { getMySavedPosts } = await import('../../services/interactionService')
-        const { data, error } = await getMySavedPosts()
-        if (data) {
-          setDbSavedPosts(data)
-        } else {
-          setDbSavedPosts([])
-          if (error) console.error('Lỗi lấy bài lưu:', error.message)
-        }
+      if (!session?.user) {
+        navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để xem bài đã lưu' } })
+        return
+      }
+      const { getMySavedPosts } = await import('../../services/interactionService')
+      const { data, error } = await getMySavedPosts()
+      if (data) {
+        setDbSavedPosts(data)
       } else {
-        setDbSavedPosts(savedPosts)
+        setDbSavedPosts([])
+        if (error) console.error('Lỗi lấy bài lưu:', error.message)
       }
       setLoading(false)
     }
@@ -117,7 +118,7 @@ function SavedPostsPage() {
 
         <div className="saved-posts-hero__visual">
           <img
-            src="https://lh3.googleusercontent.com/aida/AP1WRLsyEXL8ygmkoBTmM7-tshvP-VQ4Z1sLXWVXyINN3y95prhrS-VUoerLyPXpIb7lsjyob8ZDfxxaq_XUsWGHXh4P411TzVXhV3i4-nxVYXFrJFGOBDmHONL5nCKnjnWoGp4OtdnMpYlKtKmhkgTIU_5yWU9mkwn-p_6STtwjQeW_RwnZWX3tuTnB28QsabrL990mkLkesFOYSp7_NacW-Z-CbeGbNLz3MKQwfzHFmNiKDu4PbVXOkSTPPND9"
+            src='/images/fallback-green.jpg'
             alt="Người dùng đang xem lại bài viết đã lưu trên laptop"
           />
         </div>

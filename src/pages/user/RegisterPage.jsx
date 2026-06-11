@@ -171,15 +171,16 @@ function RegisterPage() {
             <span className="is-active">Đăng ký</span>
           </div>
 
-          {errorMessage ? <div className="auth-card__message auth-card__message--error">{errorMessage}</div> : null}
+          {errorMessage ? <div className="auth-card__message auth-card__message--error" role="alert" data-testid="register-error">{errorMessage}</div> : null}
           {successMessage ? (
             <div className="auth-card__message auth-card__message--success">{successMessage}</div>
           ) : null}
 
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <label>
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            <label htmlFor="register-name">
               <span>Họ và tên</span>
               <input
+                id="register-name"
                 type="text"
                 value={form.name}
                 onChange={(event) => handleChange('name', event.target.value)}
@@ -187,9 +188,10 @@ function RegisterPage() {
               />
             </label>
 
-            <label>
+            <label htmlFor="register-email">
               <span>Email</span>
               <input
+                id="register-email"
                 type="email"
                 value={form.email}
                 onChange={(event) => handleChange('email', event.target.value)}
@@ -197,9 +199,10 @@ function RegisterPage() {
               />
             </label>
 
-            <label>
+            <label htmlFor="register-password">
               <span>Mật khẩu</span>
               <input
+                id="register-password"
                 type="password"
                 value={form.password}
                 onChange={(event) => handleChange('password', event.target.value)}
@@ -207,9 +210,10 @@ function RegisterPage() {
               />
             </label>
 
-            <label>
+            <label htmlFor="register-confirm">
               <span>Xác nhận mật khẩu</span>
               <input
+                id="register-confirm"
                 type="password"
                 value={form.confirmPassword}
                 onChange={(event) => handleChange('confirmPassword', event.target.value)}
@@ -217,8 +221,9 @@ function RegisterPage() {
               />
             </label>
 
-            <label className="auth-form__checkbox">
+            <label className="auth-form__checkbox" htmlFor="register-agree">
               <input
+                id="register-agree"
                 type="checkbox"
                 checked={form.agree}
                 onChange={(event) => handleChange('agree', event.target.checked)}

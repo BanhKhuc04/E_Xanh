@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('04 - Create Post Page', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('sb-mryhdocmbxnxmokpsxzl-auth-token', JSON.stringify({
+        user: { id: 'test-user', email: 'test@example.com' },
+        access_token: 'fake-token'
+      }));
+    });
     await page.goto('/dang-bai');
   });
 

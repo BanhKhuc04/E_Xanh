@@ -109,7 +109,7 @@ export const posts = [
       'Áp dụng ngay những mẹo nhỏ này để giảm tải cho điều hòa và tiết kiệm đáng kể chi phí điện năng trong những ngày hè oi bức.',
     category: 'Điều hòa',
     image:
-      'https://lh3.googleusercontent.com/aida/AP1WRLtJfGHYp4iRBd3DNb0kS0JmBUmMmzBG2Q7kXPeFcjJgUPIhg8XwXVrifo2FhXJpUTBY2BGAZIYIWuKg0WGU3RvaBnYGmQIDmquDd2GM-R9bArCPpoKvKKQ0qIwgdeatuQdTGadOOewVspg5wPwlvkkvUzyX5aP8_TWQZOig-cDyf7IqUjjgsX3ZnTLII4ohu_otaSfhusjl3ViPixt4oPpthoxUuhroQdmzzR_id2cnRP7Rv56CawNxH6Q',
+      '/images/fallback-green.jpg',
     author: 'E-XANH Team',
     date: '12/05/2024',
     readTime: '5 phút đọc',
@@ -166,7 +166,7 @@ export const posts = [
       'Vị trí đặt tủ lạnh ảnh hưởng lớn đến khả năng tản nhiệt và mức tiêu thụ điện. Cùng tìm hiểu vị trí tối ưu nhất.',
     category: 'Tủ lạnh',
     image:
-      'https://lh3.googleusercontent.com/aida/AP1WRLvbWOyPiA1HOGeXusMgsrnwPTGOs7ZeCNH_V5mjvBV-0raxbD0NylGvP8bjesWQZEw1w79K7iGEhb2VJCJY8W3VAYkEuDmoB4B7GlXyCWZVaQ2zb613SQ0E6FD6DZc46lE9JE6uUsKhANajT_tUjY1mYHEjkVaIi_r2VGhPl7D65TgSU3FQS1l1ZcNBKyGwFDhM1WuxkMRyqJhVAHuO5LB8exzEpGOlKqqcD6cSw_DMO70yjYybvun0kDg',
+      '/images/fallback-green.jpg',
     author: 'E-XANH Team',
     date: '05/05/2024',
     readTime: '4 phút đọc',

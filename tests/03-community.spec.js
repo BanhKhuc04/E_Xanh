@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('03 - Community Page', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('sb-mryhdocmbxnxmokpsxzl-auth-token', JSON.stringify({
+        user: { id: 'test-user', email: 'test@example.com' },
+        access_token: 'fake-token'
+      }));
+    });
     await page.goto('/cong-dong');
   });
 
@@ -10,7 +16,7 @@ test.describe('03 - Community Page', () => {
   });
 
   test('TC02 - Nút viết bài chia sẻ hoạt động', async ({ page }) => {
-    await page.getByTestId('community-write-post-button').click();
+    await page.getByTestId('community-write-post-button').first().click();
     await expect(page).toHaveURL(/dang-bai/);
   });
 

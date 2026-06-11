@@ -13,7 +13,7 @@ export const communityHero = {
   description:
     'Chia sẻ kinh nghiệm tiết kiệm điện, đặt câu hỏi, lưu lại mẹo hữu ích và cùng lan tỏa thói quen sống xanh mỗi ngày.',
   image:
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuAyrbNoUK3ekPS_9QZPba6To3U0N3fqwEUwR-YpGGdX_RyIBgsV-SY673FiF5gHdEKlgXkGqx_FCltaQjPimutPUjOjz8skWxG81YOw6G7lhw2NnY7OOwWdibC5udn3PGHs_iIkei7HdbWUYFKO1ui4h2SV27JlPZVYfpUp7v9jtizJJU5BZcU_LmSFl5RCOHUWGD2-EVzDHb6NMnytdX77NaRGbsvteQiLJzT1aRBTqzd4aLRzk2hOmBSvLL2WrumMdkwQZw3cXWQl',
+    '/images/fallback-green.jpg',
 }
 
 export const communityPosts = [
@@ -21,7 +21,7 @@ export const communityPosts = [
     id: 'community-1',
     author: 'Minh Tuấn',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuB4_KoYlcMLHiqq69Sigcvh8P86KEhZj_RYstiqV5kh9hDfiScotSrw8lZuTnaLHYki95wR6d8vrpPmfcec6uxga25KbMFTxdQkoYQb5Kr2QYrRvk7W1a-giyMbpTahZr_2UxAth69isMzRte8ESnrkF_Kl4rycmchngZiUO0Zluib9H9fJAu_Z9CEc5UMt3ulgp570HStmBKzYtjdUIv4Kgbf7m7X5wVLYm-dx684axxMpz-PIf4Dm7ed4k1L4l7X-0OOKQ1MWcyEm',
+      '/images/fallback-green.jpg',
     role: 'Sinh viên Bách Khoa',
     time: '2 giờ trước',
     publishedAt: '2024-06-12T08:30:00',
@@ -31,7 +31,7 @@ export const communityPosts = [
     excerpt:
       'Trước đây mình hay để điều hòa 20 độ và bật cả đêm. Sau khi đổi sang 26 độ, bật thêm quạt số nhỏ và đóng kín cửa hơn, hóa đơn điện tháng này giảm thấy rõ mà phòng vẫn đủ mát.',
     image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDVJ9xLD4__aCKF7XA4ImafdJzy4racjqf6ylb0SeXPO2ou3rslckIEOMB3iPhAeO2q6vOpFFnl_qcquvy0SaL6SltsKMjG6IKILKdU7iXWayfHQH8TJnWhNW8jPKs9uP6wCr2-i8s6izoqD5MOVQbJaqYY9WqN6tlBbgh6HvcPT8L1GvvtxQV9DDtHKM6_q5KdHS4ubBQbuTi0Bn5g3JxB4bzXBtTH7uOS3zdwInqozyT88KgsaLMcmIC1XSN3BqNshmy9nPU9DKsk',
+      '/images/fallback-green.jpg',
     likes: 302,
     commentsCount: 45,
     savedCount: 128,
@@ -52,7 +52,7 @@ export const communityPosts = [
     id: 'community-2',
     author: 'Lan Anh',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAz90FHzzrBRJ5Lu1xekY9SQ5iOsS1G_ZpZR4vzP6Ifhtn-XFfqNKX1MWzPMZNv0aqi7g5LRBperq8Z_71QjDwWXDO4W51CmRb7fNAOAJLip-mmraB9bvd_Fr59OVsTNrUBCbZkY9ELZsigZBpNjGODtg01hNtWZEVk7JmpvFOTymIweU0G56IkJbzAeaqL1ZG0XpNQCzI9sIjBB7xB5P5bn9jR0G-OX2z0-kiwsS-ogtKx0AQBe5mUt9ci4sUVQaKguJiLUzvXlEJ5',
+      '/images/fallback-green.jpg',
     role: 'Hỏi đáp',
     time: '5 giờ trước',
     publishedAt: '2024-06-12T05:15:00',
@@ -73,7 +73,7 @@ export const communityPosts = [
         id: 'community-2-comment-1',
         author: 'Hoàng Hải',
         avatar:
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuBLdfakE43oINnNZwRZq8gX527nzkgbNMoqa34V61FRD4ucJzdssH-wAYwWfhm8Ir5CRQFubzMtGlwlFBo66SFrMwvKlZ-nde_7WD7ocK6x5vWrrdvPlUse3i4ytftIcr2i-VrABkJ8D9t0lQTbRHn_C5MT0dZzoRSdmMEYgh7lS68aD-5UyT3pCobB3KwJePI4Hl3IHFm6SabMEwG9HjlOflO-_ezbiWOzZvK341bGxUnvOu8i_DR6NIN9lAi_2FU4fENzCRteDC14',
+          '/images/fallback-green.jpg',
         content: 'Nếu dùng bàn học cả ngày, mình thường rút khi pin đủ và máy không cần tải nặng để bớt nóng.',
       },
       {
@@ -89,7 +89,7 @@ export const communityPosts = [
     id: 'community-3',
     author: 'Team E-XANH',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuD02qOWYyqMVvbDbbFbf0A6-kJE5L7pcCb_pY-LZOt829UqIqGZgMQxNZrYI1z_kPeVMXIyJfxv52s2QgH2gM_dObRujbHYpdP8wEFnUk0mfK4TUtH6gmYoHr49qCP_ps7-TiCfVXDZZ1r-ccG9XaghfRI3UYXYh7zIMJEobjYDTpseyhgJ9vaq80p1otByOmPZIe4lzNfywpKu9gLK5StBL4k1vuf4-PxdMPw_2kIUb3MNnaDEmwg6i_NqyueqipXWOHKcYBRugu6J',
+      '/images/fallback-green.jpg',
     role: 'Quản trị viên',
     time: 'Hôm nay',
     publishedAt: '2024-06-12T09:45:00',
@@ -110,7 +110,7 @@ export const communityPosts = [
         id: 'community-3-comment-1',
         author: 'Khánh Linh',
         avatar:
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuBu2itfGNIyFdRxZLpRaTNBwimMkj8RiWrXwFIGBXbaqH9lBgtp3Vhz8RAGoovimC09CZsCqi9zN7TQVNAxbrCfxwO2HqWzmF6DfxXALaU6ZaKgwz2Wr-mst6Zf-bzrlx_H6xb_edk0hv8HvUfJGXfCWlD-NsJ0lgOh7EF-t3ISHVfwM3bqApfTKgNvinvzXuIo-VQC_d34XP6uuSFT4R_wIUJbFrfXDNCOUDEKs4wgYbXGA0cd9KF-c7aJXkth1TRLcZwNXeiBSGn3',
+          '/images/fallback-green.jpg',
         content: 'Mình dán hẳn checklist trước cửa nên đỡ quên hẳn.',
       },
     ],
@@ -142,7 +142,7 @@ export const communityPosts = [
     id: 'community-5',
     author: 'Đức Minh',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDIt8JpkLRhJ8yjNAi4yzmjaVetynXS6kCCQddc8iaWu5IwRFuAuedMYCXpBAM1NjZHB-tBMIlGzJn5w3N9uYyJGo9FWm14wnIQxJlRDOyMK4U6szmRf2VDsbWscBFEwv4AVOwwTXC9XUINrKd3N60J4qSo9mnlWZbhGvJJN2LDGCzLINsYMx4zzel3rdPmLocqOXngEbgrh1EsfSM3VqRYloEYpM39ai-tEO7tkaQi0EsV4aCsQJvhfCkazRAYb1lZnAgMN-QnCm1U',
+      '/images/fallback-green.jpg',
     role: 'Kinh nghiệm phòng trọ',
     time: '2 ngày trước',
     publishedAt: '2024-06-10T18:40:00',
@@ -175,7 +175,7 @@ export const activeMembers = [
     id: 'member-1',
     name: 'Khánh Linh',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBu2itfGNIyFdRxZLpRaTNBwimMkj8RiWrXwFIGBXbaqH9lBgtp3Vhz8RAGoovimC09CZsCqi9zN7TQVNAxbrCfxwO2HqWzmF6DfxXALaU6ZaKgwz2Wr-mst6Zf-bzrlx_H6xb_edk0hv8HvUfJGXfCWlD-NsJ0lgOh7EF-t3ISHVfwM3bqApfTKgNvinvzXuIo-VQC_d34XP6uuSFT4R_wIUJbFrfXDNCOUDEKs4wgYbXGA0cd9KF-c7aJXkth1TRLcZwNXeiBSGn3',
+      '/images/fallback-green.jpg',
     contribution: '42 bài chia sẻ',
     badge: '#1',
   },
@@ -183,7 +183,7 @@ export const activeMembers = [
     id: 'member-2',
     name: 'Đức Minh',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDIt8JpkLRhJ8yjNAi4yzmjaVetynXS6kCCQddc8iaWu5IwRFuAuedMYCXpBAM1NjZHB-tBMIlGzJn5w3N9uYyJGo9FWm14wnIQxJlRDOyMK4U6szmRf2VDsbWscBFEwv4AVOwwTXC9XUINrKd3N60J4qSo9mnlWZbhGvJJN2LDGCzLINsYMx4zzel3rdPmLocqOXngEbgrh1EsfSM3VqRYloEYpM39ai-tEO7tkaQi0EsV4aCsQJvhfCkazRAYb1lZnAgMN-QnCm1U',
+      '/images/fallback-green.jpg',
     contribution: '38 bài chia sẻ',
     badge: '#2',
   },
@@ -191,7 +191,7 @@ export const activeMembers = [
     id: 'member-3',
     name: 'Lan Anh',
     avatar:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAz90FHzzrBRJ5Lu1xekY9SQ5iOsS1G_ZpZR4vzP6Ifhtn-XFfqNKX1MWzPMZNv0aqi7g5LRBperq8Z_71QjDwWXDO4W51CmRb7fNAOAJLip-mmraB9bvd_Fr59OVsTNrUBCbZkY9ELZsigZBpNjGODtg01hNtWZEVk7JmpvFOTymIweU0G56IkJbzAeaqL1ZG0XpNQCzI9sIjBB7xB5P5bn9jR0G-OX2z0-kiwsS-ogtKx0AQBe5mUt9ci4sUVQaKguJiLUzvXlEJ5',
+      '/images/fallback-green.jpg',
     contribution: '26 bài chia sẻ',
     badge: 'Gợi ý hay',
   },

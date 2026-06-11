@@ -74,12 +74,12 @@ function ContactPage() {
         <section className="static-page__contact-form-card">
           <h2>Gửi tin nhắn cho chúng tôi</h2>
 
-          {errorMessage ? <div className="static-page__message static-page__message--error">{errorMessage}</div> : null}
+          {errorMessage ? <div className="static-page__message static-page__message--error" role="alert" data-testid="contact-error">{errorMessage}</div> : null}
           {successMessage ? (
             <div className="static-page__message static-page__message--success">{successMessage}</div>
           ) : null}
 
-          <form className="static-page__contact-form" onSubmit={handleSubmit}>
+          <form className="static-page__contact-form" onSubmit={handleSubmit} noValidate>
             <div className="static-page__form-row">
               <label>
                 <span>Họ và tên</span>

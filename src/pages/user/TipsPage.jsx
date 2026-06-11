@@ -119,8 +119,12 @@ function TipsPage() {
 
         <div className="tips-hero__visual">
           <img
-            src="https://lh3.googleusercontent.com/aida/AP1WRLuN-xlTzAvJ2YABiTMep4m7AmleqctohMTuoKlE9fbpDfOurOPpxlPDVFqJTzSKKW1EzA8pNxTUs6Fpx-q6aAd-3rDINQAB6l2wPmKnH8GXWFFE13z8viDR6LRyXWbHWDxbEWOIPA-IJPjhJcnAjr60C0csDBkONsodp0qr5dzDZScorKpmiUIHRtXntOk4E6i4wU5ZPbxC_man3Q9XsaBAhbolMgSWryFn2rKce48bpFdIoHM7ZOfnYJn_"
+            src="/images/fallback-green.jpg"
             alt="Không gian học tập xanh với các mẹo tiết kiệm điện"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/images/fallback-green.jpg';
+            }}
           />
         </div>
       </section>
@@ -146,7 +150,7 @@ function TipsPage() {
 
           {visiblePosts.length === 0 ? (
             <div className="tips-empty-state">
-              <strong>Chưa có bài viết phù hợp</strong>
+              <strong>Không tìm thấy kết quả phù hợp</strong>
               <p>Hãy thử đổi từ khóa tìm kiếm hoặc chọn lại bộ lọc chủ đề.</p>
             </div>
           ) : null}

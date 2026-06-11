@@ -89,7 +89,7 @@ export const homeFeaturedPosts = [
     likes: '124',
     imageAlt: 'Điều hòa và không gian phòng xanh mát',
     image:
-      'https://lh3.googleusercontent.com/aida/AP1WRLtJfGHYp4iRBd3DNb0kS0JmBUmMmzBG2Q7kXPeFcjJgUPIhg8XwXVrifo2FhXJpUTBY2BGAZIYIWuKg0WGU3RvaBnYGmQIDmquDd2GM-R9bArCPpoKvKKQ0qIwgdeatuQdTGadOOewVspg5wPwlvkkvUzyX5aP8_TWQZOig-cDyf7IqUjjgsX3ZnTLII4ohu_otaSfhusjl3ViPixt4oPpthoxUuhroQdmzzR_id2cnRP7Rv56CawNxH6Q',
+      '/images/fallback-green.jpg',
   },
   {
     category: 'Thiết bị bếp',
@@ -100,7 +100,7 @@ export const homeFeaturedPosts = [
     likes: '89',
     imageAlt: 'Tủ lạnh tiết kiệm điện trong căn bếp xanh',
     image:
-      'https://lh3.googleusercontent.com/aida/AP1WRLvbWOyPiA1HOGeXusMgsrnwPTGOs7ZeCNH_V5mjvBV-0raxbD0NylGvP8bjesWQZEw1w79K7iGEhb2VJCJY8W3VAYkEuDmoB4B7GlXyCWZVaQ2zb613SQ0E6FD6DZc46lE9JE6uUsKhANajT_tUjY1mYHEjkVaIi_r2VGhPl7D65TgSU3FQS1l1ZcNBKyGwFDhM1WuxkMRyqJhVAHuO5LB8exzEpGOlKqqcD6cSw_DMO70yjYybvun0kDg',
+      '/images/fallback-green.jpg',
   },
   {
     category: 'Góc trọ sinh viên',
@@ -111,7 +111,7 @@ export const homeFeaturedPosts = [
     likes: '215',
     imageAlt: 'Phòng trọ sinh viên với góc học tập tiết kiệm điện',
     image:
-      'https://lh3.googleusercontent.com/aida/AP1WRLuN-xlTzAvJ2YABiTMep4m7AmleqctohMTuoKlE9fbpDfOurOPpxlPDVFqJTzSKKW1EzA8pNxTUs6Fpx-q6aAd-3rDINQAB6l2wPmKnH8GXWFFE13z8viDR6LRyXWbHWDxbEWOIPA-IJPjhJcnAjr60C0csDBkONsodp0qr5dzDZScorKpmiUIHRtXntOk4E6i4wU5ZPbxC_man3Q9XsaBAhbolMgSWryFn2rKce48bpFdIoHM7ZOfnYJn_',
+      '/images/fallback-green.jpg',
   },
 ]
 

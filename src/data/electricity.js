@@ -155,7 +155,7 @@ export const heroHighlights = {
   description:
     'Nhập thiết bị bạn đang sử dụng để ước tính chi phí điện, tìm thiết bị tiêu hao nhiều nhất và nhận gợi ý tiết kiệm phù hợp.',
   image:
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuCow35s7JJ7pIZIyBLPj_7Ig_r8NO416G87hKH58v1xZ2OnnBi8etNvKkPyaQRmXjFoMu1jBYIE00kCx_RYb35UgZirRiDJRGtTHq7GT3E2D4S1TNAqEjQCseKxQVvqbsUteHHmPlqHvq0ljJ6EZ9MGQFWdDKLnpCEyuIF72J-7hgf-fscm7hjK4jPndtk8xPhIqFvxBjRzGJ-FCYT5jvm8bSPfsxfLjkFvPX-JAb9cZduYfem9BFDHVC4bP5CLDcqRkr9yjbuFPb6y',
+    '/images/fallback-green.jpg',
 }
 
 export function calculateDeviceKwh(device) {
