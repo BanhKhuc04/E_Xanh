@@ -1,0 +1,21 @@
+{
+  "name": "exanh-playwright-tests",
+  "version": "1.0.0",
+  "description": "Bộ Playwright test tự động cho dự án E-XANH: route, nút, user, admin, UI/UX, responsive.",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:smoke": "playwright test tests/01-smoke-routes.spec.js tests/02-navigation.spec.js",
+    "test:user": "playwright test tests/03-auth-user-profile.spec.js tests/06-community.spec.js tests/07-create-post.spec.js tests/09-saved-posts.spec.js",
+    "test:admin": "playwright test tests/12-admin-auth.spec.js tests/13-admin-dashboard.spec.js tests/14-admin-management.spec.js",
+    "test:uiux": "playwright test tests/16-dead-buttons.spec.js tests/17-responsive.spec.js tests/18-uiux-accessibility.spec.js",
+    "report": "playwright show-report",
+    "install:browsers": "playwright install"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}

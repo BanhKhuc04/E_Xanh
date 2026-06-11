@@ -1,0 +1,1 @@
+Bộ test có 21 file spec. Nhiều test được sinh bằng vòng lặp theo route/viewport, tổng số test khi chạy sẽ trên 100 nếu tính đầy đủ.
