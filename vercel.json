@@ -1,10 +1,4 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)\\.(?:js|css|webp|png|jpg|jpeg|svg|ico|woff|woff2)",
@@ -35,6 +29,12 @@
           "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }
