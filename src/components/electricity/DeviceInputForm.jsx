@@ -56,9 +56,14 @@ function DeviceInputForm({
         </label>
       </div>
 
-      <button type="submit" className="electricity-form__add">
-        Thêm thiết bị
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+        {form.error && (
+          <span style={{ color: '#e53935', fontSize: '0.9rem', fontWeight: 'bold' }}>{form.error}</span>
+        )}
+        <button type="submit" className="electricity-form__add">
+          Thêm thiết bị
+        </button>
+      </div>
     </form>
   )
 }

@@ -273,7 +273,7 @@ function UserManagementPage() {
             onStatusChange={setStatus}
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
-            onFilter={() => {}}
+            onFilter={() => alert('Bộ lọc đã được tự động áp dụng.')}
             onReset={handleReset}
           />
 

@@ -7,6 +7,7 @@ import ElectricityBreakdown from '../../components/electricity/ElectricityBreakd
 import ElectricityResultCard from '../../components/electricity/ElectricityResultCard'
 import RecentElectricityHistory from '../../components/electricity/RecentElectricityHistory'
 import SavingSuggestions from '../../components/electricity/SavingSuggestions'
+import heroImage from '../../assets/hero.png'
 import {
   calculateDeviceKwh,
   deviceOptions,
@@ -171,6 +172,7 @@ function ElectricityCheckPage() {
     setForm((current) => ({
       ...current,
       [field]: value,
+      error: '',
     }))
   }
 
@@ -180,6 +182,7 @@ function ElectricityCheckPage() {
       ...current,
       name,
       power: defaultPower,
+      error: '',
     }))
   }
 
@@ -187,7 +190,7 @@ function ElectricityCheckPage() {
     event.preventDefault()
 
     if (!form.name || !form.power || !form.hoursPerDay || !form.daysPerMonth) {
-      setFeedbackMessage('Vui lòng nhập đầy đủ thông tin thiết bị.')
+      setForm((current) => ({ ...current, error: 'Vui lòng nhập đầy đủ thông tin thiết bị.' }))
       return
     }
 
@@ -196,17 +199,17 @@ function ElectricityCheckPage() {
     const days = Number(form.daysPerMonth)
 
     if (isNaN(power) || power <= 0) {
-      setFeedbackMessage('Công suất phải là số lớn hơn 0.')
+      setForm((current) => ({ ...current, error: 'Công suất phải là số lớn hơn 0.' }))
       return
     }
 
     if (isNaN(hours) || hours <= 0 || hours > 24) {
-      setFeedbackMessage('Số giờ dùng mỗi ngày phải lớn hơn 0 và tối đa 24.')
+      setForm((current) => ({ ...current, error: 'Số giờ dùng mỗi ngày phải lớn hơn 0 và tối đa 24.' }))
       return
     }
 
     if (isNaN(days) || days <= 0 || days > 31) {
-      setFeedbackMessage('Số ngày dùng mỗi tháng phải lớn hơn 0 và tối đa 31.')
+      setForm((current) => ({ ...current, error: 'Số ngày dùng mỗi tháng phải lớn hơn 0 và tối đa 31.' }))
       return
     }
 
@@ -319,7 +322,7 @@ function ElectricityCheckPage() {
         </div>
 
         <div className="electricity-hero__visual">
-          <img src={heroHighlights.image} alt="Minh họa bảng điều khiển điện năng E-XANH" />
+          <img src={heroImage} alt="Minh họa bảng điều khiển điện năng E-XANH" />
           <div className="electricity-floating electricity-floating--cost">
             <span>Dự kiến</span>
             <strong>520.000đ/tháng</strong>

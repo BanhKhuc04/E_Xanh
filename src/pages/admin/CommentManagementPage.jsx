@@ -235,7 +235,7 @@ function CommentManagementPage() {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         postTitles={postTitles}
-        onFilter={() => {}}
+        onFilter={() => alert('Bộ lọc đã được tự động áp dụng.')}
         onReset={handleReset}
       />
 

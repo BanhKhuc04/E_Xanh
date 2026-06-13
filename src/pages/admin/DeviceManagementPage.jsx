@@ -236,7 +236,7 @@ function DeviceManagementPage() {
         onLevelChange={setLevel}
         status={status}
         onStatusChange={setStatus}
-        onFilter={() => {}}
+        onFilter={() => alert('Bộ lọc đã được tự động áp dụng.')}
         onReset={handleReset}
       />
 

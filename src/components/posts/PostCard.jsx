@@ -113,7 +113,7 @@ function PostCard({ post }) {
           </div>
         </div>
 
-        <Link className="post-card-ui__link" to={`/meo-tiet-kiem/${post.slug}`} data-testid="tip-card-link">
+        <Link className="post-card-ui__link" to={`/meo-tiet-kiem/${post.slug || post.id}`} data-testid="tip-card-link">
           Đọc tiếp
         </Link>
       </div>

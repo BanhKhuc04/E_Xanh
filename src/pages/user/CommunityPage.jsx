@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import CommunitySidebar from '../../components/community/CommunitySidebar'
+import heroImage from '../../assets/hero.png'
 import PostComposer from '../../components/community/PostComposer'
 import {
   activeMembers,
@@ -305,7 +306,7 @@ function CommunityPage() {
 
         <div className="community-page__hero-visual">
           <img
-            src={communityHero.image}
+            src={heroImage}
             alt="Nhóm sinh viên đang chia sẻ kinh nghiệm sống xanh"
             width="640"
             height="360"

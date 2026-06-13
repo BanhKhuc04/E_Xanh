@@ -142,6 +142,10 @@ const router = createBrowserRouter([
             path: 'bai-da-luu',
             element: <Suspense fallback={<PageFallback />}><SavedPostsPage /></Suspense>,
           },
+          {
+            path: '*',
+            element: <NotFoundPage />,
+          },
         ],
       },
       {
@@ -195,10 +199,6 @@ const router = createBrowserRouter([
             ],
           },
         ],
-      },
-      {
-        path: '*',
-        element: <NotFoundPage />,
       },
     ],
   },

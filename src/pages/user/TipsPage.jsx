@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import heroImage from '../../assets/hero.png'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
 import {
@@ -144,11 +145,11 @@ function TipsPage() {
 
         <div className="tips-hero__visual">
           <img
-            src="/images/fallback-green.jpg"
+            src={heroImage}
             alt="Không gian học tập xanh với các mẹo tiết kiệm điện"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = '/images/fallback-green.jpg';
+              e.currentTarget.style.display = 'none';
             }}
           />
         </div>
@@ -207,13 +208,13 @@ function TipsPage() {
             <h2>Bài viết được lưu nhiều</h2>
             <div className="tips-saved-list">
               {savedHighlights.map((item) => (
-                <article key={item.id} className="tips-saved-item">
+                <Link key={item.id} to={`/meo-tiet-kiem/${item.id}`} className="tips-saved-item" style={{ textDecoration: 'none', color: 'inherit' }}>
                   <span className="tips-saved-item__icon">{item.icon}</span>
                   <div>
                     <h3>{item.title}</h3>
                     <p>{item.savedCount} lượt lưu</p>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           </section>
