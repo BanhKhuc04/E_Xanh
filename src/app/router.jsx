@@ -1,34 +1,61 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import ScrollToTop from '../components/common/ScrollToTop'
 import DevelopmentNotice from '../components/common/DevelopmentNotice'
 import AdminRoute from '../components/auth/AdminRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
-import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
-import AdminAccessDeniedPage from '../pages/admin/AdminAccessDeniedPage'
-import PostManagementPage from '../pages/admin/PostManagementPage'
-import CommentManagementPage from '../pages/admin/CommentManagementPage'
-import UserManagementPage from '../pages/admin/UserManagementPage'
-import DeviceManagementPage from '../pages/admin/DeviceManagementPage'
-import StatisticsPage from '../pages/admin/StatisticsPage'
-import SettingsPage from '../pages/admin/SettingsPage'
-import ThemeSettingsPage from '../pages/admin/ThemeSettingsPage'
-import AccountPage from '../pages/user/AccountPage'
-import AboutPage from '../pages/user/AboutPage'
-import CommunityPage from '../pages/user/CommunityPage'
-import CommunityPostDetailPage from '../pages/user/CommunityPostDetailPage'
-import ContactPage from '../pages/user/ContactPage'
-import CreatePostPage from '../pages/user/CreatePostPage'
-import ElectricityCheckPage from '../pages/user/ElectricityCheckPage'
-import ElectricityHistoryPage from '../pages/user/ElectricityHistoryPage'
+
+// ─── Eager pages (critical path — kept small) ────────────────────────────────
 import HomePage from '../pages/user/HomePage'
 import LoginPage from '../pages/user/LoginPage'
-import NotFoundPage from '../pages/shared/NotFoundPage'
-import PostDetailPage from '../pages/user/PostDetailPage'
 import RegisterPage from '../pages/user/RegisterPage'
-import SavedPostsPage from '../pages/user/SavedPostsPage'
-import TermsPage from '../pages/user/TermsPage'
-import TipsPage from '../pages/user/TipsPage'
+import NotFoundPage from '../pages/shared/NotFoundPage'
+
+// ─── Lazy pages — User ────────────────────────────────────────────────────────
+const TipsPage = lazy(() => import('../pages/user/TipsPage'))
+const PostDetailPage = lazy(() => import('../pages/user/PostDetailPage'))
+const CommunityPage = lazy(() => import('../pages/user/CommunityPage'))
+const CommunityPostDetailPage = lazy(() => import('../pages/user/CommunityPostDetailPage'))
+const CreatePostPage = lazy(() => import('../pages/user/CreatePostPage'))
+const AccountPage = lazy(() => import('../pages/user/AccountPage'))
+const AboutPage = lazy(() => import('../pages/user/AboutPage'))
+const TermsPage = lazy(() => import('../pages/user/TermsPage'))
+const ContactPage = lazy(() => import('../pages/user/ContactPage'))
+const ElectricityCheckPage = lazy(() => import('../pages/user/ElectricityCheckPage'))
+const ElectricityHistoryPage = lazy(() => import('../pages/user/ElectricityHistoryPage'))
+const SavedPostsPage = lazy(() => import('../pages/user/SavedPostsPage'))
+
+// ─── Lazy pages — Admin ───────────────────────────────────────────────────────
+const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
+const AdminAccessDeniedPage = lazy(() => import('../pages/admin/AdminAccessDeniedPage'))
+const PostManagementPage = lazy(() => import('../pages/admin/PostManagementPage'))
+const CommentManagementPage = lazy(() => import('../pages/admin/CommentManagementPage'))
+const UserManagementPage = lazy(() => import('../pages/admin/UserManagementPage'))
+const DeviceManagementPage = lazy(() => import('../pages/admin/DeviceManagementPage'))
+const StatisticsPage = lazy(() => import('../pages/admin/StatisticsPage'))
+const SettingsPage = lazy(() => import('../pages/admin/SettingsPage'))
+const ThemeSettingsPage = lazy(() => import('../pages/admin/ThemeSettingsPage'))
+
+// ─── Suspense fallback ─────────────────────────────────────────────────────────
+function PageFallback() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '40vh',
+        color: 'var(--color-text-muted)',
+        fontSize: '0.95rem',
+      }}
+      aria-live="polite"
+      aria-label="Đang tải trang..."
+    >
+      <span>Đang tải...</span>
+    </div>
+  )
+}
 
 const router = createBrowserRouter([
   {
@@ -42,122 +69,122 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-    element: <UserLayout />,
-    children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: 'meo-tiet-kiem',
-        element: <TipsPage />,
-      },
-      {
-        path: 'meo-tiet-kiem/:slug',
-        element: <PostDetailPage />,
-      },
-      {
-        path: 'cong-dong',
-        element: <CommunityPage />,
-      },
-      {
-        path: 'cong-dong/:id',
-        element: <CommunityPostDetailPage />,
-      },
-      {
-        path: 'dang-bai',
-        element: <CreatePostPage />,
-      },
-      {
-        path: 'dang-nhap',
-        element: <LoginPage />,
-      },
-      {
-        path: 'dang-ky',
-        element: <RegisterPage />,
-      },
-      {
-        path: 'tai-khoan',
-        element: <AccountPage />,
-      },
-      {
-        path: 've-chung-toi',
-        element: <AboutPage />,
-      },
-      {
-        path: 'dieu-khoan',
-        element: <TermsPage />,
-      },
-      {
-        path: 'lien-he',
-        element: <ContactPage />,
-      },
-      {
-        path: 'kiem-tra-tien-dien',
-        element: <ElectricityCheckPage />,
-      },
-      {
-        path: 'lich-su-kiem-tra',
-        element: <ElectricityHistoryPage />,
-      },
-      {
-        path: 'bai-da-luu',
-        element: <SavedPostsPage />,
-      },
-    ],
-  },
-  {
-    path: '/admin/khong-co-quyen',
-    element: <AdminAccessDeniedPage />,
-  },
-  {
-    path: '/admin',
-    element: <AdminRoute />,
-    children: [
-      {
-        path: '',
-        element: <AdminLayout />,
+        element: <UserLayout />,
         children: [
           {
             index: true,
-            element: <AdminDashboardPage />,
+            element: <HomePage />,
           },
           {
-            path: 'quan-ly-bai-viet',
-            element: <PostManagementPage />,
+            path: 'meo-tiet-kiem',
+            element: <Suspense fallback={<PageFallback />}><TipsPage /></Suspense>,
           },
           {
-            path: 'duyet-bai-viet',
-            element: <Navigate to="/admin/quan-ly-bai-viet" replace />,
+            path: 'meo-tiet-kiem/:slug',
+            element: <Suspense fallback={<PageFallback />}><PostDetailPage /></Suspense>,
           },
           {
-            path: 'quan-ly-binh-luan',
-            element: <CommentManagementPage />,
+            path: 'cong-dong',
+            element: <Suspense fallback={<PageFallback />}><CommunityPage /></Suspense>,
           },
           {
-            path: 'quan-ly-nguoi-dung',
-            element: <UserManagementPage />,
+            path: 'cong-dong/:id',
+            element: <Suspense fallback={<PageFallback />}><CommunityPostDetailPage /></Suspense>,
           },
           {
-            path: 'quan-ly-thiet-bi',
-            element: <DeviceManagementPage />,
+            path: 'dang-bai',
+            element: <Suspense fallback={<PageFallback />}><CreatePostPage /></Suspense>,
           },
           {
-            path: 'thong-ke',
-            element: <StatisticsPage />,
+            path: 'dang-nhap',
+            element: <LoginPage />,
           },
           {
-            path: 'cai-dat',
-            element: <SettingsPage />,
+            path: 'dang-ky',
+            element: <RegisterPage />,
           },
           {
-            path: 'cai-dat-giao-dien',
-            element: <ThemeSettingsPage />,
+            path: 'tai-khoan',
+            element: <Suspense fallback={<PageFallback />}><AccountPage /></Suspense>,
+          },
+          {
+            path: 've-chung-toi',
+            element: <Suspense fallback={<PageFallback />}><AboutPage /></Suspense>,
+          },
+          {
+            path: 'dieu-khoan',
+            element: <Suspense fallback={<PageFallback />}><TermsPage /></Suspense>,
+          },
+          {
+            path: 'lien-he',
+            element: <Suspense fallback={<PageFallback />}><ContactPage /></Suspense>,
+          },
+          {
+            path: 'kiem-tra-tien-dien',
+            element: <Suspense fallback={<PageFallback />}><ElectricityCheckPage /></Suspense>,
+          },
+          {
+            path: 'lich-su-kiem-tra',
+            element: <Suspense fallback={<PageFallback />}><ElectricityHistoryPage /></Suspense>,
+          },
+          {
+            path: 'bai-da-luu',
+            element: <Suspense fallback={<PageFallback />}><SavedPostsPage /></Suspense>,
           },
         ],
       },
-    ],
-  },
+      {
+        path: '/admin/khong-co-quyen',
+        element: <Suspense fallback={<PageFallback />}><AdminAccessDeniedPage /></Suspense>,
+      },
+      {
+        path: '/admin',
+        element: <AdminRoute />,
+        children: [
+          {
+            path: '',
+            element: <AdminLayout />,
+            children: [
+              {
+                index: true,
+                element: <Suspense fallback={<PageFallback />}><AdminDashboardPage /></Suspense>,
+              },
+              {
+                path: 'quan-ly-bai-viet',
+                element: <Suspense fallback={<PageFallback />}><PostManagementPage /></Suspense>,
+              },
+              {
+                path: 'duyet-bai-viet',
+                element: <Navigate to="/admin/quan-ly-bai-viet" replace />,
+              },
+              {
+                path: 'quan-ly-binh-luan',
+                element: <Suspense fallback={<PageFallback />}><CommentManagementPage /></Suspense>,
+              },
+              {
+                path: 'quan-ly-nguoi-dung',
+                element: <Suspense fallback={<PageFallback />}><UserManagementPage /></Suspense>,
+              },
+              {
+                path: 'quan-ly-thiet-bi',
+                element: <Suspense fallback={<PageFallback />}><DeviceManagementPage /></Suspense>,
+              },
+              {
+                path: 'thong-ke',
+                element: <Suspense fallback={<PageFallback />}><StatisticsPage /></Suspense>,
+              },
+              {
+                path: 'cai-dat',
+                element: <Suspense fallback={<PageFallback />}><SettingsPage /></Suspense>,
+              },
+              {
+                path: 'cai-dat-giao-dien',
+                element: <Suspense fallback={<PageFallback />}><ThemeSettingsPage /></Suspense>,
+              },
+            ],
+          },
+        ],
+      },
       {
         path: '*',
         element: <NotFoundPage />,

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import '../../styles/static-pages.css'
 import BrandLogo from '../../components/common/BrandLogo'
 
@@ -26,6 +27,14 @@ const values = ['Thông minh', 'Tiết kiệm', 'Bền vững']
 function AboutPage() {
   return (
     <div className="static-page">
+      <Helmet>
+        <title>Về chúng tôi — E-XANH</title>
+        <meta name="description" content="E-XANH là nền tảng giúp người trẻ sử dụng điện thông minh hơn, tiết kiệm chi phí và lan tỏa lối sống xanh trong cộng đồng sinh viên." />
+        <meta property="og:title" content="Về chúng tôi — E-XANH" />
+        <meta property="og:description" content="Tìm hiểu về dự án E-XANH, sứ mệnh giúp sinh viên sử dụng điện thông minh và lan tỏa lối sống bền vững." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://e-xanh.vercel.app/ve-chung-toi" />
+      </Helmet>
       <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>{'>'}</span>
@@ -50,6 +59,9 @@ function AboutPage() {
           <img
             src="https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?auto=format&fit=crop&w=1400&q=80"
             alt="Minh họa nền tảng E-XANH"
+            width="700"
+            height="400"
+            loading="lazy"
           />
         </div>
       </section>

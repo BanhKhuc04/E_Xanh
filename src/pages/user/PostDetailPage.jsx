@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { useEffect, useState } from 'react'
 import ArticleActions from '../../components/posts/ArticleActions'
 import ArticleContent from '../../components/posts/ArticleContent'
@@ -249,6 +250,14 @@ function PostDetailPage() {
 
   return (
     <div className="post-detail-page">
+      <Helmet>
+        <title>{post.title ? `${post.title} — E-XANH` : 'Chi tiết bài viết — E-XANH'}</title>
+        <meta name="description" content={post.description || `Đọc bài viết "${post.title}" trên E-XANH — nền tảng hỗ trợ sinh viên sử dụng điện thông minh và tiết kiệm điện.`} />
+        <meta property="og:title" content={post.title ? `${post.title} — E-XANH` : 'E-XANH'} />
+        <meta property="og:description" content={post.description || 'Bài viết trên nền tảng E-XANH'} />
+        <meta property="og:type" content="article" />
+        {post.image && <meta property="og:image" content={post.image} />}
+      </Helmet>
       <nav className="post-breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>/</span>
@@ -270,7 +279,14 @@ function PostDetailPage() {
             {post.authorAvatar === 'EX' ? (
               <span className="post-side-card__author-avatar">{post.author.slice(0, 2).toUpperCase()}</span>
             ) : (
-              <img src={post.authorAvatar} alt={post.author} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px' }} />
+              <img
+                src={post.authorAvatar}
+                alt={`Ảnh đại diện của ${post.author}`}
+                width="60"
+                height="60"
+                loading="lazy"
+                style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px' }}
+              />
             )}
             <h2>{post.author}</h2>
             <p>{post.authorBio}</p>

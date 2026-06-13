@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+/* Font loaded via <link> in index.html for better performance */
 
 :root {
   font-family: 'Be Vietnam Pro', sans-serif;
@@ -210,4 +210,33 @@ iframe {
 .tip-card__excerpt {
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+/* ─── Image utilities — chống CLS ────────────────────────────────────────── */
+.hero-img,
+.banner-img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+}
+
+.post-img,
+.community-img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+}
+
+.avatar-img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Đảm bảo ảnh không overflow container */
+img {
+  max-width: 100%;
+  height: auto;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import DeviceInputForm from '../../components/electricity/DeviceInputForm'
 import DeviceUsageList from '../../components/electricity/DeviceUsageList'
 import ElectricityBreakdown from '../../components/electricity/ElectricityBreakdown'
@@ -281,6 +282,14 @@ function ElectricityCheckPage() {
 
   return (
     <div className="electricity-page">
+      <Helmet>
+        <title>Kiểm tra tiền điện — E-XANH</title>
+        <meta name="description" content="Công cụ tính toán và dự báo tiền điện hàng tháng miễn phí. Nhập các thiết bị điện trong nhà để biết ngay số điện tiêu thụ và gợi ý tiết kiệm." />
+        <meta property="og:title" content="Kiểm tra tiền điện — E-XANH" />
+        <meta property="og:description" content="Công cụ tính toán tiền điện miễn phí. Biết ngay bạn đang dùng bao nhiêu kWh mỗi tháng và cách giảm hóa đơn điện." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://e-xanh.vercel.app/kiem-tra-tien-dien" />
+      </Helmet>
       <section className="electricity-hero">
         <div className="electricity-hero__content">
           <span className="electricity-hero__badge">{heroHighlights.badge}</span>

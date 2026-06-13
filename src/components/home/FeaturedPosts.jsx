@@ -98,7 +98,13 @@ function FeaturedPosts() {
                 onClick={() => handlePostClick(post)}
               >
                 <div className="home-post-card__media">
-                  <img src={post.image_url || DEFAULT_IMAGE} alt={post.title} />
+                  <img
+                    src={post.image_url || DEFAULT_IMAGE}
+                    alt={post.title}
+                    width="600"
+                    height="400"
+                    loading="lazy"
+                  />
                   <span className="home-post-card__tag">{getTypeLabel(post.type)}</span>
                   <button type="button" aria-label={`Lưu bài viết ${post.title}`} onClick={(e) => {
                     e.stopPropagation();

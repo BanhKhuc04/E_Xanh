@@ -102,7 +102,13 @@ function CommunityPostCard({
     <article className="community-post-card" id={post.id} data-testid="community-post-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
       <div className="community-post-card__header">
         <div className="community-post-card__author">
-          <img src={post.avatar} alt={post.author} />
+          <img
+            src={post.avatar}
+            alt={`Ảnh đại diện của ${post.author}`}
+            width="40"
+            height="40"
+            loading="lazy"
+          />
           <div>
             <strong>{post.author}</strong>
             <span>
@@ -127,9 +133,16 @@ function CommunityPostCard({
 
       {post.image ? (
         <div className="community-post-card__media">
-          <Link to={`/cong-dong/${post.id}`}>
-            <img src={post.image} alt={post.title} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/fallback-green.jpg'; }} />
-          </Link>
+            <Link to={`/cong-dong/${post.id}`}>
+              <img
+                src={post.image}
+                alt={post.title}
+                width="800"
+                height="450"
+                loading="lazy"
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/fallback-green.jpg'; }}
+              />
+            </Link>
         </div>
       ) : null}
 
@@ -192,7 +205,13 @@ function CommunityPostCard({
             {postComments && postComments.length > 0 ? (
               postComments.map((comment) => (
                 <div key={comment.id} className="community-post-card__comment" style={{ background: 'transparent', padding: '8px 0' }}>
-                  <img src={comment.avatar} alt={comment.author} />
+                  <img
+                  src={comment.avatar}
+                  alt={`Ảnh đại diện của ${comment.author}`}
+                  width="36"
+                  height="36"
+                  loading="lazy"
+                />
                   <div style={{ background: 'rgba(234, 245, 157, 0.16)', padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(79, 132, 40, 0.05)' }}>
                     <strong style={{ fontSize: '0.9rem', color: '#173715' }}>{comment.author}</strong>
                     <p style={{ margin: '4px 0 0', fontSize: '0.95rem', color: '#333' }}>{comment.content}</p>
@@ -205,9 +224,12 @@ function CommunityPostCard({
           </div>
           
           <div className="community-post-card__comment-input-area">
-            <img 
-              src={currentUser?.avatar_url || `https://ui-avatars.com/api/?name=${currentUser?.name || 'G'}&background=c1d95c&color=fff`} 
-              alt="Bạn" 
+            <img
+              src={currentUser?.avatar_url || `https://ui-avatars.com/api/?name=${currentUser?.name || 'G'}&background=c1d95c&color=fff`}
+              alt={`Ảnh đại diện của ${currentUser?.name || 'bạn'}`}
+              width="36"
+              height="36"
+              loading="lazy"
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <textarea 

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Link, useNavigate } from 'react-router-dom'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
@@ -270,6 +271,14 @@ function CommunityPage() {
 
   return (
     <div className="community-page">
+      <Helmet>
+        <title>Cộng đồng — E-XANH</title>
+        <meta name="description" content="Tham gia cộng đồng E-XANH, nơi sinh viên và người trẻ chia sẻ kinh nghiệm sống xanh, mẹo tiết kiệm điện và lối sống bền vững." />
+        <meta property="og:title" content="Cộng đồng E-XANH — Chia sẻ kinh nghiệm sống xanh" />
+        <meta property="og:description" content="Cộng đồng nơi sinh viên chia sẻ mẹo tiết kiệm điện, kinh nghiệm sống xanh và các bí quyết giảm chi phí điện." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://e-xanh.vercel.app/cong-dong" />
+      </Helmet>
       <section className="community-page__hero">
         <div className="community-page__hero-content">
           <span className="community-page__badge">{communityHero.badge}</span>
@@ -287,7 +296,14 @@ function CommunityPage() {
         </div>
 
         <div className="community-page__hero-visual">
-          <img src={communityHero.image} alt="Nhóm sinh viên đang chia sẻ kinh nghiệm sống xanh" />
+          <img
+            src={communityHero.image}
+            alt="Nhóm sinh viên đang chia sẻ kinh nghiệm sống xanh"
+            width="640"
+            height="360"
+            loading="eager"
+            fetchPriority="high"
+          />
         </div>
       </section>
 

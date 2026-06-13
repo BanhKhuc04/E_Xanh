@@ -142,13 +142,16 @@ function UserNavbar() {
                 type="button"
                 className="user-navbar__user-trigger"
                 onClick={() => setIsOpen((current) => !current)}
+                aria-expanded={isOpen}
+                aria-haspopup="true"
+                aria-label="Mở menu tài khoản"
               >
                 <span className="user-navbar__avatar">{currentUser.avatar}</span>
                 <span className="user-navbar__user-name">{getShortName(currentUser.name, currentUser.email)}</span>
               </button>
 
               {isOpen ? (
-                <div className="user-navbar__dropdown">
+                <div className="user-navbar__dropdown" role="menu" aria-label="Menu tài khoản">
                   <Link
                     to="/tai-khoan"
                     className="user-navbar__dropdown-link"

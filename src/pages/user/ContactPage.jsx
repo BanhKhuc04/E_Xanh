@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import '../../styles/static-pages.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -55,6 +56,14 @@ function ContactPage() {
 
   return (
     <div className="static-page">
+      <Helmet>
+        <title>Liên hệ — E-XANH</title>
+        <meta name="description" content="Liên hệ với đội ngũ E-XANH để gửi góp ý, báo lỗi, hợp tác hoặc nhận hỗ trợ tài khoản. Chúng tôi phản hồi trong 24 giờ." />
+        <meta property="og:title" content="Liên hệ với E-XANH" />
+        <meta property="og:description" content="Gửi góp ý, báo lỗi hoặc hợp tác cùng E-XANH. Đội ngũ sẽ phản hồi sớm nhất." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://e-xanh.vercel.app/lien-he" />
+      </Helmet>
       <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>{'>'}</span>

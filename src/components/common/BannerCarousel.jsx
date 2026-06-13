@@ -19,7 +19,11 @@ function BannerCarousel({ banners, interval = 5000 }) {
     return (
       <img
         src={banners[0].image_url}
-        alt={banners[0].title || 'Banner'}
+        alt={banners[0].title || 'Banner E-XANH'}
+        width="720"
+        height="405"
+        loading="eager"
+        fetchPriority="high"
         style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover', borderRadius: 'inherit' }}
       />
     )
@@ -43,7 +47,11 @@ function BannerCarousel({ banners, interval = 5000 }) {
         >
           <img
             src={banner.image_url}
-            alt={banner.title || 'Banner'}
+            alt={banner.title || 'Banner E-XANH'}
+            width="720"
+            height="405"
+            loading={index === 0 ? 'eager' : 'lazy'}
+            fetchPriority={index === 0 ? 'high' : 'auto'}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </div>
