@@ -7,11 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "test:e2e": "playwright test --workers=1",
-    "test:e2e:ui": "playwright test --ui --workers=1",
-    "test:e2e:headed": "playwright test --headed --workers=1",
-    "test:e2e:report": "playwright show-report"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
@@ -31,7 +27,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
