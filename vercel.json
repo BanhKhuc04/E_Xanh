@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/(.*)\\.(?:js|css|webp|png|jpg|jpeg|svg|ico|woff|woff2)",
+      "source": "/(.*)\\.(js|css|webp|png|jpg|jpeg|svg|ico|woff|woff2)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -10,7 +10,16 @@
       ]
     },
     {
-      "source": "/(robots\\.txt|sitemap\\.xml)",
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public,max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
       "headers": [
         {
           "key": "Cache-Control",
@@ -42,7 +51,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!.*\\.).*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]
