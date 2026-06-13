@@ -33,7 +33,11 @@
   ],
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/(.*\\.(?:js|css|webp|png|jpg|jpeg|svg|ico|woff|woff2|xml|txt))$",
+      "destination": "/$1"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

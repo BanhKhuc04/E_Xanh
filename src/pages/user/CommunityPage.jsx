@@ -45,7 +45,7 @@ function CommunityPage() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
-  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.png'
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
   const [activeFilter, setActiveFilter] = useState('Tất cả')
   const [posts, setPosts] = useState([])
   const [visibleCount, setVisibleCount] = useState(3)

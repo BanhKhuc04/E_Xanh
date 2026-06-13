@@ -8,7 +8,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 function ContactPage() {
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
-  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.png'
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
 
   const [form, setForm] = useState({
     name: '',

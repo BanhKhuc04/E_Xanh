@@ -65,7 +65,7 @@ function TermsPage() {
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content="https://e-xanh.vercel.app/og-image.png" />
+        <meta property="og:image" content="https://e-xanh.vercel.app/og-image-v2.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>

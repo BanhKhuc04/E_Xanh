@@ -256,7 +256,7 @@ function PostDetailPage() {
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
-  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.png'
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
 
   return (
     <div className="post-detail-page">
