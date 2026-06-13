@@ -1,5 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { signInWithEmail, getCurrentUserProfile } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
 import BannerCarousel from '../../components/common/BannerCarousel'
@@ -10,6 +11,9 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -102,119 +106,128 @@ function LoginPage() {
 
 
   return (
-    <div className="auth-page">
-      <div className="auth-layout">
-        <section className="auth-visual">
-          <div className="auth-visual__main">
-            <div className="auth-visual__top">
-              <div className="auth-visual__brand" style={{ marginBottom: '8px' }}>
-                <BrandLogo to="/" size="auth" />
+    <>
+      <Helmet>
+        <title>Đăng nhập - E-XANH</title>
+        <meta name="description" content="Đăng nhập vào E-XANH để khám phá thêm nhiều mẹo tiết kiệm điện." />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+
+      <div className="auth-page">
+        <div className="auth-layout">
+          <section className="auth-visual">
+            <div className="auth-visual__main">
+              <div className="auth-visual__top">
+                <div className="auth-visual__brand" style={{ marginBottom: '8px' }}>
+                  <BrandLogo to="/" size="auth" />
+                </div>
+                <span className="auth-visual__chip">Cộng đồng sống xanh</span>
               </div>
-              <span className="auth-visual__chip">Cộng đồng sống xanh</span>
+
+              <div className="auth-visual__content">
+                <h1>
+                  Tham gia E-XANH<br />
+                  để sống xanh hơn<br />
+                  mỗi ngày
+                </h1>
+                <p>
+                  Một tài khoản E-XANH giúp bạn lưu bài viết, tham gia cộng đồng và theo dõi thói quen sử dụng điện cá nhân.
+                </p>
+                <div className="auth-visual__inline-features">
+                   <span>Lưu bài viết</span>
+                   <span className="dot">•</span>
+                   <span>Bình luận</span>
+                   <span className="dot">•</span>
+                   <span>Theo dõi điện năng</span>
+                </div>
+              </div>
             </div>
 
-            <div className="auth-visual__content">
-              <h1>
-                Tham gia E-XANH<br />
-                để sống xanh hơn<br />
-                mỗi ngày
-              </h1>
-              <p>
-                Một tài khoản E-XANH giúp bạn lưu bài viết, tham gia cộng đồng và theo dõi thói quen sử dụng điện cá nhân.
-              </p>
-              <div className="auth-visual__inline-features">
-                 <span>Lưu bài viết</span>
-                 <span className="dot">•</span>
-                 <span>Bình luận</span>
-                 <span className="dot">•</span>
-                 <span>Theo dõi điện năng</span>
-              </div>
+            <div className="auth-carousel-placeholder" style={{ padding: 0, overflow: 'hidden' }}>
+              {banners.length > 0 ? (
+                <BannerCarousel banners={banners} />
+              ) : (
+                <span style={{ display: 'grid', placeItems: 'center', height: '100%' }}>Ảnh minh họa đang cập nhật</span>
+              )}
             </div>
-          </div>
+          </section>
 
-          <div className="auth-carousel-placeholder" style={{ padding: 0, overflow: 'hidden' }}>
-            {banners.length > 0 ? (
-              <BannerCarousel banners={banners} />
-            ) : (
-              <span style={{ display: 'grid', placeItems: 'center', height: '100%' }}>Ảnh minh họa đang cập nhật</span>
-            )}
-          </div>
-        </section>
+          <section className="auth-card">
+            <div className="auth-card__header">
+              <h2>Chào mừng trở lại</h2>
+              <p>Đăng nhập để tiếp tục hành trình sống xanh cùng E-XANH.</p>
+            </div>
 
-        <section className="auth-card">
-          <div className="auth-card__header">
-            <h2>Chào mừng trở lại</h2>
-            <p>Đăng nhập để tiếp tục hành trình sống xanh cùng E-XANH.</p>
-          </div>
+            <div className="auth-card__switcher">
+              <span className="is-active">Đăng nhập</span>
+              <Link to="/dang-ky">Đăng ký</Link>
+            </div>
 
-          <div className="auth-card__switcher">
-            <span className="is-active">Đăng nhập</span>
-            <Link to="/dang-ky">Đăng ký</Link>
-          </div>
+            {errorMessage ? <div className="auth-card__message auth-card__message--error" role="alert" data-testid="login-error">{errorMessage}</div> : null}
+            {successMessage ? (
+              <div className="auth-card__message auth-card__message--success">{successMessage}</div>
+            ) : null}
 
-          {errorMessage ? <div className="auth-card__message auth-card__message--error" role="alert" data-testid="login-error">{errorMessage}</div> : null}
-          {successMessage ? (
-            <div className="auth-card__message auth-card__message--success">{successMessage}</div>
-          ) : null}
-
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            <label htmlFor="login-email">
-              <span>Email</span>
-              <input
-                id="login-email"
-                type="email"
-                value={form.email}
-                onChange={(event) => handleChange('email', event.target.value)}
-                placeholder="Nhập email của bạn"
-              />
-            </label>
-
-            <label htmlFor="login-password">
-              <span>Mật khẩu</span>
-              <input
-                id="login-password"
-                type="password"
-                value={form.password}
-                onChange={(event) => handleChange('password', event.target.value)}
-                placeholder="Nhập mật khẩu"
-              />
-            </label>
-
-            <div className="auth-form__row">
-              <label className="auth-form__checkbox" htmlFor="login-remember">
+            <form className="auth-form" onSubmit={handleSubmit} noValidate>
+              <label htmlFor="login-email">
+                <span>Email</span>
                 <input
-                  id="login-remember"
-                  type="checkbox"
-                  checked={form.remember}
-                  onChange={(event) => handleChange('remember', event.target.checked)}
+                  id="login-email"
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => handleChange('email', event.target.value)}
+                  placeholder="Nhập email của bạn"
                 />
-                <span>Ghi nhớ đăng nhập</span>
               </label>
 
-              <button type="button" className="auth-form__link-button">
-                Quên mật khẩu?
+              <label htmlFor="login-password">
+                <span>Mật khẩu</span>
+                <input
+                  id="login-password"
+                  type="password"
+                  value={form.password}
+                  onChange={(event) => handleChange('password', event.target.value)}
+                  placeholder="Nhập mật khẩu"
+                />
+              </label>
+
+              <div className="auth-form__row">
+                <label className="auth-form__checkbox" htmlFor="login-remember">
+                  <input
+                    id="login-remember"
+                    type="checkbox"
+                    checked={form.remember}
+                    onChange={(event) => handleChange('remember', event.target.checked)}
+                  />
+                  <span>Ghi nhớ đăng nhập</span>
+                </label>
+
+                <button type="button" className="auth-form__link-button">
+                  Quên mật khẩu?
+                </button>
+              </div>
+
+              <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
-            </div>
+            </form>
 
-            <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
-            </button>
-          </form>
-
-          <p className="auth-card__alternate">
-            Chưa có tài khoản? <Link to="/dang-ky">Tạo tài khoản ngay</Link>
-          </p>
-
-
-          <div className="auth-note">
-            <strong>Bảo mật thông tin</strong>
-            <p>
-              Khách chưa đăng nhập vẫn có thể xem bài viết và tính tiền điện. Đăng nhập giúp bạn lưu lại dữ liệu cá nhân hóa.
+            <p className="auth-card__alternate">
+              Chưa có tài khoản? <Link to="/dang-ky">Tạo tài khoản ngay</Link>
             </p>
-          </div>
-        </section>
+
+
+            <div className="auth-note">
+              <strong>Bảo mật thông tin</strong>
+              <p>
+                Khách chưa đăng nhập vẫn có thể xem bài viết và tính tiền điện. Đăng nhập giúp bạn lưu lại dữ liệu cá nhân hóa.
+              </p>
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

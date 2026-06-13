@@ -12,6 +12,17 @@ function generateSlug(title) {
 }
 
 export async function uploadPostImage(file, userId) {
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return { publicUrl: null, error: new Error('Chỉ chấp nhận ảnh JPG, PNG, WebP hoặc GIF.') }
+  }
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    return { publicUrl: null, error: new Error('Ảnh không được vượt quá 5MB.') }
+  }
+
   const safeFileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase()
   const timestamp = new Date().getTime()
   const path = `posts/${userId}/${timestamp}-${safeFileName}`

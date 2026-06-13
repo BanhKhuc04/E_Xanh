@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import {
   electricityHistory,
   formatCurrency,
@@ -50,6 +51,9 @@ function ElectricityHistoryPage() {
   const [filters, setFilters] = useState(defaultFilters)
   const [appliedFilters, setAppliedFilters] = useState(defaultFilters)
   const [selectedHistory, setSelectedHistory] = useState(null)
+
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
 
   useEffect(() => {
     async function fetchHistories() {
@@ -197,7 +201,15 @@ function ElectricityHistoryPage() {
   const fallbackSummary = electricityHistory.slice(0, 3)
 
   return (
-    <div className="electricity-history-page">
+    <>
+      <Helmet>
+        <title>Lịch sử kiểm tra tiền điện - E-XANH</title>
+        <meta name="description" content="Xem lại các lần kiểm tra tiền điện, so sánh mức tiêu thụ và theo dõi chi phí hằng tháng của bạn." />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+
+      <div className="electricity-history-page">
       <div className="electricity-history-page__breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>{'>'}</span>
@@ -459,6 +471,7 @@ function ElectricityHistoryPage() {
         </div>
       ) : null}
     </div>
+    </>
   )
 }
 

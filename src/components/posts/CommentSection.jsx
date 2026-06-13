@@ -32,7 +32,12 @@ function CommentSection({ comments: mockComments, post }) {
   }, [post?.id, mockComments])
 
   async function handleSubmit() {
-    if (!content.trim() || isSubmitting) return
+    const trimmedContent = content.trim()
+    if (!trimmedContent || isSubmitting) return
+    if (trimmedContent.length > 1000) {
+      alert('Bình luận tối đa 1000 ký tự.')
+      return
+    }
     if (!user) {
       alert('Bạn cần đăng nhập để bình luận.')
       return
@@ -44,7 +49,7 @@ function CommentSection({ comments: mockComments, post }) {
 
     setIsSubmitting(true)
     const { addComment } = await import('../../services/interactionService')
-    const { data, error } = await addComment(post.id, content)
+    const { data, error } = await addComment(post.id, trimmedContent)
     if (error) {
       alert(error.message)
     } else if (data) {
@@ -75,15 +80,19 @@ function CommentSection({ comments: mockComments, post }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             disabled={!user}
+            maxLength={1000}
           ></textarea>
-          <div className="comment-section__actions">
+          <div className="comment-section__actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', color: content.length > 1000 ? '#e53935' : '#888' }}>
+              {content.length}/1000 ký tự
+            </span>
             <button 
               type="button" 
               className="btn btn--primary" 
               onClick={handleSubmit} 
-              disabled={isSubmitting || !user || !content.trim()}
+              disabled={isSubmitting || !user || !content.trim() || content.length > 1000}
             >
-              Gửi bình luận
+              {isSubmitting ? 'Đang gửi...' : 'Gửi bình luận'}
             </button>
           </div>
         </div>

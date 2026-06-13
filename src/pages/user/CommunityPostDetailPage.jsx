@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
@@ -14,6 +15,11 @@ function CommunityPostDetailPage() {
   // We use this just to let CommunityPostCard manage its own UI states
   const [activeCommentPostId, setActiveCommentPostId] = useState(id)
   const [activeSharePostId, setActiveSharePostId] = useState(null)
+
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const SITE_URL = 'https://e-xanh.vercel.app'
+  const fallbackOgImage = `${SITE_URL}/og-image-v2.png`
 
   useEffect(() => {
     async function loadData() {
@@ -196,7 +202,21 @@ function CommunityPostDetailPage() {
   }
 
   return (
-    <div className="community-page">
+    <>
+      <Helmet>
+        <title>{post ? `${post.title} - E-XANH` : 'Chi tiết bài viết - E-XANH'}</title>
+        <meta name="description" content={post ? post.excerpt : 'Xem chi tiết bài viết trên cộng đồng E-XANH.'} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={post ? `${post.title} - E-XANH` : 'Chi tiết bài viết - E-XANH'} />
+        <meta property="og:description" content={post ? post.excerpt : 'Xem chi tiết bài viết trên cộng đồng E-XANH.'} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={post?.image || fallbackOgImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </Helmet>
+
+      <div className="community-page">
       <div className="container" style={{ padding: '20px 0', maxWidth: '800px', margin: '0 auto' }}>
         <Link to="/cong-dong" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4F8428', textDecoration: 'none', marginBottom: '24px', fontWeight: 'bold' }}>
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
@@ -225,6 +245,7 @@ function CommunityPostDetailPage() {
         )}
       </div>
     </div>
+    </>
   )
 }
 

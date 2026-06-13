@@ -1,5 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import ProfileHeader from '../../components/account/ProfileHeader'
 import ProfileStats from '../../components/account/ProfileStats'
 import MyPostsList from '../../components/account/MyPostsList'
@@ -88,6 +89,10 @@ function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
 
   useEffect(() => {
     let isMounted = true
@@ -190,71 +195,92 @@ function AccountPage() {
   }
 
   return (
-    <div className="account-page">
-      <div className="account-page__breadcrumb">
-        <Link to="/">Trang chủ</Link>
-        <span>{'>'}</span>
-        <span>Tài khoản của tôi</span>
-      </div>
+    <>
+      <Helmet>
+        <title>Tài khoản cá nhân - E-XANH</title>
+        <meta
+          name="description"
+          content="Quản lý thông tin tài khoản, xem lại các bài viết đã lưu, lịch sử tra cứu điện và các hoạt động khác của bạn trên E-XANH."
+        />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content="Tài khoản cá nhân - E-XANH" />
+        <meta
+          property="og:description"
+          content="Quản lý thông tin tài khoản, xem lại các bài viết đã lưu, lịch sử tra cứu điện và các hoạt động khác của bạn trên E-XANH."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </Helmet>
 
-      <ProfileHeader 
-        user={currentUser} 
-        onLogout={handleLogout} 
-        onEditClick={() => setIsEditModalOpen(true)}
-        onPasswordClick={() => setIsPasswordModalOpen(true)}
-      />
-      <ProfileStats stats={profileStats} />
-
-      <div className="account-layout">
-        <div className="account-layout__main">
-          <MyPostsList posts={myPosts} />
-          <RecentSavedPosts posts={savedPosts.slice(0, 3)} />
-          <RecentComments comments={recentComments} />
+      <div className="account-page">
+        <div className="account-page__breadcrumb">
+          <Link to="/">Trang chủ</Link>
+          <span>{'>'}</span>
+          <span>Tài khoản của tôi</span>
         </div>
 
-        <div className="account-layout__side">
-          <AccountInfoCard user={currentUser} />
-          <RecentElectricityHistoryCard
-            histories={recentHistory}
-            formatCurrency={formatCurrency}
-            formatHistoryDate={formatHistoryDate}
-            formatKwh={formatKwh}
-          />
-          <AccountSettingsCard />
-
-          <section className="account-side-card account-side-card--tips">
-            <h2>Gợi ý dành cho bạn</h2>
-            <p>
-              Bạn thường kiểm tra thiết bị điều hòa. Hãy xem thêm mẹo tiết kiệm điện khi dùng điều hòa.
-            </p>
-            <p>
-              Bạn đã lưu nhiều bài về laptop. Có thể bạn quan tâm đến chủ đề sạc pin đúng cách.
-            </p>
-          </section>
-        </div>
-      </div>
-
-      {isEditModalOpen && (
-        <EditProfileModal 
+        <ProfileHeader 
           user={currentUser} 
-          onClose={() => setIsEditModalOpen(false)} 
-          onSuccess={() => {
-            setIsEditModalOpen(false)
-            alert('Cập nhật hồ sơ thành công!')
-          }} 
+          onLogout={handleLogout} 
+          onEditClick={() => setIsEditModalOpen(true)}
+          onPasswordClick={() => setIsPasswordModalOpen(true)}
         />
-      )}
+        <ProfileStats stats={profileStats} />
 
-      {isPasswordModalOpen && (
-        <ChangePasswordModal 
-          onClose={() => setIsPasswordModalOpen(false)} 
-          onSuccess={() => {
-            setIsPasswordModalOpen(false)
-            alert('Đổi mật khẩu thành công!')
-          }} 
-        />
-      )}
-    </div>
+        <div className="account-layout">
+          <div className="account-layout__main">
+            <MyPostsList posts={myPosts} />
+            <RecentSavedPosts posts={savedPosts.slice(0, 3)} />
+            <RecentComments comments={recentComments} />
+          </div>
+
+          <div className="account-layout__side">
+            <AccountInfoCard user={currentUser} />
+            <RecentElectricityHistoryCard
+              histories={recentHistory}
+              formatCurrency={formatCurrency}
+              formatHistoryDate={formatHistoryDate}
+              formatKwh={formatKwh}
+            />
+            <AccountSettingsCard />
+
+            <section className="account-side-card account-side-card--tips">
+              <h2>Gợi ý dành cho bạn</h2>
+              <p>
+                Bạn thường kiểm tra thiết bị điều hòa. Hãy xem thêm mẹo tiết kiệm điện khi dùng điều hòa.
+              </p>
+              <p>
+                Bạn đã lưu nhiều bài về laptop. Có thể bạn quan tâm đến chủ đề sạc pin đúng cách.
+              </p>
+            </section>
+          </div>
+        </div>
+
+        {isEditModalOpen && (
+          <EditProfileModal 
+            user={currentUser} 
+            onClose={() => setIsEditModalOpen(false)} 
+            onSuccess={() => {
+              setIsEditModalOpen(false)
+              alert('Cập nhật hồ sơ thành công!')
+            }} 
+          />
+        )}
+
+        {isPasswordModalOpen && (
+          <ChangePasswordModal 
+            onClose={() => setIsPasswordModalOpen(false)} 
+            onSuccess={() => {
+              setIsPasswordModalOpen(false)
+              alert('Đổi mật khẩu thành công!')
+            }} 
+          />
+        )}
+      </div>
+    </>
   )
 }
 

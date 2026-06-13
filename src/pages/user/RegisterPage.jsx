@@ -1,5 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { signUpWithEmail } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
 import BannerCarousel from '../../components/common/BannerCarousel'
@@ -10,6 +11,9 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function RegisterPage() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -121,7 +125,15 @@ function RegisterPage() {
 
 
   return (
-    <div className="auth-page">
+    <>
+      <Helmet>
+        <title>Đăng ký - E-XANH</title>
+        <meta name="description" content="Tạo tài khoản E-XANH để tham gia cộng đồng và lưu các mẹo tiết kiệm điện." />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+
+      <div className="auth-page">
       <div className="auth-layout">
         <section className="auth-visual">
           <div className="auth-visual__main">
@@ -253,12 +265,13 @@ function RegisterPage() {
           <div className="auth-note">
             <strong>Bảo mật thông tin</strong>
             <p>
-              Khách chưa đăng nhập vẫn có thể xem bài viết và tính tiền điện. Đăng nhập giúp bạn lưu lại dữ liệu cá nhân hóa.
+              E-XANH cam kết bảo vệ dữ liệu cá nhân của bạn. Thông tin được mã hóa an toàn và không chia sẻ cho bên thứ ba.
             </p>
           </div>
         </section>
       </div>
     </div>
+    </>
   )
 }
 

@@ -87,12 +87,20 @@ function CommunityPostCard({
   }
 
   const handleSubmitComment = () => {
-    if (!commentText.trim()) return
+    const trimmedText = commentText.trim()
+    if (!trimmedText) {
+      showToast('Bình luận không được để trống')
+      return
+    }
+    if (trimmedText.length > 1000) {
+      showToast('Bình luận tối đa 1000 ký tự')
+      return
+    }
     if (!currentUser) {
       showToast('Vui lòng đăng nhập để bình luận')
       return
     }
-    const success = onAddComment(post.id, commentText)
+    const success = onAddComment(post.id, trimmedText)
     if (success) {
       setCommentText('')
     }
@@ -260,6 +268,7 @@ function CommunityPostCard({
                 placeholder="Viết bình luận..." 
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
+                maxLength={1000}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
@@ -267,16 +276,21 @@ function CommunityPostCard({
                   }
                 }}
               />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px' }}>
-                {!currentUser && <span style={{ color: '#e53935', fontSize: '0.85rem' }}>Vui lòng đăng nhập để bình luận</span>}
-                <button 
-                  className="btn btn--primary" 
-                  style={{ padding: '6px 16px', fontSize: '0.85rem', opacity: !commentText.trim() ? 0.5 : 1 }}
-                  onClick={handleSubmitComment}
-                  disabled={!commentText.trim()}
-                >
-                  Gửi
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: commentText.length > 1000 ? '#e53935' : '#888' }}>
+                  {commentText.length}/1000 ký tự
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {!currentUser && <span style={{ color: '#e53935', fontSize: '0.85rem' }}>Vui lòng đăng nhập để bình luận</span>}
+                  <button 
+                    className="btn btn--primary" 
+                    style={{ padding: '6px 16px', fontSize: '0.85rem', opacity: !commentText.trim() ? 0.5 : 1 }}
+                    onClick={handleSubmitComment}
+                    disabled={!commentText.trim()}
+                  >
+                    Gửi
+                  </button>
+                </div>
               </div>
             </div>
           </div>

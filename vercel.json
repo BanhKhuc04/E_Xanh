@@ -1,11 +1,20 @@
 {
   "headers": [
     {
-      "source": "/(.*)\\.(?:js|css|webp|png|jpg|jpeg|svg|ico|woff|woff2|xml|txt)",
+      "source": "/(.*)\\.(?:js|css|webp|png|jpg|jpeg|svg|ico|woff|woff2)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public,max-age=31536000,immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(robots\\.txt|sitemap\\.xml)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public,max-age=86400"
         }
       ]
     },
