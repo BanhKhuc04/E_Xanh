@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getImageUrl } from '../../utils/imageUrl'
 
 function BannerCarousel({ banners, interval = 5000 }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -18,7 +19,7 @@ function BannerCarousel({ banners, interval = 5000 }) {
   if (banners.length === 1) {
     return (
       <img
-        src={banners[0].image_url}
+        src={getImageUrl(banners[0].image_url, 1200)}
         alt={banners[0].title || 'Banner E-XANH'}
         width="720"
         height="405"
@@ -46,7 +47,7 @@ function BannerCarousel({ banners, interval = 5000 }) {
           }}
         >
           <img
-            src={banner.image_url}
+            src={getImageUrl(banner.image_url, 1200)}
             alt={banner.title || 'Banner E-XANH'}
             width="720"
             height="405"

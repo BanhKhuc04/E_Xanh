@@ -132,7 +132,11 @@ function UserNavbar() {
                 aria-label="Mở menu tài khoản"
               >
                 {isValidImageUrl(currentUser.avatar_url) ? (
-                  <img src={currentUser.avatar_url} alt="Avatar" className="user-navbar__avatar-img" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+                  <img 
+                    src={currentUser.avatar_url} 
+                    alt={`Avatar của ${getShortName(currentUser.name, currentUser.email)}`} 
+                    className="user-navbar__avatar-img" 
+                  />
                 ) : (
                   <span className="user-navbar__avatar">{getInitials(currentUser.name || currentUser.email)}</span>
                 )}

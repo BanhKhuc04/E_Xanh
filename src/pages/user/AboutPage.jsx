@@ -27,7 +27,7 @@ const values = ['Thông minh', 'Tiết kiệm', 'Bền vững']
 function AboutPage() {
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
-  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.svg'
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.png'
 
   return (
     <div className="static-page">

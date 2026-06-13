@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getFeaturedPosts } from '../../services/postService'
+import { getImageUrl } from '../../utils/imageUrl'
 
 function FeaturedPosts() {
   const [posts, setPosts] = useState([])
@@ -99,7 +100,7 @@ function FeaturedPosts() {
               >
                 <div className="home-post-card__media">
                   <img
-                    src={post.image_url || DEFAULT_IMAGE}
+                    src={getImageUrl(post.image_url, 600) || DEFAULT_IMAGE}
                     alt={post.title}
                     width="600"
                     height="400"

@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import '../../styles/static-pages.css'
 
 const termsSections = [
@@ -45,9 +46,32 @@ const termsSections = [
 ]
 
 function TermsPage() {
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+
   return (
-    <div className="static-page">
-      <div className="static-page__breadcrumb">
+    <>
+      <Helmet>
+        <title>Điều khoản sử dụng - E-XANH</title>
+        <meta
+          name="description"
+          content="Các điều khoản, quy định và chính sách khi sử dụng nền tảng E-XANH."
+        />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content="Điều khoản sử dụng - E-XANH" />
+        <meta
+          property="og:description"
+          content="Các điều khoản, quy định và chính sách khi sử dụng nền tảng E-XANH."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content="https://e-xanh.vercel.app/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </Helmet>
+
+      <div className="static-page">
+        <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>{'>'}</span>
         <span>Điều khoản</span>
@@ -91,6 +115,7 @@ function TermsPage() {
         </section>
       </div>
     </div>
+    </>
   )
 }
 

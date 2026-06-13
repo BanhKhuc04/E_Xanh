@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
 import {
@@ -34,6 +35,8 @@ function TipsPage() {
   const [isLoading, setIsLoading] = useState(true)
   // eslint-disable-next-line no-unused-vars
   const [errorMsg, setErrorMsg] = useState('')
+  const location = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${location.pathname}`
 
   useEffect(() => {
     let isMounted = true
@@ -106,7 +109,29 @@ function TipsPage() {
   )
 
   return (
-    <div className="tips-page">
+    <>
+      <Helmet>
+        <title>Mẹo tiết kiệm điện - E-XANH</title>
+        <meta
+          name="description"
+          content="Tổng hợp mẹo tiết kiệm điện dễ áp dụng cho sinh viên, phòng trọ và ký túc xá."
+        />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content="Mẹo tiết kiệm điện - E-XANH" />
+        <meta
+          property="og:description"
+          content="Khám phá các mẹo dùng điện thông minh, tiết kiệm chi phí và sống xanh hơn mỗi ngày."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content="https://e-xanh.vercel.app/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://e-xanh.vercel.app/og-image.png" />
+      </Helmet>
+      
+      <div className="tips-page">
       <section className="tips-hero">
         <div className="tips-hero__content">
           <span className="tips-hero__badge">Thư viện mẹo tiết kiệm điện</span>
@@ -207,6 +232,7 @@ function TipsPage() {
         </aside>
       </div>
     </div>
+    </>
   )
 }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { updateProfile } from '../../services/profileService'
-import { isValidImageUrl } from '../../utils/avatar'
+import { getInitials, isValidImageUrl } from '../../utils/avatar'
 
 function EditProfileModal({ user, onClose, onSuccess }) {
   const [name, setName] = useState(user?.name || '')
@@ -8,16 +8,19 @@ function EditProfileModal({ user, onClose, onSuccess }) {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!name.trim()) {
       setError('Tên hiển thị không được để trống.')
+      setSuccess('')
       return
     }
 
     setLoading(true)
     setError('')
+    setSuccess('')
 
     const updates = {
       name: name.trim(),
@@ -32,70 +35,119 @@ function EditProfileModal({ user, onClose, onSuccess }) {
       return
     }
 
-    // Trigger event for UserNavbar
+    setSuccess('Cập nhật hồ sơ thành công.')
+    
+    // Trigger event for UserNavbar and ProfileHeader
     window.dispatchEvent(new Event('profileUpdated'))
-    onSuccess()
+    
+    // Wait a bit to show the success message before closing
+    setTimeout(() => {
+      onSuccess()
+    }, 1200)
   }
 
   return (
-    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div className="modal-content" style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ marginTop: 0, marginBottom: '16px', color: '#173715' }}>Chỉnh sửa hồ sơ</h2>
-        {error && <p style={{ color: '#e53935', fontSize: '0.9rem', marginBottom: '16px' }}>{error}</p>}
+    <div className="account-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title">
+      <div className="account-modal">
+        <div className="account-modal__header">
+          <h2 id="edit-profile-title">Chỉnh sửa hồ sơ</h2>
+          <p>Cập nhật thông tin cá nhân và ảnh đại diện của bạn</p>
+          <button 
+            type="button" 
+            className="account-modal__close" 
+            onClick={onClose} 
+            aria-label="Đóng chỉnh sửa hồ sơ"
+            disabled={loading}
+          >
+            ✕
+          </button>
+        </div>
         
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '0.9rem' }}>Tên hiển thị *</label>
-            <input 
-              type="text" 
-              value={name} 
-              onChange={e => setName(e.target.value)} 
-              className="input" 
-              style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '6px' }}
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '0.9rem' }}>Tiểu sử (Bio)</label>
-            <textarea 
-              value={bio} 
-              onChange={e => setBio(e.target.value)} 
-              className="input" 
-              rows="3"
-              style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '6px', resize: 'vertical' }}
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '0.9rem' }}>URL Ảnh đại diện</label>
-            <input 
-              type="url" 
-              value={avatarUrl} 
-              onChange={e => setAvatarUrl(e.target.value)} 
-              className="input" 
-              placeholder="https://..."
-              style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '6px' }}
-              disabled={loading}
-            />
-            {avatarUrl && isValidImageUrl(avatarUrl) && (
-              <div style={{ marginTop: '12px', textAlign: 'center' }}>
-                <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>Xem trước ảnh</p>
-                <img src={avatarUrl} alt="Preview" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; setError('URL Ảnh không hợp lệ hoặc không tải được.'); }} onLoad={(e) => { e.target.style.display = 'inline-block'; setError(''); }} />
+        <div className="account-modal__body">
+          <div className="account-modal__avatar-preview">
+            {avatarUrl && isValidImageUrl(avatarUrl) ? (
+              <img 
+                src={avatarUrl} 
+                alt="Avatar preview" 
+                className="account-modal__avatar-circle"
+                onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }} 
+                onLoad={(e) => { e.target.style.display = 'block'; if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'none'; }} 
+              />
+            ) : (
+              <div className="account-modal__avatar-circle">
+                {getInitials(name || user?.email || 'A')}
               </div>
             )}
+            {avatarUrl && isValidImageUrl(avatarUrl) && (
+              <div className="account-modal__avatar-circle" style={{ display: 'none' }}>
+                 {getInitials(name || user?.email || 'A')}
+              </div>
+            )}
+            
+            <label>Ảnh đại diện</label>
+            <p>Dán URL ảnh để xem trước</p>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
-            <button type="button" className="btn" onClick={onClose} disabled={loading} style={{ background: '#eee', color: '#333' }}>
-              Hủy
-            </button>
-            <button type="submit" className="btn btn--primary" disabled={loading}>
-              {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit} className="account-modal__form">
+            {success && <div className="account-modal__success">{success}</div>}
+            {error && <div className="account-modal__main-error">{error}</div>}
+            
+            <div className="account-modal__field">
+              <label htmlFor="profile-name">Tên hiển thị *</label>
+              <input 
+                id="profile-name"
+                type="text" 
+                value={name} 
+                onChange={e => setName(e.target.value)} 
+                disabled={loading}
+              />
+              {!name.trim() && <div className="account-modal__error">Tên không được để trống</div>}
+            </div>
+
+            <div className="account-modal__field">
+              <label htmlFor="profile-bio">Tiểu sử (Bio)</label>
+              <textarea 
+                id="profile-bio"
+                value={bio} 
+                onChange={e => setBio(e.target.value)} 
+                disabled={loading}
+                placeholder="Giới thiệu ngắn về bạn..."
+              />
+            </div>
+
+            <div className="account-modal__field">
+              <label htmlFor="profile-avatar">URL Ảnh đại diện</label>
+              <input 
+                id="profile-avatar"
+                type="url" 
+                value={avatarUrl} 
+                onChange={e => setAvatarUrl(e.target.value)} 
+                placeholder="https://example.com/avatar.jpg"
+                disabled={loading}
+              />
+              <small>Dùng ảnh vuông sẽ hiển thị đẹp nhất.</small>
+            </div>
+          </form>
+        </div>
+
+        <div className="account-modal__actions">
+          <button 
+            type="button" 
+            className="btn account-modal__secondary" 
+            onClick={onClose} 
+            disabled={loading}
+          >
+            Hủy
+          </button>
+          <button 
+            type="button" 
+            className="btn account-modal__primary" 
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+          </button>
+        </div>
       </div>
     </div>
   )

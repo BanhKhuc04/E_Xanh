@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import SavedPostCard from '../../components/posts/SavedPostCard'
 import SavedPostsFilter from '../../components/posts/SavedPostsFilter'
 import SavedSidebar from '../../components/posts/SavedSidebar'
@@ -34,6 +35,8 @@ function SavedPostsPage() {
   
   const [dbSavedPosts, setDbSavedPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
 
   useEffect(() => {
     async function loadSavedPosts() {
@@ -100,8 +103,28 @@ function SavedPostsPage() {
   }
 
   return (
-    <div className="saved-posts-page">
-      <nav className="saved-posts-page__breadcrumb" aria-label="Breadcrumb">
+    <>
+      <Helmet>
+        <title>Bài viết đã lưu - E-XANH</title>
+        <meta
+          name="description"
+          content="Quản lý và xem lại danh sách các bài viết mẹo tiết kiệm điện mà bạn đã lưu trên E-XANH."
+        />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content="Bài viết đã lưu - E-XANH" />
+        <meta
+          property="og:description"
+          content="Quản lý và xem lại danh sách các bài viết mẹo tiết kiệm điện mà bạn đã lưu trên E-XANH."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content="https://e-xanh.vercel.app/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+      </Helmet>
+
+      <div className="saved-posts-page">
+        <nav className="saved-posts-page__breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>/</span>
         <span>Bài đã lưu</span>
@@ -167,6 +190,7 @@ function SavedPostsPage() {
         <SavedSidebar folders={savedFolderSummary} recentlyRead={savedRecentlyRead} />
       </div>
     </div>
+    </>
   )
 }
 

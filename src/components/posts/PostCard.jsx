@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getImageUrl } from '../../utils/imageUrl'
 import './PostCard.css'
 
 function getAuthorInitials(author) {
@@ -57,7 +58,7 @@ function PostCard({ post }) {
       <div className="post-card-ui__media">
         {post.image ? (
           <img 
-            src={post.image} 
+            src={getImageUrl(post.image, 640)} 
             alt={`${post.title} - mẹo tiết kiệm điện`}
             width="640"
             height="360"

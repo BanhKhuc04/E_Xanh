@@ -56,6 +56,9 @@
   font-size: 1.6rem;
   font-weight: 800;
   background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
+  border: 3px solid #eaf59d;
+  box-shadow: 0 4px 12px rgba(79, 132, 40, 0.15);
+  flex-shrink: 0;
 }
 
 .account-profile-header__content h1 {
@@ -415,3 +418,286 @@
     padding: 20px;
   }
 }
+
+/* Account Modals */
+.account-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.account-modal {
+  background: #fff;
+  border-radius: 22px;
+  width: 100%;
+  max-width: 680px;
+  box-shadow: 0 10px 40px rgba(39, 80, 10, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideUp 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.account-modal__header {
+  position: relative;
+  padding: 24px 32px 16px;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.1);
+}
+
+.account-modal__header h2 {
+  margin: 0 0 4px;
+  color: #27500a;
+  font-size: 1.5rem;
+}
+
+.account-modal__header p {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.account-modal__close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.account-modal__close:hover {
+  background: rgba(79, 132, 40, 0.1);
+  color: #27500a;
+}
+
+.account-modal__body {
+  padding: 32px;
+  display: flex;
+  gap: 32px;
+}
+
+.account-modal__avatar-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 140px;
+}
+
+.account-modal__avatar-circle {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #eaf59d;
+  box-shadow: 0 4px 12px rgba(79, 132, 40, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c1d95c;
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.account-modal__avatar-preview label {
+  font-weight: 600;
+  color: #27500a;
+}
+
+.account-modal__avatar-preview p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+}
+
+.account-modal__form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-modal__field label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.account-modal__field input,
+.account-modal__field textarea {
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.account-modal__field input:focus,
+.account-modal__field textarea:focus {
+  border-color: #4f8428;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(193, 217, 92, 0.3);
+}
+
+.account-modal__field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.account-modal__field small {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.account-modal__error {
+  color: #e53935;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: -4px;
+}
+
+.account-modal__success {
+  background: rgba(193, 217, 92, 0.2);
+  color: #27500a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  border-left: 4px solid #4f8428;
+}
+
+.account-modal__main-error {
+  background: rgba(229, 57, 53, 0.1);
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  border-left: 4px solid #e53935;
+}
+
+.account-modal__actions {
+  padding: 24px 32px;
+  border-top: 1px solid rgba(79, 132, 40, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #fafafa;
+}
+
+.account-modal__actions .btn {
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account-modal__primary {
+  background: #4f8428;
+  color: #fff;
+  border: none;
+}
+
+.account-modal__primary:hover:not(:disabled) {
+  background: #27500a;
+}
+
+.account-modal__primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.account-modal__secondary {
+  background: #f1f1f1;
+  color: #333;
+  border: none;
+}
+
+.account-modal__secondary:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.account-modal__password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.account-modal__password-field input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.account-modal__password-toggle {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+}
+
+.account-modal__password-toggle:hover {
+  color: #27500a;
+}
+
+@media (max-width: 760px) {
+  .account-modal {
+    width: calc(100% - 32px);
+    margin: 16px;
+  }
+  
+  .account-modal__body {
+    flex-direction: column;
+    padding: 24px 20px;
+    gap: 24px;
+  }
+  
+  .account-modal__header {
+    padding: 20px 20px 16px;
+  }
+  
+  .account-modal__actions {
+    padding: 20px;
+    flex-direction: column-reverse;
+  }
+  
+  .account-modal__actions .btn {
+    width: 100%;
+  }
+}
+

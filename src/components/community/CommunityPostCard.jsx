@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
+import { getImageUrl } from '../../utils/imageUrl'
 
 const HeartIcon = ({ isLiked }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -143,7 +144,7 @@ function CommunityPostCard({
         <div className="community-post-card__media">
             <Link to={`/cong-dong/${post.id}`}>
               <img
-                src={post.image}
+                src={getImageUrl(post.image, 800)}
                 alt={post.title}
                 width="800"
                 height="450"

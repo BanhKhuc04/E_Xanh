@@ -10,7 +10,7 @@ import { homeFeatures } from '../../data/home'
 import '../../styles/home.css'
 
 const SITE_URL = 'https://e-xanh.vercel.app'
-const OG_IMAGE = `${SITE_URL}/og-image.svg`
+const OG_IMAGE = `${SITE_URL}/og-image.png`
 
 function HomePage() {
   const { pathname } = useLocation()
