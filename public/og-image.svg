@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f7faef;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8f2d5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#80b155;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#336a29;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <!-- Decorative circle top-right -->
+  <circle cx="1100" cy="80" r="200" fill="#c1d95c" opacity="0.15" />
+  <!-- Decorative circle bottom-left -->
+  <circle cx="80" cy="580" r="160" fill="#80b155" opacity="0.12" />
+  <!-- Logo circle -->
+  <circle cx="140" cy="110" r="52" fill="url(#accent)" />
+  <text x="140" y="122" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">E</text>
+  <!-- Brand name -->
+  <text x="210" y="125" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#336a29">E-XANH</text>
+  <!-- Divider -->
+  <rect x="80" y="160" width="160" height="5" rx="3" fill="url(#accent)" />
+  <!-- Main headline -->
+  <text x="80" y="270" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#173715" letter-spacing="-2">Sử dụng điện</text>
+  <text x="80" y="360" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#336a29" letter-spacing="-2">thông minh</text>
+  <!-- Subtitle -->
+  <text x="80" y="430" font-family="Arial, sans-serif" font-size="32" fill="#4f8428" opacity="0.85">Tiết kiệm điện · Sống xanh · Cộng đồng sinh viên</text>
+  <!-- Feature pills -->
+  <rect x="80" y="490" width="220" height="54" rx="27" fill="#336a29" />
+  <text x="190" y="524" font-family="Arial, sans-serif" font-size="22" fill="white" text-anchor="middle" font-weight="600">Mẹo tiết kiệm</text>
+  <rect x="320" y="490" width="220" height="54" rx="27" fill="#4f8428" />
+  <text x="430" y="524" font-family="Arial, sans-serif" font-size="22" fill="white" text-anchor="middle" font-weight="600">Kiểm tra điện</text>
+  <rect x="560" y="490" width="200" height="54" rx="27" fill="#80b155" />
+  <text x="660" y="524" font-family="Arial, sans-serif" font-size="22" fill="white" text-anchor="middle" font-weight="600">Cộng đồng</text>
+  <!-- Right visual -->
+  <rect x="820" y="200" width="300" height="180" rx="24" fill="white" opacity="0.9" />
+  <text x="970" y="265" font-family="Arial, sans-serif" font-size="20" fill="#4f8428" text-anchor="middle" font-weight="600">Dự kiến tháng này</text>
+  <text x="970" y="320" font-family="Arial, sans-serif" font-size="48" fill="#336a29" text-anchor="middle" font-weight="bold">520.000đ</text>
+  <rect x="840" y="355" width="260" height="8" rx="4" fill="#eaf59d" />
+  <rect x="840" y="355" width="180" height="8" rx="4" fill="#80b155" />
+  <!-- URL -->
+  <text x="1180" y="610" font-family="Arial, sans-serif" font-size="22" fill="#4f8428" text-anchor="end" opacity="0.7">e-xanh.vercel.app</text>
+</svg>

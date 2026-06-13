@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import '../../styles/static-pages.css'
 import BrandLogo from '../../components/common/BrandLogo'
@@ -25,15 +25,24 @@ const featureCards = [
 const values = ['Thông minh', 'Tiết kiệm', 'Bền vững']
 
 function AboutPage() {
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.svg'
+
   return (
     <div className="static-page">
       <Helmet>
         <title>Về chúng tôi — E-XANH</title>
         <meta name="description" content="E-XANH là nền tảng giúp người trẻ sử dụng điện thông minh hơn, tiết kiệm chi phí và lan tỏa lối sống xanh trong cộng đồng sinh viên." />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content="Về chúng tôi — E-XANH" />
         <meta property="og:description" content="Tìm hiểu về dự án E-XANH, sứ mệnh giúp sinh viên sử dụng điện thông minh và lan tỏa lối sống bền vững." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://e-xanh.vercel.app/ve-chung-toi" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import '../../styles/static-pages.css'
@@ -6,6 +6,10 @@ import '../../styles/static-pages.css'
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function ContactPage() {
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.svg'
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -59,10 +63,15 @@ function ContactPage() {
       <Helmet>
         <title>Liên hệ — E-XANH</title>
         <meta name="description" content="Liên hệ với đội ngũ E-XANH để gửi góp ý, báo lỗi, hợp tác hoặc nhận hỗ trợ tài khoản. Chúng tôi phản hồi trong 24 giờ." />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content="Liên hệ với E-XANH" />
         <meta property="og:description" content="Gửi góp ý, báo lỗi hoặc hợp tác cùng E-XANH. Đội ngũ sẽ phản hồi sớm nhất." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://e-xanh.vercel.app/lien-he" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>

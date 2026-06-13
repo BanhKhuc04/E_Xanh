@@ -2,7 +2,7 @@
 
 :root {
   font-family: 'Be Vietnam Pro', sans-serif;
-  color: #336a29;
+  color: #27500a;
   background:
     radial-gradient(circle at top left, rgba(234, 245, 157, 0.7), transparent 32%),
     linear-gradient(180deg, #f9fceb 0%, #f4f8e7 100%);
@@ -239,4 +239,19 @@ iframe {
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* ─── Accessibility: Focus styles ────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #27500a;
+  outline-offset: 3px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #27500a;
+  outline-offset: 3px;
 }

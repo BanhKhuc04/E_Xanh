@@ -43,16 +43,27 @@ function PageFallback() {
     <div
       style={{
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '16px',
+        padding: '24px',
+        maxWidth: '800px',
+        margin: '0 auto',
         minHeight: '40vh',
-        color: 'var(--color-text-muted)',
-        fontSize: '0.95rem',
       }}
       aria-live="polite"
       aria-label="Đang tải trang..."
     >
-      <span>Đang tải...</span>
+      <div style={{ height: '40px', width: '60%', background: '#eaf59d', borderRadius: '8px', animation: 'pulse 1.5s infinite ease-in-out' }} />
+      <div style={{ height: '20px', width: '100%', background: '#f4f8e7', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }} />
+      <div style={{ height: '20px', width: '90%', background: '#f4f8e7', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }} />
+      <div style={{ height: '20px', width: '95%', background: '#f4f8e7', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }} />
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+      `}</style>
     </div>
   )
 }

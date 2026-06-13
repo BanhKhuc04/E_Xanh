@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useEffect, useState } from 'react'
 import ArticleActions from '../../components/posts/ArticleActions'
@@ -248,15 +248,25 @@ function PostDetailPage() {
   const parentLink = isCommunity ? '/cong-dong' : '/meo-tiet-kiem'
   const parentName = isCommunity ? 'Cộng đồng' : 'Mẹo tiết kiệm'
 
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.svg'
+
   return (
     <div className="post-detail-page">
       <Helmet>
         <title>{post.title ? `${post.title} — E-XANH` : 'Chi tiết bài viết — E-XANH'}</title>
         <meta name="description" content={post.description || `Đọc bài viết "${post.title}" trên E-XANH — nền tảng hỗ trợ sinh viên sử dụng điện thông minh và tiết kiệm điện.`} />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={post.title ? `${post.title} — E-XANH` : 'E-XANH'} />
         <meta property="og:description" content={post.description || 'Bài viết trên nền tảng E-XANH'} />
         <meta property="og:type" content="article" />
-        {post.image && <meta property="og:image" content={post.image} />}
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={post.image || OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        {post.image && <meta name="twitter:image" content={post.image} />}
       </Helmet>
       <nav className="post-breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Trang chủ</Link>

@@ -58,7 +58,10 @@ function PostCard({ post }) {
         {post.image ? (
           <img 
             src={post.image} 
-            alt={post.title} 
+            alt={`${post.title} - mẹo tiết kiệm điện`}
+            width="640"
+            height="360"
+            loading="lazy"
             style={{ aspectRatio: '16/9', objectFit: 'cover', width: '100%', display: 'block' }}
             onError={(e) => {
               e.target.onerror = null;

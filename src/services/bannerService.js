@@ -39,7 +39,13 @@ export async function uploadBannerImage(file) {
 
   const { data: publicUrlData } = supabase.storage
     .from('website-banners')
-    .getPublicUrl(filePath)
+    .getPublicUrl(filePath, {
+      transform: {
+        width: 800,
+        format: 'webp',
+        quality: 80,
+      }
+    })
 
   return { publicUrl: publicUrlData.publicUrl, filePath }
 }

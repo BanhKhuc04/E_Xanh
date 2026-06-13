@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import CommunitySidebar from '../../components/community/CommunitySidebar'
@@ -43,6 +43,9 @@ function sortCommunityPosts(posts, activeFilter) {
 
 function CommunityPage() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const OG_IMAGE = 'https://e-xanh.vercel.app/og-image.svg'
   const [activeFilter, setActiveFilter] = useState('Tất cả')
   const [posts, setPosts] = useState([])
   const [visibleCount, setVisibleCount] = useState(3)
@@ -274,10 +277,15 @@ function CommunityPage() {
       <Helmet>
         <title>Cộng đồng — E-XANH</title>
         <meta name="description" content="Tham gia cộng đồng E-XANH, nơi sinh viên và người trẻ chia sẻ kinh nghiệm sống xanh, mẹo tiết kiệm điện và lối sống bền vững." />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content="Cộng đồng E-XANH — Chia sẻ kinh nghiệm sống xanh" />
         <meta property="og:description" content="Cộng đồng nơi sinh viên chia sẻ mẹo tiết kiệm điện, kinh nghiệm sống xanh và các bí quyết giảm chi phí điện." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://e-xanh.vercel.app/cong-dong" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <section className="community-page__hero">
         <div className="community-page__hero-content">

@@ -26,7 +26,13 @@ export async function uploadPostImage(file, userId) {
 
   const { data: publicUrlData } = supabase.storage
     .from('post-images')
-    .getPublicUrl(path)
+    .getPublicUrl(path, {
+      transform: {
+        width: 800,
+        format: 'webp',
+        quality: 80,
+      }
+    })
 
   return { publicUrl: publicUrlData.publicUrl, error: null }
 }
