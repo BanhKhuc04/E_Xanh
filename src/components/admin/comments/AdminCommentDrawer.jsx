@@ -120,7 +120,7 @@ function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete }) {
           >
             Xóa bình luận
           </button>
-          <button type="button" className="btn btn--secondary" onClick={() => {}}>
+          <button type="button" className="btn btn--secondary" disabled title="Tính năng đang phát triển">
             Xem bài viết
           </button>
         </div>

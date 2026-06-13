@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { getCurrentSession, onAuthStateChange, signOut, getCurrentUserProfile } from '../../../services/authService'
+import { getInitials, isValidImageUrl } from '../../../utils/avatar'
 import BrandLogo from '../../common/BrandLogo'
 import { userNavLinks } from '../../../data/navigation'
-import {
-  getCurrentSession,
-  getCurrentUserProfile,
-  onAuthStateChange,
-  signOut,
-} from '../../../services/authService'
 
 function getShortName(name, email) {
   if (name) {
@@ -21,18 +17,6 @@ function getShortName(name, email) {
   return 'Người dùng'
 }
 
-function getAvatar(name, email, avatarUrl) {
-  if (avatarUrl) return avatarUrl // Can be handled as img if we support it later
-
-  if (name) {
-    const parts = name.trim().split(/\s+/).filter(Boolean)
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-    if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-  }
-  if (email) return email.slice(0, 2).toUpperCase()
-  return 'EX'
-}
-
 function UserNavbar() {
   const navigate = useNavigate()
   const dropdownRef = useRef(null)
@@ -41,39 +25,40 @@ function UserNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    let isMounted = true
-
-    async function loadUser(session) {
-      if (!session?.user) {
-        if (isMounted) setCurrentUser(null)
-        return
-      }
-      const profile = await getCurrentUserProfile(session.user.id)
-      if (isMounted) {
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email,
-          name: profile?.name,
-          avatar: getAvatar(profile?.name, session.user.email, profile?.avatar_url),
-          role: profile?.role || 'user',
-        })
+    async function loadUser() {
+      try {
+        const session = await getCurrentSession()
+        if (session?.user) {
+          const profile = await getCurrentUserProfile(session.user.id)
+          setCurrentUser(profile || { id: session.user.id, email: session.user.email, name: session.user.email })
+        } else {
+          setCurrentUser(null)
+        }
+      } catch (err) {
+        console.error('Lỗi tải user navbar:', err)
+        setCurrentUser(null)
       }
     }
 
-    async function initAuth() {
-      const session = await getCurrentSession()
-      loadUser(session)
-    }
+    loadUser()
 
-    initAuth()
-
-    const subscription = onAuthStateChange((event, session) => {
-      loadUser(session)
+    const unsubscribe = onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        loadUser()
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentUser(null)
+        setIsOpen(false)
+      }
     })
 
+    const handleProfileUpdate = () => loadUser()
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+
     return () => {
-      isMounted = false
-      subscription?.unsubscribe?.()
+      if (unsubscribe && typeof unsubscribe.unsubscribe === 'function') {
+        unsubscribe.unsubscribe()
+      }
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
     }
   }, [])
 
@@ -146,7 +131,11 @@ function UserNavbar() {
                 aria-haspopup="true"
                 aria-label="Mở menu tài khoản"
               >
-                <span className="user-navbar__avatar">{currentUser.avatar}</span>
+                {isValidImageUrl(currentUser.avatar_url) ? (
+                  <img src={currentUser.avatar_url} alt="Avatar" className="user-navbar__avatar-img" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <span className="user-navbar__avatar">{getInitials(currentUser.name || currentUser.email)}</span>
+                )}
                 <span className="user-navbar__user-name">{getShortName(currentUser.name, currentUser.email)}</span>
               </button>
 

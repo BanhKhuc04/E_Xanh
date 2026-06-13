@@ -87,6 +87,7 @@ function ElectricityCheckPage() {
   const [devices, setDevices] = useState(initialDevices)
   const [form, setForm] = useState(createInitialForm())
   const [feedbackMessage, setFeedbackMessage] = useState(initialNotice)
+  const [isSavingHistory, setIsSavingHistory] = useState(false)
 
   const [dbDeviceOptions, setDbDeviceOptions] = useState(deviceOptions)
 
@@ -243,10 +244,11 @@ function ElectricityCheckPage() {
   }
 
   async function handleSaveHistory() {
-    if (devices.length === 0) {
+    if (devices.length === 0 || isSavingHistory) {
       return
     }
 
+    setIsSavingHistory(true)
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
 
@@ -279,6 +281,7 @@ function ElectricityCheckPage() {
       saveElectricityHistory(historyPayload)
       setFeedbackMessage('Đã lưu lịch sử kiểm tra cục bộ (hãy đăng nhập để đồng bộ)')
     }
+    setIsSavingHistory(false)
   }
 
   const { pathname } = useLocation()
@@ -362,9 +365,9 @@ function ElectricityCheckPage() {
               type="button"
               className="btn electricity-tool-layout__save-button"
               onClick={handleSaveHistory}
-              disabled={devices.length === 0}
+              disabled={devices.length === 0 || isSavingHistory}
             >
-              Lưu lịch sử
+              {isSavingHistory ? 'Đang lưu...' : 'Lưu lịch sử'}
             </button>
             {feedbackMessage ? (
               <span className="electricity-tool-layout__save-message">{feedbackMessage}</span>

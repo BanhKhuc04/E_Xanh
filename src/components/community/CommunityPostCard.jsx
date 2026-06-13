@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getInitials, isValidImageUrl } from '../../utils/avatar'
 
 const HeartIcon = ({ isLiked }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -102,13 +103,20 @@ function CommunityPostCard({
     <article className="community-post-card" id={post.id} data-testid="community-post-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
       <div className="community-post-card__header">
         <div className="community-post-card__author">
-          <img
-            src={post.avatar}
-            alt={`Ảnh đại diện của ${post.author}`}
-            width="40"
-            height="40"
-            loading="lazy"
-          />
+          {isValidImageUrl(post.avatar) ? (
+            <img
+              src={post.avatar}
+              alt={`Ảnh đại diện của ${post.author}`}
+              width="40"
+              height="40"
+              loading="lazy"
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div className="community-post-card__avatar-placeholder" style={{ width: 40, height: 40, borderRadius: '50%', background: '#c1d95c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+              {getInitials(post.author)}
+            </div>
+          )}
           <div>
             <strong>{post.author}</strong>
             <span>
@@ -205,13 +213,20 @@ function CommunityPostCard({
             {postComments && postComments.length > 0 ? (
               postComments.map((comment) => (
                 <div key={comment.id} className="community-post-card__comment" style={{ background: 'transparent', padding: '8px 0' }}>
+                  {isValidImageUrl(comment.avatar) ? (
                   <img
-                  src={comment.avatar}
-                  alt={`Ảnh đại diện của ${comment.author}`}
-                  width="36"
-                  height="36"
-                  loading="lazy"
-                />
+                    src={comment.avatar}
+                    alt={`Ảnh đại diện của ${comment.author}`}
+                    width="36"
+                    height="36"
+                    loading="lazy"
+                    style={{ objectFit: 'cover', borderRadius: '50%' }}
+                  />
+                ) : (
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#eaf59d', color: '#4f8428', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                    {getInitials(comment.author)}
+                  </div>
+                )}
                   <div style={{ background: 'rgba(234, 245, 157, 0.16)', padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(79, 132, 40, 0.05)' }}>
                     <strong style={{ fontSize: '0.9rem', color: '#173715' }}>{comment.author}</strong>
                     <p style={{ margin: '4px 0 0', fontSize: '0.95rem', color: '#333' }}>{comment.content}</p>
@@ -224,13 +239,20 @@ function CommunityPostCard({
           </div>
           
           <div className="community-post-card__comment-input-area">
-            <img
-              src={currentUser?.avatar_url || `https://ui-avatars.com/api/?name=${currentUser?.name || 'G'}&background=c1d95c&color=fff`}
-              alt={`Ảnh đại diện của ${currentUser?.name || 'bạn'}`}
-              width="36"
-              height="36"
-              loading="lazy"
-            />
+            {isValidImageUrl(currentUser?.avatar_url) ? (
+              <img
+                src={currentUser.avatar_url}
+                alt={`Ảnh đại diện của ${currentUser.name || 'bạn'}`}
+                width="36"
+                height="36"
+                loading="lazy"
+                style={{ objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#c1d95c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                {getInitials(currentUser?.name || currentUser?.email || 'Bạn')}
+              </div>
+            )}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <textarea 
                 rows="2" 

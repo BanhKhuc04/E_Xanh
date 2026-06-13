@@ -8,6 +8,8 @@ import RecentComments from '../../components/account/RecentComments'
 import AccountInfoCard from '../../components/account/AccountInfoCard'
 import AccountSettingsCard from '../../components/account/AccountSettingsCard'
 import RecentElectricityHistoryCard from '../../components/account/RecentElectricityHistoryCard'
+import EditProfileModal from '../../components/account/EditProfileModal'
+import ChangePasswordModal from '../../components/account/ChangePasswordModal'
 import { savedPosts } from '../../data/posts'
 import { formatCurrency, formatHistoryDate, formatKwh } from '../../data/electricity'
 import { getElectricityHistories } from '../../utils/electricityStorage'
@@ -75,7 +77,7 @@ function getAvatar(name, email, avatarUrl) {
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
     if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
   }
-  if (email) return email.slice(0, 2).toUpperCase()
+  if (email) return email.split('@')[0].slice(0, 2).toUpperCase()
   return 'EX'
 }
 
@@ -84,6 +86,8 @@ function AccountPage() {
   const [recentHistory, setRecentHistory] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -140,12 +144,20 @@ function AccountPage() {
     initAuth()
 
     const subscription = onAuthStateChange((event, session) => {
-      loadUser(session)
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        loadUser(session)
+      }
     })
+
+    const handleProfileUpdate = () => {
+      getCurrentSession().then(loadUser)
+    }
+    window.addEventListener('profileUpdated', handleProfileUpdate)
 
     return () => {
       isMounted = false
       subscription?.unsubscribe?.()
+      window.removeEventListener('profileUpdated', handleProfileUpdate)
     }
   }, [])
 
@@ -185,7 +197,12 @@ function AccountPage() {
         <span>Tài khoản của tôi</span>
       </div>
 
-      <ProfileHeader user={currentUser} onLogout={handleLogout} />
+      <ProfileHeader 
+        user={currentUser} 
+        onLogout={handleLogout} 
+        onEditClick={() => setIsEditModalOpen(true)}
+        onPasswordClick={() => setIsPasswordModalOpen(true)}
+      />
       <ProfileStats stats={profileStats} />
 
       <div className="account-layout">
@@ -216,6 +233,27 @@ function AccountPage() {
           </section>
         </div>
       </div>
+
+      {isEditModalOpen && (
+        <EditProfileModal 
+          user={currentUser} 
+          onClose={() => setIsEditModalOpen(false)} 
+          onSuccess={() => {
+            setIsEditModalOpen(false)
+            alert('Cập nhật hồ sơ thành công!')
+          }} 
+        />
+      )}
+
+      {isPasswordModalOpen && (
+        <ChangePasswordModal 
+          onClose={() => setIsPasswordModalOpen(false)} 
+          onSuccess={() => {
+            setIsPasswordModalOpen(false)
+            alert('Đổi mật khẩu thành công!')
+          }} 
+        />
+      )}
     </div>
   )
 }

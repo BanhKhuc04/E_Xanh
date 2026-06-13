@@ -125,7 +125,8 @@ function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, curr
             <button
               type="button"
               className="btn btn--secondary"
-              onClick={() => {}}
+              disabled
+              title="Tính năng đang phát triển"
             >
               Xem chi tiết
             </button>

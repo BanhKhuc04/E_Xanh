@@ -18,6 +18,7 @@ function ContactPage() {
   })
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleChange(field, value) {
     setForm((current) => ({
@@ -54,8 +55,15 @@ function ContactPage() {
       return
     }
 
-    setErrorMessage('')
-    setSuccessMessage('Cảm ơn bạn đã liên hệ. E-XANH sẽ phản hồi trong 24–48 giờ làm việc.')
+    setIsSubmitting(true)
+
+    // Giả lập gửi form
+    window.setTimeout(() => {
+      setErrorMessage('')
+      setSuccessMessage('Cảm ơn bạn đã liên hệ. E-XANH sẽ phản hồi trong 24–48 giờ làm việc.')
+      setForm({ name: '', email: '', subject: 'Góp ý giao diện', content: '' })
+      setIsSubmitting(false)
+    }, 1000)
   }
 
   return (
@@ -143,8 +151,8 @@ function ContactPage() {
 
             <div className="static-page__contact-actions">
               <span>Chúng tôi thường phản hồi trong vòng 24h</span>
-              <button type="submit" className="btn btn--primary">
-                Gửi liên hệ
+              <button type="submit" className="btn btn--primary static-form__submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Đang gửi...' : 'Gửi tin nhắn'}
               </button>
             </div>
           </form>

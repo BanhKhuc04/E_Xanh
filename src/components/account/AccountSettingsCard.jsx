@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+const SETTINGS_KEY = 'exanh_account_settings'
 
 function AccountSettingsCard() {
   const [settings, setSettings] = useState({
@@ -9,6 +11,17 @@ function AccountSettingsCard() {
   })
   const [message, setMessage] = useState('')
 
+  useEffect(() => {
+    const saved = localStorage.getItem(SETTINGS_KEY)
+    if (saved) {
+      try {
+        setSettings(JSON.parse(saved))
+      } catch (e) {
+        console.error('Lỗi đọc settings:', e)
+      }
+    }
+  }, [])
+
   function handleToggle(field) {
     setSettings((current) => ({
       ...current,
@@ -17,7 +30,8 @@ function AccountSettingsCard() {
   }
 
   function handleSave() {
-    setMessage('Cài đặt tài khoản đã được lưu tạm thời.')
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+    setMessage('Cài đặt đã được lưu trên thiết bị này.')
 
     window.setTimeout(() => {
       setMessage('')

@@ -8,12 +8,14 @@ import CommentSection from '../../components/posts/CommentSection'
 import PostCard from '../../components/posts/PostCard'
 import RelatedPosts from '../../components/posts/RelatedPosts'
 import { getPostBySlug, getApprovedPosts } from '../../services/postService'
+import { getInitials, isValidImageUrl } from '../../utils/avatar'
 import '../../styles/post-detail.css'
 
 function PostDetailPage() {
   const { slug } = useParams()
   const [post, setPost] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState(false)
   const [relatedPosts, setRelatedPosts] = useState([])
 
   useEffect(() => {
@@ -203,6 +205,7 @@ function PostDetailPage() {
   }
 
   async function handleToggleFollow() {
+    if (actionLoading) return
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
     if (!session?.user) {
@@ -214,6 +217,8 @@ function PostDetailPage() {
       alert('Bạn không thể tự theo dõi chính mình.')
       return
     }
+
+    setActionLoading(true)
 
     if (!post) return
     const isCurrentlyFollowing = post.isFollowing
@@ -239,6 +244,7 @@ function PostDetailPage() {
       })
       alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
     }
+    setActionLoading(false)
   }
 
   const sidebarRelated = relatedPosts.slice(0, 3)
@@ -286,9 +292,7 @@ function PostDetailPage() {
 
         <aside className="post-detail-sidebar">
           <section className="post-side-card post-side-card--author">
-            {post.authorAvatar === 'EX' ? (
-              <span className="post-side-card__author-avatar">{post.author.slice(0, 2).toUpperCase()}</span>
-            ) : (
+            {isValidImageUrl(post.authorAvatar) ? (
               <img
                 src={post.authorAvatar}
                 alt={`Ảnh đại diện của ${post.author}`}
@@ -297,13 +301,17 @@ function PostDetailPage() {
                 loading="lazy"
                 style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px' }}
               />
+            ) : (
+              <span className="post-side-card__author-avatar" style={{ background: '#c1d95c', color: '#fff' }}>{getInitials(post.author)}</span>
             )}
-            <h2>{post.author}</h2>
+            <h3>{post.author}</h3>
             <p>{post.authorBio}</p>
             <button 
               type="button" 
-              className={`btn ${post.isFollowing ? 'btn--secondary' : 'btn--primary'}`}
+              className={`btn ${post.isFollowing ? 'btn--secondary' : 'btn--primary'} post-side-card__follow-btn`}
               onClick={handleToggleFollow}
+              disabled={actionLoading}
+              style={{ opacity: actionLoading ? 0.7 : 1 }}
             >
               {post.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
             </button>

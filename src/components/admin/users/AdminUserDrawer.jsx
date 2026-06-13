@@ -154,10 +154,10 @@ function AdminUserDrawer({
             </select>
           </div>
 
-          <button type="button" className="btn btn--ghost" onClick={() => {}}>
+          <button type="button" className="btn btn--ghost" disabled title="Tính năng đang phát triển">
             Xem bài đã đăng
           </button>
-          <button type="button" className="btn btn--ghost" onClick={() => {}}>
+          <button type="button" className="btn btn--ghost" disabled title="Tính năng đang phát triển">
             Xem bình luận
           </button>
         </div>
