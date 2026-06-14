@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { getImageUrl } from '../../utils/imageUrl'
+import PostImage from '../common/PostImage'
 
 function getAuthorBadge(author) {
   return author
@@ -15,14 +15,7 @@ function SavedPostCard({ post, onUnsave }) {
   return (
     <article className="saved-post-card">
       <div className="saved-post-card__media">
-        <img
-          src={getImageUrl(post.image, 640)}
-          alt={`Ảnh bài viết ${post.title}`}
-          width="640"
-          height="360"
-          loading="lazy"
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/fallback-green.jpg'; }}
-        />
+        <PostImage src={post.image} alt={`Ảnh bài viết ${post.title}`} variant="card" />
         <span className="saved-post-card__tag">{post.savedCategoryLabel}</span>
         <button 
           type="button" 

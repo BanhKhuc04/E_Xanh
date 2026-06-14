@@ -117,6 +117,7 @@ function AccountPage() {
           email: session.user.email,
           name: profile?.name || session.user.email.split('@')[0],
           avatar: getAvatar(profile?.name, session.user.email, profile?.avatar_url),
+          avatar_url: profile?.avatar_url || '',
           role: profile?.role || 'user',
           bio: profile?.bio,
           created_at: profile?.created_at,
@@ -282,7 +283,6 @@ function AccountPage() {
             onClose={() => setIsEditModalOpen(false)} 
             onSuccess={() => {
               setIsEditModalOpen(false)
-              alert('Cập nhật hồ sơ thành công!')
             }} 
           />
         )}

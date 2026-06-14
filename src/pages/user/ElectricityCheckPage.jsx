@@ -7,7 +7,8 @@ import ElectricityBreakdown from '../../components/electricity/ElectricityBreakd
 import ElectricityResultCard from '../../components/electricity/ElectricityResultCard'
 import RecentElectricityHistory from '../../components/electricity/RecentElectricityHistory'
 import SavingSuggestions from '../../components/electricity/SavingSuggestions'
-import heroImage from '../../assets/hero.png'
+import PageHero from '../../components/common/PageHero'
+import { pageHeroContent } from '../../data/pageHeroes'
 import {
   calculateDeviceKwh,
   deviceOptions,
@@ -313,37 +314,22 @@ function ElectricityCheckPage() {
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-      <section className="electricity-hero">
-        <div className="electricity-hero__content">
-          <span className="electricity-hero__badge">{heroHighlights.badge}</span>
-          <h1>{heroHighlights.title}</h1>
-          <p>{heroHighlights.description}</p>
-          <div className="electricity-hero__actions">
+      <PageHero
+        {...pageHeroContent['electricity-check']}
+        badge={heroHighlights.badge}
+        title={heroHighlights.title}
+        description={heroHighlights.description}
+        actions={(
+          <>
             <a className="btn btn--primary" href="#cong-cu-dien">
               Bắt đầu tính
             </a>
-            <a className="btn electricity-hero__secondary" href="#cach-tinh">
+            <a className="btn btn--secondary" href="#cach-tinh">
               Xem cách hoạt động
             </a>
-          </div>
-        </div>
-
-        <div className="electricity-hero__visual">
-          <img src={heroImage} alt="Minh họa bảng điều khiển điện năng E-XANH" />
-          <div className="electricity-floating electricity-floating--cost">
-            <span>Dự kiến</span>
-            <strong>520.000đ/tháng</strong>
-          </div>
-          <div className="electricity-floating electricity-floating--top">
-            <span>Tốn nhất</span>
-            <strong>Điều hòa</strong>
-          </div>
-          <div className="electricity-floating electricity-floating--save">
-            <span>Tiết kiệm gợi ý</span>
-            <strong>15%</strong>
-          </div>
-        </div>
-      </section>
+          </>
+        )}
+      />
 
       <section id="cong-cu-dien" className="electricity-tool-layout">
         <div className="electricity-tool-layout__left">

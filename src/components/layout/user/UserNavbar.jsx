@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../../utils/avatar'
 import BrandLogo from '../../common/BrandLogo'
 import { userNavLinks } from '../../../data/navigation'
+import { usePostComposer } from '../../community/PostComposerContext'
 
 function getShortName(name, email) {
   if (name) {
@@ -18,6 +19,7 @@ function getShortName(name, email) {
 
 function UserNavbar() {
   const navigate = useNavigate()
+  const { openComposer } = usePostComposer()
   const dropdownRef = useRef(null)
   const [currentUser, setCurrentUser] = useState(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -45,7 +47,7 @@ function UserNavbar() {
     async function initAuth() {
       await loadUser()
       const { onAuthStateChange } = await import('../../../services/authService')
-      unsubscribe = onAuthStateChange((event, session) => {
+      unsubscribe = onAuthStateChange((event) => {
         if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
           loadUser()
         } else if (event === 'SIGNED_OUT') {
@@ -189,9 +191,16 @@ function UserNavbar() {
             </Link>
           )}
 
-          <Link to="/dang-bai" className="btn btn--primary user-navbar__publish" onClick={() => setIsMobileMenuOpen(false)}>
+          <button
+            type="button"
+            className="btn btn--primary user-navbar__publish"
+            onClick={async () => {
+              setIsMobileMenuOpen(false)
+              await openComposer({ defaultType: 'community' })
+            }}
+          >
             Đăng bài
-          </Link>
+          </button>
         </div>
       </div>
     </header>

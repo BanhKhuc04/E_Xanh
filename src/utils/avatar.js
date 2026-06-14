@@ -16,5 +16,10 @@ export function getInitials(nameOrEmail) {
 
 export function isValidImageUrl(url) {
   if (!url) return false
-  return url.startsWith('http://') || url.startsWith('https://')
+  return (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('blob:') ||
+    url.startsWith('data:')
+  )
 }

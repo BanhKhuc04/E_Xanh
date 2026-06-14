@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { usePostComposer } from '../community/PostComposerContext'
 
 function CommunityPreview() {
+  const { openComposer } = usePostComposer()
   const [posts, setPosts] = useState([])
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -158,9 +160,13 @@ function CommunityPreview() {
           <section className="community-preview__cta">
             <h3>Có kinh nghiệm hay?</h3>
             <p>Chia sẻ mẹo tiết kiệm điện của bạn để giúp nhiều người hơn.</p>
-            <Link className="btn btn--light" to="/dang-bai" state={{ defaultType: 'community' }}>
+            <button
+              type="button"
+              className="btn btn--light"
+              onClick={() => openComposer({ defaultType: 'community' })}
+            >
               Đăng bài ngay
-            </Link>
+            </button>
           </section>
         </aside>
       </div>

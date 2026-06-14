@@ -7,6 +7,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import router from './app/router'
 import './styles/global.css'
 import './styles/layout.css'
+import './styles/social-ui.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

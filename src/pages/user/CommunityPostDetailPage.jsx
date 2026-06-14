@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useLocation } from 'react-router-dom'
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import { getPostById } from '../../services/postService'
@@ -7,10 +7,10 @@ import { getCurrentSession, getCurrentUserProfile } from '../../services/authSer
 
 function CommunityPostDetailPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [post, setPost] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
-  const [commentsByPost, setCommentsByPost] = useState({})
   
   // We use this just to let CommunityPostCard manage its own UI states
   const [activeCommentPostId, setActiveCommentPostId] = useState(id)
@@ -60,7 +60,7 @@ function CommunityPostDetailPage() {
             topic: data.type === 'community' ? 'Cộng đồng' : 'Mẹo tiết kiệm',
             category: 'Chia sẻ',
             title: data.title,
-            excerpt: data.description || data.content?.substring(0, 150) + '...',
+            excerpt: data.description || (data.content ? `${data.content.substring(0, 150)}...` : 'Chia sẻ từ cộng đồng E-XANH.'),
             image: data.image_url,
             likes: data.likes_count || 0,
             commentsCount: data.comments_count || 0,
@@ -75,23 +75,17 @@ function CommunityPostDetailPage() {
         console.error('Error fetching post:', e)
       }
 
-      // Load comments
-      try {
-        const { getCommentsByPost } = await import('../../services/commentService')
-        const { data: comments } = await getCommentsByPost(id)
-        if (comments) {
-          setCommentsByPost({ [id]: comments })
-        }
-      } catch (e) {
-        console.error('Error fetching comments:', e)
-      }
-
       setIsLoading(false)
     }
     loadData()
   }, [id])
 
   async function handleToggleComment(postId) {
+    if (!currentUser) {
+      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để bình luận bài viết.' } })
+      return
+    }
+
     if (activeCommentPostId === postId) {
       setActiveCommentPostId(null)
     } else {
@@ -105,32 +99,11 @@ function CommunityPostDetailPage() {
     setActiveCommentPostId(null)
   }
 
-  async function handleAddComment(postId, content) {
-    if (!currentUser) return false
-    
-    // Call Supabase
-    const { createComment } = await import('../../services/commentService')
-    const { data, error } = await createComment(postId, content)
-
-    if (error || !data) {
-      return false
-    }
-
-    // Update local state
-    setCommentsByPost(prev => {
-      const existing = prev[postId] || []
-      return {
-        ...prev,
-        [postId]: [data, ...existing]
-      }
-    })
-    
+  function handleCommentCountChange(count) {
     setPost(current => {
       if (!current) return current
-      return { ...current, commentsCount: current.commentsCount + 1 }
+      return { ...current, commentsCount: count }
     })
-
-    return true
   }
 
   async function handleToggleLike() {
@@ -236,11 +209,10 @@ function CommunityPostDetailPage() {
             onToggleSave={handleToggleSave}
             onToggleComment={handleToggleComment}
             onToggleShare={handleToggleShare}
-            onAddComment={handleAddComment}
             isCommentActive={activeCommentPostId === post.id}
             isShareActive={activeSharePostId === post.id}
-            postComments={commentsByPost[post.id]}
             currentUser={currentUser}
+            onCommentCountChange={handleCommentCountChange}
           />
         )}
       </div>

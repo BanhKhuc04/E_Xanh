@@ -1,247 +1,263 @@
-import { useState, useEffect } from 'react'
-import { Plus, Trash2, Power, PowerOff, ArrowUp, ArrowDown } from 'lucide-react'
-import Cropper from 'react-easy-crop'
-import getCroppedImg from '../../utils/cropImage'
-import { fetchBanners, uploadBannerImage, addBanner, updateBanner, deleteBanner } from '../../services/bannerService'
-import '../../styles/admin.css' // Reuse existing admin styles
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ArrowDown, ArrowUp, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
+import ImageCropModal from '../../components/common/ImageCropModal'
+import PostImage from '../../components/common/PostImage'
+import { getHeroPageLabel, heroPageOptions } from '../../data/pageHeroes'
+import {
+  addBanner,
+  deleteBanner,
+  fetchBannersByPageKeys,
+  updateBanner,
+  uploadBannerImage,
+} from '../../services/bannerService'
+import '../../styles/admin.css'
 
 function ThemeSettingsPage() {
-  const [homeBanners, setHomeBanners] = useState([])
-  const [authBanners, setAuthBanners] = useState([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
-  const [uploading, setUploading] = useState(false)
-
-  // Crop State
-  const [showCropModal, setShowCropModal] = useState(false)
-  const [imageToCrop, setImageToCrop] = useState(null)
+  const [bannerMap, setBannerMap] = useState({})
   const [cropPageKey, setCropPageKey] = useState('')
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [cropSource, setCropSource] = useState('')
 
-  // Fetch banners on load
-  useEffect(() => {
-    loadBanners()
-  }, [])
+  const pageKeys = useMemo(() => heroPageOptions.map((item) => item.key), [])
 
-  async function loadBanners() {
+  const loadBanners = useCallback(async () => {
     setLoading(true)
     setErrorMsg('')
-    try {
-      const { data: homeData, error: homeError } = await fetchBanners('home')
-      if (homeError) throw homeError
-      setHomeBanners(homeData || [])
 
-      const { data: authData, error: authError } = await fetchBanners('auth')
-      if (authError) throw authError
-      setAuthBanners(authData || [])
-    } catch (err) {
-      setErrorMsg('Lỗi khi tải danh sách banner: ' + err.message)
-    } finally {
+    const { data, error } = await fetchBannersByPageKeys(pageKeys)
+    if (error) {
+      setErrorMsg(`Lỗi khi tải danh sách hero/banner: ${error.message}`)
       setLoading(false)
+      return
     }
-  }
 
-  function showMessage(msg, isError = false) {
+    const grouped = pageKeys.reduce((accumulator, key) => {
+      accumulator[key] = []
+      return accumulator
+    }, {})
+
+    for (const banner of data) {
+      if (!grouped[banner.page_key]) {
+        grouped[banner.page_key] = []
+      }
+      grouped[banner.page_key].push(banner)
+    }
+
+    setBannerMap(grouped)
+    setLoading(false)
+  }, [pageKeys])
+
+  useEffect(() => {
+    loadBanners()
+  }, [loadBanners])
+
+  function showMessage(message, isError = false) {
     if (isError) {
-      setErrorMsg(msg)
+      setErrorMsg(message)
       setSuccessMsg('')
     } else {
-      setSuccessMsg(msg)
+      setSuccessMsg(message)
       setErrorMsg('')
     }
-    setTimeout(() => {
+
+    window.setTimeout(() => {
       setErrorMsg('')
       setSuccessMsg('')
     }, 5000)
   }
 
   function handleFileChange(event, pageKey) {
-    const file = event.target.files[0]
+    const file = event.target.files?.[0]
     if (!file) return
 
     const reader = new FileReader()
-    reader.addEventListener('load', () => {
-      setImageToCrop(reader.result)
+    reader.onload = () => {
       setCropPageKey(pageKey)
-      setShowCropModal(true)
-      setCrop({ x: 0, y: 0 })
-      setZoom(1)
-    })
+      setCropSource(String(reader.result || ''))
+    }
     reader.readAsDataURL(file)
-    event.target.value = '' // Reset
+    event.target.value = ''
   }
 
-  function onCropComplete(croppedArea, croppedAreaPixels) {
-    setCroppedAreaPixels(croppedAreaPixels)
-  }
-
-  async function handleCropSubmit() {
-    if (!imageToCrop || !croppedAreaPixels) return
+  async function handleCropSubmit(croppedBlob) {
+    if (!cropPageKey) return
 
     setUploading(true)
-    setErrorMsg('')
-    setShowCropModal(false)
 
     try {
-      const croppedBlob = await getCroppedImg(imageToCrop, croppedAreaPixels)
-      if (!croppedBlob) throw new Error('Không thể tạo ảnh đã cắt')
-
-      // Upload to storage
       const { publicUrl, error: uploadError } = await uploadBannerImage(croppedBlob)
       if (uploadError) {
         throw new Error(uploadError.message || 'Lỗi upload ảnh.')
       }
 
-      // Add to database
-      const newBanner = {
+      const nextList = bannerMap[cropPageKey] || []
+      const { error: dbError } = await addBanner({
         page_key: cropPageKey,
         image_url: publicUrl,
-        title: 'banner_cropped.jpeg',
+        title: `${cropPageKey}-hero.jpeg`,
         is_active: true,
-        sort_order: cropPageKey === 'home' ? homeBanners.length : authBanners.length
-      }
-      
-      const { error: dbError } = await addBanner(newBanner)
+        sort_order: nextList.length,
+      })
+
       if (dbError) {
-        throw new Error(dbError.message || 'Lỗi lưu dữ liệu banner.')
+        throw new Error(dbError.message || 'Không thể lưu cấu hình hero.')
       }
 
-      showMessage('Upload banner thành công!')
-      loadBanners()
-    } catch (err) {
-      showMessage(err.message, true)
+      showMessage(`Đã thêm ảnh cho ${getHeroPageLabel(cropPageKey)}.`)
+      setCropSource('')
+      setCropPageKey('')
+      await loadBanners()
+    } catch (error) {
+      showMessage(error.message, true)
     } finally {
       setUploading(false)
-      setImageToCrop(null)
-      setCropPageKey('')
     }
-  }
-
-  function handleCancelCrop() {
-    setShowCropModal(false)
-    setImageToCrop(null)
-    setCropPageKey('')
   }
 
   async function handleToggleActive(banner) {
-    try {
-      const { error } = await updateBanner(banner.id, { is_active: !banner.is_active })
-      if (error) throw error
-      loadBanners()
-    } catch (err) {
-      showMessage('Lỗi cập nhật trạng thái: ' + err.message, true)
+    const { error } = await updateBanner(banner.id, { is_active: !banner.is_active })
+    if (error) {
+      showMessage(`Lỗi cập nhật trạng thái: ${error.message}`, true)
+      return
     }
+
+    await loadBanners()
   }
 
   async function handleDelete(banner) {
-    if (!window.confirm('Bạn có chắc muốn xóa banner này?')) return
+    if (!window.confirm(`Xóa ảnh của ${getHeroPageLabel(banner.page_key)}?`)) return
 
-    try {
-      const { error } = await deleteBanner(banner.id, banner.image_url)
-      if (error) throw error
-      showMessage('Đã xóa banner!')
-      loadBanners()
-    } catch (err) {
-      showMessage('Lỗi khi xóa: ' + err.message, true)
+    const { error } = await deleteBanner(banner.id, banner.image_url)
+    if (error) {
+      showMessage(`Lỗi khi xóa: ${error.message}`, true)
+      return
     }
+
+    showMessage('Đã xóa ảnh hero.')
+    await loadBanners()
   }
 
-  async function handleMove(banner, direction) {
-    const list = banner.page_key === 'home' ? [...homeBanners] : [...authBanners]
-    const idx = list.findIndex(b => b.id === banner.id)
-    if (idx < 0) return
+  async function handleMove(pageKey, bannerId, direction) {
+    const banners = [...(bannerMap[pageKey] || [])]
+    const index = banners.findIndex((item) => item.id === bannerId)
+    if (index < 0) return
 
-    if (direction === 'up' && idx > 0) {
-      // Swap with previous
-      const temp = list[idx].sort_order
-      list[idx].sort_order = list[idx - 1].sort_order
-      list[idx - 1].sort_order = temp
-      await updateSortOrders(list[idx], list[idx - 1])
-    } else if (direction === 'down' && idx < list.length - 1) {
-      // Swap with next
-      const temp = list[idx].sort_order
-      list[idx].sort_order = list[idx + 1].sort_order
-      list[idx + 1].sort_order = temp
-      await updateSortOrders(list[idx], list[idx + 1])
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= banners.length) return
+
+    const currentBanner = banners[index]
+    const targetBanner = banners[targetIndex]
+
+    const currentOrder = currentBanner.sort_order
+    currentBanner.sort_order = targetBanner.sort_order
+    targetBanner.sort_order = currentOrder
+
+    const firstUpdate = await updateBanner(currentBanner.id, { sort_order: currentBanner.sort_order })
+    const secondUpdate = await updateBanner(targetBanner.id, { sort_order: targetBanner.sort_order })
+
+    if (firstUpdate.error || secondUpdate.error) {
+      showMessage('Không thể cập nhật thứ tự hiển thị.', true)
+      return
     }
+
+    await loadBanners()
   }
 
-  async function updateSortOrders(b1, b2) {
-    try {
-      await updateBanner(b1.id, { sort_order: b1.sort_order })
-      await updateBanner(b2.id, { sort_order: b2.sort_order })
-      loadBanners()
-    } catch (err) {
-      showMessage('Lỗi cập nhật thứ tự: ' + err.message, true)
-    }
-  }
-
-  function renderBannerList(banners) {
-    if (loading) return <p>Đang tải...</p>
-    if (banners.length === 0) return <p className="text-muted">Chưa có banner nào. Hãy upload ảnh mới.</p>
+  function renderBannerSection(pageKey) {
+    const banners = bannerMap[pageKey] || []
 
     return (
-      <div className="banner-grid" style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-        {banners.map((banner, index) => (
-          <div key={banner.id} className="admin-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ position: 'relative', paddingBottom: '56.25%', background: '#eee', borderRadius: '8px', overflow: 'hidden' }}>
-              <img 
-                src={banner.image_url} 
-                alt="Banner" 
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-              {!banner.is_active && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'grid', placeItems: 'center' }}>
-                  <span style={{ background: '#333', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>Đã ẩn</span>
-                </div>
-              )}
-            </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button 
-                  className={`btn btn--sm ${banner.is_active ? 'btn--outline' : ''}`}
-                  onClick={() => handleToggleActive(banner)}
-                  title={banner.is_active ? 'Ẩn banner' : 'Hiện banner'}
-                  style={{ padding: '8px' }}
-                >
-                  {banner.is_active ? <PowerOff size={16} /> : <Power size={16} />}
-                </button>
-                <button 
-                  className="btn btn--sm btn--outline" 
-                  onClick={() => handleDelete(banner)}
-                  title="Xóa banner"
-                  style={{ padding: '8px', color: '#dc3545', borderColor: '#dc3545' }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <button 
-                  className="btn btn--sm btn--outline" 
-                  onClick={() => handleMove(banner, 'up')}
-                  disabled={index === 0}
-                  style={{ padding: '6px' }}
-                >
-                  <ArrowUp size={16} />
-                </button>
-                <button 
-                  className="btn btn--sm btn--outline" 
-                  onClick={() => handleMove(banner, 'down')}
-                  disabled={index === banners.length - 1}
-                  style={{ padding: '6px' }}
-                >
-                  <ArrowDown size={16} />
-                </button>
-              </div>
-            </div>
+      <section key={pageKey} className="admin-section" style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '18px' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>{getHeroPageLabel(pageKey)}</h2>
+            <p style={{ margin: '6px 0 0', color: 'var(--color-text-muted)' }}>
+              Quản lý ảnh hero/banner cho trang này. Ảnh active đầu tiên sẽ được ưu tiên hiển thị ngoài public.
+            </p>
           </div>
-        ))}
-      </div>
+
+          <label className="btn btn--primary" style={{ cursor: 'pointer' }}>
+            <Plus size={18} />
+            <span>{uploading && cropPageKey === pageKey ? 'Đang tải lên...' : 'Thêm ảnh'}</span>
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              onChange={(event) => handleFileChange(event, pageKey)}
+              disabled={uploading}
+              hidden
+            />
+          </label>
+        </div>
+
+        {loading ? <p>Đang tải...</p> : null}
+        {!loading && banners.length === 0 ? (
+          <p className="text-muted">Chưa có ảnh nào cho trang này.</p>
+        ) : null}
+
+        {!loading && banners.length > 0 ? (
+          <div className="banner-grid" style={{ display: 'grid', gap: '18px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+            {banners.map((banner, index) => (
+              <article key={banner.id} className="admin-card" style={{ padding: '16px', display: 'grid', gap: '14px' }}>
+                <PostImage src={banner.image_url} alt={`${getHeroPageLabel(pageKey)} banner`} variant="card" />
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                  <span className="page-badge page-badge--soft">
+                    {banner.is_active ? 'Đang hoạt động' : 'Đã ẩn'}
+                  </span>
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.88rem' }}>
+                    Thứ tự #{(banner.sort_order ?? index) + 1}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className={`btn btn--ghost ${banner.is_active ? '' : 'btn--secondary'}`}
+                      onClick={() => handleToggleActive(banner)}
+                    >
+                      {banner.is_active ? <PowerOff size={16} /> : <Power size={16} />}
+                      {banner.is_active ? 'Ẩn' : 'Bật'}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn--ghost"
+                      style={{ color: '#b23b2a' }}
+                      onClick={() => handleDelete(banner)}
+                    >
+                      <Trash2 size={16} />
+                      Xóa
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="btn btn--secondary"
+                      onClick={() => handleMove(pageKey, banner.id, 'up')}
+                      disabled={index === 0}
+                    >
+                      <ArrowUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn--secondary"
+                      onClick={() => handleMove(pageKey, banner.id, 'down')}
+                      disabled={index === banners.length - 1}
+                    >
+                      <ArrowDown size={16} />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
+      </section>
     )
   }
 
@@ -250,78 +266,29 @@ function ThemeSettingsPage() {
       <header className="admin-page__header">
         <div className="admin-page__title">
           <h1>Cài đặt giao diện</h1>
-          <p>Quản lý banner trang chủ và các trang xác thực (Auth)</p>
+          <p>Quản lý tập trung hero images, page banners và thứ tự hiển thị cho toàn bộ trải nghiệm E-XANH.</p>
         </div>
       </header>
 
       <div className="admin-page__content">
-        {errorMsg && <div className="admin-alert admin-alert--error">{errorMsg}</div>}
-        {successMsg && <div className="admin-alert admin-alert--success">{successMsg}</div>}
+        {errorMsg ? <div className="admin-alert admin-alert--error">{errorMsg}</div> : null}
+        {successMsg ? <div className="admin-alert admin-alert--success">{successMsg}</div> : null}
 
-        <section className="admin-section" style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Banner Trang chủ</h2>
-            <label className="btn btn--primary" style={{ cursor: 'pointer' }}>
-              <Plus size={18} />
-              <span>{uploading && cropPageKey === 'home' ? 'Đang tải lên...' : 'Thêm banner'}</span>
-              <input 
-                type="file" 
-                accept="image/png, image/jpeg, image/webp" 
-                style={{ display: 'none' }} 
-                onChange={(e) => handleFileChange(e, 'home')}
-                disabled={uploading}
-              />
-            </label>
-          </div>
-          {renderBannerList(homeBanners)}
-        </section>
-
-        <section className="admin-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Banner Đăng nhập / Đăng ký</h2>
-            <label className="btn btn--primary" style={{ cursor: 'pointer' }}>
-              <Plus size={18} />
-              <span>{uploading && cropPageKey === 'auth' ? 'Đang tải lên...' : 'Thêm banner'}</span>
-              <input 
-                type="file" 
-                accept="image/png, image/jpeg, image/webp" 
-                style={{ display: 'none' }} 
-                onChange={(e) => handleFileChange(e, 'auth')}
-                disabled={uploading}
-              />
-            </label>
-          </div>
-          {renderBannerList(authBanners)}
-        </section>
+        {heroPageOptions.map((item) => renderBannerSection(item.key))}
       </div>
 
-      {showCropModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999,
-          display: 'flex', flexDirection: 'column', padding: '20px'
-        }}>
-          <div style={{ flex: 1, position: 'relative', background: '#333', borderRadius: '8px', overflow: 'hidden' }}>
-            <Cropper
-              image={imageToCrop}
-              crop={crop}
-              zoom={zoom}
-              aspect={16 / 9}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-            />
-          </div>
-          <div style={{ marginTop: '20px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <button className="btn btn--outline" onClick={handleCancelCrop} style={{ backgroundColor: '#fff', color: '#333' }}>
-              Hủy
-            </button>
-            <button className="btn btn--primary" onClick={handleCropSubmit}>
-              Cắt & Upload Ảnh
-            </button>
-          </div>
-        </div>
-      )}
+      <ImageCropModal
+        isOpen={Boolean(cropSource)}
+        image={cropSource}
+        title={`Cắt ảnh cho ${getHeroPageLabel(cropPageKey)}`}
+        aspect={heroPageOptions.find((item) => item.key === cropPageKey)?.aspectRatio || 16 / 9}
+        confirmLabel="Cắt & lưu ảnh"
+        onClose={() => {
+          setCropSource('')
+          setCropPageKey('')
+        }}
+        onApply={handleCropSubmit}
+      />
     </div>
   )
 }

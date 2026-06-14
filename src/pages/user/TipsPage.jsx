@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import heroImage from '../../assets/hero.png'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
+import PageHero from '../../components/common/PageHero'
+import { pageHeroContent } from '../../data/pageHeroes'
 import {
   featuredTopics,
   postCategories,
@@ -133,27 +134,7 @@ function TipsPage() {
       </Helmet>
       
       <div className="tips-page">
-      <section className="tips-hero">
-        <div className="tips-hero__content">
-          <span className="tips-hero__badge">Thư viện mẹo tiết kiệm điện</span>
-          <h1>Mẹo tiết kiệm điện</h1>
-          <p>
-            Khám phá các mẹo sử dụng điện thông minh, dễ áp dụng và phù hợp với đời
-            sống hằng ngày.
-          </p>
-        </div>
-
-        <div className="tips-hero__visual">
-          <img
-            src={heroImage}
-            alt="Không gian học tập xanh với các mẹo tiết kiệm điện"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        </div>
-      </section>
+      <PageHero {...pageHeroContent.tips} />
 
       <PostFilterBar
         searchValue={searchValue}

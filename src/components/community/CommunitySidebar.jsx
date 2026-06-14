@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { usePostComposer } from './PostComposerContext'
 
 function CommunitySidebar({
   activeMembers,
@@ -6,6 +6,8 @@ function CommunitySidebar({
   popularCommunityPosts,
   communityRules,
 }) {
+  const { openComposer } = usePostComposer()
+
   return (
     <aside className="community-sidebar-panel">
       <section className="community-sidebar-panel__card">
@@ -61,9 +63,9 @@ function CommunitySidebar({
         <p>
           Chia sẻ bài viết của bạn với cộng đồng E-XANH để cùng nhau lan tỏa lối sống xanh.
         </p>
-        <Link className="btn btn--light" to="/dang-bai">
+        <button type="button" className="btn btn--light" onClick={() => openComposer({ defaultType: 'community' })}>
           Đăng bài ngay
-        </Link>
+        </button>
       </section>
     </aside>
   )

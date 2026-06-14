@@ -2,6 +2,8 @@ import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import '../../styles/static-pages.css'
 import BrandLogo from '../../components/common/BrandLogo'
+import PageHero from '../../components/common/PageHero'
+import { pageHeroContent } from '../../data/pageHeroes'
 
 const featureCards = [
   {
@@ -50,30 +52,18 @@ function AboutPage() {
         <span>Về chúng tôi</span>
       </div>
 
-      <section className="static-page__hero static-page__hero--about">
-        <div className="static-page__hero-content">
-          <div style={{ marginBottom: '16px' }}>
-            <BrandLogo to="/" size="large" />
-          </div>
-          <h1>E-XANH là gì?</h1>
-          <p>
-            E-XANH là nền tảng giúp người trẻ sử dụng điện thông minh hơn, tiết kiệm chi phí hằng tháng và lan tỏa lối sống xanh trong cộng đồng.
-          </p>
+      <PageHero
+        {...pageHeroContent.about}
+        actions={(
           <Link className="btn btn--primary" to="/meo-tiet-kiem">
             Khám phá mẹo tiết kiệm
           </Link>
+        )}
+      >
+        <div style={{ marginBottom: '4px' }}>
+          <BrandLogo to="/" size="large" />
         </div>
-
-        <div className="static-page__hero-visual">
-          <img
-            src="https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?auto=format&fit=crop&w=1400&q=80"
-            alt="Minh họa nền tảng E-XANH"
-            width="700"
-            height="400"
-            loading="lazy"
-          />
-        </div>
-      </section>
+      </PageHero>
 
       <section className="static-page__mission">
         <h2>Sứ mệnh của E-XANH</h2>

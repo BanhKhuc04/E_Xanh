@@ -18,6 +18,36 @@ export async function fetchBanners(pageKey, activeOnly = false) {
   return { data, error }
 }
 
+export async function fetchBannersByPageKeys(pageKeys, activeOnly = false) {
+  if (!Array.isArray(pageKeys) || pageKeys.length === 0) {
+    return { data: [], error: null }
+  }
+
+  let query = supabase
+    .from('website_banners')
+    .select('*')
+    .in('page_key', pageKeys)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false })
+
+  if (activeOnly) {
+    query = query.eq('is_active', true)
+  }
+
+  const { data, error } = await query
+  return { data: data || [], error }
+}
+
+export async function fetchFirstActiveBanner(pageKey) {
+  const { data, error } = await fetchBanners(pageKey, true)
+
+  if (error) {
+    return { data: null, error }
+  }
+
+  return { data: data?.[0] || null, error: null }
+}
+
 export async function uploadBannerImage(file) {
   const validation = validateImageFile(file)
   if (!validation.valid) {

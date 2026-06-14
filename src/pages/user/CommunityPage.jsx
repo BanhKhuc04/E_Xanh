@@ -1,15 +1,17 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import CommunitySidebar from '../../components/community/CommunitySidebar'
-import heroImage from '../../assets/hero.png'
 import PostComposer from '../../components/community/PostComposer'
+import PageHero from '../../components/common/PageHero'
+import { pageHeroContent } from '../../data/pageHeroes'
+import { usePostComposer } from '../../components/community/PostComposerContext'
 import {
   activeMembers,
   communityFilters,
-  communityHero,
   communityRules,
   popularCommunityPosts,
   trendingTopics,
@@ -44,6 +46,7 @@ function sortCommunityPosts(posts, activeFilter) {
 
 function CommunityPage() {
   const navigate = useNavigate()
+  const { openComposer } = usePostComposer()
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
   const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
@@ -51,10 +54,10 @@ function CommunityPage() {
   const [posts, setPosts] = useState([])
   const [visibleCount, setVisibleCount] = useState(3)
   const [isLoading, setIsLoading] = useState(true)
+  const [toast, setToast] = useState('')
 
   const [activeCommentPostId, setActiveCommentPostId] = useState(null)
   const [activeSharePostId, setActiveSharePostId] = useState(null)
-  const [commentsByPost, setCommentsByPost] = useState({})
   const [currentUser, setCurrentUser] = useState(null)
 
   useEffect(() => {
@@ -101,7 +104,7 @@ function CommunityPage() {
             topic: p.type === 'community' ? 'Cộng đồng' : 'Mẹo tiết kiệm',
             category: 'Chia sẻ',
             title: p.title,
-            excerpt: p.description || p.content?.substring(0, 150) + '...',
+            excerpt: p.description || (p.content ? `${p.content.substring(0, 150)}...` : 'Chia sẻ mới từ cộng đồng E-XANH.'),
             image: p.image_url,
             likes: p.likes_count || 0,
             commentsCount: p.comments_count || 0,
@@ -119,6 +122,18 @@ function CommunityPage() {
       }
     }
     loadData()
+  }, [])
+
+  useEffect(() => {
+    function handleComposerSuccess(event) {
+      setToast(event.detail?.message || 'Bài viết đã được gửi thành công!')
+      window.setTimeout(() => setToast(''), 4000)
+    }
+
+    window.addEventListener('postComposerSuccess', handleComposerSuccess)
+    return () => {
+      window.removeEventListener('postComposerSuccess', handleComposerSuccess)
+    }
   }, [])
 
   const filteredPosts = useMemo(
@@ -229,14 +244,6 @@ function CommunityPage() {
 
     setActiveCommentPostId(postId)
     setActiveSharePostId(null)
-
-    if (!commentsByPost[postId]) {
-      const { getCommentsByPost } = await import('../../services/commentService')
-      const { data } = await getCommentsByPost(postId)
-      if (data) {
-        setCommentsByPost(prev => ({ ...prev, [postId]: data }))
-      }
-    }
   }
 
   function handleToggleShare(postId) {
@@ -244,33 +251,15 @@ function CommunityPage() {
     setActiveCommentPostId(null)
   }
 
-  async function handleAddComment(postId, content) {
-    if (!currentUser) return false
-    
-    const { createComment } = await import('../../services/commentService')
-    const { data, error } = await createComment(postId, content)
-
-    if (error || !data) {
-      return false
-    }
-
-    setCommentsByPost(prev => {
-      const existing = prev[postId] || []
-      return {
-        ...prev,
-        [postId]: [data, ...existing]
-      }
-    })
-    
+  function handleCommentCountChange(postId, count) {
     setPosts((current) =>
       current.map((post) => {
         if (post.id === postId) {
-          return { ...post, commentsCount: post.commentsCount + 1 }
+          return { ...post, commentsCount: count }
         }
         return post
       })
     )
-    return true
   }
 
   return (
@@ -288,33 +277,24 @@ function CommunityPage() {
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-      <section className="community-page__hero">
-        <div className="community-page__hero-content">
-          <span className="community-page__badge">{communityHero.badge}</span>
-          <h1>{communityHero.title}</h1>
-          <p>{communityHero.description}</p>
-
-          <div className="community-page__hero-actions">
-            <Link className="btn btn--primary" to="/dang-bai" state={{ defaultType: 'community' }} data-testid="community-write-post-button">
+      <PageHero
+        {...pageHeroContent.community}
+        actions={(
+          <>
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => openComposer({ defaultType: 'community' })}
+              data-testid="community-write-post-button"
+            >
               Viết bài chia sẻ
-            </Link>
+            </button>
             <a className="btn btn--secondary" href="#cong-dong-feed">
               Khám phá bài viết
             </a>
-          </div>
-        </div>
-
-        <div className="community-page__hero-visual">
-          <img
-            src={heroImage}
-            alt="Nhóm sinh viên đang chia sẻ kinh nghiệm sống xanh"
-            width="640"
-            height="360"
-            loading="eager"
-            fetchPriority="high"
-          />
-        </div>
-      </section>
+          </>
+        )}
+      />
 
       <div className="community-page__layout">
         <div className="community-page__feed">
@@ -338,11 +318,10 @@ function CommunityPage() {
                   onToggleSave={handleToggleSave}
                   onToggleComment={handleToggleComment}
                   onToggleShare={handleToggleShare}
-                  onAddComment={handleAddComment}
                   isCommentActive={activeCommentPostId === post.id}
                   isShareActive={activeSharePostId === post.id}
-                  postComments={commentsByPost[post.id]}
                   currentUser={currentUser}
+                  onCommentCountChange={(count) => handleCommentCountChange(post.id, count)}
                 />
               ))
             ) : (
@@ -352,9 +331,14 @@ function CommunityPage() {
                 </svg>
                 <h2 style={{ color: '#173715', fontSize: '1.25rem', margin: '0' }}>Cộng đồng hiện chưa có bài viết nào</h2>
                 <p style={{ color: '#555', margin: '0', maxWidth: '300px' }}>Hãy là người đầu tiên chia sẻ bí quyết sống xanh của bạn với mọi người nhé!</p>
-                <Link className="btn btn--primary" to="/dang-bai" style={{ marginTop: '8px' }}>
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  style={{ marginTop: '8px' }}
+                  onClick={() => openComposer({ defaultType: 'community' })}
+                >
                   Viết bài chia sẻ đầu tiên
-                </Link>
+                </button>
               </div>
             )}
           </section>
@@ -379,6 +363,13 @@ function CommunityPage() {
           communityRules={communityRules}
         />
       </div>
+
+      {toast ? (
+        <div className="ui-toast" role="status" aria-live="polite">
+          <CheckCircle2 size={18} />
+          {toast}
+        </div>
+      ) : null}
     </div>
   )
 }

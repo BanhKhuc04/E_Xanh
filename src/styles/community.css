@@ -122,10 +122,20 @@
   object-fit: cover;
 }
 
+.community-composer__avatar--fallback {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
+}
+
 .community-composer__prompt {
   min-height: 54px;
   display: flex;
   align-items: center;
+  width: 100%;
+  border: 0;
   padding: 0 18px;
   border-radius: 16px;
   color: rgba(51, 106, 41, 0.7);
@@ -152,12 +162,21 @@
   font-size: 0.95rem;
 }
 
-.community-composer__actions a {
+.community-composer__actions a,
+.community-composer__actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
   cursor: pointer;
   transition: color 0.2s;
 }
 
-.community-composer__actions a:hover {
+.community-composer__actions a:hover,
+.community-composer__actions button:hover {
   color: var(--color-primary-500);
 }
 

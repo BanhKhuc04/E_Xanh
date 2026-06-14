@@ -1,4 +1,4 @@
-function CreatePostSidebar({ form, previewHighlight }) {
+function CreatePostSidebar({ form, previewHighlight, previewAuthor = 'Nguyễn Văn A' }) {
   const previewType = form.type || 'Mẹo tiết kiệm'
   const previewTitle = form.title || 'Tiêu đề bài viết của bạn sẽ hiển thị tại đây.'
   const previewDescription =
@@ -43,7 +43,7 @@ function CreatePostSidebar({ form, previewHighlight }) {
             <h3>{previewTitle}</h3>
             <p>{previewDescription}</p>
             <div className="create-post-sidebar__preview-meta">
-              <strong>Nguyễn Văn A</strong>
+              <strong>{previewAuthor}</strong>
               <small>Trạng thái: Chờ duyệt</small>
             </div>
           </div>

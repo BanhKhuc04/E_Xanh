@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
-import { getImageUrl } from '../../utils/imageUrl'
-import heroImage from '../../assets/hero.png'
+import PostImage from '../common/PostImage'
+import InlineCommentSection from './InlineCommentSection'
 
 const HeartIcon = ({ isLiked }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -34,21 +34,18 @@ function CommunityPostCard({
   onToggleSave,
   onToggleComment,
   onToggleShare,
-  onAddComment,
   isCommentActive,
   isShareActive,
-  postComments,
-  currentUser
+  currentUser,
+  onCommentCountChange,
 }) {
-  const [commentText, setCommentText] = useState('')
   const [toast, setToast] = useState('')
   const shareRef = useRef(null)
-  const commentRef = useRef(null)
   const navigate = useNavigate()
 
   const handleCardClick = (e) => {
-    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
-    navigate(`/cong-dong/${post.id}`);
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('textarea')) return
+    navigate(`/cong-dong/${post.id}`)
   }
 
   useEffect(() => {
@@ -56,19 +53,10 @@ function CommunityPostCard({
       if (isShareActive && shareRef.current && !shareRef.current.contains(event.target)) {
         onToggleShare(null) // Đóng khi click ngoài
       }
-      
-      // Close comments if clicking outside the comment area and not on the comment toggle button itself
-      if (isCommentActive && commentRef.current && !commentRef.current.contains(event.target)) {
-        // Find if they clicked the comment toggle button by checking closest
-        const isCommentButton = event.target.closest('.comment-toggle-btn');
-        if (!isCommentButton) {
-          onToggleComment(post.id) // This will toggle it off
-        }
-      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isShareActive, isCommentActive, onToggleShare, onToggleComment, post.id])
+  }, [isShareActive, onToggleShare])
 
   const showToast = (msg) => {
     setToast(msg)
@@ -86,28 +74,6 @@ function CommunityPostCard({
     }
     onToggleShare(null)
   }
-
-  const handleSubmitComment = () => {
-    const trimmedText = commentText.trim()
-    if (!trimmedText) {
-      showToast('Bình luận không được để trống')
-      return
-    }
-    if (trimmedText.length > 1000) {
-      showToast('Bình luận tối đa 1000 ký tự')
-      return
-    }
-    if (!currentUser) {
-      showToast('Vui lòng đăng nhập để bình luận')
-      return
-    }
-    const success = onAddComment(post.id, trimmedText)
-    if (success) {
-      setCommentText('')
-    }
-  }
-
-
 
   return (
     <article className="community-post-card" id={post.id} data-testid="community-post-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
@@ -151,16 +117,9 @@ function CommunityPostCard({
 
       {post.image ? (
         <div className="community-post-card__media">
-            <Link to={`/cong-dong/${post.id}`}>
-              <img
-                src={getImageUrl(post.image, 800)}
-                alt={post.title}
-                width="800"
-                height="450"
-                loading="lazy"
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImage; }}
-              />
-            </Link>
+          <Link to={`/cong-dong/${post.id}`}>
+            <PostImage src={post.image} alt={post.title} variant="card" />
+          </Link>
         </div>
       ) : null}
 
@@ -169,31 +128,47 @@ function CommunityPostCard({
         <button
           type="button"
           className={post.isLiked ? 'is-active' : ''}
-          onClick={() => onToggleLike(post.id)}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleLike(post.id)
+          }}
         >
           <HeartIcon isLiked={post.isLiked} /> Thích {post.likes}
         </button>
         <button
           type="button"
           className={`comment-toggle-btn ${isCommentActive ? 'is-active' : ''}`}
-          onClick={() => onToggleComment(post.id)}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleComment(post.id)
+          }}
         >
           <CommentIcon isActive={isCommentActive} /> Bình luận {post.commentsCount}
         </button>
         <button
           type="button"
           className={post.isSaved ? 'is-active' : ''}
-          onClick={() => onToggleSave(post.id)}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleSave(post.id)
+          }}
         >
           <SaveIcon isSaved={post.isSaved} /> {post.isSaved ? 'Đã lưu' : 'Lưu bài'} {post.savedCount}
         </button>
         <div style={{ position: 'relative' }} ref={shareRef}>
-          <button type="button" className={isShareActive ? 'is-active' : ''} onClick={() => onToggleShare(post.id)}>
+          <button
+            type="button"
+            className={isShareActive ? 'is-active' : ''}
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggleShare(post.id)
+            }}
+          >
             <ShareIcon /> Chia sẻ {post.shares}
           </button>
           
           {isShareActive && (
-            <div className="community-post-card__share-modal" style={{ padding: '12px', minWidth: '300px', cursor: 'default' }}>
+            <div className="community-post-card__share-modal" style={{ padding: '12px', minWidth: '300px', cursor: 'default' }} onClick={(event) => event.stopPropagation()}>
               <div style={{ fontSize: '0.85rem', marginBottom: '8px', color: '#555', textAlign: 'left' }}>Liên kết bài viết:</div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input 
@@ -216,105 +191,20 @@ function CommunityPostCard({
         </div>
       </div>
 
-      {/* Expanded Comments */}
       {isCommentActive && (
-        <div ref={commentRef} style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(79, 132, 40, 0.1)' }}>
-          <div className="community-post-card__comments">
-            {postComments && postComments.length > 0 ? (
-              postComments.map((comment) => (
-                <div key={comment.id} className="community-post-card__comment" style={{ background: 'transparent', padding: '8px 0' }}>
-                  {isValidImageUrl(comment.avatar) ? (
-                  <img
-                    src={comment.avatar}
-                    alt={`Ảnh đại diện của ${comment.author}`}
-                    width="36"
-                    height="36"
-                    loading="lazy"
-                    style={{ objectFit: 'cover', borderRadius: '50%' }}
-                  />
-                ) : (
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#eaf59d', color: '#4f8428', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                    {getInitials(comment.author)}
-                  </div>
-                )}
-                  <div style={{ background: 'rgba(234, 245, 157, 0.16)', padding: '10px 14px', borderRadius: '14px', border: '1px solid rgba(79, 132, 40, 0.05)' }}>
-                    <strong style={{ fontSize: '0.9rem', color: '#173715' }}>{comment.author}</strong>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.95rem', color: '#333' }}>{comment.content}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p style={{ color: '#888', textAlign: 'center', fontSize: '0.9rem' }}>Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>
-            )}
-          </div>
-          
-          <div className="community-post-card__comment-input-area">
-            {isValidImageUrl(currentUser?.avatar_url) ? (
-              <img
-                src={currentUser.avatar_url}
-                alt={`Ảnh đại diện của ${currentUser.name || 'bạn'}`}
-                width="36"
-                height="36"
-                loading="lazy"
-                style={{ objectFit: 'cover', borderRadius: '50%' }}
-              />
-            ) : (
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#c1d95c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                {getInitials(currentUser?.name || currentUser?.email || 'Bạn')}
-              </div>
-            )}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <textarea 
-                rows="2" 
-                placeholder="Viết bình luận..." 
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                maxLength={1000}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmitComment()
-                  }
-                }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: commentText.length > 1000 ? '#e53935' : '#888' }}>
-                  {commentText.length}/1000 ký tự
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {!currentUser && <span style={{ color: '#e53935', fontSize: '0.85rem' }}>Vui lòng đăng nhập để bình luận</span>}
-                  <button 
-                    className="btn btn--primary" 
-                    style={{ padding: '6px 16px', fontSize: '0.85rem', opacity: !commentText.trim() ? 0.5 : 1 }}
-                    onClick={handleSubmitComment}
-                    disabled={!commentText.trim()}
-                  >
-                    Gửi
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Fallback old preview when comments are NOT expanded */}
-      {!isCommentActive && post.previewComments && post.previewComments.length > 0 && (
-        <div className="community-post-card__comments" style={{ marginTop: '16px' }}>
-          {post.previewComments.slice(0, 1).map((comment) => (
-            <div key={comment.id} className="community-post-card__comment">
-              <img src={comment.avatar} alt={comment.author} />
-              <div>
-                <strong>{comment.author}</strong>
-                <p>{comment.content}</p>
-              </div>
-            </div>
-          ))}
+        <div style={{ marginTop: '16px' }} onClick={(event) => event.stopPropagation()}>
+          <InlineCommentSection
+            postId={post.id}
+            currentUser={currentUser}
+            initialCount={post.commentsCount}
+            isOpen={isCommentActive}
+            onCountChange={onCommentCountChange}
+          />
         </div>
       )}
 
       {toast && (
-        <div className="au-toast" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000, background: '#333', color: '#fff', padding: '12px 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <div className="ui-toast">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
           {toast}
         </div>

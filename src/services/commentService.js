@@ -1,6 +1,18 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 
+export function formatComment(comment) {
+  return {
+    id: comment.id,
+    author: comment.profiles?.name || 'Người dùng E-XANH',
+    avatar:
+      comment.profiles?.avatar_url ||
+      `https://ui-avatars.com/api/?name=${comment.profiles?.name || 'U'}&background=c1d95c&color=fff`,
+    content: comment.content,
+    createdAt: comment.created_at,
+  }
+}
+
 export async function getCommentsByPost(postId) {
   const { data, error } = await supabase
     .from('comments')
@@ -11,6 +23,7 @@ export async function getCommentsByPost(postId) {
       profiles:user_id (name, avatar_url)
     `)
     .eq('post_id', postId)
+    .eq('status', 'visible')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -18,14 +31,7 @@ export async function getCommentsByPost(postId) {
     return { data: null, error }
   }
 
-  // Transform to match UI needs
-  const formattedData = data.map(comment => ({
-    id: comment.id,
-    author: comment.profiles?.name || 'Người dùng E-XANH',
-    avatar: comment.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${comment.profiles?.name || 'U'}&background=c1d95c&color=fff`,
-    content: comment.content,
-    createdAt: comment.created_at
-  }))
+  const formattedData = data.map(formatComment)
 
   return { data: formattedData, error: null }
 }
@@ -44,8 +50,8 @@ export async function createComment(postId, content) {
       {
         post_id: postId,
         user_id: userId,
-        content: content
-      }
+        content,
+      },
     ])
     .select(`
       id,
@@ -60,13 +66,7 @@ export async function createComment(postId, content) {
     return { data: null, error }
   }
 
-  const formattedData = {
-    id: data.id,
-    author: data.profiles?.name || 'Người dùng E-XANH',
-    avatar: data.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${data.profiles?.name || 'U'}&background=c1d95c&color=fff`,
-    content: data.content,
-    createdAt: data.created_at
-  }
+  const formattedData = formatComment(data)
 
   return { data: formattedData, error: null }
 }

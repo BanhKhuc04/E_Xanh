@@ -10,7 +10,9 @@ function CreatePostForm({
   onSaveDraft,
   onPreview,
   onSubmit,
+  onRemoveCover,
   isSubmitting,
+  compact = false,
 }) {
   const [isDragging, setIsDragging] = useState(false)
 
@@ -33,7 +35,7 @@ function CreatePostForm({
   }
 
   return (
-    <div className="create-post-form">
+    <div className={`create-post-form${compact ? ' create-post-form--compact' : ''}`}>
       <div className="create-post-form__messages">
         {errorMessage ? <div className="create-post-form__message create-post-form__message--error">{errorMessage}</div> : null}
         {successMessage ? (
@@ -101,6 +103,7 @@ function CreatePostForm({
           data-testid="post-upload-area"
           className="create-post-form__upload-box" 
           style={{ 
+            position: 'relative',
             padding: form.coverPreview ? '0' : undefined, 
             overflow: 'hidden',
             backgroundColor: isDragging ? 'rgba(193, 217, 92, 0.15)' : undefined,
@@ -108,7 +111,22 @@ function CreatePostForm({
           }}
         >
           {form.coverPreview ? (
-            <img src={form.coverPreview} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'contain', display: 'block', backgroundColor: '#f1f1f1' }} />
+            <>
+              <img src={form.coverPreview} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block', backgroundColor: '#f1f1f1' }} />
+              {onRemoveCover ? (
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    onRemoveCover()
+                  }}
+                  style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 1 }}
+                >
+                  Xóa ảnh
+                </button>
+              ) : null}
+            </>
           ) : (
             <>
               <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
