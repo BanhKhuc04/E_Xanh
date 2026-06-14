@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { getCurrentSession, onAuthStateChange, signOut, getCurrentUserProfile } from '../../../services/authService'
 import { getInitials, isValidImageUrl } from '../../../utils/avatar'
 import BrandLogo from '../../common/BrandLogo'
 import { userNavLinks } from '../../../data/navigation'
@@ -25,8 +24,11 @@ function UserNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
+    let unsubscribe;
+    
     async function loadUser() {
       try {
+        const { getCurrentSession, getCurrentUserProfile } = await import('../../../services/authService')
         const session = await getCurrentSession()
         if (session?.user) {
           const profile = await getCurrentUserProfile(session.user.id)
@@ -40,16 +42,20 @@ function UserNavbar() {
       }
     }
 
-    loadUser()
-
-    const unsubscribe = onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        loadUser()
-      } else if (event === 'SIGNED_OUT') {
-        setCurrentUser(null)
-        setIsOpen(false)
-      }
-    })
+    async function initAuth() {
+      await loadUser()
+      const { onAuthStateChange } = await import('../../../services/authService')
+      unsubscribe = onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          loadUser()
+        } else if (event === 'SIGNED_OUT') {
+          setCurrentUser(null)
+          setIsOpen(false)
+        }
+      })
+    }
+    
+    initAuth()
 
     const handleProfileUpdate = () => loadUser()
     window.addEventListener('profileUpdated', handleProfileUpdate)
@@ -77,6 +83,7 @@ function UserNavbar() {
   }, [])
 
   async function handleLogout() {
+    const { signOut } = await import('../../../services/authService')
     await signOut()
     setIsOpen(false)
     navigate('/')

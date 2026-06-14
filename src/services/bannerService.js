@@ -29,7 +29,11 @@ export async function uploadBannerImage(file) {
 
   const { error: uploadError } = await supabase.storage
     .from('website-banners')
-    .upload(filePath, file)
+    .upload(filePath, file, {
+      cacheControl: '31536000',
+      upsert: true,
+      contentType: file.type,
+    })
 
   if (uploadError) {
     let viMessage = 'Upload ảnh thất bại, vui lòng thử lại.'

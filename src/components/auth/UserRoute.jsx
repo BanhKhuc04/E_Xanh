@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { getCurrentSession } from '../../services/authService'
 import BrandLogo from '../common/BrandLogo'
 
 function UserRoute() {
@@ -13,6 +12,7 @@ function UserRoute() {
 
     async function checkAuth() {
       try {
+        const { getCurrentSession } = await import('../../services/authService')
         const session = await getCurrentSession()
         if (isMounted) {
           setUser(session?.user || null)

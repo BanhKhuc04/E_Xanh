@@ -19,7 +19,7 @@ function BannerCarousel({ banners, interval = 5000 }) {
   if (banners.length === 1) {
     return (
       <img
-        src={getImageUrl(banners[0].image_url, 1200)}
+        src={getImageUrl(banners[0].image_url, 900)}
         alt={banners[0].title || 'Banner E-XANH'}
         width="720"
         height="405"
@@ -47,7 +47,7 @@ function BannerCarousel({ banners, interval = 5000 }) {
           }}
         >
           <img
-            src={getImageUrl(banner.image_url, 1200)}
+            src={getImageUrl(banner.image_url, 900)}
             alt={banner.title || 'Banner E-XANH'}
             width="720"
             height="405"
@@ -65,17 +65,30 @@ function BannerCarousel({ banners, interval = 5000 }) {
             key={index}
             onClick={() => setCurrentIndex(index)}
             style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               border: 'none',
               padding: 0,
-              background: index === currentIndex ? '#fff' : 'rgba(255,255,255,0.5)',
+              background: 'transparent',
               cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
             }}
             aria-label={`Go to slide ${index + 1}`}
-          />
+          >
+            <span
+              style={{
+                display: 'block',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                background: index === currentIndex ? '#fff' : 'rgba(255,255,255,0.5)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                transition: 'background 0.3s ease',
+              }}
+            />
+          </button>
         ))}
       </div>
     </div>
