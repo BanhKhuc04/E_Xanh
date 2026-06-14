@@ -4,6 +4,11 @@ import {
   createSafeFileName,
   validateImageFile,
 } from '../utils/fileValidation'
+import {
+  compressImageToWebp,
+  isCompressibleImageType,
+} from '../utils/imageCompress'
+import { logError } from '../utils/logger'
 
 export async function getCurrentProfile() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
@@ -88,15 +93,31 @@ export async function uploadAvatarImage(file) {
     }
   }
 
-  const fileName = createSafeFileName(file, 'avatar')
+  let uploadFile = file
+
+  if (isCompressibleImageType(file)) {
+    try {
+      uploadFile = await compressImageToWebp(file, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.75,
+        maxBytes: 80 * 1024,
+        minQuality: 0.55,
+      })
+    } catch (error) {
+      logError('Avatar compression failed, using original avatar image.', error)
+    }
+  }
+
+  const fileName = createSafeFileName(uploadFile, 'avatar')
   const filePath = `avatars/${sessionData.session.user.id}/${fileName}`
 
   const { error: uploadError } = await supabase.storage
     .from('profile-avatars')
-    .upload(filePath, file, {
+    .upload(filePath, uploadFile, {
       cacheControl: '31536000',
       upsert: true,
-      contentType: file.type,
+      contentType: uploadFile.type || file.type,
     })
 
   if (uploadError) {
@@ -108,15 +129,7 @@ export async function uploadAvatarImage(file) {
 
   const { data: publicUrlData } = supabase.storage
     .from('profile-avatars')
-    .getPublicUrl(filePath, {
-      transform: {
-        width: 512,
-        height: 512,
-        resize: 'cover',
-        format: 'webp',
-        quality: 84,
-      },
-    })
+    .getPublicUrl(filePath)
 
   return { publicUrl: publicUrlData.publicUrl, error: null }
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getImageUrl } from '../../utils/imageUrl'
+import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
 
 const FALLBACK_IMAGE = '/images/fallback-green.jpg'
 
@@ -8,7 +8,7 @@ function PostImage({
   alt,
   variant = 'card',
   className = '',
-  width = 800,
+  width = IMAGE_TRANSFORM_WIDTHS.postCard,
   height = 450,
 }) {
   const [hasError, setHasError] = useState(false)

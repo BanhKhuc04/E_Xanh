@@ -1,5 +1,28 @@
 import { useState, useEffect } from 'react'
-import { getImageUrl } from '../../utils/imageUrl'
+import { getBannerImageSources } from '../../utils/imageUrl'
+
+function BannerMedia({ banner, prioritize = false }) {
+  const imageSources = getBannerImageSources(banner.image_url)
+
+  return (
+    <picture>
+      <source
+        media="(max-width: 768px)"
+        srcSet={imageSources.mobile}
+      />
+      <img
+        src={imageSources.desktop}
+        alt={banner.title || 'Banner E-XANH'}
+        width="1280"
+        height="720"
+        loading={prioritize ? 'eager' : 'lazy'}
+        fetchPriority={prioritize ? 'high' : 'auto'}
+        decoding="async"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+      />
+    </picture>
+  )
+}
 
 function BannerCarousel({ banners, interval = 5000 }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -18,26 +41,9 @@ function BannerCarousel({ banners, interval = 5000 }) {
 
   if (banners.length === 1) {
     return (
-      <picture>
-        <source
-          media="(max-width: 480px)"
-          srcSet={getImageUrl(banners[0].image_url, 480, 70)}
-        />
-        <source
-          media="(max-width: 768px)"
-          srcSet={getImageUrl(banners[0].image_url, 720, 75)}
-        />
-        <img
-          src={getImageUrl(banners[0].image_url, 900, 80)}
-          alt={banners[0].title || 'Banner E-XANH'}
-          width="720"
-          height="405"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover', borderRadius: 'inherit' }}
-        />
-      </picture>
+      <div style={{ width: '100%', aspectRatio: '16 / 9' }}>
+        <BannerMedia banner={banners[0]} prioritize />
+      </div>
     )
   }
 
@@ -57,26 +63,7 @@ function BannerCarousel({ banners, interval = 5000 }) {
             zIndex: index === currentIndex ? 1 : 0
           }}
         >
-          <picture>
-            <source
-              media="(max-width: 480px)"
-              srcSet={getImageUrl(banner.image_url, 480, 70)}
-            />
-            <source
-              media="(max-width: 768px)"
-              srcSet={getImageUrl(banner.image_url, 720, 75)}
-            />
-            <img
-              src={getImageUrl(banner.image_url, 900, 80)}
-              alt={banner.title || 'Banner E-XANH'}
-              width="720"
-              height="405"
-              loading={index === 0 ? 'eager' : 'lazy'}
-              fetchPriority={index === 0 ? 'high' : 'auto'}
-              decoding="async"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </picture>
+          <BannerMedia banner={banner} prioritize={index === 0} />
         </div>
       ))}
       

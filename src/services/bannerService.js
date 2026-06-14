@@ -1,6 +1,23 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
+import {
+  compressImageToWebp,
+  isCompressibleImageType,
+} from '../utils/imageCompress'
+
+function getBannerFilePathFromUrl(imageUrl) {
+  if (!imageUrl || !imageUrl.includes('website-banners/')) {
+    return null
+  }
+
+  const urlParts = imageUrl.split('website-banners/')
+  if (urlParts.length <= 1) {
+    return null
+  }
+
+  return urlParts[1].split('?')[0]
+}
 
 export async function fetchBanners(pageKey, activeOnly = false) {
   let query = supabase
@@ -54,15 +71,31 @@ export async function uploadBannerImage(file) {
     return { error: { message: validation.error } }
   }
 
-  const safeFileName = createSafeFileName(file, 'banner')
+  let uploadFile = file
+
+  if (isCompressibleImageType(file)) {
+    try {
+      uploadFile = await compressImageToWebp(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.76,
+        maxBytes: 300 * 1024,
+        minQuality: 0.6,
+      })
+    } catch (error) {
+      logError('Banner compression failed, using original banner image.', error)
+    }
+  }
+
+  const safeFileName = createSafeFileName(uploadFile, 'banner')
   const filePath = `banners/${safeFileName}`
 
   const { error: uploadError } = await supabase.storage
     .from('website-banners')
-    .upload(filePath, file, {
+    .upload(filePath, uploadFile, {
       cacheControl: '31536000',
       upsert: true,
-      contentType: file.type,
+      contentType: uploadFile.type || file.type,
     })
 
   if (uploadError) {
@@ -79,13 +112,7 @@ export async function uploadBannerImage(file) {
 
   const { data: publicUrlData } = supabase.storage
     .from('website-banners')
-    .getPublicUrl(filePath, {
-      transform: {
-        width: 800,
-        format: 'webp',
-        quality: 80,
-      }
-    })
+    .getPublicUrl(filePath)
 
   return { publicUrl: publicUrlData.publicUrl, filePath }
 }
@@ -125,9 +152,8 @@ export async function deleteBanner(id, imageUrl) {
   // Try to extract file path from URL if it's from our storage
   if (imageUrl && imageUrl.includes('website-banners')) {
     try {
-      const urlParts = imageUrl.split('website-banners/')
-      if (urlParts.length > 1) {
-        const filePath = urlParts[1]
+      const filePath = getBannerFilePathFromUrl(imageUrl)
+      if (filePath) {
         await supabase.storage.from('website-banners').remove([filePath])
       }
     } catch (err) {

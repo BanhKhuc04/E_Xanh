@@ -1,6 +1,10 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
+import {
+  compressImageToWebp,
+  isCompressibleImageType,
+} from '../utils/imageCompress'
 
 function generateSlug(title) {
   return title
@@ -19,12 +23,32 @@ export async function uploadPostImage(file, userId) {
     return { publicUrl: null, error: new Error(validation.error) }
   }
 
-  const safeFileName = createSafeFileName(file, 'post')
+  let uploadFile = file
+
+  if (isCompressibleImageType(file)) {
+    try {
+      uploadFile = await compressImageToWebp(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.75,
+        maxBytes: 500 * 1024,
+        minQuality: 0.6,
+      })
+    } catch (error) {
+      logError('Image compression failed, using original post image.', error)
+    }
+  }
+
+  const safeFileName = createSafeFileName(uploadFile, 'post')
   const path = `posts/${userId}/${safeFileName}`
 
   const { error } = await supabase.storage
     .from('post-images')
-    .upload(path, file)
+    .upload(path, uploadFile, {
+      cacheControl: '31536000',
+      contentType: uploadFile.type || file.type,
+      upsert: false,
+    })
 
   if (error) {
     return { publicUrl: null, error }
@@ -32,13 +56,7 @@ export async function uploadPostImage(file, userId) {
 
   const { data: publicUrlData } = supabase.storage
     .from('post-images')
-    .getPublicUrl(path, {
-      transform: {
-        width: 800,
-        format: 'webp',
-        quality: 80,
-      }
-    })
+    .getPublicUrl(path)
 
   return { publicUrl: publicUrlData.publicUrl, error: null }
 }

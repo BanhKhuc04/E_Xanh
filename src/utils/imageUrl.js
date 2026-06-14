@@ -1,30 +1,47 @@
 import { supabase } from '../lib/supabase'
 
-export function getImageUrl(pathOrUrl, width = 800, quality = 80) {
+const STORAGE_PUBLIC_MARKERS = [
+  '/storage/v1/object/public/',
+  '/storage/v1/render/image/public/',
+]
+
+export const IMAGE_TRANSFORM_WIDTHS = Object.freeze({
+  bannerMobile: 640,
+  postCard: 800,
+  bannerDesktop: 1080,
+})
+
+export function extractSupabaseStoragePath(pathOrUrl) {
+  if (!pathOrUrl) return null
+
+  const marker = STORAGE_PUBLIC_MARKERS.find((item) => pathOrUrl.includes(item))
+  if (!marker) return null
+
+  const urlParts = pathOrUrl.split(marker)
+  if (urlParts.length !== 2) return null
+
+  const bucketAndPath = urlParts[1].split('?')[0]
+  const firstSlashIndex = bucketAndPath.indexOf('/')
+  if (firstSlashIndex === -1) return null
+
+  return {
+    bucket: bucketAndPath.substring(0, firstSlashIndex),
+    filePath: bucketAndPath.substring(firstSlashIndex + 1),
+  }
+}
+
+export function getImageUrl(pathOrUrl, width = IMAGE_TRANSFORM_WIDTHS.postCard, quality = 80) {
   if (!pathOrUrl) return ''
 
-  // Nếu không phải Supabase Storage URL thì trả nguyên
-  if (!pathOrUrl.includes('/storage/v1/object/public/')) {
+  const storagePath = extractSupabaseStoragePath(pathOrUrl)
+  if (!storagePath) {
     return pathOrUrl
   }
 
   try {
-    // Trích xuất bucket và path từ URL
-    // Format: https://[project-id].supabase.co/storage/v1/object/public/[bucket]/[path...]
-    const urlParts = pathOrUrl.split('/storage/v1/object/public/')
-    if (urlParts.length !== 2) return pathOrUrl
-    
-    const bucketAndPath = urlParts[1]
-    const firstSlashIndex = bucketAndPath.indexOf('/')
-    if (firstSlashIndex === -1) return pathOrUrl
-
-    const bucket = bucketAndPath.substring(0, firstSlashIndex)
-    const filePath = bucketAndPath.substring(firstSlashIndex + 1)
-
-    // Sử dụng getPublicUrl với transform cho webp
     const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(filePath, {
+      .from(storagePath.bucket)
+      .getPublicUrl(storagePath.filePath, {
         transform: {
           width,
           format: 'webp',
@@ -36,5 +53,12 @@ export function getImageUrl(pathOrUrl, width = 800, quality = 80) {
   } catch (err) {
     console.error('Error transforming image URL:', err)
     return pathOrUrl
+  }
+}
+
+export function getBannerImageSources(pathOrUrl) {
+  return {
+    mobile: getImageUrl(pathOrUrl, IMAGE_TRANSFORM_WIDTHS.bannerMobile, 74),
+    desktop: getImageUrl(pathOrUrl, IMAGE_TRANSFORM_WIDTHS.bannerDesktop, 78),
   }
 }

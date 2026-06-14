@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getImageUrl } from '../../utils/imageUrl'
+import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
 import heroImage from '../../assets/hero.png'
 
 function FeaturedPosts() {
@@ -101,7 +101,7 @@ function FeaturedPosts() {
               >
                 <div className="home-post-card__media">
                   <img
-                    src={post.image_url ? getImageUrl(post.image_url) : DEFAULT_IMAGE}
+                    src={post.image_url ? getImageUrl(post.image_url, IMAGE_TRANSFORM_WIDTHS.postCard) : DEFAULT_IMAGE}
                     alt={`${post.title} - mẹo tiết kiệm điện`}
                     width="600"
                     height="400"

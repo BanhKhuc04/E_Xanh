@@ -59,7 +59,7 @@ export function validateImageFile(file, options = {}) {
 }
 
 export function createSafeFileName(file, prefix = 'image') {
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const ext = file?.name?.split('.').pop()?.toLowerCase() || 'jpg'
   const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg'
   const id =
     typeof crypto !== 'undefined' && crypto.randomUUID
