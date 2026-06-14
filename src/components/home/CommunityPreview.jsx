@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getRecentCommunityPosts, getTopActiveMembers } from '../../services/postService'
 
 function CommunityPreview() {
   const [posts, setPosts] = useState([])
@@ -11,6 +10,7 @@ function CommunityPreview() {
   useEffect(() => {
     async function load() {
       try {
+        const { getRecentCommunityPosts, getTopActiveMembers } = await import('../../services/postService')
         const [postsRes, membersRes] = await Promise.all([
           getRecentCommunityPosts(3),
           getTopActiveMembers(3)

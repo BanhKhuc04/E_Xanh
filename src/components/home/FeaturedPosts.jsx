@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getFeaturedPosts } from '../../services/postService'
 import { getImageUrl } from '../../utils/imageUrl'
 import heroImage from '../../assets/hero.png'
 
@@ -12,6 +11,7 @@ function FeaturedPosts() {
   useEffect(() => {
     async function load() {
       try {
+        const { getFeaturedPosts } = await import('../../services/postService')
         const { data, error } = await getFeaturedPosts()
         if (error) throw error
         

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { homeHero } from '../../data/home'
-import { fetchBanners } from '../../services/bannerService'
 import BannerCarousel from '../common/BannerCarousel'
 
 function HeroSection() {
@@ -10,6 +9,7 @@ function HeroSection() {
   useEffect(() => {
     async function load() {
       try {
+        const { fetchBanners } = await import('../../services/bannerService')
         const { data, error } = await fetchBanners('home', true)
         if (error) {
           console.error('Lỗi khi tải banner trang chủ từ Supabase:', error)

@@ -1,7 +1,7 @@
 /* Font loaded via <link> in index.html for better performance */
 
 :root {
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   color: #27500a;
   background:
     radial-gradient(circle at top left, rgba(234, 245, 157, 0.7), transparent 32%),
