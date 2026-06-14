@@ -62,7 +62,7 @@ function CreatePostPage() {
       const session = await getCurrentSession()
       if (isMounted) {
         if (!session?.user) {
-          navigate('/dang-nhap', { state: { message: "Vui lòng đăng nhập để đăng bài" } })
+          navigate('/dang-nhap', { state: { from: location.pathname, message: "Vui lòng đăng nhập để đăng bài" } })
           return
         }
         setUser(session.user)

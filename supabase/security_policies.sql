@@ -74,6 +74,52 @@ CREATE POLICY "Admin/Mod can delete comments"
 ON comments FOR DELETE 
 USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator') OR auth.uid() = author_id);
 
+-- BẢNG POST_LIKES
+
+ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can see all likes" 
+ON post_likes FOR SELECT USING (true);
+
+CREATE POLICY "Users can like/unlike posts" 
+ON post_likes FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can remove their likes" 
+ON post_likes FOR DELETE USING (auth.uid() = user_id);
+
+-- BẢNG SAVED_POSTS
+
+ALTER TABLE saved_posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can see their own saved posts" 
+ON saved_posts FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can save posts" 
+ON saved_posts FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can unsave posts" 
+ON saved_posts FOR DELETE USING (auth.uid() = user_id);
+
+-- BẢNG DEVICES
+
+CREATE POLICY "Anyone can view devices" 
+ON devices FOR SELECT USING (true);
+
+CREATE POLICY "Only admins can modify devices" 
+ON devices FOR ALL 
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
+
+-- BẢNG WEBSITE_BANNERS (banners)
+
+ALTER TABLE website_banners ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view active banners" 
+ON website_banners FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Only admins can modify banners" 
+ON website_banners FOR ALL 
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
+
 -- GHI CHÚ QUAN TRỌNG:
 -- Chạy đoạn script này trên Supabase SQL Editor.
 -- Client-side whitelist đã được bổ sung nhưng RLS là lớp khiên bảo mật cuối cùng chặn hacker!

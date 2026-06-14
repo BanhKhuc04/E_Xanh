@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import ScrollToTop from '../components/common/ScrollToTop'
 import DevelopmentNotice from '../components/common/DevelopmentNotice'
 import AdminRoute from '../components/auth/AdminRoute'
+import UserRoute from '../components/auth/UserRoute'
 import AdminLayout from '../layouts/AdminLayout'
 import UserLayout from '../layouts/UserLayout'
 
@@ -140,7 +141,13 @@ const router = createBrowserRouter([
           },
           {
             path: 'bai-da-luu',
-            element: <Suspense fallback={<PageFallback />}><SavedPostsPage /></Suspense>,
+            element: <UserRoute />,
+            children: [
+              {
+                index: true,
+                element: <Suspense fallback={<PageFallback />}><SavedPostsPage /></Suspense>,
+              }
+            ]
           },
           {
             path: '*',

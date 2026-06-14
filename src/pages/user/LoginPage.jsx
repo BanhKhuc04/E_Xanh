@@ -11,7 +11,8 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function LoginPage() {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname, state } = location
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
 
   const [form, setForm] = useState({
@@ -19,7 +20,7 @@ function LoginPage() {
     password: '',
     remember: false,
   })
-  const [errorMessage, setErrorMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState(state?.message || '')
   const [successMessage, setSuccessMessage] = useState('')
   const [banners, setBanners] = useState([])
 
@@ -96,7 +97,9 @@ function LoginPage() {
     setIsSubmitting(false)
 
     window.setTimeout(() => {
-      if (role === 'admin' || role === 'moderator') {
+      if (state?.from) {
+        navigate(state.from)
+      } else if (role === 'admin' || role === 'moderator') {
         navigate('/admin')
       } else {
         navigate('/')

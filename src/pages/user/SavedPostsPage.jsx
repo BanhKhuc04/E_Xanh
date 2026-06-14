@@ -44,7 +44,6 @@ function SavedPostsPage() {
       const { getCurrentSession } = await import('../../services/authService')
       const session = await getCurrentSession()
       if (!session?.user) {
-        navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để xem bài đã lưu' } })
         return
       }
       const { getMySavedPosts } = await import('../../services/interactionService')
