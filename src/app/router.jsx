@@ -26,6 +26,7 @@ const ContactPage = lazy(() => import('../pages/user/ContactPage'))
 const ElectricityCheckPage = lazy(() => import('../pages/user/ElectricityCheckPage'))
 const ElectricityHistoryPage = lazy(() => import('../pages/user/ElectricityHistoryPage'))
 const SavedPostsPage = lazy(() => import('../pages/user/SavedPostsPage'))
+const SettingsUserPage = lazy(() => import('../pages/user/SettingsUserPage'))
 
 // ─── Lazy pages — Admin ───────────────────────────────────────────────────────
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
@@ -120,6 +121,16 @@ const router = createBrowserRouter([
             element: <Suspense fallback={<PageFallback />}><AccountPage /></Suspense>,
           },
           {
+            path: 'tai-khoan/cai-dat',
+            element: <UserRoute />,
+            children: [
+              {
+                index: true,
+                element: <Suspense fallback={<PageFallback />}><SettingsUserPage /></Suspense>,
+              }
+            ]
+          },
+          {
             path: 've-chung-toi',
             element: <Suspense fallback={<PageFallback />}><AboutPage /></Suspense>,
           },
@@ -137,7 +148,13 @@ const router = createBrowserRouter([
           },
           {
             path: 'lich-su-kiem-tra',
-            element: <Suspense fallback={<PageFallback />}><ElectricityHistoryPage /></Suspense>,
+            element: <UserRoute />,
+            children: [
+              {
+                index: true,
+                element: <Suspense fallback={<PageFallback />}><ElectricityHistoryPage /></Suspense>,
+              }
+            ]
           },
           {
             path: 'bai-da-luu',

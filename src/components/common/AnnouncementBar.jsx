@@ -24,6 +24,13 @@ function AnnouncementBar() {
     }
   }, [])
 
+  const visibleAnnouncement = useMemo(() => {
+    return announcements.find(
+      (announcement) =>
+        !localStorage.getItem(`${DISMISS_PREFIX}${announcement.id}`)
+    )
+  }, [announcements])
+
   useEffect(() => {
     if (loading || !visibleAnnouncement) {
       document.documentElement.style.setProperty('--announcement-offset', '0px')
@@ -38,13 +45,6 @@ function AnnouncementBar() {
       document.documentElement.style.setProperty('--announcement-offset', '0px')
     }
   }, [loading, visibleAnnouncement])
-
-  const visibleAnnouncement = useMemo(() => {
-    return announcements.find(
-      (announcement) =>
-        !localStorage.getItem(`${DISMISS_PREFIX}${announcement.id}`)
-    )
-  }, [announcements])
 
   if (loading || !visibleAnnouncement) {
     return null

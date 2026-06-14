@@ -29,10 +29,6 @@ function EditProfileModal({ user, onClose, onSuccess }) {
     }
   }, [previewUrl])
 
-  function handleManualAvatarChange(value) {
-    setAvatarUrl(value)
-    setPendingAvatarFile(null)
-  }
 
   function handleRemoveAvatar() {
     setPendingAvatarFile(null)
@@ -176,18 +172,7 @@ function EditProfileModal({ user, onClose, onSuccess }) {
                 />
               </div>
 
-              <div className="account-modal__field">
-                <label htmlFor="profile-avatar-url">URL ảnh đại diện (tuỳ chọn)</label>
-                <input
-                  id="profile-avatar-url"
-                  type="url"
-                  value={avatarUrl}
-                  onChange={(event) => handleManualAvatarChange(event.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  disabled={loading}
-                />
-                <small>Nếu muốn, bạn vẫn có thể dùng URL ảnh. Tuy nhiên tải file trực tiếp là cách chính.</small>
-              </div>
+
             </form>
           </div>
 

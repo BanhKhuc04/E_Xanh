@@ -109,6 +109,9 @@ async function login(page, email, password) {
   const clicked = await clickByAny(page, [/đăng nhập/i, /login/i, /sign in/i]);
   if (!clicked) await page.locator('button[type="submit"], input[type="submit"]').first().click();
   await page.waitForLoadState('networkidle').catch(() => {});
+  // Đợi cho đến khi URL chuyển khỏi trang /dang-nhap
+  await page.waitForURL(url => !url.pathname.includes('/dang-nhap'), { timeout: 10000 }).catch(() => {});
+  await page.waitForTimeout(1000);
 }
 
 async function scanClickableInventory(page) {

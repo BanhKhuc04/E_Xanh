@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import PostContentEditor from './PostContentEditor'
+import CustomSelect from '../common/CustomSelect'
 import '../../styles/create-post.css'
 
 function CreatePostForm({
@@ -120,13 +121,19 @@ function CreatePostForm({
               <span>Loại bài viết</span>
             </label>
           </div>
-          <select id="post-type" className={`post-form-control ${fieldErrors.type ? 'is-invalid' : ''}`} value={form.type} onChange={(event) => onChange('type', event.target.value)}>
-            <option value="">Chọn loại bài...</option>
-            <option value="tip">Mẹo tiết kiệm</option>
-            <option value="community">Chia sẻ cộng đồng</option>
-            <option value="qa">Hỏi đáp</option>
-            <option value="review">Review thiết bị</option>
-          </select>
+          <CustomSelect
+            id="post-type"
+            value={form.type}
+            onChange={(val) => onChange('type', val)}
+            error={Boolean(fieldErrors.type)}
+            placeholder="Chọn loại bài..."
+            options={[
+              { value: 'tip', label: 'Mẹo tiết kiệm' },
+              { value: 'community', label: 'Chia sẻ cộng đồng' },
+              { value: 'qa', label: 'Hỏi đáp' },
+              { value: 'review', label: 'Review thiết bị' },
+            ]}
+          />
           {fieldErrors.type ? <p className="post-form-group__error">{fieldErrors.type}</p> : null}
         </div>
 
@@ -136,16 +143,22 @@ function CreatePostForm({
               <span>Danh mục</span>
             </label>
           </div>
-          <select id="post-category" className={`post-form-control ${fieldErrors.category ? 'is-invalid' : ''}`} value={form.category} onChange={(event) => onChange('category', event.target.value)}>
-            <option value="">Chọn thiết bị/chủ đề...</option>
-            <option value="Điều hòa">Điều hòa</option>
-            <option value="Laptop">Laptop</option>
-            <option value="Đèn học">Đèn học</option>
-            <option value="Tủ lạnh">Tủ lạnh</option>
-            <option value="Thiết bị gia dụng">Thiết bị gia dụng</option>
-            <option value="Thói quen xanh">Thói quen xanh</option>
-            <option value="Phòng trọ">Phòng trọ</option>
-          </select>
+          <CustomSelect
+            id="post-category"
+            value={form.category}
+            onChange={(val) => onChange('category', val)}
+            error={Boolean(fieldErrors.category)}
+            placeholder="Chọn thiết bị/chủ đề..."
+            options={[
+              { value: 'Điều hòa', label: 'Điều hòa' },
+              { value: 'Laptop', label: 'Laptop' },
+              { value: 'Đèn học', label: 'Đèn học' },
+              { value: 'Tủ lạnh', label: 'Tủ lạnh' },
+              { value: 'Thiết bị gia dụng', label: 'Thiết bị gia dụng' },
+              { value: 'Thói quen xanh', label: 'Thói quen xanh' },
+              { value: 'Phòng trọ', label: 'Phòng trọ' },
+            ]}
+          />
           {fieldErrors.category ? <p className="post-form-group__error">{fieldErrors.category}</p> : null}
         </div>
       </div>

@@ -162,6 +162,13 @@ function UserNavbar() {
                     Tài khoản của tôi
                   </Link>
                   <Link
+                    to="/tai-khoan/cai-dat"
+                    className="user-navbar__dropdown-link"
+                    onClick={() => { setIsOpen(false); setIsMobileMenuOpen(false); }}
+                  >
+                    Cài đặt tài khoản
+                  </Link>
+                  <Link
                     to="/bai-da-luu"
                     className="user-navbar__dropdown-link"
                     onClick={() => { setIsOpen(false); setIsMobileMenuOpen(false); }}

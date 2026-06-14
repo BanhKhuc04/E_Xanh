@@ -1,27 +1,46 @@
-import { useState } from 'react'
-import {
-  overviewStats,
-  weeklyActivities,
-  contentTypes,
-  topDevices,
-  topSavedPosts,
-  activeUsers,
-  communityStats,
-  dataInsights,
-} from '../../data/adminStatistics'
+import { useState, useEffect } from 'react'
+import { getDashboardStats } from '../../services/adminStatsService'
 import AdminStatsOverview from '../../components/admin/statistics/AdminStatsOverview'
 import AdminTimeFilter from '../../components/admin/statistics/AdminTimeFilter'
-import AdminActivityChart from '../../components/admin/statistics/AdminActivityChart'
-import AdminContentTypeChart from '../../components/admin/statistics/AdminContentTypeChart'
-import AdminTopDevices from '../../components/admin/statistics/AdminTopDevices'
-import AdminTopSavedPosts from '../../components/admin/statistics/AdminTopSavedPosts'
-import AdminActiveUsers from '../../components/admin/statistics/AdminActiveUsers'
-import AdminCommunityStats from '../../components/admin/statistics/AdminCommunityStats'
-import AdminDataInsights from '../../components/admin/statistics/AdminDataInsights'
 import '../../styles/admin-statistics.css'
 
 function StatisticsPage() {
   const [timeFilter, setTimeFilter] = useState('30 ngày qua')
+  const [statsData, setStatsData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+    async function loadStats() {
+      const data = await getDashboardStats()
+      if (isMounted) {
+        setStatsData(data)
+        setIsLoading(false)
+      }
+    }
+    loadStats()
+    return () => { isMounted = false }
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="as-page page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <p style={{ fontSize: '1.2rem', color: '#666' }}>Đang tải dữ liệu phân tích...</p>
+      </div>
+    )
+  }
+
+  const formatValue = (val) => {
+    if (val === '-' || val === null || val === undefined) return 'Không có dữ liệu'
+    if (val === 0) return 'Chưa có dữ liệu'
+    return val
+  }
+
+  const realOverviewStats = [
+    { label: 'Tổng bài viết', value: formatValue(statsData?.totalPosts), change: '', changeLabel: '', icon: 'posts', accent: 'green' },
+    { label: 'Người dùng', value: formatValue(statsData?.totalUsers), change: '', changeLabel: '', icon: 'users', accent: 'blue' },
+    { label: 'Lượt lưu bài', value: formatValue(statsData?.totalSavedPosts), change: '', changeLabel: '', icon: 'comments', accent: 'orange' },
+  ]
 
   return (
     <div className="as-page page">
@@ -40,24 +59,12 @@ function StatisticsPage() {
 
       <AdminTimeFilter active={timeFilter} onChange={setTimeFilter} />
 
-      <AdminStatsOverview stats={overviewStats} />
+      <AdminStatsOverview stats={realOverviewStats} />
 
-      <div className="as-charts-row">
-        <AdminActivityChart data={weeklyActivities} />
-        <AdminContentTypeChart data={contentTypes} />
+      <div style={{ padding: '60px 24px', textAlign: 'center', background: 'rgba(255,255,255,0.8)', borderRadius: '24px', border: '1px dashed #ccc', marginTop: '24px' }}>
+        <h3 style={{ marginBottom: '8px' }}>Biểu đồ phân tích chi tiết đang được phát triển</h3>
+        <p style={{ color: '#666' }}>Tính năng thống kê dạng biểu đồ (hoạt động hàng tuần, thiết bị) sẽ sớm ra mắt với dữ liệu thực tế.</p>
       </div>
-
-      <div className="as-two-col">
-        <AdminTopDevices devices={topDevices} />
-        <AdminTopSavedPosts posts={topSavedPosts} />
-      </div>
-
-      <div className="as-two-col">
-        <AdminActiveUsers users={activeUsers} />
-        <AdminCommunityStats stats={communityStats} />
-      </div>
-
-      <AdminDataInsights insights={dataInsights} />
     </div>
   )
 }

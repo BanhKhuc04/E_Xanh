@@ -15,17 +15,22 @@ function PostComposerModal({
     },
   })
 
+  const handleClose = () => {
+    composer.handleSaveDraft()
+    onClose()
+  }
+
   if (!isOpen) return null
 
   return (
-    <div className="ui-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-composer-title" onClick={onClose}>
+    <div className="ui-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="post-composer-title" onClick={handleClose}>
       <div className="ui-modal ui-modal--composer" onClick={(event) => event.stopPropagation()}>
         <div className="ui-modal__header">
           <div>
             <h2 id="post-composer-title">Chia sẻ với cộng đồng</h2>
             <p>Đăng bài nhanh mà không rời khỏi trang bạn đang xem.</p>
           </div>
-          <button type="button" className="ui-modal__close" onClick={onClose} aria-label="Đóng trình soạn bài">
+          <button type="button" className="ui-modal__close" onClick={handleClose} aria-label="Đóng trình soạn bài">
             ✕
           </button>
         </div>

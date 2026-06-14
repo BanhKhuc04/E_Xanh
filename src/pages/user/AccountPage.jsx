@@ -7,13 +7,7 @@ import MyPostsList from '../../components/account/MyPostsList'
 import RecentSavedPosts from '../../components/account/RecentSavedPosts'
 import RecentComments from '../../components/account/RecentComments'
 import AccountInfoCard from '../../components/account/AccountInfoCard'
-import AccountSettingsCard from '../../components/account/AccountSettingsCard'
-import RecentElectricityHistoryCard from '../../components/account/RecentElectricityHistoryCard'
-import EditProfileModal from '../../components/account/EditProfileModal'
-import ChangePasswordModal from '../../components/account/ChangePasswordModal'
 import { savedPosts } from '../../data/posts'
-import { formatCurrency, formatHistoryDate, formatKwh } from '../../data/electricity'
-import { getElectricityHistories } from '../../utils/electricityStorage'
 import {
   getCurrentSession,
   getCurrentUserProfile,
@@ -84,16 +78,11 @@ function getAvatar(name, email, avatarUrl) {
 
 function AccountPage() {
   const navigate = useNavigate()
-  const [recentHistory, setRecentHistory] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
-  
   const [myPostsData, setMyPostsData] = useState([])
   const [savedPostsData, setSavedPostsData] = useState([])
   const [recentCommentsData, setRecentCommentsData] = useState([])
-  const [totalElectricityChecks, setTotalElectricityChecks] = useState(0)
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
@@ -131,11 +120,6 @@ function AccountPage() {
       loadUser(session)
       
       if (session?.user) {
-        if (isMounted) {
-          const histories = getElectricityHistories(session.user.id)
-          setTotalElectricityChecks(histories.length)
-          setRecentHistory(histories.slice(0, 3))
-        }
 
         const { getMyPosts } = await import('../../services/postService')
         const { getMySavedPosts } = await import('../../services/interactionService')
@@ -152,10 +136,6 @@ function AccountPage() {
           if (savedRes.data) setSavedPostsData(savedRes.data)
           if (commentsRes.data) setRecentCommentsData(commentsRes.data)
         }
-      } else if (isMounted) {
-        const histories = getElectricityHistories('guest')
-        setTotalElectricityChecks(histories.length)
-        setRecentHistory(histories.slice(0, 3))
       }
     }
 
@@ -238,14 +218,11 @@ function AccountPage() {
         <ProfileHeader 
           user={currentUser} 
           onLogout={handleLogout} 
-          onEditClick={() => setIsEditModalOpen(true)}
-          onPasswordClick={() => setIsPasswordModalOpen(true)}
         />
         <ProfileStats stats={[
           { label: 'Bài đã đăng', value: myPostsData.length },
           { label: 'Bài đã lưu', value: savedPostsData.length },
           { label: 'Bình luận', value: recentCommentsData.length },
-          { label: 'Lần kiểm tra điện', value: totalElectricityChecks },
         ]} />
 
         <div className="account-layout">
@@ -257,14 +234,6 @@ function AccountPage() {
 
           <div className="account-layout__side">
             <AccountInfoCard user={currentUser} />
-            <RecentElectricityHistoryCard
-              histories={recentHistory}
-              formatCurrency={formatCurrency}
-              formatHistoryDate={formatHistoryDate}
-              formatKwh={formatKwh}
-            />
-            <AccountSettingsCard />
-
             <section className="account-side-card account-side-card--tips">
               <h2>Gợi ý dành cho bạn</h2>
               <p>
@@ -276,26 +245,6 @@ function AccountPage() {
             </section>
           </div>
         </div>
-
-        {isEditModalOpen && (
-          <EditProfileModal 
-            user={currentUser} 
-            onClose={() => setIsEditModalOpen(false)} 
-            onSuccess={() => {
-              setIsEditModalOpen(false)
-            }} 
-          />
-        )}
-
-        {isPasswordModalOpen && (
-          <ChangePasswordModal 
-            onClose={() => setIsPasswordModalOpen(false)} 
-            onSuccess={() => {
-              setIsPasswordModalOpen(false)
-              alert('Đổi mật khẩu thành công!')
-            }} 
-          />
-        )}
       </div>
     </>
   )

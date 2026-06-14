@@ -1,0 +1,38 @@
+[
+  {
+    "text": "×",
+    "beforeURL": "http://localhost:5173/meo-tiet-kiem",
+    "afterURL": "http://localhost:5173/meo-tiet-kiem",
+    "changed": true
+  },
+  {
+    "text": "Đăng bài",
+    "beforeURL": "http://localhost:5173/meo-tiet-kiem",
+    "afterURL": "http://localhost:5173/dang-nhap",
+    "changed": true
+  },
+  {
+    "text": "Go to slide 1",
+    "beforeURL": "http://localhost:5173/dang-nhap",
+    "afterURL": "http://localhost:5173/dang-nhap",
+    "changed": false
+  },
+  {
+    "text": "Go to slide 2",
+    "beforeURL": "http://localhost:5173/dang-nhap",
+    "afterURL": "http://localhost:5173/dang-nhap",
+    "changed": false
+  },
+  {
+    "text": "Go to slide 3",
+    "beforeURL": "http://localhost:5173/dang-nhap",
+    "afterURL": "http://localhost:5173/dang-nhap",
+    "changed": false
+  },
+  {
+    "text": "Đăng nhập",
+    "beforeURL": "http://localhost:5173/dang-nhap",
+    "afterURL": "http://localhost:5173/dang-nhap",
+    "changed": true
+  }
+]

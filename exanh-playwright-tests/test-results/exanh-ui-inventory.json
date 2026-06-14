@@ -1,0 +1,3512 @@
+[
+  {
+    "route": "/",
+    "name": "Trang chủ",
+    "url": "http://localhost:5173/",
+    "title": "E-XANH — Sử dụng điện thông minh, tiết kiệm điện",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nNền tảng sống xanh cho sinh viên\nDùng điện thông minh,\nsống ",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link is-active"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Khám phá mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--secondary"
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Go to slide 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Go to slide 2",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "button",
+        "text": "Go to slide 3",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "Khám phá",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 17,
+        "tag": "a",
+        "text": "Khám phá",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Khám phá",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "Ước tính ngay",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "btn electricity-preview__button"
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Xem tất cả",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": "home-section__link"
+      },
+      {
+        "index": 21,
+        "tag": "button",
+        "text": "Tính năng đang phát triển",
+        "href": null,
+        "disabled": true,
+        "visible": true,
+        "className": "fp-card__save-btn"
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Xem cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": "btn community-preview__button"
+      },
+      {
+        "index": 23,
+        "tag": "button",
+        "text": "Đăng bài ngay",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--light"
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Tham gia cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary home-final-cta__button"
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      },
+      {
+        "index": 27,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 28,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 29,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 30,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 31,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 32,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/meo-tiet-kiem",
+    "name": "Mẹo tiết kiệm",
+    "url": "http://localhost:5173/meo-tiet-kiem",
+    "title": "Mẹo tiết kiệm điện - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nThư viện mẹo tiết kiệm điện\nMẹo tiết kiệm điện\n\nKhám phá các",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link is-active"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "button",
+        "text": "Tất cả",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-filter-chip is-active"
+      },
+      {
+        "index": 12,
+        "tag": "button",
+        "text": "Điều hòa",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-filter-chip"
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Laptop",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-filter-chip"
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Tủ lạnh",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-filter-chip"
+      },
+      {
+        "index": 15,
+        "tag": "button",
+        "text": "Thiết bị điện",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-filter-chip"
+      },
+      {
+        "index": 16,
+        "tag": "button",
+        "text": "Thói quen",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-filter-chip"
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Lưu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "post-card-ui__save-button"
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Đọc tiếp",
+        "href": "/meo-tiet-kiem/cach-de-tiet-kiem-nguoi-yeu-bcrm",
+        "disabled": false,
+        "visible": true,
+        "className": "post-card-ui__link"
+      },
+      {
+        "index": 19,
+        "tag": "button",
+        "text": "Điều hòa",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 20,
+        "tag": "button",
+        "text": "Tủ lạnh",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 21,
+        "tag": "button",
+        "text": "Máy giặt",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 22,
+        "tag": "button",
+        "text": "Thiết bị gia dụng",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 23,
+        "tag": "button",
+        "text": "Laptop",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 24,
+        "tag": "button",
+        "text": "Thói quen",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 25,
+        "tag": "button",
+        "text": "Mùa nắng nóng",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "tips-topic-chip"
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "TL\nMẹo rã đông tủ lạnh đúng cách không tốn điện\n\n452 lượt lưu",
+        "href": "/meo-tiet-kiem/saved-1",
+        "disabled": false,
+        "visible": true,
+        "className": "tips-saved-item"
+      },
+      {
+        "index": 27,
+        "tag": "a",
+        "text": "MN\nSử dụng máy nước nóng lạnh sao cho hiệu quả?\n\n389 lượt lưu",
+        "href": "/meo-tiet-kiem/saved-2",
+        "disabled": false,
+        "visible": true,
+        "className": "tips-saved-item"
+      },
+      {
+        "index": 28,
+        "tag": "a",
+        "text": "MG\nLượng quần áo tối ưu cho mỗi mẻ giặt\n\n315 lượt lưu",
+        "href": "/meo-tiet-kiem/saved-3",
+        "disabled": false,
+        "visible": true,
+        "className": "tips-saved-item"
+      },
+      {
+        "index": 29,
+        "tag": "a",
+        "text": "Đăng bài chia sẻ",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--light"
+      },
+      {
+        "index": 30,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 31,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 32,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      },
+      {
+        "index": 33,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 34,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 35,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 36,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 37,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/cong-dong",
+    "name": "Cộng đồng",
+    "url": "http://localhost:5173/cong-dong",
+    "title": "Cộng đồng — E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nCộng đồng sống xanh\nCùng nhau chia sẻ mẹo tiết kiệm điện\n\nNơ",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link is-active"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "button",
+        "text": "Viết bài chia sẻ",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "Khám phá bài viết",
+        "href": "#cong-dong-feed",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--secondary"
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Bạn muốn chia sẻ mẹo tiết kiệm điện nào?",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-composer__prompt"
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Viết bài chia sẻ",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary community-composer__button"
+      },
+      {
+        "index": 15,
+        "tag": "button",
+        "text": "Ảnh",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "button",
+        "text": "Chủ đề",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Mẹo nhanh",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "button",
+        "text": "Tất cả",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-filter-bar__chip is-active"
+      },
+      {
+        "index": 19,
+        "tag": "button",
+        "text": "Mới nhất",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-filter-bar__chip "
+      },
+      {
+        "index": 20,
+        "tag": "button",
+        "text": "Nhiều tương tác",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-filter-bar__chip "
+      },
+      {
+        "index": 21,
+        "tag": "button",
+        "text": "Hỏi đáp",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-filter-bar__chip "
+      },
+      {
+        "index": 22,
+        "tag": "button",
+        "text": "Kinh nghiệm",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-filter-bar__chip "
+      },
+      {
+        "index": 23,
+        "tag": "button",
+        "text": "Đã lưu nhiều",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "community-filter-bar__chip "
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Gợi ý 5 thói quen giúp giảm rác thải nhựa khi đi siêu thị\n\nMang theo túi vải, hạ",
+        "href": "/cong-dong/3b6ccb24-1d2a-46c2-84f0-efb655f57e80",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 25,
+        "tag": "button",
+        "text": "Thích 56",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "button",
+        "text": "Bình luận 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "comment-toggle-btn "
+      },
+      {
+        "index": 27,
+        "tag": "button",
+        "text": "Lưu bài 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 28,
+        "tag": "button",
+        "text": "Chia sẻ 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 29,
+        "tag": "a",
+        "text": "MMeo tiet kiem dien khi su dung tu lanh\n\nDay la mot bai viet chia se ve cach su ",
+        "href": "/cong-dong/5a6ac10c-740f-47c1-8f75-aecee1b0e01c",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 30,
+        "tag": "button",
+        "text": "Thích 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 31,
+        "tag": "button",
+        "text": "Bình luận 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "comment-toggle-btn "
+      },
+      {
+        "index": 32,
+        "tag": "button",
+        "text": "Lưu bài 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 33,
+        "tag": "button",
+        "text": "Chia sẻ 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 34,
+        "tag": "a",
+        "text": "hehihihihihihihihehihihihihihihihehihihihihihihi\n\nhehihihihihihihihehihihihihihi",
+        "href": "/cong-dong/8682dc7c-55a6-4996-a716-3eb8c85c4547",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 35,
+        "tag": "a",
+        "text": "",
+        "href": "/cong-dong/8682dc7c-55a6-4996-a716-3eb8c85c4547",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 36,
+        "tag": "button",
+        "text": "Thích 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 37,
+        "tag": "button",
+        "text": "Bình luận 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "comment-toggle-btn "
+      },
+      {
+        "index": 38,
+        "tag": "button",
+        "text": "Lưu bài 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 39,
+        "tag": "button",
+        "text": "Chia sẻ 0",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 40,
+        "tag": "button",
+        "text": "Xem thêm bài viết",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 41,
+        "tag": "button",
+        "text": "Đăng bài ngay",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--light"
+      },
+      {
+        "index": 42,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 43,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 44,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 45,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      },
+      {
+        "index": 46,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 47,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 48,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 49,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/dang-bai",
+    "name": "Đăng bài",
+    "url": "http://localhost:5173/dang-nhap",
+    "title": "Đăng nhập - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nCộng đồng sống xanh\nTham gia E-XANH\nđể sống xanh hơn\nmỗi ngà",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--auth "
+      },
+      {
+        "index": 12,
+        "tag": "button",
+        "text": "Go to slide 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Go to slide 2",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Go to slide 3",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Đăng ký",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "button",
+        "text": "Quên mật khẩu?",
+        "href": null,
+        "disabled": true,
+        "visible": true,
+        "className": "auth-form__link-button"
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Đăng nhập",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary auth-form__submit"
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Tạo tài khoản ngay",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/bai-da-luu",
+    "name": "Bài đã lưu",
+    "url": "http://localhost:5173/dang-nhap",
+    "title": "Đăng nhập - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nCộng đồng sống xanh\nTham gia E-XANH\nđể sống xanh hơn\nmỗi ngà",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--auth "
+      },
+      {
+        "index": 12,
+        "tag": "button",
+        "text": "Go to slide 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Go to slide 2",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Go to slide 3",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Đăng ký",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "button",
+        "text": "Quên mật khẩu?",
+        "href": null,
+        "disabled": true,
+        "visible": true,
+        "className": "auth-form__link-button"
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Đăng nhập",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary auth-form__submit"
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Tạo tài khoản ngay",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/kiem-tra-tien-dien",
+    "name": "Kiểm tra tiền điện",
+    "url": "http://localhost:5173/kiem-tra-tien-dien",
+    "title": "Kiểm tra tiền điện — E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nCông cụ thông minh\nKiểm tra tiền điện hằng tháng\n\nNhập thiết",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link is-active"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Bắt đầu tính",
+        "href": "#cong-cu-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "Xem cách hoạt động",
+        "href": "#cach-tinh",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--secondary"
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Thêm thiết bị",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "electricity-form__add"
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Xóa",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "button",
+        "text": "Xóa",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "button",
+        "text": "Tính tiền điện",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary electricity-tool-layout__primary"
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Làm mới",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn electricity-tool-layout__reset"
+      },
+      {
+        "index": 18,
+        "tag": "button",
+        "text": "Lưu lịch sử",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn electricity-tool-layout__save-button"
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "Xem lịch sử đầy đủ",
+        "href": "/lich-su-kiem-tra",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 27,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/dang-nhap",
+    "name": "Đăng nhập",
+    "url": "http://localhost:5173/dang-nhap",
+    "title": "Đăng nhập - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nCộng đồng sống xanh\nTham gia E-XANH\nđể sống xanh hơn\nmỗi ngà",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--auth "
+      },
+      {
+        "index": 12,
+        "tag": "button",
+        "text": "Go to slide 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Go to slide 2",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Go to slide 3",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Đăng ký",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "button",
+        "text": "Quên mật khẩu?",
+        "href": null,
+        "disabled": true,
+        "visible": true,
+        "className": "auth-form__link-button"
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Đăng nhập",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary auth-form__submit"
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Tạo tài khoản ngay",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/dang-ky",
+    "name": "Đăng ký",
+    "url": "http://localhost:5173/dang-ky",
+    "title": "Đăng ký - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nCộng đồng sống xanh\nTham gia E-XANH\nđể sống xanh hơn\nmỗi ngà",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--auth "
+      },
+      {
+        "index": 12,
+        "tag": "button",
+        "text": "Go to slide 1",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Go to slide 2",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Go to slide 3",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "điều khoản sử dụng",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": "auth-form__terms-link"
+      },
+      {
+        "index": 17,
+        "tag": "button",
+        "text": "Tạo tài khoản",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary auth-form__submit"
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/tai-khoan",
+    "name": "Tài khoản",
+    "url": "http://localhost:5173/tai-khoan",
+    "title": "E-XANH — Sử dụng điện thông minh, tiết kiệm điện",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nBạn cần đăng nhập để xem tài khoản.\n\nĐăng nhập để xem bài đã",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "Tạo tài khoản",
+        "href": "/dang-ky",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--secondary"
+      },
+      {
+        "index": 13,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 14,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 17,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/lich-su-kiem-tra",
+    "name": "Lịch sử điện",
+    "url": "http://localhost:5173/lich-su-kiem-tra",
+    "title": "Lịch sử kiểm tra tiền điện - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nTrang chủ\n>\nLịch sử kiểm tra\nLịch sử kiểm tra tiền điện\n\nXem",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "Kiểm tra mới",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 13,
+        "tag": "button",
+        "text": "Lọc lịch sử",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 14,
+        "tag": "button",
+        "text": "Làm mới",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn electricity-history-filters__reset"
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện ngay",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 17,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/ve-chung-toi",
+    "name": "Về chúng tôi",
+    "url": "http://localhost:5173/ve-chung-toi",
+    "title": "Về chúng tôi — E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nTrang chủ\n>\nVề chúng tôi\nVề E-XANH\nE-XANH là gì?\n\nE-XANH là ",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "Khám phá mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 13,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--large "
+      },
+      {
+        "index": 14,
+        "tag": "a",
+        "text": "Khám phá mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện ngay",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--secondary"
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 17,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/dieu-khoan",
+    "name": "Điều khoản",
+    "url": "http://localhost:5173/dieu-khoan",
+    "title": "Điều khoản sử dụng - E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nTrang chủ\n>\nĐiều khoản\nĐiều khoản sử dụng E-XANH\n\nVui lòng đ",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 12,
+        "tag": "a",
+        "text": "1. Chấp nhận điều khoản",
+        "href": "#term-1",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 13,
+        "tag": "a",
+        "text": "2. Tài khoản người dùng",
+        "href": "#term-2",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 14,
+        "tag": "a",
+        "text": "3. Nội dung do người dùng đăng",
+        "href": "#term-3",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "4. Quy tắc cộng đồng",
+        "href": "#term-4",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "5. Dữ liệu và quyền riêng tư",
+        "href": "#term-5",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 17,
+        "tag": "a",
+        "text": "6. Giới hạn trách nhiệm",
+        "href": "#term-6",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "7. Thay đổi điều khoản",
+        "href": "#term-7",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "8. Liên hệ hỗ trợ",
+        "href": "#term-8",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 23,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 24,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 25,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 26,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      },
+      {
+        "index": 27,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      }
+    ]
+  },
+  {
+    "route": "/lien-he",
+    "name": "Liên hệ",
+    "url": "http://localhost:5173/lien-he",
+    "title": "Liên hệ — E-XANH",
+    "textSample": "×\nE-XANH đang trong quá trình phát triển\n\nWebsite có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.\n\nPhiên bản hiện tại:\nBeta v1.1\n\nCập nhật gần nhất:\n11/06/2026\n\nDự kiến cập nhật tiếp theo:\nSắp cập nhật\n\nBáo cáo lỗi\nTrang chủ\n>\nLiên hệ\nLiên hệ với E-XANH\n\nBạn có câu hỏi, góp ",
+    "clickables": [
+      {
+        "index": 0,
+        "tag": "button",
+        "text": "×",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-notice-close"
+      },
+      {
+        "index": 1,
+        "tag": "button",
+        "text": "Báo cáo lỗi",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "development-report-button"
+      },
+      {
+        "index": 2,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--medium "
+      },
+      {
+        "index": 3,
+        "tag": "button",
+        "text": "Mở menu",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "user-navbar__mobile-toggle"
+      },
+      {
+        "index": 4,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 5,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 6,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 7,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 8,
+        "tag": "a",
+        "text": "Bài đã lưu",
+        "href": "/bai-da-luu",
+        "disabled": false,
+        "visible": false,
+        "className": "user-navbar__link"
+      },
+      {
+        "index": 9,
+        "tag": "a",
+        "text": "Đăng nhập",
+        "href": "/dang-nhap",
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--ghost user-navbar__login"
+      },
+      {
+        "index": 10,
+        "tag": "button",
+        "text": "Đăng bài",
+        "href": null,
+        "disabled": false,
+        "visible": false,
+        "className": "btn btn--primary user-navbar__publish"
+      },
+      {
+        "index": 11,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 12,
+        "tag": "button",
+        "text": "Gửi tin nhắn",
+        "href": null,
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary static-form__submit"
+      },
+      {
+        "index": 13,
+        "tag": "a",
+        "text": "Tham gia cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--secondary"
+      },
+      {
+        "index": 14,
+        "tag": "a",
+        "text": "Đăng bài chia sẻ",
+        "href": "/dang-bai",
+        "disabled": false,
+        "visible": true,
+        "className": "btn btn--primary"
+      },
+      {
+        "index": 15,
+        "tag": "a",
+        "text": "E-XANH về trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": "brand-logo brand-logo--footer "
+      },
+      {
+        "index": 16,
+        "tag": "a",
+        "text": "Trang chủ",
+        "href": "/",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 17,
+        "tag": "a",
+        "text": "Mẹo tiết kiệm",
+        "href": "/meo-tiet-kiem",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 18,
+        "tag": "a",
+        "text": "Cộng đồng",
+        "href": "/cong-dong",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 19,
+        "tag": "a",
+        "text": "Kiểm tra tiền điện",
+        "href": "/kiem-tra-tien-dien",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 20,
+        "tag": "a",
+        "text": "Về chúng tôi",
+        "href": "/ve-chung-toi",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 21,
+        "tag": "a",
+        "text": "Điều khoản",
+        "href": "/dieu-khoan",
+        "disabled": false,
+        "visible": true,
+        "className": ""
+      },
+      {
+        "index": 22,
+        "tag": "a",
+        "text": "Liên hệ",
+        "href": "/lien-he",
+        "disabled": false,
+        "visible": true,
+        "className": "active"
+      }
+    ]
+  }
+]

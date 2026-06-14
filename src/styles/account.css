@@ -709,3 +709,32 @@
     width: 100%;
   }
 }
+
+.account-tabs-nav {
+  display: flex;
+  gap: 12px;
+  border-bottom: 2px solid rgba(79, 132, 40, 0.1);
+  margin-bottom: 24px;
+}
+
+.account-tabs-nav__item {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.account-tabs-nav__item:hover {
+  color: #336a29;
+}
+
+.account-tabs-nav__item.is-active {
+  color: #336a29;
+  border-bottom-color: #4f8428;
+}

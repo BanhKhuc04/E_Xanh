@@ -243,6 +243,42 @@ export function usePostComposerForm({
     }
   }, [form, isSubmitting])
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isSubmitting) return
+      
+      const hasDraftContent = [
+        form.title,
+        form.description,
+        form.content,
+        form.tags,
+      ].some((item) => String(item || '').trim().length > 0)
+      
+      if (hasDraftContent) {
+        try {
+          localStorage.setItem(
+            DRAFT_STORAGE_KEY,
+            JSON.stringify({
+              title: form.title,
+              type: form.type,
+              category: form.category,
+              description: form.description,
+              content: form.content,
+              tags: form.tags,
+            })
+          )
+        } catch {
+          // ignore error on unload
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [form, isSubmitting])
+
   function resetForm(nextType = defaultType, options = {}) {
     const { preserveFeedback = false } = options
 

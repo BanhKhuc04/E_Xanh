@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import MarkdownContent from '../common/MarkdownContent'
 
 function PostContentEditor({
@@ -15,6 +15,14 @@ function PostContentEditor({
   const textareaRef = useRef(null)
   const imageInputRef = useRef(null)
   const [activeTab, setActiveTab] = useState('write')
+
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (textarea && activeTab === 'write') {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${Math.max(textarea.scrollHeight, 320)}px`
+    }
+  }, [value, activeTab])
 
   function updateValue(nextValue) {
     onChange(nextValue.slice(0, maxLength))
@@ -97,7 +105,7 @@ function PostContentEditor({
 
   return (
     <div className="post-editor">
-      <div className="post-editor__toolbar">
+      <div className="post-editor__toolbar post-editor__toolbar--sticky">
         <div className="post-editor__tools">
           {toolbarActions.map((action) => (
             <button key={action.label} type="button" className="post-editor__tool" onClick={action.onClick}>
@@ -148,10 +156,10 @@ function PostContentEditor({
           value={value}
           onChange={(event) => updateValue(event.target.value)}
           placeholder="Viết nội dung chia sẻ của bạn tại đây. Bạn có thể dùng tiêu đề, danh sách, trích dẫn, link và ảnh minh họa."
-          rows="14"
           maxLength={maxLength}
           aria-invalid={Boolean(error)}
           aria-describedby={describedBy}
+          style={{ overflow: 'hidden' }}
         />
       ) : (
         <div className="post-editor__preview">

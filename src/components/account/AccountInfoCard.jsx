@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function AccountInfoCard({ user }) {
   return (
     <section className="account-side-card">
@@ -8,31 +10,21 @@ function AccountInfoCard({ user }) {
           <span>Họ và tên</span>
           <strong>{user.name}</strong>
         </div>
-        <div>
-          <span>Email</span>
-          <strong>{user.email}</strong>
-        </div>
-        <div>
-          <span>Số điện thoại</span>
-          <strong>Chưa cập nhật</strong>
-        </div>
+        {user.bio ? (
+          <div style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+            <span>Tiểu sử</span>
+            <strong style={{ lineHeight: 1.5 }}>{user.bio}</strong>
+          </div>
+        ) : null}
         <div>
           <span>Khu vực</span>
-          <strong>Hà Nội</strong>
-        </div>
-        <div>
-          <span>Vai trò</span>
-          <strong>Người dùng</strong>
-        </div>
-        <div>
-          <span>Trạng thái</span>
-          <strong>Đang hoạt động</strong>
+          <strong>Chưa cập nhật</strong>
         </div>
       </div>
 
-      <button type="button" className="btn account-side-card__button">
+      <Link to="/tai-khoan/cai-dat" className="btn account-side-card__button" style={{ display: 'block', textAlign: 'center', marginTop: '16px' }}>
         Cập nhật thông tin
-      </button>
+      </Link>
     </section>
   )
 }
