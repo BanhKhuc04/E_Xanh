@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import PostImage from '../common/PostImage'
+import { resolvePostDetailRoute, resolvePostImageSource } from '../../utils/postMedia'
 
 function getAuthorBadge(author) {
   return author
@@ -12,11 +13,14 @@ function getAuthorBadge(author) {
 }
 
 function SavedPostCard({ post, onUnsave }) {
+  const detailRoute = resolvePostDetailRoute(post)
+  const imageSource = resolvePostImageSource(post)
+
   return (
     <article className="saved-post-card">
       <div className="saved-post-card__media">
-        <PostImage src={post.image} alt={`Ảnh bài viết ${post.title}`} variant="card" />
-        <span className="saved-post-card__tag">{post.savedCategoryLabel}</span>
+        <PostImage src={imageSource} alt={`Ảnh bài viết ${post.title}`} variant="card" />
+        <span className="saved-post-card__tag">{post.savedCategoryLabel || post.category}</span>
         <button 
           type="button" 
           className="saved-post-card__bookmark" 
@@ -46,7 +50,7 @@ function SavedPostCard({ post, onUnsave }) {
           >
             Bỏ lưu
           </button>
-          <Link to={`/meo-tiet-kiem/${post.slug}`} className="saved-post-card__read">
+          <Link to={detailRoute} className="saved-post-card__read">
             Đọc lại
           </Link>
         </div>

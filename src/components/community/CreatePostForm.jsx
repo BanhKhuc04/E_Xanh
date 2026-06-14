@@ -1,20 +1,42 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import PostContentEditor from './PostContentEditor'
+import '../../styles/create-post.css'
 
 function CreatePostForm({
   form,
   errorMessage,
   successMessage,
   infoMessage,
+  fieldErrors = {},
   onChange,
   onCoverChange,
   onSaveDraft,
+  onClearDraft,
   onPreview,
   onSubmit,
   onRemoveCover,
+  onInsertInlineImage,
   isSubmitting,
+  isUploadingInlineImage = false,
+  draftMeta = '',
+  cooldownRemaining = 0,
+  limits = {
+    titleMax: 90,
+    descriptionMax: 180,
+    contentMin: 80,
+    contentMax: 4000,
+    tagsMax: 5,
+    contentImageMax: 3,
+  },
   compact = false,
+  showActions = true,
 }) {
   const [isDragging, setIsDragging] = useState(false)
+  const coverInputRef = useRef(null)
+  const tagCount = form.tags
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean).length
 
   function handleDragOver(e) {
     e.preventDefault()
@@ -34,8 +56,20 @@ function CreatePostForm({
     }
   }
 
+  function handleOpenCoverPicker() {
+    if (isSubmitting) return
+    coverInputRef.current?.click()
+  }
+
+  function handleUploadBoxKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleOpenCoverPicker()
+    }
+  }
+
   return (
-    <div className={`create-post-form${compact ? ' create-post-form--compact' : ''}`}>
+    <div className={`create-post-form post-modal-form${compact ? ' create-post-form--compact' : ''}`}>
       <div className="create-post-form__messages">
         {errorMessage ? <div className="create-post-form__message create-post-form__message--error">{errorMessage}</div> : null}
         {successMessage ? (
@@ -44,31 +78,65 @@ function CreatePostForm({
         {infoMessage ? <div className="create-post-form__message create-post-form__message--info">{infoMessage}</div> : null}
       </div>
 
-      <label className="create-post-form__field">
-        <span>Tiêu đề bài viết</span>
+      <div className="create-post-form__utility">
+        <span className="create-post-form__draft-meta">{draftMeta || 'Nháp sẽ tự động lưu sau vài giây.'}</span>
+        {onClearDraft ? (
+          <button
+            type="button"
+            className="create-post-form__clear-draft"
+            onClick={onClearDraft}
+            disabled={isSubmitting}
+          >
+            Xóa nháp
+          </button>
+        ) : null}
+      </div>
+
+      <div className="create-post-form__field post-form-group">
+        <div className="post-form-group__header">
+          <label htmlFor="post-title">
+            <span>Tiêu đề bài viết</span>
+          </label>
+          <span className="post-form-group__counter">{form.title.length}/{limits.titleMax}</span>
+        </div>
         <input
+          id="post-title"
+          className={`post-form-control ${fieldErrors.title ? 'is-invalid' : ''}`}
           type="text"
           value={form.title}
           onChange={(event) => onChange('title', event.target.value)}
           placeholder="Ví dụ: 5 cách dùng điều hòa tiết kiệm điện mùa nóng"
+          maxLength={limits.titleMax}
+          aria-invalid={Boolean(fieldErrors.title)}
+          aria-describedby={fieldErrors.title ? 'post-title-error' : undefined}
         />
-      </label>
+        {fieldErrors.title ? <p id="post-title-error" className="post-form-group__error">{fieldErrors.title}</p> : null}
+      </div>
 
-      <div className="create-post-form__row">
-        <label className="create-post-form__field">
-          <span>Loại bài viết</span>
-          <select value={form.type} onChange={(event) => onChange('type', event.target.value)}>
+      <div className="create-post-form__row post-form-row">
+        <div className="create-post-form__field post-form-group">
+          <div className="post-form-group__header">
+            <label htmlFor="post-type">
+              <span>Loại bài viết</span>
+            </label>
+          </div>
+          <select id="post-type" className={`post-form-control ${fieldErrors.type ? 'is-invalid' : ''}`} value={form.type} onChange={(event) => onChange('type', event.target.value)}>
             <option value="">Chọn loại bài...</option>
             <option value="tip">Mẹo tiết kiệm</option>
             <option value="community">Chia sẻ cộng đồng</option>
             <option value="qa">Hỏi đáp</option>
             <option value="review">Review thiết bị</option>
           </select>
-        </label>
+          {fieldErrors.type ? <p className="post-form-group__error">{fieldErrors.type}</p> : null}
+        </div>
 
-        <label className="create-post-form__field">
-          <span>Danh mục</span>
-          <select value={form.category} onChange={(event) => onChange('category', event.target.value)}>
+        <div className="create-post-form__field post-form-group">
+          <div className="post-form-group__header">
+            <label htmlFor="post-category">
+              <span>Danh mục</span>
+            </label>
+          </div>
+          <select id="post-category" className={`post-form-control ${fieldErrors.category ? 'is-invalid' : ''}`} value={form.category} onChange={(event) => onChange('category', event.target.value)}>
             <option value="">Chọn thiết bị/chủ đề...</option>
             <option value="Điều hòa">Điều hòa</option>
             <option value="Laptop">Laptop</option>
@@ -78,30 +146,53 @@ function CreatePostForm({
             <option value="Thói quen xanh">Thói quen xanh</option>
             <option value="Phòng trọ">Phòng trọ</option>
           </select>
-        </label>
+          {fieldErrors.category ? <p className="post-form-group__error">{fieldErrors.category}</p> : null}
+        </div>
       </div>
 
-      <label className="create-post-form__field">
-        <span>Mô tả ngắn</span>
+      <div className="create-post-form__field post-form-group">
+        <div className="post-form-group__header">
+          <label htmlFor="post-description">
+            <span>Mô tả ngắn</span>
+          </label>
+          <span className="post-form-group__counter">{form.description.length}/{limits.descriptionMax}</span>
+        </div>
         <textarea
+          id="post-description"
+          className={`post-form-control ${fieldErrors.description ? 'is-invalid' : ''}`}
           rows="3"
           value={form.description}
           onChange={(event) => onChange('description', event.target.value)}
           placeholder="Tóm tắt nội dung bài viết trong 1–2 câu..."
+          maxLength={limits.descriptionMax}
+          aria-invalid={Boolean(fieldErrors.description)}
+          aria-describedby={fieldErrors.description ? 'post-description-error' : undefined}
         />
-      </label>
+        {fieldErrors.description ? <p id="post-description-error" className="post-form-group__error">{fieldErrors.description}</p> : null}
+      </div>
 
-      <label 
-        className="create-post-form__field"
+      <div
+        className="create-post-form__field post-form-group"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <span>Ảnh bìa</span>
-        <input data-testid="post-image-input" className="create-post-form__file-input" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={onCoverChange} />
+        <div className="post-form-group__header">
+          <label htmlFor="post-cover">
+            <span>Ảnh bìa</span>
+          </label>
+          <span className="post-form-group__hint">JPG, PNG, WEBP, tối đa 5MB</span>
+        </div>
+        <input ref={coverInputRef} id="post-cover" data-testid="post-image-input" className="create-post-form__file-input" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={onCoverChange} />
         <div 
           data-testid="post-upload-area"
-          className="create-post-form__upload-box" 
+          className="create-post-form__upload-box"
+          role="button"
+          tabIndex={isSubmitting ? -1 : 0}
+          aria-label="Chọn ảnh bìa từ máy"
+          onClick={handleOpenCoverPicker}
+          onKeyDown={handleUploadBoxKeyDown}
+          aria-disabled={isSubmitting}
           style={{ 
             position: 'relative',
             padding: form.coverPreview ? '0' : undefined, 
@@ -131,43 +222,90 @@ function CreatePostForm({
             <>
               <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
               <small>Hỗ trợ JPG, PNG, WEBP. Kích thước tối đa 5MB</small>
+              <button
+                type="button"
+                className="btn btn--secondary create-post-form__upload-trigger"
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  handleOpenCoverPicker()
+                }}
+                disabled={isSubmitting}
+              >
+                Chọn ảnh bìa
+              </button>
             </>
           )}
         </div>
-      </label>
+        {form.coverName ? <p className="post-form-group__help">Đã chọn: {form.coverName}</p> : null}
+        {fieldErrors.coverFile ? <p className="post-form-group__error">{fieldErrors.coverFile}</p> : null}
+      </div>
 
-      <label className="create-post-form__field">
-        <span>Nội dung bài viết</span>
-        <textarea
-          className="create-post-form__content"
-          rows="12"
+      <div className="create-post-form__field post-form-group">
+        <div className="post-form-group__header">
+          <label htmlFor="post-content">
+            <span>Nội dung bài viết</span>
+          </label>
+          <span className="post-form-group__counter">
+            {form.content.length}/{limits.contentMax} ký tự
+          </span>
+        </div>
+        <PostContentEditor
+          id="post-content"
           value={form.content}
-          onChange={(event) => onChange('content', event.target.value)}
-          placeholder="Viết nội dung chia sẻ của bạn tại đây..."
+          onChange={(value) => onChange('content', value)}
+          onInsertImage={onInsertInlineImage}
+          isUploadingImage={isUploadingInlineImage}
+          maxLength={limits.contentMax}
+          minLength={limits.contentMin}
+          error={fieldErrors.content}
+          describedBy={fieldErrors.content ? 'post-content-error' : 'post-content-help'}
         />
-      </label>
+        <p id="post-content-help" className="post-form-group__help">
+          Tối thiểu {limits.contentMin} ký tự để bài viết đủ rõ ràng và hạn chế spam. Bạn có thể chèn tối đa {limits.contentImageMax} ảnh minh họa vào nội dung.
+        </p>
+        {fieldErrors.content ? <p id="post-content-error" className="post-form-group__error">{fieldErrors.content}</p> : null}
+      </div>
 
-      <label className="create-post-form__field">
-        <span>Tags</span>
+      <div className="create-post-form__field post-form-group">
+        <div className="post-form-group__header">
+          <label htmlFor="post-tags">
+            <span>Tags</span>
+          </label>
+          <span className="post-form-group__counter">{tagCount}/{limits.tagsMax} tags</span>
+        </div>
         <input
+          id="post-tags"
+          className={`post-form-control ${fieldErrors.tags ? 'is-invalid' : ''}`}
           type="text"
           value={form.tags}
           onChange={(event) => onChange('tags', event.target.value)}
           placeholder="Ví dụ: điều hòa, phòng trọ, tiết kiệm điện"
+          aria-invalid={Boolean(fieldErrors.tags)}
+          aria-describedby={fieldErrors.tags ? 'post-tags-error' : 'post-tags-help'}
         />
-      </label>
-
-      <div className="create-post-form__actions">
-        <button type="button" className="btn create-post-form__draft" onClick={onSaveDraft} disabled={isSubmitting}>
-          Lưu nháp
-        </button>
-        <button type="button" className="btn btn--secondary" onClick={onPreview} disabled={isSubmitting}>
-          Xem trước
-        </button>
-        <button type="button" className="btn btn--primary" onClick={onSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Đang gửi...' : 'Gửi bài chờ duyệt'}
-        </button>
+        <p id="post-tags-help" className="post-form-group__help">Tối đa {limits.tagsMax} tags, ngăn cách bằng dấu phẩy.</p>
+        {fieldErrors.tags ? <p id="post-tags-error" className="post-form-group__error">{fieldErrors.tags}</p> : null}
       </div>
+
+      {showActions ? (
+        <div className="create-post-form__actions">
+          <button type="button" className="btn create-post-form__draft" onClick={onSaveDraft} disabled={isSubmitting}>
+            Lưu nháp
+          </button>
+          {onClearDraft ? (
+            <button type="button" className="btn btn--ghost" onClick={onClearDraft} disabled={isSubmitting}>
+              Xóa nháp
+            </button>
+          ) : null}
+          <button type="button" className="btn btn--secondary" onClick={onPreview} disabled={isSubmitting}>
+            Xem trước
+          </button>
+          <button type="button" className="btn btn--primary" onClick={onSubmit} disabled={isSubmitting || cooldownRemaining > 0}>
+            {isSubmitting ? 'Đang gửi...' : 'Gửi bài chờ duyệt'}
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

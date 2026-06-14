@@ -1,5 +1,6 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
+import { resolvePostImageSource } from '../utils/postMedia'
 import { getCurrentSession } from './authService'
 
 export async function savePost(postId) {
@@ -98,13 +99,15 @@ export async function getMySavedPosts() {
       slug: post.slug,
       title: post.title,
       description: post.description,
-      image: post.image_url,
+      image: resolvePostImageSource(post),
       category: post.type === 'tip' ? 'Mẹo tiết kiệm' : post.type === 'community' ? 'Cộng đồng' : 'Hỏi đáp',
+      savedCategoryLabel: post.type === 'tip' ? 'Mẹo hay' : post.type === 'community' ? 'Cộng đồng' : 'Giải đáp',
       author: post.profiles?.name || post.profiles?.email || 'Người dùng',
       savedAt: new Date(row.created_at).toLocaleDateString('vi-VN'),
       likes: post.likes_count || 0,
-      savedType: 'Tất cả',
-      status: post.status
+      savedType: post.type === 'tip' ? 'Mẹo tiết kiệm' : post.type === 'community' ? 'Cộng đồng' : 'Review thiết bị',
+      status: post.status,
+      type: post.type,
     }
   }).filter(Boolean)
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
+import MarkdownContent from '../../components/common/MarkdownContent'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 
@@ -62,6 +63,7 @@ function CommunityPostDetailPage() {
             title: data.title,
             excerpt: data.description || (data.content ? `${data.content.substring(0, 150)}...` : 'Chia sẻ từ cộng đồng E-XANH.'),
             image: data.image_url,
+            content: data.content || '',
             likes: data.likes_count || 0,
             commentsCount: data.comments_count || 0,
             savedCount: data.saved_count || 0,
@@ -203,17 +205,26 @@ function CommunityPostDetailPage() {
         ) : !post ? (
           <div style={{ textAlign: 'center', padding: '40px' }}>Không tìm thấy bài viết!</div>
         ) : (
-          <CommunityPostCard
-            post={post}
-            onToggleLike={handleToggleLike}
-            onToggleSave={handleToggleSave}
-            onToggleComment={handleToggleComment}
-            onToggleShare={handleToggleShare}
-            isCommentActive={activeCommentPostId === post.id}
-            isShareActive={activeSharePostId === post.id}
-            currentUser={currentUser}
-            onCommentCountChange={handleCommentCountChange}
-          />
+          <>
+            <CommunityPostCard
+              post={post}
+              onToggleLike={handleToggleLike}
+              onToggleSave={handleToggleSave}
+              onToggleComment={handleToggleComment}
+              onToggleShare={handleToggleShare}
+              isCommentActive={activeCommentPostId === post.id}
+              isShareActive={activeSharePostId === post.id}
+              currentUser={currentUser}
+              onCommentCountChange={handleCommentCountChange}
+            />
+
+            {post.content ? (
+              <section className="post-side-card" style={{ marginTop: '20px' }}>
+                <h2>Nội dung bài chia sẻ</h2>
+                <MarkdownContent content={post.content} className="article-content__markdown" />
+              </section>
+            ) : null}
+          </>
         )}
       </div>
     </div>

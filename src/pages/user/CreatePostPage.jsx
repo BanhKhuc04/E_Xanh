@@ -56,13 +56,20 @@ function CreatePostPage() {
           errorMessage={composer.errorMessage}
           successMessage={composer.successMessage}
           infoMessage={composer.infoMessage}
+          fieldErrors={composer.fieldErrors}
           onChange={composer.handleChange}
           onCoverChange={composer.handleCoverChange}
           onRemoveCover={composer.removeCover}
           onSaveDraft={composer.handleSaveDraft}
+          onClearDraft={composer.clearDraft}
           onPreview={composer.handlePreview}
           onSubmit={composer.handleSubmit}
+          onInsertInlineImage={composer.handleInlineImageUpload}
           isSubmitting={composer.isSubmitting}
+          isUploadingInlineImage={composer.isUploadingInlineImage}
+          draftMeta={composer.draftMeta}
+          cooldownRemaining={composer.cooldownRemaining}
+          limits={composer.limits}
         />
 
         <CreatePostSidebar

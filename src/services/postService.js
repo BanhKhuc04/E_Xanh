@@ -17,6 +17,44 @@ function generateSlug(title) {
     .replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 6)
 }
 
+export async function checkRecentPostRateLimit(userId) {
+  if (!userId) {
+    return {
+      allowed: false,
+      error: new Error('Thiếu thông tin người dùng để kiểm tra tần suất đăng bài.'),
+    }
+  }
+
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const tenMinutesAgo = Date.now() - 10 * 60 * 1000
+
+  const { data, error } = await supabase
+    .from('posts')
+    .select('id, created_at')
+    .eq('author_id', userId)
+    .gte('created_at', oneDayAgo)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return { allowed: true, error }
+  }
+
+  const recentPosts = data || []
+  const postsInLastTenMinutes = recentPosts.filter((post) => {
+    const createdAt = new Date(post.created_at).getTime()
+    return Number.isFinite(createdAt) && createdAt >= tenMinutesAgo
+  }).length
+
+  const postsInLastDay = recentPosts.length
+
+  return {
+    allowed: postsInLastTenMinutes < 3 && postsInLastDay < 20,
+    postsInLastTenMinutes,
+    postsInLastDay,
+    error: null,
+  }
+}
+
 export async function uploadPostImage(file, userId) {
   const validation = validateImageFile(file)
   if (!validation.valid) {
@@ -61,6 +99,54 @@ export async function uploadPostImage(file, userId) {
   return { publicUrl: publicUrlData.publicUrl, error: null }
 }
 
+export async function uploadPostInlineImage(file, userId) {
+  const validation = validateImageFile(file, {
+    allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    invalidTypeMessage: 'Ảnh trong nội dung chỉ nhận JPG, PNG hoặc WEBP.',
+    sizeMessage: 'Ảnh trong nội dung không được vượt quá 5MB.',
+  })
+  if (!validation.valid) {
+    return { publicUrl: null, error: new Error(validation.error) }
+  }
+
+  let uploadFile = file
+
+  if (isCompressibleImageType(file)) {
+    try {
+      uploadFile = await compressImageToWebp(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.75,
+        maxBytes: 500 * 1024,
+        minQuality: 0.6,
+      })
+    } catch (error) {
+      logError('Inline image compression failed, using original image.', error)
+    }
+  }
+
+  const safeFileName = createSafeFileName(uploadFile, 'post-inline')
+  const path = `posts/${userId}/inline/${safeFileName}`
+
+  const { error } = await supabase.storage
+    .from('post-images')
+    .upload(path, uploadFile, {
+      cacheControl: '31536000',
+      contentType: uploadFile.type || file.type,
+      upsert: false,
+    })
+
+  if (error) {
+    return { publicUrl: null, error }
+  }
+
+  const { data } = supabase.storage
+    .from('post-images')
+    .getPublicUrl(path)
+
+  return { publicUrl: data.publicUrl, error: null }
+}
+
 export async function createPost(postData) {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError || !sessionData.session) {
@@ -93,6 +179,8 @@ export async function createPost(postData) {
       return { data: null, error: new Error('Lỗi tải ảnh lên: ' + uploadError.message) }
     }
     imageUrl = publicUrl
+  } else if (postData.image_url) {
+    imageUrl = postData.image_url
   }
 
   const payload = {
@@ -351,6 +439,8 @@ export async function updatePost(postId, postData) {
         payload.image_url = publicUrl
       }
     }
+  } else if (postData.image_url !== undefined) {
+    payload.image_url = postData.image_url || null
   }
 
   const { data, error } = await supabase

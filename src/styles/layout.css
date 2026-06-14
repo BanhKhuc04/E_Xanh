@@ -8,7 +8,7 @@
 
 .user-navbar {
   position: sticky;
-  top: 0;
+  top: var(--announcement-offset, 0px);
   z-index: 20;
   backdrop-filter: blur(18px);
   background: rgba(255, 255, 255, 0.8);

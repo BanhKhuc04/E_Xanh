@@ -166,6 +166,15 @@
   line-height: 1.8;
 }
 
+.article-content__markdown {
+  display: grid;
+  gap: 16px;
+}
+
+.article-content__markdown .markdown-content__figure img {
+  max-height: 460px;
+}
+
 .article-quick-tip {
   display: grid;
   gap: 8px;

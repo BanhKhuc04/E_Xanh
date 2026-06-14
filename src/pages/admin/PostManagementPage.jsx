@@ -37,6 +37,7 @@ function PostManagementPage() {
     title: '',
     description: '',
     content: '',
+    image_url: '',
     type: 'Mẹo tiết kiệm',
     status: 'pending'
   })
@@ -75,9 +76,11 @@ function PostManagementPage() {
           author: post.profiles?.name || 'Người dùng ẩn danh',
           type: post.type === 'tip' ? 'Mẹo tiết kiệm' : (post.type === 'community' ? 'Cộng đồng' : post.type),
           category: post.type === 'tip' ? 'Mẹo tiết kiệm' : (post.type === 'community' ? 'Cộng đồng' : post.type),
+          rawType: post.type,
           submittedAt: new Date(post.created_at).toISOString().split('T')[0],
           status: post.status,
           thumbnail: post.image_url || 'https://images.unsplash.com/photo-1631545806609-3c480b4bb12a?w=400&h=260&fit=crop',
+          imageUrl: post.image_url || '',
           description: post.description || '',
           contentPreview: post.content || '',
           likes: post.likes_count || 0,
@@ -191,6 +194,7 @@ function PostManagementPage() {
       title: '',
       description: '',
       content: '',
+      image_url: '',
       type: 'tip',
       status: 'approved'
     })
@@ -203,7 +207,8 @@ function PostManagementPage() {
       title: post.title,
       description: post.description,
       content: post.contentPreview,
-      type: post.type,
+      image_url: post.imageUrl || '',
+      type: post.rawType || post.type,
       status: post.status
     })
     setIsModalOpen(true)
@@ -397,6 +402,17 @@ function PostManagementPage() {
                   value={formData.description} 
                   onChange={e => setFormData({...formData, description: e.target.value})}
                   rows="2"
+                  style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                />
+              </label>
+
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <strong>Link ảnh bìa</strong>
+                <input
+                  type="url"
+                  value={formData.image_url}
+                  onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                  placeholder="https://..."
                   style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
                 />
               </label>

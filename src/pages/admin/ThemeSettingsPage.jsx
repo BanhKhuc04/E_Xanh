@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
+import AdminAnnouncementManager from '../../components/admin/settings/AdminAnnouncementManager'
 import ImageCropModal from '../../components/common/ImageCropModal'
 import PostImage from '../../components/common/PostImage'
 import { getHeroPageLabel, heroPageOptions } from '../../data/pageHeroes'
@@ -11,6 +12,7 @@ import {
   uploadBannerImage,
 } from '../../services/bannerService'
 import '../../styles/admin.css'
+import '../../styles/admin-settings.css'
 
 function ThemeSettingsPage() {
   const [loading, setLoading] = useState(true)
@@ -273,6 +275,8 @@ function ThemeSettingsPage() {
       <div className="admin-page__content">
         {errorMsg ? <div className="admin-alert admin-alert--error">{errorMsg}</div> : null}
         {successMsg ? <div className="admin-alert admin-alert--success">{successMsg}</div> : null}
+
+        <AdminAnnouncementManager />
 
         {heroPageOptions.map((item) => renderBannerSection(item.key))}
       </div>
