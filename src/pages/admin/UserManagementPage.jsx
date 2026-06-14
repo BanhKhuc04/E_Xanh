@@ -125,7 +125,7 @@ function UserManagementPage() {
     }
 
     return matchSearch && matchRole && matchStatus && matchDate
-  })
+  }).sort((a, b) => new Date(b.joinedAt) - new Date(a.joinedAt))
 
   const handleToggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -146,31 +146,39 @@ function UserManagementPage() {
   }
 
   const handleChangeStatus = async (id, newStatus) => {
+    // Optimistic update
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: newStatus } : u)))
+
     const { error } = await updateUserStatus(id, newStatus, currentUserData.id)
     if (error) {
       showToast('Lỗi: ' + error.message)
+      fetchUsers() // Rollback on error
       return
     }
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: newStatus } : u)),
-    )
-    showToast(
-      `Đã cập nhật trạng thái: ${userStatusMap[newStatus]?.label ?? newStatus}.`
-    )
+    showToast(`Đã cập nhật trạng thái: ${userStatusMap[newStatus]?.label ?? newStatus}.`)
   }
 
   const handleChangeRole = async (id, newRole) => {
+    // Check if trying to remove admin role
+    const targetUser = users.find(u => u.id === id);
+    if (targetUser && targetUser.role === 'admin' && newRole !== 'admin') {
+        const adminCount = users.filter(u => u.role === 'admin').length;
+        if (adminCount <= 1) {
+            showToast('Lỗi: Không thể hạ quyền Admin duy nhất của hệ thống.');
+            return;
+        }
+    }
+
+    // Optimistic update
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)))
+
     const { error } = await updateUserRole(id, newRole, currentUserData.id)
     if (error) {
       showToast('Lỗi: ' + error.message)
+      fetchUsers() // Rollback on error
       return
     }
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)),
-    )
-    showToast(
-      `Đã đổi vai trò: ${userRoleMap[newRole]?.label ?? newRole}.`
-    )
+    showToast(`Đã đổi vai trò: ${userRoleMap[newRole]?.label ?? newRole}.`)
   }
 
   const handleQuickToggleLock = (id) => {
@@ -181,27 +189,19 @@ function UserManagementPage() {
   }
 
   const handleBulkLock = async () => {
+    setUsers((prev) => prev.map((u) => selectedIds.includes(u.id) ? { ...u, status: 'locked' } : u))
     for (const id of selectedIds) {
       await updateUserStatus(id, 'locked', currentUserData.id)
     }
-    setUsers((prev) =>
-      prev.map((u) =>
-        selectedIds.includes(u.id) ? { ...u, status: 'locked' } : u,
-      ),
-    )
     setSelectedIds([])
     showToast('Đã khóa các tài khoản đã chọn.')
   }
 
   const handleBulkUnlock = async () => {
+    setUsers((prev) => prev.map((u) => selectedIds.includes(u.id) ? { ...u, status: 'active' } : u))
     for (const id of selectedIds) {
       await updateUserStatus(id, 'active', currentUserData.id)
     }
-    setUsers((prev) =>
-      prev.map((u) =>
-        selectedIds.includes(u.id) ? { ...u, status: 'active' } : u,
-      ),
-    )
     setSelectedIds([])
     showToast('Đã mở khóa các tài khoản đã chọn.')
   }

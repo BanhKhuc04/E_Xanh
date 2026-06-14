@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
 import { getImageUrl } from '../../utils/imageUrl'
+import heroImage from '../../assets/hero.png'
 
 const HeartIcon = ({ isLiked }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
@@ -143,7 +144,7 @@ function CommunityPostCard({
 
       <div className="community-post-card__body">
         <Link to={`/cong-dong/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }} data-testid="community-post-link">
-          <h2>{post.title}</h2>
+          <h2 style={{ overflowWrap: 'anywhere', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.title}</h2>
           <p>{post.excerpt}</p>
         </Link>
       </div>
@@ -157,7 +158,7 @@ function CommunityPostCard({
                 width="800"
                 height="450"
                 loading="lazy"
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/images/fallback-green.jpg'; }}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = heroImage; }}
               />
             </Link>
         </div>

@@ -76,7 +76,7 @@ export async function createPost(postData) {
   if (postData.coverFile) {
     const { publicUrl, error: uploadError } = await uploadPostImage(postData.coverFile, userId)
     if (uploadError) {
-      console.error('Debug: Error uploading image:', uploadError)
+      console.error('Debug: Error uploading image:', uploadError?.message || uploadError)
       return { data: null, error: new Error('Lỗi tải ảnh lên: ' + uploadError.message) }
     }
     imageUrl = publicUrl
@@ -249,16 +249,25 @@ export async function getTopActiveMembers(limitCount = 3) {
 export async function getFeaturedPosts() {
   const { data, error } = await supabase
     .from('posts')
-    .select(`
-      *, 
-      profiles:author_id (name, avatar_url, role)
-    `)
+    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
     .eq('status', 'approved')
-    .order('created_at', { ascending: false })
+    .eq('type', 'tip')
+    .order('likes_count', { ascending: false })
     .limit(3)
 
   return { data, error }
 }
+
+export async function getMyPosts(userId) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('author_id', userId)
+    .order('created_at', { ascending: false })
+
+  return { data, error }
+}
+
 
 export async function updatePostStatus(postId, status, adminNote = null) {
   const updatePayload = { status }

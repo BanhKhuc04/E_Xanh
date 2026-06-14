@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import heroImage from '../../assets/hero.png'
 
 function PostComposer() {
   return (
@@ -6,7 +7,7 @@ function PostComposer() {
       <div className="community-composer__top">
         <img
           className="community-composer__avatar"
-          src='/images/fallback-green.jpg'
+          src={heroImage}
           alt="Avatar người dùng"
         />
 

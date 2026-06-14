@@ -11,6 +11,7 @@ import {
   savedRecentlyRead,
   savedSortOptions,
 } from '../../data/posts'
+import heroImage from '../../assets/hero.png'
 import '../../styles/saved-posts.css'
 
 function sortSavedPosts(items, sortValue) {
@@ -141,7 +142,7 @@ function SavedPostsPage() {
 
         <div className="saved-posts-hero__visual">
           <img
-            src='/images/fallback-green.jpg'
+            src={heroImage}
             alt="Người dùng đang xem lại bài viết đã lưu trên laptop"
           />
         </div>

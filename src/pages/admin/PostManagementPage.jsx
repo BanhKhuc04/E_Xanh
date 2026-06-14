@@ -73,8 +73,8 @@ function PostManagementPage() {
           id: post.id,
           title: post.title,
           author: post.profiles?.name || 'Người dùng ẩn danh',
-          type: post.type,
-          category: post.type,
+          type: post.type === 'tip' ? 'Mẹo tiết kiệm' : (post.type === 'community' ? 'Cộng đồng' : post.type),
+          category: post.type === 'tip' ? 'Mẹo tiết kiệm' : (post.type === 'community' ? 'Cộng đồng' : post.type),
           submittedAt: new Date(post.created_at).toISOString().split('T')[0],
           status: post.status,
           thumbnail: post.image_url || 'https://images.unsplash.com/photo-1631545806609-3c480b4bb12a?w=400&h=260&fit=crop',
@@ -123,7 +123,7 @@ function PostManagementPage() {
     }
 
     return matchSearch && matchCategory && matchStatus && matchDate
-  })
+  }).sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
 
   const handleToggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -148,31 +148,32 @@ function PostManagementPage() {
   }
 
   const handleChangeStatus = async (id, newStatus, adminNote = null) => {
+    setPosts(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p))
     const { error } = await updatePostStatus(id, newStatus, adminNote)
     if (error) {
       showToast('Tài khoản hiện tại không có quyền duyệt bài này.')
+      setRefreshTrigger(prev => prev + 1)
       return
     }
     showToast('Đã cập nhật trạng thái bài viết.')
-    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleBulkApprove = async () => {
+    setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'approved' } : p))
     for (const id of selectedIds) {
       await updatePostStatus(id, 'approved')
     }
     setSelectedIds([])
     showToast('Đã duyệt các bài viết đã chọn.')
-    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleBulkReject = async () => {
+    setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'rejected' } : p))
     for (const id of selectedIds) {
       await updatePostStatus(id, 'rejected')
     }
     setSelectedIds([])
     showToast('Đã từ chối các bài viết đã chọn.')
-    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleReset = () => {
@@ -247,14 +248,15 @@ function PostManagementPage() {
 
   const handleDeletePost = async (id) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa bài viết này không?')) return
-
+    
+    setPosts(prev => prev.filter(p => p.id !== id))
     const { error } = await deletePost(id)
     if (error) {
       showToast('Lỗi xóa bài (có thể bạn không đủ quyền Admin): ' + error.message)
+      setRefreshTrigger(prev => prev + 1)
     } else {
       showToast('Đã xóa bài viết.')
       if (activePostId === id) setActivePostId(null)
-      setRefreshTrigger(prev => prev + 1)
     }
   }
 

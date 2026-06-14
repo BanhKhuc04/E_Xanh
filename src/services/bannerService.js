@@ -102,7 +102,7 @@ export async function deleteBanner(id, imageUrl) {
         await supabase.storage.from('website-banners').remove([filePath])
       }
     } catch (err) {
-      console.error('Failed to delete image from storage:', err)
+      console.error('Failed to delete image from storage:', err?.message || err)
     }
   }
 

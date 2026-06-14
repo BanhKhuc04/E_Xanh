@@ -7,7 +7,7 @@ export async function getAllDevicesAdmin() {
     .order('created_at', { ascending: false })
   
   if (error) {
-    console.error('[E-XANH] Lỗi lấy danh sách thiết bị admin:', error)
+    console.error('[E-XANH] Lỗi lấy danh sách thiết bị admin:', error?.message || error)
     return { data: [], error }
   }
   return { data, error: null }
@@ -21,7 +21,7 @@ export async function createDevice(payload) {
     .single()
   
   if (error) {
-    console.error('[E-XANH] Lỗi thêm thiết bị:', error)
+    console.error('[E-XANH] Lỗi thêm thiết bị:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -36,7 +36,7 @@ export async function updateDevice(id, payload) {
     .single()
     
   if (error) {
-    console.error('[E-XANH] Lỗi cập nhật thiết bị:', error)
+    console.error('[E-XANH] Lỗi cập nhật thiết bị:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -49,7 +49,7 @@ export async function deleteDevice(id) {
     .eq('id', id)
     
   if (error) {
-    console.error('[E-XANH] Lỗi xóa thiết bị:', error)
+    console.error('[E-XANH] Lỗi xóa thiết bị:', error?.message || error)
     return { error }
   }
   return { error: null }
@@ -62,7 +62,7 @@ export async function bulkUpdateDeviceVisibility(ids, isVisible) {
     .in('id', ids)
     
   if (error) {
-    console.error('[E-XANH] Lỗi cập nhật hiển thị hàng loạt:', error)
+    console.error('[E-XANH] Lỗi cập nhật hiển thị hàng loạt:', error?.message || error)
     return { error }
   }
   return { error: null }
@@ -75,7 +75,7 @@ export async function bulkDeleteDevices(ids) {
     .in('id', ids)
     
   if (error) {
-    console.error('[E-XANH] Lỗi xóa hàng loạt:', error)
+    console.error('[E-XANH] Lỗi xóa hàng loạt:', error?.message || error)
     return { error }
   }
   return { error: null }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getFeaturedPosts } from '../../services/postService'
 import { getImageUrl } from '../../utils/imageUrl'
+import heroImage from '../../assets/hero.png'
 
 function FeaturedPosts() {
   const [posts, setPosts] = useState([])
@@ -52,11 +53,11 @@ function FeaturedPosts() {
     if (post.type === 'community') {
       navigate(`/cong-dong/${post.id}`)
     } else {
-      navigate(`/meo-tiet-kiem/${post.slug}`)
+      navigate(`/meo-tiet-kiem/${post.slug || post.id}`)
     }
   }
 
-  const DEFAULT_IMAGE = 'https://placehold.co/600x400/eaf7df/4f8428?text=E-XANH'
+  const DEFAULT_IMAGE = heroImage
 
   return (
     <section className="home-section">
@@ -100,18 +101,22 @@ function FeaturedPosts() {
               >
                 <div className="home-post-card__media">
                   <img
-                    src={getImageUrl(post.image_url, 600) || DEFAULT_IMAGE}
-                    alt={post.title}
+                    src={post.image_url ? getImageUrl(post.image_url) : DEFAULT_IMAGE}
+                    alt={`${post.title} - mẹo tiết kiệm điện`}
                     width="600"
                     height="400"
                     loading="lazy"
+                    onError={(e) => {
+                      e.target.onerror = null
+                      e.target.src = DEFAULT_IMAGE
+                    }}
                   />
                   <span className="home-post-card__tag">{getTypeLabel(post.type)}</span>
                   <button type="button" aria-label={`Lưu bài viết ${post.title}`} onClick={(e) => {
                     e.stopPropagation();
                     alert('Chức năng lưu bài viết đang phát triển!');
                   }}>
-                    Lưu
+                    <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/></svg>
                   </button>
                 </div>
 

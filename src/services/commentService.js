@@ -13,7 +13,7 @@ export async function getCommentsByPost(postId) {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error fetching comments:', error)
+    console.error('Error fetching comments:', error?.message || error)
     return { data: null, error }
   }
 
@@ -55,7 +55,7 @@ export async function createComment(postId, content) {
     .single()
 
   if (error) {
-    console.error('Error creating comment:', error)
+    console.error('Error creating comment:', error?.message || error)
     return { data: null, error }
   }
 
@@ -66,6 +66,35 @@ export async function createComment(postId, content) {
     content: data.content,
     createdAt: data.created_at
   }
+
+  return { data: formattedData, error: null }
+}
+
+export async function getMyComments(userId) {
+  const { data, error } = await supabase
+    .from('comments')
+    .select(`
+      id,
+      content,
+      created_at,
+      posts (title, slug, id)
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching my comments:', error?.message || error)
+    return { data: null, error }
+  }
+
+  const formattedData = data.map(comment => ({
+    id: comment.id,
+    content: comment.content,
+    postTitle: comment.posts?.title || 'Bài viết không xác định',
+    postId: comment.posts?.id,
+    postSlug: comment.posts?.slug,
+    time: new Date(comment.created_at).toLocaleDateString('vi-VN')
+  }))
 
   return { data: formattedData, error: null }
 }

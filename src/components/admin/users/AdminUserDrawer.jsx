@@ -154,10 +154,10 @@ function AdminUserDrawer({
             </select>
           </div>
 
-          <button type="button" className="btn btn--ghost" disabled title="Tính năng đang phát triển">
+          <button type="button" className="btn btn--ghost" onClick={() => alert('Tính năng đang phát triển')} title="Tính năng đang phát triển">
             Xem bài đã đăng
           </button>
-          <button type="button" className="btn btn--ghost" disabled title="Tính năng đang phát triển">
+          <button type="button" className="btn btn--ghost" onClick={() => alert('Tính năng đang phát triển')} title="Tính năng đang phát triển">
             Xem bình luận
           </button>
         </div>

@@ -89,6 +89,11 @@ function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  
+  const [myPostsData, setMyPostsData] = useState([])
+  const [savedPostsData, setSavedPostsData] = useState([])
+  const [recentCommentsData, setRecentCommentsData] = useState([])
+  const [totalElectricityChecks, setTotalElectricityChecks] = useState(0)
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
@@ -125,24 +130,31 @@ function AccountPage() {
       loadUser(session)
       
       if (session?.user) {
-        const { getMyElectricityChecks } = await import('../../services/electricityService')
-        const { data } = await getMyElectricityChecks()
-        if (data && isMounted) {
-          const formatted = data.map(dbItem => ({
-            id: dbItem.id,
-            checkedAt: dbItem.checked_at,
-            deviceCount: dbItem.items?.length || 0,
-            totalKwh: Number(dbItem.total_kwh),
-            estimatedCost: Number(dbItem.estimated_cost),
-            highestDevice: dbItem.highest_device,
-            savingPercent: dbItem.saving_percent,
-          }))
-          setRecentHistory(formatted.slice(0, 3))
-        } else if (isMounted) {
-          setRecentHistory(getElectricityHistories().slice(0, 3))
+        if (isMounted) {
+          const histories = getElectricityHistories(session.user.id)
+          setTotalElectricityChecks(histories.length)
+          setRecentHistory(histories.slice(0, 3))
+        }
+
+        const { getMyPosts } = await import('../../services/postService')
+        const { getMySavedPosts } = await import('../../services/interactionService')
+        const { getMyComments } = await import('../../services/commentService')
+
+        const [myPostsRes, savedRes, commentsRes] = await Promise.all([
+          getMyPosts(session.user.id),
+          getMySavedPosts(),
+          getMyComments(session.user.id)
+        ])
+
+        if (isMounted) {
+          if (myPostsRes.data) setMyPostsData(myPostsRes.data)
+          if (savedRes.data) setSavedPostsData(savedRes.data)
+          if (commentsRes.data) setRecentCommentsData(commentsRes.data)
         }
       } else if (isMounted) {
-        setRecentHistory(getElectricityHistories().slice(0, 3))
+        const histories = getElectricityHistories('guest')
+        setTotalElectricityChecks(histories.length)
+        setRecentHistory(histories.slice(0, 3))
       }
     }
 
@@ -228,13 +240,18 @@ function AccountPage() {
           onEditClick={() => setIsEditModalOpen(true)}
           onPasswordClick={() => setIsPasswordModalOpen(true)}
         />
-        <ProfileStats stats={profileStats} />
+        <ProfileStats stats={[
+          { label: 'Bài đã đăng', value: myPostsData.length },
+          { label: 'Bài đã lưu', value: savedPostsData.length },
+          { label: 'Bình luận', value: recentCommentsData.length },
+          { label: 'Lần kiểm tra điện', value: totalElectricityChecks },
+        ]} />
 
         <div className="account-layout">
           <div className="account-layout__main">
-            <MyPostsList posts={myPosts} />
-            <RecentSavedPosts posts={savedPosts.slice(0, 3)} />
-            <RecentComments comments={recentComments} />
+            <MyPostsList posts={myPostsData} />
+            <RecentSavedPosts posts={savedPostsData.slice(0, 3)} />
+            <RecentComments comments={recentCommentsData.slice(0, 3)} />
           </div>
 
           <div className="account-layout__side">

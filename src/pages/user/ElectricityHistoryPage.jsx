@@ -13,6 +13,7 @@ import {
   setScrollToResultFlag,
   setRecalculateDevices,
 } from '../../utils/electricityStorage'
+import heroImage from '../../assets/hero.png'
 import '../../styles/electricity-history.css'
 
 const defaultFilters = {
@@ -61,31 +62,9 @@ function ElectricityHistoryPage() {
       const session = await getCurrentSession()
       
       if (session?.user) {
-        const { getMyElectricityChecks } = await import('../../services/electricityService')
-        const { data } = await getMyElectricityChecks()
-        if (data) {
-          const formatted = data.map(dbItem => ({
-            id: dbItem.id,
-            checkedAt: dbItem.checked_at,
-            deviceCount: dbItem.items?.length || 0,
-            totalKwh: Number(dbItem.total_kwh),
-            estimatedCost: Number(dbItem.estimated_cost),
-            highestDevice: dbItem.highest_device,
-            savingPercent: dbItem.saving_percent,
-            items: (dbItem.items || []).map(item => ({
-              deviceName: item.device_name,
-              power: item.power,
-              hoursPerDay: Number(item.hours_per_day),
-              daysPerMonth: item.days_per_month,
-              kwh: Number(item.kwh)
-            }))
-          }))
-          setHistories(formatted)
-        } else {
-          setHistories(getDisplayHistories())
-        }
+        setHistories(getElectricityHistories(session.user.id))
       } else {
-        setHistories(getDisplayHistories())
+        setHistories(getElectricityHistories('guest'))
       }
       setLoading(false)
     }
@@ -153,15 +132,10 @@ function ElectricityHistoryPage() {
     const session = await getCurrentSession()
     
     if (session?.user) {
-      const { deleteElectricityCheck } = await import('../../services/electricityService')
-      const { error } = await deleteElectricityCheck(id)
-      if (!error) {
-        setHistories(current => current.filter(h => h.id !== id))
-      } else {
-        alert('Lỗi xóa lịch sử: ' + error.message)
-      }
+      const next = deleteElectricityHistory(id, session.user.id)
+      setHistories(next)
     } else {
-      const next = deleteElectricityHistory(id)
+      const next = deleteElectricityHistory(id, 'guest')
       setHistories(next)
     }
 
@@ -229,7 +203,7 @@ function ElectricityHistoryPage() {
 
         <div className="electricity-history-hero__visual">
           <img
-            src='/images/fallback-green.jpg'
+            src={heroImage}
             alt="Minh họa lịch sử kiểm tra điện năng"
           />
         </div>

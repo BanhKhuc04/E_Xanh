@@ -17,7 +17,7 @@ function ContactPage() {
     content: '',
   })
   const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [toast, setToast] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleChange(field, value) {
@@ -32,25 +32,21 @@ function ContactPage() {
     event.preventDefault()
 
     if (!form.name.trim()) {
-      setSuccessMessage('')
       setErrorMessage('Vui lòng nhập họ tên.')
       return
     }
 
     if (!form.email.trim()) {
-      setSuccessMessage('')
       setErrorMessage('Vui lòng nhập email.')
       return
     }
 
     if (!emailPattern.test(form.email.trim())) {
-      setSuccessMessage('')
       setErrorMessage('Email không hợp lệ.')
       return
     }
 
     if (!form.content.trim()) {
-      setSuccessMessage('')
       setErrorMessage('Vui lòng nhập nội dung.')
       return
     }
@@ -60,9 +56,10 @@ function ContactPage() {
     // Giả lập gửi form
     window.setTimeout(() => {
       setErrorMessage('')
-      setSuccessMessage('Cảm ơn bạn đã liên hệ. E-XANH sẽ phản hồi trong 24–48 giờ làm việc.')
+      setToast('Cảm ơn bạn đã liên hệ. E-XANH sẽ phản hồi trong 24–48 giờ làm việc.')
       setForm({ name: '', email: '', subject: 'Góp ý giao diện', content: '' })
       setIsSubmitting(false)
+      setTimeout(() => setToast(''), 3000)
     }, 1000)
   }
 
@@ -101,9 +98,12 @@ function ContactPage() {
           <h2>Gửi tin nhắn cho chúng tôi</h2>
 
           {errorMessage ? <div className="static-page__message static-page__message--error" role="alert" data-testid="contact-error">{errorMessage}</div> : null}
-          {successMessage ? (
-            <div className="static-page__message static-page__message--success">{successMessage}</div>
-          ) : null}
+
+          {toast && (
+            <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000, background: '#4caf50', color: '#fff', padding: '12px 20px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} role="alert">
+              {toast}
+            </div>
+          )}
 
           <form className="static-page__contact-form" onSubmit={handleSubmit} noValidate>
             <div className="static-page__form-row">

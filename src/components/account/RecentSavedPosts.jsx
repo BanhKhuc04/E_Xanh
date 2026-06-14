@@ -9,15 +9,17 @@ function RecentSavedPosts({ posts }) {
       </div>
 
       <div className="account-saved-posts">
-        {posts.map((post) => (
-          <article key={post.slug} className="account-saved-posts__item">
+        {posts.length === 0 ? (
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Bạn chưa có bài viết đã lưu nào.</p>
+        ) : posts.map((post) => (
+          <article key={post.id || post.slug} className="account-saved-posts__item">
             <div>
-              <span className="account-saved-posts__category">{post.category}</span>
+              <span className="account-saved-posts__category">{post.category || 'Mẹo tiết kiệm'}</span>
               <h3>{post.title}</h3>
-              <p>{post.savedAt}</p>
+              <p>{post.savedAt || new Date().toLocaleDateString('vi-VN')}</p>
             </div>
 
-            <Link to={`/meo-tiet-kiem/${post.slug}`}>Đọc lại</Link>
+            <Link to={post.type === 'community' ? `/cong-dong/${post.id}` : `/meo-tiet-kiem/${post.slug || post.id}`}>Đọc lại</Link>
           </article>
         ))}
       </div>

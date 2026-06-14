@@ -2,9 +2,13 @@ const ELECTRICITY_HISTORY_KEY = 'eXanhElectricityHistory'
 const RECALCULATE_DEVICES_KEY = 'eXanhRecalculateDevices'
 const SCROLL_TO_RESULT_KEY = 'eXanhScrollToResult'
 
-export function getElectricityHistories() {
+export function getHistoryKey(userId = 'guest') {
+  return `exanh_electricity_history_${userId}`
+}
+
+export function getElectricityHistories(userId = 'guest') {
   try {
-    const raw = localStorage.getItem(ELECTRICITY_HISTORY_KEY)
+    const raw = localStorage.getItem(getHistoryKey(userId))
 
     if (!raw) {
       return []
@@ -17,33 +21,33 @@ export function getElectricityHistories() {
   }
 }
 
-export function saveElectricityHistory(history) {
+export function saveElectricityHistory(history, userId = 'guest') {
   try {
-    const currentHistories = getElectricityHistories()
+    const currentHistories = getElectricityHistories(userId)
     const nextHistories = [history, ...currentHistories]
-    localStorage.setItem(ELECTRICITY_HISTORY_KEY, JSON.stringify(nextHistories))
+    localStorage.setItem(getHistoryKey(userId), JSON.stringify(nextHistories))
     return nextHistories
   } catch {
-    return getElectricityHistories()
+    return getElectricityHistories(userId)
   }
 }
 
-export function deleteElectricityHistory(id) {
+export function deleteElectricityHistory(id, userId = 'guest') {
   try {
-    const nextHistories = getElectricityHistories().filter((item) => item.id !== id)
-    localStorage.setItem(ELECTRICITY_HISTORY_KEY, JSON.stringify(nextHistories))
+    const nextHistories = getElectricityHistories(userId).filter((item) => item.id !== id)
+    localStorage.setItem(getHistoryKey(userId), JSON.stringify(nextHistories))
     return nextHistories
   } catch {
-    return getElectricityHistories()
+    return getElectricityHistories(userId)
   }
 }
 
-export function clearElectricityHistories() {
+export function clearElectricityHistories(userId = 'guest') {
   try {
-    localStorage.removeItem(ELECTRICITY_HISTORY_KEY)
+    localStorage.removeItem(getHistoryKey(userId))
     return []
   } catch {
-    return getElectricityHistories()
+    return getElectricityHistories(userId)
   }
 }
 

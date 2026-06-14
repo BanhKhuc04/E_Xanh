@@ -43,6 +43,8 @@ function createInitialForm() {
     power: getDefaultPowerByName('Điều hòa 9000BTU'),
     hoursPerDay: '',
     daysPerMonth: '',
+    error: '',
+    errors: {}
   }
 }
 
@@ -173,6 +175,7 @@ function ElectricityCheckPage() {
       ...current,
       [field]: value,
       error: '',
+      errors: { ...current.errors, [field]: '' }
     }))
   }
 
@@ -183,33 +186,42 @@ function ElectricityCheckPage() {
       name,
       power: defaultPower,
       error: '',
+      errors: {}
     }))
   }
 
   function handleAddDevice(event) {
     event.preventDefault()
 
+    const power = Number(form.power)
+    const hours = Number(form.hoursPerDay)
+    const days = Number(form.daysPerMonth)
+    
+    let hasError = false
+    const newErrors = {}
+
     if (!form.name || !form.power || !form.hoursPerDay || !form.daysPerMonth) {
       setForm((current) => ({ ...current, error: 'Vui lòng nhập đầy đủ thông tin thiết bị.' }))
       return
     }
 
-    const power = Number(form.power)
-    const hours = Number(form.hoursPerDay)
-    const days = Number(form.daysPerMonth)
-
     if (isNaN(power) || power <= 0) {
-      setForm((current) => ({ ...current, error: 'Công suất phải là số lớn hơn 0.' }))
-      return
+      newErrors.power = 'Công suất > 0'
+      hasError = true
     }
 
     if (isNaN(hours) || hours <= 0 || hours > 24) {
-      setForm((current) => ({ ...current, error: 'Số giờ dùng mỗi ngày phải lớn hơn 0 và tối đa 24.' }))
-      return
+      newErrors.hours = 'Giờ: 1-24'
+      hasError = true
     }
 
     if (isNaN(days) || days <= 0 || days > 31) {
-      setForm((current) => ({ ...current, error: 'Số ngày dùng mỗi tháng phải lớn hơn 0 và tối đa 31.' }))
+      newErrors.days = 'Ngày: 1-31'
+      hasError = true
+    }
+
+    if (hasError) {
+      setForm((current) => ({ ...current, errors: newErrors, error: '' }))
       return
     }
 
@@ -255,33 +267,28 @@ function ElectricityCheckPage() {
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
 
-    if (session?.user) {
-      const { saveElectricityCheck } = await import('../../services/electricityService')
-      const { error } = await saveElectricityCheck({ summary, devices })
-      if (error) {
-        setFeedbackMessage('Lỗi lưu lịch sử: ' + error.message)
-      } else {
-        setFeedbackMessage('Đã lưu lịch sử kiểm tra lên hệ thống')
-      }
-    } else {
-      const historyPayload = {
-        id: `history-${Date.now()}`,
-        checkedAt: new Date().toISOString().slice(0, 10),
-        deviceCount: devices.length,
-        totalKwh: Number(summary.totalKwh.toFixed(1)),
-        estimatedCost: Math.round(summary.estimatedCost),
-        highestDevice: summary.topDevice?.name ?? '',
-        savingPercent: summary.savingRange,
-        items: devices.map((device) => ({
-          deviceName: device.name,
-          power: device.power,
-          hoursPerDay: device.hoursPerDay,
-          daysPerMonth: device.daysPerMonth,
-          kwh: Number(device.kwh.toFixed(1)),
-        })),
-      }
+    const historyPayload = {
+      id: `history-${Date.now()}`,
+      checkedAt: new Date().toISOString().slice(0, 10),
+      deviceCount: devices.length,
+      totalKwh: Number(summary.totalKwh.toFixed(1)),
+      estimatedCost: Math.round(summary.estimatedCost),
+      highestDevice: summary.topDevice?.name ?? '',
+      savingPercent: summary.savingRange,
+      items: devices.map((device) => ({
+        deviceName: device.name,
+        power: device.power,
+        hoursPerDay: device.hoursPerDay,
+        daysPerMonth: device.daysPerMonth,
+        kwh: Number(device.kwh.toFixed(1)),
+      })),
+    }
 
-      saveElectricityHistory(historyPayload)
+    if (session?.user) {
+      saveElectricityHistory(historyPayload, session.user.id)
+      setFeedbackMessage('Đã lưu lịch sử')
+    } else {
+      saveElectricityHistory(historyPayload, 'guest')
       setFeedbackMessage('Đã lưu lịch sử kiểm tra cục bộ (hãy đăng nhập để đồng bộ)')
     }
     setIsSavingHistory(false)

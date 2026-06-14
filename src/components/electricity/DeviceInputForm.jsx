@@ -31,6 +31,7 @@ function DeviceInputForm({
             onChange={(event) => onChange('power', event.target.value)}
             placeholder="Ví dụ: 1000"
           />
+          {form.errors?.power && <span style={{ color: '#e53935', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{form.errors.power}</span>}
         </label>
 
         <label>
@@ -38,10 +39,12 @@ function DeviceInputForm({
           <input
             type="number"
             min="1"
+            max="24"
             value={form.hoursPerDay}
             onChange={(event) => onChange('hoursPerDay', event.target.value)}
             placeholder="Ví dụ: 8"
           />
+          {form.errors?.hours && <span style={{ color: '#e53935', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{form.errors.hours}</span>}
         </label>
 
         <label>
@@ -49,10 +52,12 @@ function DeviceInputForm({
           <input
             type="number"
             min="1"
+            max="31"
             value={form.daysPerMonth}
             onChange={(event) => onChange('daysPerMonth', event.target.value)}
             placeholder="Ví dụ: 30"
           />
+          {form.errors?.days && <span style={{ color: '#e53935', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{form.errors.days}</span>}
         </label>
       </div>
 

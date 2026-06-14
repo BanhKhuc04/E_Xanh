@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function RecentComments({ comments }) {
   return (
     <section className="account-panel">
@@ -6,13 +8,15 @@ function RecentComments({ comments }) {
       </div>
 
       <div className="account-comments">
-        {comments.map((comment) => (
+        {comments.length === 0 ? (
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Bạn chưa có bình luận nào.</p>
+        ) : comments.map((comment) => (
           <article key={comment.id} className="account-comments__item">
             <p>{comment.content}</p>
             <span>Trong bài: {comment.postTitle}</span>
             <div className="account-comments__footer">
               <small>{comment.time}</small>
-              <button type="button">Xem bài viết</button>
+              <Link to={`/meo-tiet-kiem/${comment.postSlug || comment.postId}`} className="btn btn--secondary" style={{ padding: '4px 12px', fontSize: '0.85rem' }}>Xem bài viết</Link>
             </div>
           </article>
         ))}

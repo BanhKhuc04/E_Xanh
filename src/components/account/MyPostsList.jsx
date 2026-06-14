@@ -1,4 +1,20 @@
+import { useNavigate } from 'react-router-dom'
+
 function MyPostsList({ posts }) {
+  const navigate = useNavigate()
+
+  function handleView(post) {
+    if (post.type === 'community') {
+      navigate(`/cong-dong/${post.id}`)
+    } else {
+      navigate(`/meo-tiet-kiem/${post.slug || post.id}`)
+    }
+  }
+
+  function handleEdit() {
+    alert('Tính năng chỉnh sửa bài viết đang phát triển!')
+  }
+
   return (
     <section className="account-panel">
       <div className="account-panel__header">
@@ -27,8 +43,8 @@ function MyPostsList({ posts }) {
             </div>
 
             <div className="account-my-posts__actions">
-              <button type="button">Xem</button>
-              <button type="button">Chỉnh sửa</button>
+              <button type="button" onClick={() => handleView(post)}>Xem</button>
+              <button type="button" onClick={handleEdit}>Chỉnh sửa</button>
             </div>
           </article>
         ))}
