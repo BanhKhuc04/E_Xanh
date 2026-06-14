@@ -1,3 +1,4 @@
+import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 import { getCurrentSession } from './authService'
 
@@ -13,7 +14,7 @@ export async function savePost(postId) {
     .insert({ user_id: session.user.id, post_id: postId })
 
   if (error && error.code !== '23505') {
-    console.error('[E-XANH] Lỗi lưu bài viết:', error?.message || error)
+    logError('[E-XANH] Lỗi lưu bài viết:', error?.message || error)
     return { error }
   }
 
@@ -37,7 +38,7 @@ export async function unsavePost(postId) {
     .eq('post_id', postId)
 
   if (error) {
-    console.error('[E-XANH] Lỗi bỏ lưu bài viết:', error?.message || error)
+    logError('[E-XANH] Lỗi bỏ lưu bài viết:', error?.message || error)
     return { error }
   }
 
@@ -61,7 +62,7 @@ export async function getMySavedPosts() {
     .order('created_at', { ascending: false })
 
   if (savedError) {
-    console.error('[E-XANH] Lỗi lấy bài đã lưu:', savedError?.message || savedError)
+    logError('[E-XANH] Lỗi lấy bài đã lưu:', savedError?.message || savedError)
     return { data: [], error: savedError }
   }
 
@@ -81,7 +82,7 @@ export async function getMySavedPosts() {
     .in('id', postIds)
 
   if (postsError) {
-    console.error('[E-XANH] Lỗi lấy chi tiết posts:', postsError?.message || postsError)
+    logError('[E-XANH] Lỗi lấy chi tiết posts:', postsError?.message || postsError)
     return { data: [], error: postsError }
   }
 
@@ -122,7 +123,7 @@ export async function isPostSaved(postId) {
     .maybeSingle()
 
   if (error) {
-    console.error('[E-XANH] Lỗi kiểm tra bài đã lưu:', error?.message || error)
+    logError('[E-XANH] Lỗi kiểm tra bài đã lưu:', error?.message || error)
     return { data: false, error }
   }
   
@@ -141,7 +142,7 @@ export async function likePost(postId) {
     .insert({ user_id: session.user.id, post_id: postId })
 
   if (error && error.code !== '23505') {
-    console.error('[E-XANH] Lỗi thích bài viết:', error?.message || error)
+    logError('[E-XANH] Lỗi thích bài viết:', error?.message || error)
     return { error }
   }
 
@@ -164,7 +165,7 @@ export async function unlikePost(postId) {
     .eq('post_id', postId)
 
   if (error) {
-    console.error('[E-XANH] Lỗi bỏ thích bài viết:', error?.message || error)
+    logError('[E-XANH] Lỗi bỏ thích bài viết:', error?.message || error)
     return { error }
   }
 
@@ -188,7 +189,7 @@ export async function isPostLiked(postId) {
     .maybeSingle()
 
   if (error) {
-    console.error('[E-XANH] Lỗi kiểm tra bài đã thích:', error?.message || error)
+    logError('[E-XANH] Lỗi kiểm tra bài đã thích:', error?.message || error)
     return { data: false, error }
   }
   
@@ -214,7 +215,7 @@ export async function addComment(postId, content) {
     .single()
 
   if (error) {
-    console.error('[E-XANH] Lỗi thêm bình luận:', error?.message || error)
+    logError('[E-XANH] Lỗi thêm bình luận:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -232,7 +233,7 @@ export async function getCommentsByPostId(postId) {
     .order('created_at', { ascending: true })
 
   if (error) {
-    console.error('[E-XANH] Lỗi lấy bình luận:', error?.message || error)
+    logError('[E-XANH] Lỗi lấy bình luận:', error?.message || error)
     return { data: [], error }
   }
   return { data, error: null }
@@ -249,7 +250,7 @@ export async function deleteMyComment(commentId) {
     .eq('user_id', session.user.id)
 
   if (error) {
-    console.error('[E-XANH] Lỗi xóa bình luận:', error?.message || error)
+    logError('[E-XANH] Lỗi xóa bình luận:', error?.message || error)
     return { error }
   }
   return { error: null }
@@ -269,7 +270,7 @@ export async function getAllCommentsAdmin() {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('[E-XANH] Lỗi lấy tất cả bình luận:', error?.message || error)
+    logError('[E-XANH] Lỗi lấy tất cả bình luận:', error?.message || error)
     return { data: [], error }
   }
   return { data, error: null }
@@ -284,7 +285,7 @@ export async function updateCommentStatusAdmin(commentId, status) {
     .single()
 
   if (error) {
-    console.error('[E-XANH] Lỗi cập nhật trạng thái bình luận:', error?.message || error)
+    logError('[E-XANH] Lỗi cập nhật trạng thái bình luận:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -297,7 +298,7 @@ export async function deleteCommentAdmin(commentId) {
     .eq('id', commentId)
 
   if (error) {
-    console.error('[E-XANH] Lỗi xóa bình luận (admin):', error?.message || error)
+    logError('[E-XANH] Lỗi xóa bình luận (admin):', error?.message || error)
     return { error }
   }
   return { error: null }
@@ -316,7 +317,7 @@ export async function followUser(followingId) {
     .insert({ follower_id: session.user.id, following_id: followingId })
 
   if (error && error.code !== '23505') {
-    console.error('[E-XANH] Lỗi theo dõi người dùng:', error?.message || error)
+    logError('[E-XANH] Lỗi theo dõi người dùng:', error?.message || error)
     return { error }
   }
 
@@ -334,7 +335,7 @@ export async function unfollowUser(followingId) {
     .eq('following_id', followingId)
 
   if (error) {
-    console.error('[E-XANH] Lỗi hủy theo dõi người dùng:', error?.message || error)
+    logError('[E-XANH] Lỗi hủy theo dõi người dùng:', error?.message || error)
     return { error }
   }
 
@@ -353,7 +354,7 @@ export async function checkFollowStatus(followingId) {
     .maybeSingle()
 
   if (error) {
-    console.error('[E-XANH] Lỗi kiểm tra theo dõi:', error?.message || error)
+    logError('[E-XANH] Lỗi kiểm tra theo dõi:', error?.message || error)
     return { data: false, error }
   }
   

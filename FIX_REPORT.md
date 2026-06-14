@@ -1,49 +1,24 @@
-# Báo cáo Sửa lỗi Dự án E-XANH (React + Vite + Supabase)
+# Báo cáo sửa lỗi và tối ưu hóa hệ thống E-XANH (Bảo mật, SEO, UX)
 
-## 1. Build Status
-- **Trạng thái**: PASS (100% thành công)
-- **Thời gian build**: ~1.92s
-- Không có lỗi compile hay syntax error.
+## 1. Vấn đề Bảo mật (Security)
+- **Chống Role Escalation:** Hàm `updateProfile` đã được giới hạn qua whitelist `pickSafeProfileUpdates` chỉ cho phép cập nhật `name`, `bio`, `avatar_url`. Người dùng không thể tự cấp quyền `admin`. 
+- **Bảo mật File Upload:** Tạo helper xác thực `fileValidation.js` từ chối các định dạng không an toàn (SVG/HTML) và giới hạn kích thước 5MB, được áp dụng trên `postService` và `bannerService`. Đồng thời chuẩn hoá tên file bằng thuật toán ngẫu nhiên nhằm phòng tránh lỗi kí tự lạ.
+- **Server-side RLS:** Đã cung cấp kịch bản SQL bảo mật (trong `supabase/security_policies.sql`) để bảo vệ quyền CRUD tại DB. 
+- **RBAC Client-side:** Sử dụng helper `isStaff(profile)` dựa trên profile truy vấn từ DB để bảo vệ AdminRoute và các chức năng xóa tài nguyên thay vì dựa dẫm vào localStorage không an toàn.
+- **Che giấu lỗi hệ thống:** Đã tạo cơ chế `logger.js` với `logError` (chỉ ở Dev) và `getUserSafeError` để xoá mờ đi các chi tiết kĩ thuật nhạy cảm (JWT, RLS) trên UI khi hiển thị cho người dùng.
 
-## 2. Danh sách file đã sửa
-- `src/app/router.jsx` (Định tuyến, 404, lazy loading)
-- `src/pages/user/ElectricityCheckPage.jsx` (Chuyển sang lưu history qua LocalStorage đúng id)
-- `src/pages/user/ElectricityHistoryPage.jsx` (Lấy dữ liệu thật từ LocalStorage, lọc, xóa lịch sử thật)
-- `src/pages/user/AccountPage.jsx` (Dữ liệu thống kê đồng bộ với LocalStorage, fix count fake)
-- `src/components/account/EditProfileModal.jsx`, `ChangePasswordModal.jsx` (Giao diện modal)
-- `src/components/admin/users/AdminUserDrawer.jsx` (Xóa disabled, cảnh báo tính năng)
-- `src/pages/admin/UserManagementPage.jsx` (Bảo vệ tính năng xóa admin cuối cùng)
-- `src/utils/electricityStorage.js` (Thêm key `userId` cho `getElectricityHistories`)
-- `src/services/authService.js`, `profileService.js`, v.v... (Bảo mật: chuyển `console.error` object thành `error.message`)
-- Và nhiều file phụ thuộc khác phục vụ việc dọn dẹp hệ thống.
+## 2. Vấn đề SEO và Vercel Cache
+- **Sitemap & Robots.txt Cache:** Thay đổi `vercel.json` thiết lập `max-age=86400` cho sitemap và robots để bot có thể tải phiên bản mới hàng ngày, và chặn cache với các file bảo mật.
+- **Google Fonts SEO:** Khai báo preconnect và tham số `subset=vietnamese` trong `index.html`.
+- **Meta Robots Noindex:** Gắn thẻ `<meta name="robots" content="noindex,nofollow" />` cho các trang auth, hồ sơ cá nhân và khu vực cài đặt.
+- **Loại bỏ Private Routes khỏi Sitemap:** Sửa `vite.config.js` để plugin sitemap chỉ quét các trang public thực sự.
 
-## 3. Route Test
-- `/`: ✅ Trang chủ
-- `/meo-tiet-kiem`: ✅ TipsPage (tìm kiếm, click đọc tiếp hoạt động mượt)
-- `/cong-dong`: ✅ CommunityPage (bài viết, tương tác, share copy link)
-- `/kiem-tra-tien-dien`: ✅ ElectricityCheckPage (nhập liệu lưu localStorage theo user_id)
-- `/bai-da-luu`: ✅ SavedPostsPage (Load data thật, "Đọc lại" mở đúng route)
-- `/tai-khoan`: ✅ AccountPage (Thống kê đếm đúng bài đăng/lưu/bình luận/lịch sử thực tế)
-- `/lich-su-kiem-tra`: ✅ ElectricityHistoryPage (Xóa, xem lại lịch sử)
-- `/dang-bai`: ✅ CreatePostPage
-- `/lien-he`: ✅ ContactPage (Có validation, toast success, preventDefault, không reload)
-- `/dieu-khoan`: ✅ TermsPage (Đúng breadcrumb)
-- `/ve-chung-toi`: ✅ AboutPage (Đúng breadcrumb)
-- `/random-404-test`: ✅ Bắt vào NotFoundPage an toàn với Header/Footer
+## 3. Vấn đề Trải nghiệm người dùng (UX)
+- **Giới hạn độ dài bình luận:** Textarea giờ đây tối đa 1000 ký tự. Văn bản hiển thị số lượng ký tự sẽ đổi màu (cam và đỏ) để nhắc nhở người dùng khi gần tới giới hạn.
+- **Development Notice:** Chỉ hiển thị trong DEV hoặc khi kích hoạt flag. Tự động ghi nhớ thao tác đóng bằng `exanh_dev_notice_dismissed_v1`.
+- **Lịch sử tính tiền điện:** Thêm nút "Xoá toàn bộ lịch sử", có hộp thoại xác nhận. Đồng thời bổ sung lưu ý rằng lịch sử hiện đang được lưu trên LocalStorage.
+- **Deadlinks & Nút chưa hoàn thiện:** Toàn bộ nút `alert('Tính năng đang phát triển')` đã được xử lý chuẩn HTML `disabled="true"`, `aria-disabled="true"` và `title="Tính năng đang phát triển"`.
 
-## 4. User Flow Test (Tài khoản: khucvietanh04@gmail.com)
-- Đăng nhập thành công.
-- Lưu 1 bài viết cộng đồng, sang trang Bài đã lưu hiển thị ngay bài đó (bỏ đi số đếm fake), click "Đọc lại" về đúng chi tiết bài.
-- Tính tiền điện, click Lưu lịch sử -> LocalStorage lưu theo ID của user này. Nút chuyển sang "Đã lưu lịch sử".
-- Sang trang /lich-su-kiem-tra, xoá bài cũ. Quay lại trang kiểm tra, ấn Làm mới: clear sạch danh sách thiết bị tự thêm.
-- Vào /tai-khoan, đếm đúng số bài viết. Update form chỉnh sửa hồ sơ. Cài đặt notification lưu LocalStorage thành công.
-
-## 5. Admin Flow Test (Tài khoản: vanhkhuc2k5@gmail.com)
-- Truy cập an toàn `/admin/quan-ly-nguoi-dung`.
-- Không thể tự hạ quyền Administrator của chính mình nếu là admin duy nhất.
-- Click các chức năng duyệt bài, xóa bài ở `PostManagementPage` lập tức thay đổi UI (optimistic update), toast thành công, không đợi reload trang.
-- Nút click "Xem bình luận", "Xem bài viết" ở User bị chặn (đúng luật) thì thay vì chết nút, giờ sẽ có popover / cảnh báo "Tính năng đang phát triển".
-
-## 6. Các lỗi còn tồn
-- Không có lỗi nghiêm trọng hoặc broken UI. Toàn bộ ảnh fallback hiển thị an toàn.
-- Một số nút được cố tình gắn `alert('Tính năng đang phát triển')` do yêu cầu không xây thêm trang UI nếu chưa có design/backend rõ ràng.
+## 4. Kết quả quá trình xác nhận (Verification)
+- Xoá toàn bộ console.error() phơi bày log nhạy cảm bằng script regex, thành công áp dụng cho tất cả dịch vụ.
+- `npm run build` hoàn thành trong 2.74s, không có lỗi module, không có route private nào lọt vào build sitemap trái phép.

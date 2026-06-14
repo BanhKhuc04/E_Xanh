@@ -203,7 +203,7 @@ function LoginPage() {
                   <span>Ghi nhớ đăng nhập</span>
                 </label>
 
-                <button type="button" className="auth-form__link-button" disabled title="Tính năng đang phát triển" onClick={() => alert('Tính năng đang phát triển')}>
+                <button type="button" className="auth-form__link-button" disabled title="Tính năng đang phát triển" aria-disabled="true">
                   Quên mật khẩu?
                 </button>
               </div>

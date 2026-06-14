@@ -1,3 +1,4 @@
+import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 
 export async function signUpWithEmail({ name, email, password }) {
@@ -45,7 +46,7 @@ export async function signOut() {
 export async function getCurrentSession() {
   const { data, error } = await supabase.auth.getSession()
   if (error) {
-    console.error('[E-XANH] Lỗi lấy session:', error.message)
+    logError('[E-XANH] Lỗi lấy session:', error.message)
     return null
   }
   return data.session
@@ -61,7 +62,7 @@ export async function getCurrentUserProfile(userId) {
     .single()
 
   if (error) {
-    console.error('[E-XANH] Lỗi lấy profile:', error.message)
+    logError('[E-XANH] Lỗi lấy profile:', error.message)
     return null
   }
   return data

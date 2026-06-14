@@ -83,7 +83,7 @@ function CommentSection({ comments: mockComments, post }) {
             maxLength={1000}
           ></textarea>
           <div className="comment-section__actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.85rem', color: content.length > 1000 ? '#e53935' : '#888' }}>
+            <span style={{ fontSize: '0.85rem', color: content.length > 1000 ? '#e53935' : content.length > 900 ? '#f57c00' : '#888' }}>
               {content.length}/1000 ký tự
             </span>
             <button 

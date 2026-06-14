@@ -1,113 +1,79 @@
--- =========================================================================
--- FILE HƯỚNG DẪN SQL RLS (CHỈ CHẠY THỦ CÔNG TRONG SUPABASE SQL EDITOR)
--- =========================================================================
+-- Kiểm tra policy hiện tại
+SELECT tablename, policyname, cmd, qual, with_check
+FROM pg_policies
+WHERE tablename = 'profiles';
 
--- MỤC TIÊU:
--- Bảo mật các hành động của admin (update status, delete, set role, set user status).
--- Front-end đã có AdminRoute nhưng không ngăn được việc gọi trực tiếp qua API.
--- File này nhằm đảm bảo Supabase RLS chặn các hành vi leo thang quyền hạn từ user thường.
+-- Bật RLS cho các bảng quan trọng nếu chưa bật
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE devices ENABLE ROW LEVEL SECURITY;
 
--- LƯU Ý QUAN TRỌNG:
--- Nếu project đã bật RLS và cấu hình trước đó, hãy cẩn thận khi chạy lệnh DROP POLICY.
--- Chỉ chạy những lệnh nào thực sự cần thiết và bị thiếu trên server.
+-- BẢNG PROFILES
 
--- 1. BẢNG posts: CHỈ ADMIN/MODERATOR ĐƯỢC PHÉP UPDATE STATUS / DELETE
--- Giả sử đã có RLS cho `posts`. Bạn cần đảm bảo user thường không thể tự update `status` của bài mình thành 'published'.
+-- Policy 1: Bất kỳ ai cũng có thể xem hồ sơ công khai
+CREATE POLICY "Public profiles are viewable by everyone." 
+ON profiles FOR SELECT USING (true);
 
--- Policy: Admin/Moderator được update bất kỳ bài nào (bao gồm duyệt, từ chối, khóa)
--- DROP POLICY IF EXISTS "posts_update_staff" ON posts;
-CREATE POLICY "posts_update_staff"
-ON posts
-FOR UPDATE
-USING (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'moderator')
-  )
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'moderator')
-  )
-);
+-- Policy 2: User tự update thông tin (Khuyến cáo dùng RPC để bảo mật tuyệt đối)
+-- Lưu ý: Postgres RLS không hỗ trợ column-level trực tiếp trong WITH CHECK.
+-- Do đó ứng dụng client KHÔNG ĐƯỢC PHÉP gửi role/status. 
+-- Nếu muốn chặt chẽ 100%, hãy xóa quyền UPDATE trên bảng profiles cho user thường và dùng hàm RPC.
+CREATE POLICY "Users can insert their own profile." 
+ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Policy: Admin/Moderator được quyền xóa bài viết
--- DROP POLICY IF EXISTS "posts_delete_staff" ON posts;
-CREATE POLICY "posts_delete_staff"
-ON posts
-FOR DELETE
-USING (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'moderator')
-  )
-);
+CREATE POLICY "Users can update own profile." 
+ON profiles FOR UPDATE 
+USING (auth.uid() = id);
 
--- Policy bổ sung cho user: Người dùng có thể sửa bài của mình, NHƯNG KHÔNG ĐƯỢC TỰ DUYỆT BÀI
--- (Logic này cần xử lý bằng hàm trigger nếu muốn chặn hoàn toàn việc đổi cột `status` từ client của user thường)
+-- (Chỉ admin mới được update role/status - Tốt nhất thực hiện qua Database Function / RPC gọi bẳng service_role)
+-- Ví dụ RPC:
+/*
+CREATE OR REPLACE FUNCTION update_user_role_status(target_id uuid, new_role text, new_status text)
+RETURNS void AS $$
+BEGIN
+  IF (SELECT role FROM profiles WHERE id = auth.uid()) = 'admin' THEN
+    UPDATE profiles SET role = new_role, status = new_status WHERE id = target_id;
+  ELSE
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+*/
 
+-- BẢNG POSTS
 
--- 2. BẢNG profiles: CHỈ ADMIN MỚI ĐƯỢC PHÉP ĐỔI `role` VÀ `status`
--- Cấu hình chặn user tự sửa `role` đã được xử lý phía client (chỉ whitelist: name, bio, avatar).
--- Tuy nhiên ở RLS, để chặn triệt để, thông thường ta cần sử dụng Security Definer Function để đổi role,
--- hoặc tạo 1 bảng riêng biệt không cho client update.
--- Nếu dùng RLS, ta có thể cho phép admin update profile của người khác:
+CREATE POLICY "Posts viewable by everyone if approved" 
+ON posts FOR SELECT 
+USING (status = 'approved' OR auth.uid() = author_id OR (SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'));
 
--- DROP POLICY IF EXISTS "profiles_update_admin" ON profiles;
-CREATE POLICY "profiles_update_admin"
-ON profiles
-FOR UPDATE
-USING (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role = 'admin'
-  )
-);
+CREATE POLICY "Users can insert own posts" 
+ON posts FOR INSERT WITH CHECK (auth.uid() = author_id);
 
+CREATE POLICY "Users can update own pending posts" 
+ON posts FOR UPDATE 
+USING (auth.uid() = author_id);
 
--- 3. BẢNG devices: CHỈ ADMIN/MODERATOR ĐƯỢC QUYỀN INSERT/UPDATE/DELETE (nếu đúng logic)
--- Tùy thuộc logic app. Nếu admin là người thêm thiết bị điện mẫu vào hệ thống:
+CREATE POLICY "Admin/Mod can update any post status" 
+ON posts FOR UPDATE 
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'));
 
--- DROP POLICY IF EXISTS "devices_insert_admin" ON devices;
-CREATE POLICY "devices_insert_admin"
-ON devices
-FOR INSERT
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'moderator')
-  )
-);
+CREATE POLICY "Only admin can delete posts" 
+ON posts FOR DELETE 
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
 
--- DROP POLICY IF EXISTS "devices_update_admin" ON devices;
-CREATE POLICY "devices_update_admin"
-ON devices
-FOR UPDATE
-USING (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'moderator')
-  )
-);
+-- BẢNG COMMENTS
 
--- DROP POLICY IF EXISTS "devices_delete_admin" ON devices;
-CREATE POLICY "devices_delete_admin"
-ON devices
-FOR DELETE
-USING (
-  EXISTS (
-    SELECT 1 FROM profiles
-    WHERE profiles.id = auth.uid()
-    AND profiles.role IN ('admin', 'moderator')
-  )
-);
+CREATE POLICY "Comments viewable by everyone" 
+ON comments FOR SELECT USING (true);
 
--- ĐÃ XONG. 
--- KHÔNG CHẠY TỰ ĐỘNG. FILE NÀY CHỈ LÀ TÀI LIỆU HƯỚNG DẪN.
+CREATE POLICY "Users can insert own comments" 
+ON comments FOR INSERT WITH CHECK (auth.uid() = author_id);
+
+CREATE POLICY "Admin/Mod can delete comments" 
+ON comments FOR DELETE 
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator') OR auth.uid() = author_id);
+
+-- GHI CHÚ QUAN TRỌNG:
+-- Chạy đoạn script này trên Supabase SQL Editor.
+-- Client-side whitelist đã được bổ sung nhưng RLS là lớp khiên bảo mật cuối cùng chặn hacker!

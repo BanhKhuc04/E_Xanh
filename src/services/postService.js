@@ -1,4 +1,6 @@
+import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
+import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
 
 function generateSlug(title) {
   return title
@@ -12,20 +14,13 @@ function generateSlug(title) {
 }
 
 export async function uploadPostImage(file, userId) {
-  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-  const MAX_IMAGE_SIZE = 5 * 1024 * 1024
-
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return { publicUrl: null, error: new Error('Chỉ chấp nhận ảnh JPG, PNG, WebP hoặc GIF.') }
+  const validation = validateImageFile(file)
+  if (!validation.valid) {
+    return { publicUrl: null, error: new Error(validation.error) }
   }
 
-  if (file.size > MAX_IMAGE_SIZE) {
-    return { publicUrl: null, error: new Error('Ảnh không được vượt quá 5MB.') }
-  }
-
-  const safeFileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase()
-  const timestamp = new Date().getTime()
-  const path = `posts/${userId}/${timestamp}-${safeFileName}`
+  const safeFileName = createSafeFileName(file, 'post')
+  const path = `posts/${userId}/${safeFileName}`
 
   const { error } = await supabase.storage
     .from('post-images')
@@ -76,7 +71,7 @@ export async function createPost(postData) {
   if (postData.coverFile) {
     const { publicUrl, error: uploadError } = await uploadPostImage(postData.coverFile, userId)
     if (uploadError) {
-      console.error('Debug: Error uploading image:', uploadError?.message || uploadError)
+      logError('Debug: Error uploading image:', uploadError?.message || uploadError)
       return { data: null, error: new Error('Lỗi tải ảnh lên: ' + uploadError.message) }
     }
     imageUrl = publicUrl
@@ -101,7 +96,7 @@ export async function createPost(postData) {
     .single()
 
   if (error) {
-    console.error('Debug: Error inserting post:', {
+    logError('Debug: Error inserting post:', {
       message: error.message,
       details: error.details,
       hint: error.hint,

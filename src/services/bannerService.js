@@ -1,4 +1,6 @@
+import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
+import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
 
 export async function fetchBanners(pageKey, activeOnly = false) {
   let query = supabase
@@ -17,20 +19,13 @@ export async function fetchBanners(pageKey, activeOnly = false) {
 }
 
 export async function uploadBannerImage(file) {
-  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-  const MAX_IMAGE_SIZE = 5 * 1024 * 1024
-
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return { error: { message: 'Chỉ chấp nhận ảnh JPG, PNG, WebP hoặc GIF.' } }
+  const validation = validateImageFile(file)
+  if (!validation.valid) {
+    return { error: { message: validation.error } }
   }
 
-  if (file.size > MAX_IMAGE_SIZE) {
-    return { error: { message: 'Ảnh không được vượt quá 5MB.' } }
-  }
-
-  const fileExt = file.name ? file.name.split('.').pop() : 'jpeg'
-  const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
-  const filePath = `banners/${fileName}`
+  const safeFileName = createSafeFileName(file, 'banner')
+  const filePath = `banners/${safeFileName}`
 
   const { error: uploadError } = await supabase.storage
     .from('website-banners')
@@ -102,7 +97,7 @@ export async function deleteBanner(id, imageUrl) {
         await supabase.storage.from('website-banners').remove([filePath])
       }
     } catch (err) {
-      console.error('Failed to delete image from storage:', err?.message || err)
+      logError('Failed to delete image from storage:', err?.message || err)
     }
   }
 

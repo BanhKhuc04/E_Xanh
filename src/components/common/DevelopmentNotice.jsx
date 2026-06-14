@@ -10,13 +10,15 @@ const ReportIcon = () => (
 )
 
 function DevelopmentNotice() {
+  const shouldShow = import.meta.env.DEV || import.meta.env.VITE_SHOW_DEV_NOTICE === 'true'
+
   const [isDismissed, setIsDismissed] = useState(() => {
-    return localStorage.getItem('exanh_dev_notice_dismissed') === 'true'
+    return localStorage.getItem('exanh_dev_notice_dismissed_v1') === 'true'
   })
 
   const handleDismiss = () => {
     setIsDismissed(true)
-    localStorage.setItem('exanh_dev_notice_dismissed', 'true')
+    localStorage.setItem('exanh_dev_notice_dismissed_v1', 'true')
   }
 
   const formUrl = "https://forms.gle/H7haoeUWb16TNUDw6"
@@ -24,6 +26,8 @@ function DevelopmentNotice() {
   const handleReportClick = () => {
     window.open(formUrl, "_blank", "noopener,noreferrer")
   }
+
+  if (!shouldShow) return null
 
   return (
     <div className="development-notice-container">

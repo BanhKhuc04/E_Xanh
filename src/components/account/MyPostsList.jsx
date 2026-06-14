@@ -12,7 +12,7 @@ function MyPostsList({ posts }) {
   }
 
   function handleEdit() {
-    alert('Tính năng chỉnh sửa bài viết đang phát triển!')
+    // alert('Tính năng chỉnh sửa bài viết đang phát triển!')
   }
 
   return (
@@ -44,7 +44,7 @@ function MyPostsList({ posts }) {
 
             <div className="account-my-posts__actions">
               <button type="button" onClick={() => handleView(post)}>Xem</button>
-              <button type="button" onClick={handleEdit}>Chỉnh sửa</button>
+              <button className="btn btn--secondary btn--small" disabled title="Tính năng đang phát triển" aria-disabled="true">Chỉnh sửa</button>
             </div>
           </article>
         ))}

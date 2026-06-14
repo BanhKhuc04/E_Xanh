@@ -1,3 +1,4 @@
+import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 import { getCurrentSession } from './authService'
 
@@ -9,7 +10,7 @@ export async function getVisibleDevices() {
     .order('name')
   
   if (error) {
-    console.error('[E-XANH] Lỗi lấy danh sách thiết bị:', error?.message || error)
+    logError('[E-XANH] Lỗi lấy danh sách thiết bị:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -34,7 +35,7 @@ export async function saveElectricityCheck({ summary, devices }) {
     .single()
 
   if (checkError) {
-    console.error('[E-XANH] Lỗi lưu electricity_check:', checkError?.message || checkError)
+    logError('[E-XANH] Lỗi lưu electricity_check:', checkError?.message || checkError)
     return { data: null, error: checkError }
   }
 
@@ -52,7 +53,7 @@ export async function saveElectricityCheck({ summary, devices }) {
     .insert(itemsPayload)
 
   if (itemsError) {
-    console.error('[E-XANH] Lỗi lưu electricity_check_items:', itemsError?.message || itemsError)
+    logError('[E-XANH] Lỗi lưu electricity_check_items:', itemsError?.message || itemsError)
     return { data: null, error: itemsError }
   }
 
@@ -75,7 +76,7 @@ export async function getMyElectricityChecks() {
     .order('checked_at', { ascending: false })
 
   if (error) {
-    console.error('[E-XANH] Lỗi lấy electricity_checks:', error?.message || error)
+    logError('[E-XANH] Lỗi lấy electricity_checks:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -97,7 +98,7 @@ export async function getElectricityCheckById(id) {
     .single()
 
   if (error) {
-    console.error('[E-XANH] Lỗi lấy chi tiết check:', error?.message || error)
+    logError('[E-XANH] Lỗi lấy chi tiết check:', error?.message || error)
     return { data: null, error }
   }
   return { data, error: null }
@@ -116,7 +117,7 @@ export async function deleteElectricityCheck(id) {
     .eq('user_id', session.user.id)
 
   if (error) {
-    console.error('[E-XANH] Lỗi xóa electricity_check:', error?.message || error)
+    logError('[E-XANH] Lỗi xóa electricity_check:', error?.message || error)
     return { error }
   }
   return { error: null }

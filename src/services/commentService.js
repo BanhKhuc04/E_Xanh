@@ -1,3 +1,4 @@
+import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 
 export async function getCommentsByPost(postId) {
@@ -13,7 +14,7 @@ export async function getCommentsByPost(postId) {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error fetching comments:', error?.message || error)
+    logError('Error fetching comments:', error?.message || error)
     return { data: null, error }
   }
 
@@ -55,7 +56,7 @@ export async function createComment(postId, content) {
     .single()
 
   if (error) {
-    console.error('Error creating comment:', error?.message || error)
+    logError('Error creating comment:', error?.message || error)
     return { data: null, error }
   }
 
@@ -83,7 +84,7 @@ export async function getMyComments(userId) {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error fetching my comments:', error?.message || error)
+    logError('Error fetching my comments:', error?.message || error)
     return { data: null, error }
   }
 

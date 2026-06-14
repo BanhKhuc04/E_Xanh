@@ -10,6 +10,7 @@ import {
 import {
   deleteElectricityHistory,
   getElectricityHistories,
+  clearElectricityHistories,
   setScrollToResultFlag,
   setRecalculateDevices,
 } from '../../utils/electricityStorage'
@@ -140,6 +141,20 @@ function ElectricityHistoryPage() {
     }
 
     if (selectedHistory?.id === id) {
+      setSelectedHistory(null)
+    }
+  }
+
+  async function handleDeleteAll() {
+    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử kiểm tra điện không? Thao tác này không thể hoàn tác.')) {
+      const { getCurrentSession } = await import('../../services/authService')
+      const session = await getCurrentSession()
+      
+      if (session?.user) {
+        setHistories(clearElectricityHistories(session.user.id))
+      } else {
+        setHistories(clearElectricityHistories('guest'))
+      }
       setSelectedHistory(null)
     }
   }
@@ -282,6 +297,17 @@ function ElectricityHistoryPage() {
           Làm mới
         </button>
       </section>
+
+      {histories.length > 0 && (
+        <div style={{ padding: '0 5%', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <p style={{ fontSize: '0.85rem', color: '#666', margin: 0 }}>
+            Lịch sử kiểm tra điện được lưu trên trình duyệt này. Bạn có thể xoá bất cứ lúc nào.
+          </p>
+          <button type="button" onClick={handleDeleteAll} style={{ background: 'none', border: 'none', color: '#e53935', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}>
+            Xóa toàn bộ lịch sử
+          </button>
+        </div>
+      )}
 
       {histories.length === 0 ? (
         <section className="electricity-history-empty">

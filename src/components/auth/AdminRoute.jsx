@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
+import { isStaff } from '../../utils/permissions'
 import BrandLogo from '../../components/common/BrandLogo'
 
 function AdminRoute() {
@@ -30,7 +31,7 @@ function AdminRoute() {
         const profile = await getCurrentUserProfile(session.user.id)
         
         if (isMounted) {
-          if (profile && (profile.role === 'admin' || profile.role === 'moderator')) {
+          if (isStaff(profile)) {
             setIsAdmin(true)
           }
           setLoading(false)
