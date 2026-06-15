@@ -746,6 +746,8 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .admin-topbar__avatar {
@@ -757,6 +759,7 @@
   color: #fff;
   font-weight: 700;
   background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
+  flex-shrink: 0;
 }
 
 .admin-main {
