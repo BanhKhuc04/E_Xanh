@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { userRoleMap, userStatusMap } from '../../../data/adminUsers'
 
 function AdminUserDrawer({
@@ -6,26 +6,33 @@ function AdminUserDrawer({
   onClose,
   onChangeStatus,
   onChangeRole,
+  onSaveNote,
+  onViewPosts,
+  onViewComments,
+  onDeactivate,
+  canManageUsers,
+  isBusy = false,
 }) {
   const [adminNote, setAdminNote] = useState('')
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [isSavingNote, setIsSavingNote] = useState(false)
+
+  useEffect(() => {
+    setAdminNote(user?.adminNote ?? '')
+  }, [user])
 
   if (!user) return null
 
   const roleInfo = userRoleMap[user.role] ?? userRoleMap.user
   const statusInfo = userStatusMap[user.status] ?? userStatusMap.active
-  const isLocked = user.status === 'locked'
-  
-  const handleRoleChange = async (e) => {
-    setIsUpdating(true)
-    await onChangeRole(user.id, e.target.value)
-    setIsUpdating(false)
-  }
+  const isLocked = ['locked', 'blocked'].includes(user.status)
+  const isDeleted = user.status === 'deleted'
 
-  const handleStatusChange = async (newStatus) => {
-    setIsUpdating(true)
-    await onChangeStatus(user.id, newStatus)
-    setIsUpdating(false)
+  async function handleSaveNote() {
+    if (!onSaveNote) return
+
+    setIsSavingNote(true)
+    await onSaveNote(user.id, adminNote)
+    setIsSavingNote(false)
   }
 
   return (
@@ -37,7 +44,12 @@ function AdminUserDrawer({
       />
       <aside className="au-drawer" role="dialog" aria-label="Chi tiết người dùng">
         <div className="au-drawer__header">
-          <h3>Chi tiết người dùng</h3>
+          <div>
+            <h3>Chi tiết người dùng</h3>
+            <p className="au-drawer__hint">
+              Theo dõi hành vi tài khoản, lưu ghi chú quản trị và thao tác quyền khi cần.
+            </p>
+          </div>
           <button
             type="button"
             className="au-drawer__close"
@@ -52,7 +64,13 @@ function AdminUserDrawer({
 
         <div className="au-drawer__body">
           <div className="au-drawer__profile">
-            <span className="au-drawer__avatar">{user.avatar}</span>
+            <span className="au-drawer__avatar">
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="au-drawer__avatar-img" />
+              ) : (
+                user.avatar
+              )}
+            </span>
             <div>
               <strong>{user.name}</strong>
               <span className="au-drawer__email">{user.email}</span>
@@ -75,9 +93,17 @@ function AdminUserDrawer({
             </div>
             <div className="au-drawer__field">
               <span className="au-drawer__label">Lần hoạt động gần nhất</span>
-              <span>{user.lastActive}</span>
+              <span title={user.lastActiveFull}>{user.lastActive}</span>
             </div>
           </div>
+
+          {(user.banReason || user.deletedAt) ? (
+            <div className="au-drawer__field">
+              <span className="au-drawer__label">Thông tin xử lý tài khoản</span>
+              {user.banReason ? <span>Lý do khóa gần nhất: {user.banReason}</span> : null}
+              {user.deletedAt ? <span>Vô hiệu hóa lúc: {new Date(user.deletedAt).toLocaleString('vi-VN')}</span> : null}
+            </div>
+          ) : null}
 
           <div className="au-drawer__metrics-grid">
             <div className="au-drawer__metric">
@@ -99,67 +125,113 @@ function AdminUserDrawer({
           </div>
 
           <div className="au-drawer__field">
-            <span className="au-drawer__label">Hoạt động gần đây</span>
+            <div className="au-drawer__section-head">
+              <span className="au-drawer__label">Hoạt động gần đây</span>
+              <button
+                type="button"
+                className="btn btn--ghost au-drawer__jump-btn"
+                onClick={() => onViewPosts?.(user)}
+              >
+                Xem bài đã đăng
+              </button>
+            </div>
             <ul className="au-drawer__activity-list">
               {user.recentActivities.map((activity, index) => (
-                <li key={index}>{activity}</li>
+                <li key={`${user.id}-activity-${index}`}>{activity}</li>
               ))}
             </ul>
+          </div>
+
+          <div className="au-drawer__drawer-actions">
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => onViewPosts?.(user)}
+            >
+              Xem bài đã đăng
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => onViewComments?.(user)}
+            >
+              Xem bình luận
+            </button>
           </div>
 
           <div className="au-drawer__field">
             <span className="au-drawer__label">Ghi chú admin</span>
             <textarea
               className="au-drawer__note"
-              rows="3"
-              placeholder="Nhập ghi chú về người dùng này..."
+              rows="4"
+              placeholder="Nhập ghi chú nội bộ về tài khoản này..."
               value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
+              onChange={(event) => setAdminNote(event.target.value)}
+              disabled={!onSaveNote || isSavingNote}
             />
+            <div className="au-drawer__note-actions">
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={handleSaveNote}
+                disabled={!onSaveNote || isSavingNote}
+              >
+                {isSavingNote ? 'Đang lưu...' : 'Lưu ghi chú'}
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="au-drawer__footer">
-          {isLocked ? (
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={() => handleStatusChange('active')}
-              disabled={isUpdating}
-            >
-              Mở khóa
-            </button>
+          {canManageUsers ? (
+            <>
+              {isLocked ? (
+                <button
+                  type="button"
+                  className="btn btn--primary"
+                  onClick={() => onChangeStatus(user)}
+                  disabled={isBusy}
+                >
+                  {isBusy ? 'Đang xử lý...' : 'Mở khóa'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn--ghost au-drawer__lock-btn"
+                  onClick={() => onChangeStatus(user)}
+                  disabled={isBusy || isDeleted}
+                >
+                  {isBusy ? 'Đang xử lý...' : 'Khóa tài khoản'}
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="btn btn--ghost au-drawer__deactivate-btn"
+                onClick={() => onDeactivate?.(user)}
+                disabled={isBusy || isDeleted}
+              >
+                {isDeleted ? 'Tài khoản đã vô hiệu hóa' : 'Vô hiệu hóa tài khoản'}
+              </button>
+
+              <label className="au-drawer__role-field">
+                <span className="au-drawer__label">Đổi vai trò</span>
+                <select
+                  value={user.role}
+                  onChange={(event) => onChangeRole(user, event.target.value)}
+                  disabled={isBusy || isDeleted}
+                >
+                  <option value="user">Người dùng</option>
+                  <option value="moderator">Moderator</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+            </>
           ) : (
-            <button
-              type="button"
-              className="btn btn--ghost au-drawer__lock-btn"
-              onClick={() => handleStatusChange('locked')}
-              disabled={isUpdating}
-            >
-              Khóa tài khoản
-            </button>
+            <div className="au-drawer__readonly">
+              Tài khoản moderator đang ở chế độ chỉ xem trên trang này. Chỉ admin mới được đổi role hoặc khóa tài khoản.
+            </div>
           )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 'bold' }}>Đổi vai trò:</span>
-            <select
-              value={user.role}
-              onChange={handleRoleChange}
-              disabled={isUpdating}
-              style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc' }}
-            >
-              <option value="user">Người dùng</option>
-              <option value="moderator">Moderator</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <button type="button" className="btn btn--ghost" disabled title="Tính năng đang phát triển" aria-disabled="true">
-            Xem bài đã đăng
-          </button>
-          <button type="button" className="btn btn--ghost" disabled title="Tính năng đang phát triển" aria-disabled="true">
-            Xem bình luận
-          </button>
         </div>
       </aside>
     </>

@@ -1,8 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-import {
-  adminDeviceStats,
-  savingTipsHighlight,
-} from '../../data/adminDevices'
 import { 
   getAllDevicesAdmin, 
   createDevice, 
@@ -58,6 +54,38 @@ function DeviceManagementPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDevices()
   }, [loadDevices])
+
+  const computedStats = [
+    {
+      label: 'Tổng thiết bị',
+      value: devices.length,
+      icon: 'total',
+      accent: 'success',
+    },
+    {
+      label: 'Thiết bị đang dùng',
+      value: devices.filter((device) => device.is_visible).length,
+      icon: 'active',
+      accent: 'highlight',
+    },
+    {
+      label: 'Tiêu thụ cao',
+      value: devices.filter((device) => Number(device.default_power) > 800).length,
+      icon: 'high',
+      accent: 'warning',
+    },
+    {
+      label: 'Có mẹo tiết kiệm',
+      value: devices.filter((device) => String(device.tips || '').trim()).length,
+      icon: 'tips',
+      accent: 'muted',
+    },
+  ]
+
+  const topTips = devices
+    .map((device) => device.tips)
+    .filter(Boolean)
+    .slice(0, 4)
 
   const filteredDevices = devices.filter((device) => {
     const matchSearch =
@@ -225,7 +253,7 @@ function DeviceManagementPage() {
         </div>
       </section>
 
-      <AdminDeviceStats stats={adminDeviceStats} />
+      <AdminDeviceStats stats={computedStats} />
 
       <AdminDeviceFilter
         search={search}
@@ -236,7 +264,7 @@ function DeviceManagementPage() {
         onLevelChange={setLevel}
         status={status}
         onStatusChange={setStatus}
-        onFilter={() => alert('Bộ lọc đã được tự động áp dụng.')}
+        onFilter={() => showToast('Bộ lọc đã được áp dụng tự động.', 'warning')}
         onReset={handleReset}
       />
 
@@ -248,8 +276,19 @@ function DeviceManagementPage() {
       />
 
       {isLoading ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Đang tải dữ liệu thiết bị...
+        <div style={{ marginTop: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '18px', marginBottom: '24px' }}>
+            <div style={{ height: '90px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '90px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '90px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '90px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          </div>
+          <div style={{ height: '60px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', marginBottom: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ height: '60px', background: 'rgba(255,255,255,0.7)', borderRadius: '12px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '60px', background: 'rgba(255,255,255,0.7)', borderRadius: '12px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '60px', background: 'rgba(255,255,255,0.7)', borderRadius: '12px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          </div>
         </div>
       ) : (
         <AdminDeviceList
@@ -263,7 +302,7 @@ function DeviceManagementPage() {
         />
       )}
 
-      <AdminDeviceTipsCard tips={savingTipsHighlight} />
+      <AdminDeviceTipsCard tips={topTips.length ? topTips : ['Chưa có mẹo tiết kiệm nào trong dữ liệu thiết bị hiện tại.']} />
 
       {drawerMode && (
         <AdminDeviceFormDrawer

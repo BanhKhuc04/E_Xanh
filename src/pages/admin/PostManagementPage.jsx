@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect } from 'react'
-import { adminPostStats } from '../../data/adminPosts'
+import { useSearchParams } from 'react-router-dom'
 import AdminPostStats from '../../components/admin/posts/AdminPostStats'
 import AdminPostFilter from '../../components/admin/posts/AdminPostFilter'
 import AdminPostBulkAction from '../../components/admin/posts/AdminPostBulkAction'
 import AdminPostList from '../../components/admin/posts/AdminPostList'
 import AdminPostPreview from '../../components/admin/posts/AdminPostPreview'
-import { getAllAdminPosts, updatePostStatus, createPost, updatePost, deletePost } from '../../services/postService'
+import { getAllAdminPosts, updatePostStatus, createPost, updatePost, deletePost, uploadPostInlineImage } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
+import PostContentEditor from '../../components/community/PostContentEditor'
+import '../../styles/block-editor.css'
 import '../../styles/admin-posts.css'
 
 const statusLabelToKey = {
@@ -17,6 +19,7 @@ const statusLabelToKey = {
 }
 
 function PostManagementPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [posts, setPosts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
@@ -29,6 +32,8 @@ function PostManagementPage() {
   const [toast, setToast] = useState('')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [userRole, setUserRole] = useState(null)
+  const authorFilterId = searchParams.get('authorId') || ''
+  const authorFilterName = searchParams.get('authorName') || ''
 
   // States for Add/Edit Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -37,11 +42,13 @@ function PostManagementPage() {
     title: '',
     description: '',
     content: '',
+    content_blocks: [],
     image_url: '',
-    type: 'Mẹo tiết kiệm',
-    status: 'pending'
+    type: 'tip',
+    status: 'approved'
   })
   const [formLoading, setFormLoading] = useState(false)
+  const [isUploadingInlineImage, setIsUploadingInlineImage] = useState(false)
 
   const showToast = useCallback((message) => {
     setToast(message)
@@ -72,6 +79,7 @@ function PostManagementPage() {
       } else if (data) {
         const mapped = data.map(post => ({
           id: post.id,
+          authorId: post.author_id,
           title: post.title,
           author: post.profiles?.name || 'Người dùng ẩn danh',
           type: post.type === 'tip' ? 'Mẹo tiết kiệm' : (post.type === 'community' ? 'Cộng đồng' : post.type),
@@ -83,6 +91,7 @@ function PostManagementPage() {
           imageUrl: post.image_url || '',
           description: post.description || '',
           contentPreview: post.content || '',
+          contentBlocks: post.content_blocks || [],
           likes: post.likes_count || 0,
           comments: post.comments_count || 0,
         }))
@@ -97,6 +106,9 @@ function PostManagementPage() {
   }, [showToast, refreshTrigger])
 
   const filteredPosts = posts.filter((post) => {
+    const matchAuthorId =
+      authorFilterId === '' || post.authorId === authorFilterId
+
     const matchSearch =
       search === '' ||
       post.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -125,7 +137,7 @@ function PostManagementPage() {
       }
     }
 
-    return matchSearch && matchCategory && matchStatus && matchDate
+    return matchAuthorId && matchSearch && matchCategory && matchStatus && matchDate
   }).sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
 
   const handleToggleSelect = (id) => {
@@ -151,6 +163,14 @@ function PostManagementPage() {
   }
 
   const handleChangeStatus = async (id, newStatus, adminNote = null) => {
+    const actionMap = {
+      approved: 'duyệt',
+      rejected: 'từ chối',
+      blocked: 'khóa',
+    }
+    if (!window.confirm(`Bạn chắc chắn muốn ${actionMap[newStatus] || 'cập nhật'} bài viết này?`)) {
+      return
+    }
     setPosts(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p))
     const { error } = await updatePostStatus(id, newStatus, adminNote)
     if (error) {
@@ -162,6 +182,7 @@ function PostManagementPage() {
   }
 
   const handleBulkApprove = async () => {
+    if (!window.confirm(`Duyệt ${selectedIds.length} bài viết đã chọn?`)) return
     setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'approved' } : p))
     for (const id of selectedIds) {
       await updatePostStatus(id, 'approved')
@@ -171,6 +192,7 @@ function PostManagementPage() {
   }
 
   const handleBulkReject = async () => {
+    if (!window.confirm(`Từ chối ${selectedIds.length} bài viết đã chọn?`)) return
     setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'rejected' } : p))
     for (const id of selectedIds) {
       await updatePostStatus(id, 'rejected')
@@ -194,6 +216,7 @@ function PostManagementPage() {
       title: '',
       description: '',
       content: '',
+      content_blocks: [],
       image_url: '',
       type: 'tip',
       status: 'approved'
@@ -207,6 +230,7 @@ function PostManagementPage() {
       title: post.title,
       description: post.description,
       content: post.contentPreview,
+      content_blocks: post.contentBlocks || [],
       image_url: post.imageUrl || '',
       type: post.rawType || post.type,
       status: post.status
@@ -223,7 +247,7 @@ function PostManagementPage() {
     e.preventDefault()
     setFormLoading(true)
 
-    if (!formData.title.trim() || !formData.content.trim()) {
+    if (!formData.title.trim() || (!formData.content.trim() && formData.content_blocks.length === 0)) {
       showToast('Vui lòng nhập đầy đủ Tiêu đề và Nội dung.')
       setFormLoading(false)
       return
@@ -266,6 +290,36 @@ function PostManagementPage() {
   }
 
   const activePost = posts.find((p) => p.id === activePostId) ?? null
+  const computedStats = [
+    {
+      label: 'Chờ duyệt',
+      value: posts.filter((post) => post.status === 'pending').length,
+      icon: 'pending',
+      accent: 'warning',
+    },
+    {
+      label: 'Đã duyệt',
+      value: posts.filter((post) => post.status === 'approved').length,
+      icon: 'approved',
+      accent: 'success',
+    },
+    {
+      label: 'Bị từ chối',
+      value: posts.filter((post) => post.status === 'rejected').length,
+      icon: 'rejected',
+      accent: 'muted',
+    },
+    {
+      label: 'Bài mới hôm nay',
+      value: posts.filter((post) => {
+        const submitted = new Date(post.submittedAt)
+        const now = new Date()
+        return submitted.toDateString() === now.toDateString()
+      }).length,
+      icon: 'today',
+      accent: 'highlight',
+    },
+  ]
 
   return (
     <div className="ap-page page" style={{ position: 'relative' }}>
@@ -282,8 +336,44 @@ function PostManagementPage() {
         </button>
       </section>
 
+      {authorFilterId ? (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          padding: '14px 18px',
+          borderRadius: '18px',
+          background: 'rgba(234, 245, 157, 0.32)',
+          border: '1px solid rgba(79, 132, 40, 0.12)',
+        }}>
+          <span>
+            Đang lọc bài viết theo người dùng: <strong>{authorFilterName || authorFilterId}</strong>
+          </span>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => setSearchParams({})}
+          >
+            Xóa bộ lọc này
+          </button>
+        </div>
+      ) : null}
+
       {isLoading ? (
-        <div style={{ padding: '40px', textAlign: 'center' }}>Đang tải dữ liệu...</div>
+        <div style={{ marginTop: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '18px', marginBottom: '24px' }}>
+            <div style={{ height: '100px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '100px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '100px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '100px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          </div>
+          <div style={{ height: '60px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', marginBottom: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
+            <div style={{ height: '300px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '300px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          </div>
+        </div>
       ) : errorMsg ? (
         <div style={{ padding: '40px', textAlign: 'center', color: '#dc3545', fontWeight: 'bold' }}>
           {errorMsg}
@@ -294,7 +384,7 @@ function PostManagementPage() {
         </div>
       ) : (
         <>
-          <AdminPostStats stats={adminPostStats} />
+          <AdminPostStats stats={computedStats} />
 
           <AdminPostFilter
             search={search}
@@ -305,7 +395,7 @@ function PostManagementPage() {
             onStatusChange={setStatus}
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
-            onFilter={() => alert('Bộ lọc đã được tự động áp dụng.')}
+            onFilter={() => showToast('Bộ lọc đã được áp dụng tự động.', 'warning')}
             onReset={handleReset}
           />
 
@@ -419,12 +509,25 @@ function PostManagementPage() {
 
               <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <strong>Nội dung</strong>
-                <textarea 
-                  value={formData.content} 
-                  onChange={e => setFormData({...formData, content: e.target.value})}
-                  required 
-                  rows="6"
-                  style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                <PostContentEditor
+                  id="admin-post-content"
+                  value={formData.content}
+                  blocks={formData.content_blocks}
+                  onChange={(val) => setFormData({ ...formData, content: val })}
+                  onChangeBlocks={(blocks) => setFormData({ ...formData, content_blocks: blocks })}
+                  onInsertImage={async (file) => {
+                    const session = await getCurrentSession()
+                    if (!session?.user) throw new Error('Not logged in')
+                    setIsUploadingInlineImage(true)
+                    try {
+                      const { publicUrl, error } = await uploadPostInlineImage(file, session.user.id)
+                      if (error) throw error
+                      return publicUrl
+                    } finally {
+                      setIsUploadingInlineImage(false)
+                    }
+                  }}
+                  isUploadingImage={isUploadingInlineImage}
                 />
               </label>
 

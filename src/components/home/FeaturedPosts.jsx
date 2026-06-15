@@ -126,10 +126,12 @@ function FeaturedPosts() {
                   <h3>{post.title}</h3>
 
                   <div className="home-post-card__meta">
-                    <span className="home-avatar home-avatar--primary">
-                      {getInitials(authorName)}
-                    </span>
-                    <strong>{authorName}</strong>
+                    <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
+                      <span className="home-avatar home-avatar--primary">
+                        {getInitials(authorName)}
+                      </span>
+                      <strong>{authorName}</strong>
+                    </Link>
                     <span>{new Date(post.created_at).toLocaleDateString('vi-VN')}</span>
                   </div>
                 </div>

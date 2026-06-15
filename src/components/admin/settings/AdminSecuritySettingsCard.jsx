@@ -1,6 +1,14 @@
 import AdminToggle from './AdminToggle'
 
-function AdminSecuritySettingsCard({ security, onToggle, onSave }) {
+function AdminSecuritySettingsCard({
+  security,
+  onToggle,
+  onSave,
+  newPassword = '',
+  onPasswordChange,
+  canToggleTwoFactor = false,
+  twoFactorDescription = 'Xác minh 2 bước chưa được bật trong phiên bản hiện tại.',
+}) {
   return (
     <div className="st-card">
       <h3 className="st-card__title">Bảo mật admin</h3>
@@ -12,6 +20,8 @@ function AdminSecuritySettingsCard({ security, onToggle, onSave }) {
           className="st-card__input"
           placeholder="Nhập mật khẩu mới..."
           autoComplete="new-password"
+          value={newPassword}
+          onChange={(event) => onPasswordChange?.(event.target.value)}
         />
       </div>
 
@@ -20,7 +30,8 @@ function AdminSecuritySettingsCard({ security, onToggle, onSave }) {
           checked={security.twoFactor}
           onChange={(val) => onToggle('twoFactor', val)}
           label="Bật xác minh 2 bước"
-          description="Yêu cầu mã xác nhận khi đăng nhập từ thiết bị mới."
+          description={twoFactorDescription}
+          disabled={!canToggleTwoFactor}
         />
         <AdminToggle
           checked={security.autoLogout}
@@ -32,14 +43,18 @@ function AdminSecuritySettingsCard({ security, onToggle, onSave }) {
 
       <div className="st-card__field">
         <span className="st-card__label">Lịch sử đăng nhập gần đây</span>
-        <ul className="st-login-history">
-          {security.loginHistory.map((entry, i) => (
-            <li key={i}>
-              <span className="st-login-history__time">{entry.time}</span>
-              <span className="st-login-history__action">{entry.action}</span>
-            </li>
-          ))}
-        </ul>
+        {security.loginHistory?.length ? (
+          <ul className="st-login-history">
+            {security.loginHistory.map((entry, i) => (
+              <li key={i}>
+                <span className="st-login-history__time">{entry.time}</span>
+                <span className="st-login-history__action">{entry.action}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="st-card__helper">Chưa có dữ liệu lịch sử đăng nhập để hiển thị trong giao diện này.</span>
+        )}
       </div>
 
       <div className="st-card__actions">

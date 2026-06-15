@@ -52,10 +52,15 @@
   gap: 14px;
 }
 
-.electricity-hero__secondary,
-.electricity-tool-layout__reset {
+.electricity-hero__secondary {
   color: #336a29;
   background: #eaf59d;
+}
+
+.electricity-tool-layout__reset {
+  color: #336a29;
+  background: transparent;
+  border: 1.5px solid #336a29;
 }
 
 .electricity-hero__visual {
@@ -198,6 +203,31 @@
 .device-usage-list {
   display: grid;
   gap: 12px;
+}
+
+.device-usage-list--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px dashed rgba(128, 177, 85, 0.4);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.device-usage-list__empty-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #173715;
+  margin: 0 0 8px 0;
+}
+
+.device-usage-list__empty-desc {
+  font-size: 0.95rem;
+  color: rgba(23, 55, 21, 0.7);
+  margin: 0;
 }
 
 .device-usage-item {
@@ -501,7 +531,7 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .electricity-form__grid,
   .saving-suggestions,
   .electricity-history__head,
@@ -522,4 +552,41 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+@media (max-width: 480px) {
+  .saving-suggestions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations for lively interaction */
+.saving-suggestion-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.saving-suggestion-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(79, 132, 40, 0.15);
+}
+
+.saving-suggestion-card:hover .saving-suggestion-card__icon {
+  animation: bounceIcon 0.6s cubic-bezier(0.28, 0.84, 0.42, 1) forwards;
+}
+
+@keyframes bounceIcon {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+  60% { transform: translateY(0); }
+  80% { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+
+.electricity-formula__box {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.electricity-formula__box:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 28px rgba(79, 132, 40, 0.12);
 }

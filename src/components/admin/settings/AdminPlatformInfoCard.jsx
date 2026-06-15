@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function AdminPlatformInfoCard({ initial, onSave }) {
   const [form, setForm] = useState(initial)
+
+  useEffect(() => {
+    setForm(initial)
+  }, [initial])
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }))

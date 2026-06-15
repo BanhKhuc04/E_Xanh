@@ -16,6 +16,16 @@ function AccountInfoCard({ user }) {
             <strong style={{ lineHeight: 1.5 }}>{user.bio}</strong>
           </div>
         ) : null}
+        {user.facebook_url ? (
+          <div>
+            <span>Facebook</span>
+            <strong>
+              <a href={user.facebook_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-600)' }}>
+                Xem hồ sơ ↗
+              </a>
+            </strong>
+          </div>
+        ) : null}
         <div>
           <span>Khu vực</span>
           <strong>Chưa cập nhật</strong>

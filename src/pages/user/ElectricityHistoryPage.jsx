@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import {
-  electricityHistory,
   formatCurrency,
   formatHistoryDate,
   formatKwh,
@@ -14,18 +13,12 @@ import {
   setScrollToResultFlag,
   setRecalculateDevices,
 } from '../../utils/electricityStorage'
-import heroImage from '../../assets/hero.png'
 import '../../styles/electricity-history.css'
 
 const defaultFilters = {
   searchValue: '',
   timeFilter: 'Tất cả thời gian',
   costFilter: 'Tất cả mức chi phí',
-}
-
-function getDisplayHistories() {
-  const histories = getElectricityHistories()
-  return histories.length > 0 ? histories : []
 }
 
 function isWithinDays(dateString, days) {
@@ -63,7 +56,34 @@ function ElectricityHistoryPage() {
       const session = await getCurrentSession()
       
       if (session?.user) {
-        setHistories(getElectricityHistories(session.user.id))
+        try {
+          const { getMyElectricityChecks } = await import('../../services/electricityService')
+          const { data, error } = await getMyElectricityChecks()
+          if (!error && data) {
+            const mapped = data.map(dbCheck => ({
+              id: dbCheck.id,
+              checkedAt: dbCheck.checked_at,
+              deviceCount: dbCheck.items?.length || 0,
+              totalKwh: Number(dbCheck.total_kwh),
+              estimatedCost: dbCheck.estimated_cost,
+              highestDevice: dbCheck.highest_device,
+              savingPercent: dbCheck.saving_percent,
+              items: (dbCheck.items || []).map(item => ({
+                deviceName: item.device_name,
+                power: item.power,
+                hoursPerDay: Number(item.hours_per_day),
+                daysPerMonth: item.days_per_month,
+                kwh: Number(item.kwh)
+              }))
+            }))
+            setHistories(mapped)
+          } else {
+            setHistories(getElectricityHistories(session.user.id))
+          }
+        } catch (e) {
+          console.error(e)
+          setHistories(getElectricityHistories(session.user.id))
+        }
       } else {
         setHistories(getElectricityHistories('guest'))
       }
@@ -133,8 +153,21 @@ function ElectricityHistoryPage() {
     const session = await getCurrentSession()
     
     if (session?.user) {
-      const next = deleteElectricityHistory(id, session.user.id)
-      setHistories(next)
+      try {
+        const { deleteElectricityCheck } = await import('../../services/electricityService')
+        const { error } = await deleteElectricityCheck(id)
+        if (!error) {
+          setHistories(prev => prev.filter(item => item.id !== id))
+        } else {
+          // fallback delete locally
+          const next = deleteElectricityHistory(id, session.user.id)
+          setHistories(next)
+        }
+      } catch (err) {
+        console.error(err)
+        const next = deleteElectricityHistory(id, session.user.id)
+        setHistories(next)
+      }
     } else {
       const next = deleteElectricityHistory(id, 'guest')
       setHistories(next)
@@ -151,7 +184,18 @@ function ElectricityHistoryPage() {
       const session = await getCurrentSession()
       
       if (session?.user) {
-        setHistories(clearElectricityHistories(session.user.id))
+        try {
+          const { supabase } = await import('../../lib/supabase')
+          const { error } = await supabase.from('electricity_checks').delete().eq('user_id', session.user.id)
+          if (!error) {
+            setHistories([])
+          } else {
+            setHistories(clearElectricityHistories(session.user.id))
+          }
+        } catch (e) {
+          console.error(e)
+          setHistories(clearElectricityHistories(session.user.id))
+        }
       } else {
         setHistories(clearElectricityHistories('guest'))
       }
@@ -187,7 +231,7 @@ function ElectricityHistoryPage() {
     )
   }
 
-  const fallbackSummary = electricityHistory.slice(0, 3)
+
 
   return (
     <>
@@ -207,20 +251,40 @@ function ElectricityHistoryPage() {
 
       <section className="electricity-history-hero">
         <div className="electricity-history-hero__content">
+          <span className="electricity-history-hero__eyebrow">Theo dõi tiêu thụ điện cá nhân</span>
           <h1>Lịch sử kiểm tra tiền điện</h1>
           <p>
             Xem lại các lần kiểm tra tiền điện, so sánh mức tiêu thụ và theo dõi chi phí hằng tháng của bạn.
           </p>
-          <Link className="btn btn--primary" to="/kiem-tra-tien-dien">
-            Kiểm tra mới
-          </Link>
+          <div className="electricity-history-hero__actions">
+            <Link className="btn btn--primary" to="/kiem-tra-tien-dien">
+              Kiểm tra mới
+            </Link>
+            <span className="electricity-history-hero__note">
+              Lưu tự động các lần kiểm tra để tiện so sánh tháng này với tháng trước.
+            </span>
+          </div>
         </div>
 
-        <div className="electricity-history-hero__visual">
-          <img
-            src={heroImage}
-            alt="Minh họa lịch sử kiểm tra điện năng"
-          />
+        <div className="electricity-history-hero__summary">
+          <div className="electricity-history-hero__summary-top">
+            <span>Tổng lịch sử đang có</span>
+            <strong>{stats.count}</strong>
+          </div>
+          <div className="electricity-history-hero__summary-grid">
+            <article>
+              <span>Điện năng gần nhất</span>
+              <strong>{stats.latestKwh}</strong>
+            </article>
+            <article>
+              <span>Chi phí cao nhất</span>
+              <strong>{stats.highestCost}</strong>
+            </article>
+            <article className="electricity-history-hero__summary-device">
+              <span>Thiết bị nổi bật</span>
+              <strong>{stats.highestDevice}</strong>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -319,16 +383,6 @@ function ElectricityHistoryPage() {
           <Link className="btn btn--primary" to="/kiem-tra-tien-dien">
             Kiểm tra tiền điện ngay
           </Link>
-
-          <div className="electricity-history-empty__fallback">
-            <h3>Dữ liệu mẫu tham khảo</h3>
-            {fallbackSummary.map((item) => (
-              <div key={item.id} className="electricity-history-empty__fallback-item">
-                <span>{item.date}</span>
-                <strong>{formatCurrency(item.estimatedCost)}</strong>
-              </div>
-            ))}
-          </div>
         </section>
       ) : (
         <div className="electricity-history-layout">

@@ -27,7 +27,27 @@ function StatIcon({ icon }) {
   return icons[icon] ?? null
 }
 
-function AdminUserStats({ stats }) {
+function AdminUserStats({ stats, isLoading = false }) {
+  if (isLoading) {
+    return (
+      <section className="au-stats" aria-label="Thống kê người dùng đang tải">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <article
+            key={`user-stat-skeleton-${index}`}
+            className="au-stats__card au-stats__card--skeleton"
+            aria-hidden="true"
+          >
+            <span className="au-stats__icon au-stats__icon--skeleton" />
+            <div className="au-stats__info">
+              <p className="au-skeleton au-skeleton--text" />
+              <strong className="au-skeleton au-skeleton--value" />
+            </div>
+          </article>
+        ))}
+      </section>
+    )
+  }
+
   return (
     <section className="au-stats" aria-label="Thống kê người dùng">
       {stats.map((item) => (

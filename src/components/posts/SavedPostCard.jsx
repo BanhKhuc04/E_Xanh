@@ -36,8 +36,10 @@ function SavedPostCard({ post, onUnsave }) {
         <h3>{post.title}</h3>
 
         <div className="saved-post-card__meta">
-          <span className="saved-post-card__author-badge">{getAuthorBadge(post.author)}</span>
-          <span>{post.author}</span>
+          <Link to={`/nguoi-dung/${post.authorId}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
+            <span className="saved-post-card__author-badge">{getAuthorBadge(post.author)}</span>
+            <span>{post.author}</span>
+          </Link>
           <span>•</span>
           <span>{post.savedAt}</span>
         </div>

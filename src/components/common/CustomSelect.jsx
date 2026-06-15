@@ -46,7 +46,6 @@ function CustomSelect({
     <div
       ref={containerRef}
       className={`custom-select ${className} ${error ? 'is-invalid' : ''}`}
-      style={{ position: 'relative' }}
     >
       {/* Hidden native select for accessibility and form submission if needed */}
       <select
@@ -72,21 +71,12 @@ function CustomSelect({
         role="button"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        style={{
-          cursor: 'pointer',
-          userSelect: 'none',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderColor: error ? 'rgba(176, 59, 42, 0.45)' : undefined,
-          backgroundImage: 'none',
-          paddingRight: '16px'
-        }}
       >
-        <span style={{ color: value ? '#173715' : 'rgba(51, 106, 41, 0.58)' }}>
+        <span className={`custom-select__trigger-label${value ? ' has-value' : ''}`}>
           {displayLabel}
         </span>
         <svg
+          className="custom-select__trigger-icon"
           width="16"
           height="16"
           viewBox="0 0 24 24"
@@ -95,11 +85,7 @@ function CustomSelect({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-            color: '#336a29'
-          }}
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -109,22 +95,6 @@ function CustomSelect({
         <ul
           className="custom-select__dropdown"
           role="listbox"
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 4px)',
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-            margin: 0,
-            padding: '8px',
-            listStyle: 'none',
-            background: '#fff',
-            border: '1px solid rgba(79, 132, 40, 0.16)',
-            borderRadius: '14px',
-            boxShadow: '0 12px 24px rgba(79, 132, 40, 0.15)',
-            maxHeight: '220px',
-            overflowY: 'auto'
-          }}
         >
           {options.map((opt) => {
             const isSelected = opt.value === value
@@ -134,24 +104,7 @@ function CustomSelect({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => handleSelect(opt.value)}
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: isSelected ? 'rgba(193, 217, 92, 0.2)' : 'transparent',
-                  color: isSelected ? '#336a29' : '#173715',
-                  fontWeight: isSelected ? '700' : '400',
-                  transition: 'background-color 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(234, 245, 157, 0.3)'
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+                className={`custom-select__option${isSelected ? ' is-selected' : ''}`}
               >
                 {opt.label}
                 {isSelected && (

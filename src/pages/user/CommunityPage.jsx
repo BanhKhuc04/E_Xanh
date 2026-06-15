@@ -7,16 +7,20 @@ import CommunityPostCard from '../../components/community/CommunityPostCard'
 import CommunitySidebar from '../../components/community/CommunitySidebar'
 import PostComposer from '../../components/community/PostComposer'
 import PageHero from '../../components/common/PageHero'
+import SectionSkeleton from '../../components/common/SectionSkeleton'
+import EmptyState from '../../components/common/EmptyState'
 import { pageHeroContent } from '../../data/pageHeroes'
 import { usePostComposer } from '../../components/community/PostComposerContext'
-import {
-  activeMembers,
-  communityFilters,
-  communityRules,
-  popularCommunityPosts,
-  trendingTopics,
-} from '../../data/community'
 import '../../styles/community.css'
+
+const communityFilters = [
+  'Tất cả',
+  'Mới nhất',
+  'Nhiều tương tác',
+  'Hỏi đáp',
+  'Kinh nghiệm',
+  'Đã lưu nhiều',
+]
 
 function sortCommunityPosts(posts, activeFilter) {
   const items = [...posts]
@@ -97,11 +101,12 @@ function CommunityPage() {
           const formattedPosts = data.map(p => ({
             id: p.id,
             author: p.profiles?.name || 'Ẩn danh',
+            authorId: p.author_id,
             avatar: p.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${p.profiles?.name || 'U'}&background=c1d95c&color=fff`,
             time: new Date(p.published_at || p.created_at).toLocaleDateString('vi-VN'),
             publishedAt: p.published_at || p.created_at,
             role: p.profiles?.role === 'admin' ? 'Quản trị viên' : (p.profiles?.role === 'moderator' ? 'Điều hành viên' : 'Thành viên'),
-            topic: p.type === 'community' ? 'Cộng đồng' : 'Mẹo tiết kiệm',
+            topic: p.type === 'qa' ? 'Hỏi đáp' : (p.type === 'community' ? 'Kinh nghiệm' : 'Mẹo tiết kiệm'),
             category: 'Chia sẻ',
             title: p.title,
             excerpt: p.description || (p.content ? `${p.content.substring(0, 150)}...` : 'Chia sẻ mới từ cộng đồng E-XANH.'),
@@ -262,6 +267,43 @@ function CommunityPage() {
     )
   }
 
+  const dynamicTrendingTopics = useMemo(() => {
+    const topics = new Set()
+    posts.forEach(p => {
+      if (p.topic) topics.add(p.topic)
+      if (p.category) topics.add(p.category)
+    })
+    return Array.from(topics).slice(0, 5)
+  }, [posts])
+
+  const dynamicPopularPosts = useMemo(() => {
+    return [...posts].sort((a, b) => b.likes - a.likes).slice(0, 5)
+  }, [posts])
+
+  const dynamicActiveMembers = useMemo(() => {
+    const map = new Map()
+    posts.forEach(p => {
+      if (!p.authorId) return
+      if (!map.has(p.authorId)) {
+        map.set(p.authorId, {
+          id: p.authorId,
+          name: p.author,
+          avatar: p.avatar,
+          count: 0
+        })
+      }
+      map.get(p.authorId).count++
+    })
+    return Array.from(map.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .map(m => ({
+        ...m,
+        contribution: `${m.count} bài viết`,
+        badge: m.count > 2 ? 'Top đóng góp' : 'Thành viên'
+      }))
+  }, [posts])
+
   return (
     <div className="community-page">
       <Helmet>
@@ -308,7 +350,7 @@ function CommunityPage() {
 
           <section id="cong-dong-feed" className="community-page__posts">
             {isLoading ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>Đang tải bài viết...</div>
+              <SectionSkeleton count={3} height="200px" />
             ) : visiblePosts.length > 0 ? (
               visiblePosts.map((post) => (
                 <CommunityPostCard
@@ -325,21 +367,20 @@ function CommunityPage() {
                 />
               ))
             ) : (
-              <div className="community-page__empty" style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', borderRadius: '12px', border: '1px dashed #c1d95c', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#4F8428" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                </svg>
-                <h2 style={{ color: '#173715', fontSize: '1.25rem', margin: '0' }}>Cộng đồng hiện chưa có bài viết nào</h2>
-                <p style={{ color: '#555', margin: '0', maxWidth: '300px' }}>Hãy là người đầu tiên chia sẻ bí quyết sống xanh của bạn với mọi người nhé!</p>
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  style={{ marginTop: '8px' }}
-                  onClick={() => openComposer({ defaultType: 'community' })}
-                >
-                  Viết bài chia sẻ đầu tiên
-                </button>
-              </div>
+              <EmptyState 
+                icon="💬"
+                title="Cộng đồng hiện chưa có bài viết nào"
+                message="Hãy là người đầu tiên chia sẻ bí quyết sống xanh của bạn với mọi người nhé!"
+                action={
+                  <button
+                    type="button"
+                    className="btn btn--primary"
+                    onClick={() => openComposer({ defaultType: 'community' })}
+                  >
+                    Viết bài chia sẻ đầu tiên
+                  </button>
+                }
+              />
             )}
           </section>
 
@@ -357,10 +398,9 @@ function CommunityPage() {
         </div>
 
         <CommunitySidebar
-          activeMembers={activeMembers}
-          trendingTopics={trendingTopics}
-          popularCommunityPosts={popularCommunityPosts}
-          communityRules={communityRules}
+          activeMembers={dynamicActiveMembers}
+          trendingTopics={dynamicTrendingTopics}
+          popularCommunityPosts={dynamicPopularPosts}
         />
       </div>
 

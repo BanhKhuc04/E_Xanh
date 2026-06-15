@@ -27,6 +27,8 @@ const ElectricityCheckPage = lazy(() => import('../pages/user/ElectricityCheckPa
 const ElectricityHistoryPage = lazy(() => import('../pages/user/ElectricityHistoryPage'))
 const SavedPostsPage = lazy(() => import('../pages/user/SavedPostsPage'))
 const SettingsUserPage = lazy(() => import('../pages/user/SettingsUserPage'))
+const PublicProfilePage = lazy(() => import('../pages/user/PublicProfilePage'))
+const AuthCallbackPage = lazy(() => import('../pages/user/AuthCallbackPage'))
 
 // ─── Lazy pages — Admin ───────────────────────────────────────────────────────
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
@@ -38,6 +40,7 @@ const DeviceManagementPage = lazy(() => import('../pages/admin/DeviceManagementP
 const StatisticsPage = lazy(() => import('../pages/admin/StatisticsPage'))
 const SettingsPage = lazy(() => import('../pages/admin/SettingsPage'))
 const ThemeSettingsPage = lazy(() => import('../pages/admin/ThemeSettingsPage'))
+const SystemNotificationPage = lazy(() => import('../pages/admin/SystemNotificationPage'))
 
 // ─── Suspense fallback ─────────────────────────────────────────────────────────
 function PageFallback() {
@@ -46,26 +49,15 @@ function PageFallback() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
-        padding: '24px',
-        maxWidth: '800px',
-        margin: '0 auto',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '60px 0',
         minHeight: '40vh',
       }}
       aria-live="polite"
       aria-label="Đang tải trang..."
     >
-      <div style={{ height: '40px', width: '60%', background: '#eaf59d', borderRadius: '8px', animation: 'pulse 1.5s infinite ease-in-out' }} />
-      <div style={{ height: '20px', width: '100%', background: '#f4f8e7', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }} />
-      <div style={{ height: '20px', width: '90%', background: '#f4f8e7', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }} />
-      <div style={{ height: '20px', width: '95%', background: '#f4f8e7', borderRadius: '4px', animation: 'pulse 1.5s infinite ease-in-out' }} />
-      <style>{`
-        @keyframes pulse {
-          0% { opacity: 0.6; }
-          50% { opacity: 1; }
-          100% { opacity: 0.6; }
-        }
-      `}</style>
+      <div className="page-loader__spinner" style={{ margin: '0 auto' }}></div>
     </div>
   )
 }
@@ -117,8 +109,16 @@ const router = createBrowserRouter([
             element: <RegisterPage />,
           },
           {
+            path: 'auth/callback',
+            element: <Suspense fallback={<PageFallback />}><AuthCallbackPage /></Suspense>,
+          },
+          {
             path: 'tai-khoan',
             element: <Suspense fallback={<PageFallback />}><AccountPage /></Suspense>,
+          },
+          {
+            path: 'nguoi-dung/:userId',
+            element: <Suspense fallback={<PageFallback />}><PublicProfilePage /></Suspense>,
           },
           {
             path: 'tai-khoan/cai-dat',
@@ -211,6 +211,10 @@ const router = createBrowserRouter([
               {
                 path: 'thong-ke',
                 element: <Suspense fallback={<PageFallback />}><StatisticsPage /></Suspense>,
+              },
+              {
+                path: 'thong-bao-he-thong',
+                element: <Suspense fallback={<PageFallback />}><SystemNotificationPage /></Suspense>,
               },
               {
                 path: 'cai-dat',

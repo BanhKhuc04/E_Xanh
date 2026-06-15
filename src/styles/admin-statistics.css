@@ -154,6 +154,18 @@
   gap: 20px;
 }
 
+.as-charts-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+}
+
+.as-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
 /* ---- Chart Card ---- */
 .as-chart-card {
   padding: 24px;
@@ -635,6 +647,11 @@
 
 @media (max-width: 900px) {
   .as-charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .as-charts-grid,
+  .as-secondary-grid {
     grid-template-columns: 1fr;
   }
 

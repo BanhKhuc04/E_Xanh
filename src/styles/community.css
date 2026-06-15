@@ -3,6 +3,13 @@
   gap: 28px;
 }
 
+.community-page > *,
+.community-page__layout > *,
+.community-post-card > *,
+.community-composer > * {
+  min-width: 0;
+}
+
 .community-page__hero {
   position: relative;
   overflow: hidden;
@@ -417,6 +424,8 @@
 
 .community-post-card__share-modal {
   position: absolute;
+  width: min(320px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
   background: #fff;
   border: 1px solid rgba(79, 132, 40, 0.15);
   border-radius: 12px;
@@ -430,6 +439,38 @@
   right: 0;
   margin-bottom: 8px;
   min-width: 200px;
+}
+
+.community-post-card__share-copy {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  color: #555;
+  text-align: left;
+}
+
+.community-post-card__share-row {
+  display: flex;
+  gap: 8px;
+}
+
+.community-post-card__share-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.community-post-card__share-row .btn {
+  width: auto;
+  min-height: 40px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .community-post-card__share-option {
@@ -610,5 +651,20 @@
 
   .community-post-card__body h2 {
     font-size: 1.45rem;
+  }
+
+  .community-post-card__share-modal {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(100vw - 24px, 320px);
+  }
+
+  .community-post-card__share-row {
+    flex-direction: column;
+  }
+
+  .community-post-card__share-row .btn {
+    width: 100%;
   }
 }

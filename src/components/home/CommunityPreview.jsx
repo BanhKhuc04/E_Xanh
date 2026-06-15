@@ -83,15 +83,19 @@ function CommunityPreview() {
                   <article key={post.id} className="community-preview__post">
                     <div className="community-preview__post-top">
                       <div className="community-preview__author">
-                        {post.profiles?.avatar_url ? (
-                          <img src={post.profiles.avatar_url} alt={authorName} className="home-avatar" style={{ objectFit: 'cover' }} />
-                        ) : (
-                          <span className="home-avatar home-avatar--primary">
-                            {getInitials(authorName)}
-                          </span>
-                        )}
+                        <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()}>
+                          {post.profiles?.avatar_url ? (
+                            <img src={post.profiles.avatar_url} alt={authorName} className="home-avatar" style={{ objectFit: 'cover' }} />
+                          ) : (
+                            <span className="home-avatar home-avatar--primary">
+                              {getInitials(authorName)}
+                            </span>
+                          )}
+                        </Link>
                         <div>
-                          <strong>{authorName}</strong>
+                          <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
+                            <strong>{authorName}</strong>
+                          </Link>
                           <span>{getTimeAgo(post.created_at)}</span>
                         </div>
                       </div>
@@ -139,17 +143,19 @@ function CommunityPreview() {
                       <span className={`community-preview__rank ${rankClass}`} style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold', fontSize: '0.8rem' }}>
                         {index + 1}
                       </span>
-                      {member.avatar_url ? (
-                        <img src={member.avatar_url} alt={member.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                      ) : (
-                        <span style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-primary-100)', color: 'var(--color-primary-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                          {getInitials(member.name)}
-                        </span>
-                      )}
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <strong style={{ fontSize: '0.95rem' }}>{member.name}</strong>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{member.approved_posts_count} bài viết</span>
-                      </div>
+                      <Link to={`/nguoi-dung/${member.id}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
+                        {member.avatar_url ? (
+                          <img src={member.avatar_url} alt={member.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-primary-100)', color: 'var(--color-primary-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                            {getInitials(member.name)}
+                          </span>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <strong style={{ fontSize: '0.95rem' }}>{member.name}</strong>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{member.approved_posts_count} bài viết</span>
+                        </div>
+                      </Link>
                     </li>
                   )
                 })}

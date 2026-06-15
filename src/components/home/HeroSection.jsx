@@ -71,20 +71,22 @@ function HeroSection() {
             <BannerCarousel banners={banners} />
           </div>
 
-          <div className="home-floating-card home-floating-card--savings">
-            <span>{homeHero.floatingSavings.label}</span>
-            <strong>{homeHero.floatingSavings.value}</strong>
-            <small>{homeHero.floatingSavings.note}</small>
-          </div>
+          <div className="home-hero__floating-grid">
+            <div className="home-floating-card home-floating-card--savings">
+              <span>{homeHero.floatingSavings.label}</span>
+              <strong>{homeHero.floatingSavings.value}</strong>
+              <small>{homeHero.floatingSavings.note}</small>
+            </div>
 
-          <div className="home-floating-card home-floating-card--warning">
-            <span>{homeHero.floatingAppliance.label}</span>
-            <strong>{homeHero.floatingAppliance.value}</strong>
-          </div>
+            <div className="home-floating-card home-floating-card--warning">
+              <span>{homeHero.floatingAppliance.label}</span>
+              <strong>{homeHero.floatingAppliance.value}</strong>
+            </div>
 
-          <div className="home-floating-card home-floating-card--tip">
-            <span>{homeHero.floatingTip.label}</span>
-            <p>{homeHero.floatingTip.value}</p>
+            <div className="home-floating-card home-floating-card--tip">
+              <span>{homeHero.floatingTip.label}</span>
+              <p>{homeHero.floatingTip.value}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,28 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import PostContentEditor from './PostContentEditor'
 import CustomSelect from '../common/CustomSelect'
 import '../../styles/create-post.css'
+
+function extractPlainText(blocks = [], fallback = '') {
+  if (Array.isArray(blocks) && blocks.length > 0) {
+    return blocks
+      .map((block) => {
+        if (block.type === 'list' && Array.isArray(block.items)) {
+          return block.items.join('\n')
+        }
+
+        return block.content || block.label || block.alt || ''
+      })
+      .join('\n\n')
+      .trim()
+  }
+
+  return String(fallback || '').trim()
+}
+
+function countWords(text = '') {
+  return text.split(/\s+/).map((item) => item.trim()).filter(Boolean).length
+}
 
 function CreatePostForm({
   form,
@@ -34,26 +55,37 @@ function CreatePostForm({
 }) {
   const [isDragging, setIsDragging] = useState(false)
   const coverInputRef = useRef(null)
-  const tagCount = form.tags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean).length
 
-  function handleDragOver(e) {
-    e.preventDefault()
+  const tagCount = useMemo(
+    () =>
+      form.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean).length,
+    [form.tags],
+  )
+
+  const plainContent = useMemo(
+    () => extractPlainText(form.content_blocks, form.content),
+    [form.content, form.content_blocks],
+  )
+  const wordCount = useMemo(() => countWords(plainContent), [plainContent])
+
+  function handleDragOver(event) {
+    event.preventDefault()
     setIsDragging(true)
   }
 
-  function handleDragLeave(e) {
-    e.preventDefault()
+  function handleDragLeave(event) {
+    event.preventDefault()
     setIsDragging(false)
   }
 
-  function handleDrop(e) {
-    e.preventDefault()
+  function handleDrop(event) {
+    event.preventDefault()
     setIsDragging(false)
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onCoverChange({ target: { files: e.dataTransfer.files } })
+    if (event.dataTransfer.files?.length) {
+      onCoverChange({ target: { files: event.dataTransfer.files } })
     }
   }
 
@@ -81,16 +113,95 @@ function CreatePostForm({
 
       <div className="create-post-form__utility">
         <span className="create-post-form__draft-meta">{draftMeta || 'Nháp sẽ tự động lưu sau vài giây.'}</span>
-        {onClearDraft ? (
-          <button
-            type="button"
-            className="create-post-form__clear-draft"
-            onClick={onClearDraft}
-            disabled={isSubmitting}
-          >
-            Xóa nháp
-          </button>
-        ) : null}
+        <div className="create-post-form__utility-meta">
+          <span>{wordCount} từ</span>
+          <span>{plainContent.length}/{limits.contentMax} ký tự</span>
+          {onClearDraft ? (
+            <button
+              type="button"
+              className="create-post-form__clear-draft"
+              onClick={onClearDraft}
+              disabled={isSubmitting}
+            >
+              Xóa nháp
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      <div
+        className="create-post-form__field post-form-group"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div className="post-form-group__header">
+          <label htmlFor="post-cover">
+            <span>Ảnh bìa</span>
+          </label>
+          <span className="post-form-group__hint">JPG, PNG, WEBP, tối đa 5MB</span>
+        </div>
+
+        <input
+          ref={coverInputRef}
+          id="post-cover"
+          data-testid="post-image-input"
+          className="create-post-form__file-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/jpg"
+          onChange={onCoverChange}
+          style={{ display: 'none' }}
+        />
+
+        <div
+          data-testid="post-upload-area"
+          className={`create-post-form__upload-box${form.coverPreview ? ' has-preview' : ''}${isDragging ? ' is-dragging' : ''}`}
+          role="button"
+          tabIndex={isSubmitting ? -1 : 0}
+          aria-label="Chọn ảnh bìa từ máy"
+          onClick={handleOpenCoverPicker}
+          onKeyDown={handleUploadBoxKeyDown}
+          aria-disabled={isSubmitting}
+        >
+          {form.coverPreview ? (
+            <>
+              <img src={form.coverPreview} alt="Preview" className="create-post-form__cover-preview" />
+              {onRemoveCover ? (
+                <button
+                  type="button"
+                  className="btn btn--ghost create-post-form__remove-cover"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    onRemoveCover()
+                  }}
+                >
+                  Xóa ảnh
+                </button>
+              ) : null}
+            </>
+          ) : (
+            <div className="create-post-form__upload-copy">
+              <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
+              <small>Ảnh cover rộng sẽ hiển thị đẹp hơn ở cả feed và trang chi tiết.</small>
+              <button
+                type="button"
+                className="btn btn--secondary create-post-form__upload-trigger"
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  handleOpenCoverPicker()
+                }}
+                disabled={isSubmitting}
+              >
+                Chọn ảnh bìa
+              </button>
+            </div>
+          )}
+        </div>
+
+        {form.coverName ? <p className="post-form-group__help">Đã chọn: {form.coverName}</p> : null}
+        {fieldErrors.coverFile ? <p className="post-form-group__error">{fieldErrors.coverFile}</p> : null}
       </div>
 
       <div className="create-post-form__field post-form-group">
@@ -124,8 +235,9 @@ function CreatePostForm({
           <CustomSelect
             id="post-type"
             value={form.type}
-            onChange={(val) => onChange('type', val)}
+            onChange={(nextValue) => onChange('type', nextValue)}
             error={Boolean(fieldErrors.type)}
+            className="create-post-form__select"
             placeholder="Chọn loại bài..."
             options={[
               { value: 'tip', label: 'Mẹo tiết kiệm' },
@@ -146,8 +258,9 @@ function CreatePostForm({
           <CustomSelect
             id="post-category"
             value={form.category}
-            onChange={(val) => onChange('category', val)}
+            onChange={(nextValue) => onChange('category', nextValue)}
             error={Boolean(fieldErrors.category)}
+            className="create-post-form__select"
             placeholder="Chọn thiết bị/chủ đề..."
             options={[
               { value: 'Điều hòa', label: 'Điều hòa' },
@@ -184,98 +297,35 @@ function CreatePostForm({
         {fieldErrors.description ? <p id="post-description-error" className="post-form-group__error">{fieldErrors.description}</p> : null}
       </div>
 
-      <div
-        className="create-post-form__field post-form-group"
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div className="post-form-group__header">
-          <label htmlFor="post-cover">
-            <span>Ảnh bìa</span>
-          </label>
-          <span className="post-form-group__hint">JPG, PNG, WEBP, tối đa 5MB</span>
-        </div>
-        <input ref={coverInputRef} id="post-cover" data-testid="post-image-input" className="create-post-form__file-input" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={onCoverChange} />
-        <div 
-          data-testid="post-upload-area"
-          className="create-post-form__upload-box"
-          role="button"
-          tabIndex={isSubmitting ? -1 : 0}
-          aria-label="Chọn ảnh bìa từ máy"
-          onClick={handleOpenCoverPicker}
-          onKeyDown={handleUploadBoxKeyDown}
-          aria-disabled={isSubmitting}
-          style={{ 
-            position: 'relative',
-            padding: form.coverPreview ? '0' : undefined, 
-            overflow: 'hidden',
-            backgroundColor: isDragging ? 'rgba(193, 217, 92, 0.15)' : undefined,
-            borderColor: isDragging ? 'var(--color-primary-500)' : undefined
-          }}
-        >
-          {form.coverPreview ? (
-            <>
-              <img src={form.coverPreview} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block', backgroundColor: '#f1f1f1' }} />
-              {onRemoveCover ? (
-                <button
-                  type="button"
-                  className="btn btn--ghost"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    onRemoveCover()
-                  }}
-                  style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 1 }}
-                >
-                  Xóa ảnh
-                </button>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
-              <small>Hỗ trợ JPG, PNG, WEBP. Kích thước tối đa 5MB</small>
-              <button
-                type="button"
-                className="btn btn--secondary create-post-form__upload-trigger"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  handleOpenCoverPicker()
-                }}
-                disabled={isSubmitting}
-              >
-                Chọn ảnh bìa
-              </button>
-            </>
-          )}
-        </div>
-        {form.coverName ? <p className="post-form-group__help">Đã chọn: {form.coverName}</p> : null}
-        {fieldErrors.coverFile ? <p className="post-form-group__error">{fieldErrors.coverFile}</p> : null}
-      </div>
-
       <div className="create-post-form__field post-form-group">
-        <div className="post-form-group__header">
+        <div className="post-form-group__header post-form-group__header--content">
           <label htmlFor="post-content">
             <span>Nội dung bài viết</span>
           </label>
-          <span className="post-form-group__counter">
-            {form.content.length}/{limits.contentMax} ký tự
-          </span>
+          <div className="post-form-group__content-stats">
+            <span className="post-form-group__counter">{plainContent.length}/{limits.contentMax} ký tự</span>
+            <span className="post-form-group__counter">{wordCount} từ</span>
+          </div>
         </div>
-        <PostContentEditor
-          id="post-content"
-          value={form.content}
-          onChange={(value) => onChange('content', value)}
-          onInsertImage={onInsertInlineImage}
-          isUploadingImage={isUploadingInlineImage}
-          maxLength={limits.contentMax}
-          minLength={limits.contentMin}
-          error={fieldErrors.content}
-          describedBy={fieldErrors.content ? 'post-content-error' : 'post-content-help'}
-        />
+
+        <div className="create-post-form__editor-shell">
+          <PostContentEditor
+            id="post-content"
+            value={form.content}
+            blocks={form.content_blocks}
+            onChange={(nextValue) => onChange('content', nextValue)}
+            onChangeBlocks={(nextBlocks) => onChange('content_blocks', nextBlocks)}
+            onInsertImage={onInsertInlineImage}
+            isUploadingImage={isUploadingInlineImage}
+            maxLength={limits.contentMax}
+            minLength={limits.contentMin}
+            error={fieldErrors.content}
+            describedBy={fieldErrors.content ? 'post-content-error' : 'post-content-help'}
+          />
+        </div>
+
         <p id="post-content-help" className="post-form-group__help">
-          Tối thiểu {limits.contentMin} ký tự để bài viết đủ rõ ràng và hạn chế spam. Bạn có thể chèn tối đa {limits.contentImageMax} ảnh minh họa vào nội dung.
+          Tối thiểu {limits.contentMin} ký tự để bài viết đủ rõ ràng. Bạn có thể chèn tối đa {limits.contentImageMax} ảnh minh họa vào nội dung.
         </p>
         {fieldErrors.content ? <p id="post-content-error" className="post-form-group__error">{fieldErrors.content}</p> : null}
       </div>

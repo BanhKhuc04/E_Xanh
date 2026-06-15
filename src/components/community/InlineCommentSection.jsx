@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
 import { createComment, getCommentsByPost } from '../../services/commentService'
 
@@ -23,6 +24,7 @@ function InlineCommentSection({
   onCountChange,
   variant = 'inline',
   title,
+  highlightCommentId = '',
 }) {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(false)
@@ -30,6 +32,7 @@ function InlineCommentSection({
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [loadedPostId, setLoadedPostId] = useState(null)
+  const commentRefs = useRef({})
 
   useEffect(() => {
     let isMounted = true
@@ -71,6 +74,15 @@ function InlineCommentSection({
       onCountChange(totalCount)
     }
   }, [onCountChange, totalCount])
+
+  useEffect(() => {
+    if (!highlightCommentId || loading) return
+
+    const target = commentRefs.current[highlightCommentId]
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [highlightCommentId, loading, comments])
 
   async function handleSubmit() {
     const trimmed = content.trim()
@@ -164,27 +176,73 @@ function InlineCommentSection({
 
         {!loading
           ? comments.map((comment) => (
-              <article key={comment.id} className="inline-comments__item">
-                {isValidImageUrl(comment.avatar) ? (
-                  <img
-                    src={comment.avatar}
-                    alt={`Ảnh đại diện của ${comment.author}`}
-                    className="inline-comments__item-avatar"
-                  />
-                ) : (
-                  <span className="inline-comments__item-avatar inline-comments__item-avatar--fallback">
-                    {getInitials(comment.author)}
-                  </span>
-                )}
+                <article
+                  key={comment.id}
+                  className="inline-comments__item"
+                  id={`comment-${comment.id}`}
+                  ref={(element) => {
+                    if (element) {
+                      commentRefs.current[comment.id] = element
+                    }
+                  }}
+                >
+                <Link to={`/nguoi-dung/${comment.authorId}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
+                  {isValidImageUrl(comment.avatar) ? (
+                    <img
+                      src={comment.avatar}
+                      alt={`Ảnh đại diện của ${comment.author}`}
+                      className="inline-comments__item-avatar"
+                    />
+                  ) : (
+                    <span className="inline-comments__item-avatar inline-comments__item-avatar--fallback">
+                      {getInitials(comment.author)}
+                    </span>
+                  )}
+                </Link>
 
                 <div className="inline-comments__bubble">
-                  <div className="inline-comments__item-meta">
-                    <strong>{comment.author}</strong>
-                    <span>{formatRelativeTime(comment.createdAt)}</span>
+                  <div className="inline-comments__item-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <Link to={`/nguoi-dung/${comment.authorId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                        <strong>{comment.author}</strong>
+                      </Link>
+                      <span>{formatRelativeTime(comment.createdAt)}</span>
+                    </div>
+                    {currentUser && currentUser.id !== comment.authorId && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const reason = window.prompt('Nhập lý do báo cáo bình luận này:')
+                          if (reason === null) return
+                          if (!reason.trim()) {
+                            alert('Vui lòng nhập lý do báo cáo.')
+                            return
+                          }
+                          const { createReport } = await import('../../services/reportService')
+                          const { error } = await createReport({ commentId: comment.id, reason: reason.trim() })
+                          if (error) {
+                            alert(error.message || 'Lỗi gửi báo cáo.')
+                          } else {
+                            alert('Báo cáo bình luận thành công.')
+                          }
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#e53935',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          padding: 0
+                        }}
+                      >
+                        Báo cáo
+                      </button>
+                    )}
                   </div>
                   <p>{comment.content}</p>
                 </div>
-              </article>
+                </article>
             ))
           : null}
       </div>

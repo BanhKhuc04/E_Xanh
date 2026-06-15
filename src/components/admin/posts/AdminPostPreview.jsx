@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { postStatusMap } from '../../../data/adminPosts'
 import PostImage from '../../common/PostImage'
+import PostBlockRenderer from '../../community/PostBlockRenderer'
 
 function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, currentUserRole }) {
   const [adminNote, setAdminNote] = useState('')
@@ -46,8 +47,8 @@ function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, curr
 
           <div className="ap-preview__section">
             <h4>Nội dung xem trước</h4>
-            <div className="ap-preview__content-block">
-              {post.contentPreview}
+            <div className="ap-preview__content-block" style={{ background: '#f8f9fa', padding: '16px', borderRadius: '8px' }}>
+              <PostBlockRenderer blocks={post.contentBlocks} fallbackContent={post.contentPreview} />
             </div>
           </div>
 

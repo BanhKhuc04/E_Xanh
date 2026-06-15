@@ -19,20 +19,22 @@ function SavedSidebar({ folders, recentlyRead }) {
         </div>
       </section>
 
-      <section className="saved-sidebar__card">
-        <h2>Bài đọc gần đây</h2>
-        <div className="saved-sidebar__recent-list">
-          {recentlyRead.map((post) => (
-            <Link key={post.id} to={`/meo-tiet-kiem/${post.slug}`} className="saved-sidebar__recent-item">
-              <img src={post.image} alt={post.title} />
-              <div>
-                <h3>{post.title}</h3>
-                <p>{post.recentReadAt}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {recentlyRead && recentlyRead.length > 0 && (
+        <section className="saved-sidebar__card">
+          <h2>Bài đọc gần đây</h2>
+          <div className="saved-sidebar__recent-list">
+            {recentlyRead.map((post) => (
+              <Link key={post.id} to={`/meo-tiet-kiem/${post.slug}`} className="saved-sidebar__recent-item">
+                <img src={post.image} alt={post.title} />
+                <div>
+                  <h3>{post.title}</h3>
+                  <p>{post.recentReadAt}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="saved-sidebar__card saved-sidebar__card--cta">
         <h2>Bạn có mẹo hay?</h2>

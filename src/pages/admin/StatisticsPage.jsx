@@ -1,26 +1,104 @@
-import { useState, useEffect } from 'react'
-import { getDashboardStats } from '../../services/adminStatsService'
+import { useEffect, useMemo, useState } from 'react'
+import AdminActivityChart from '../../components/admin/statistics/AdminActivityChart'
+import AdminCommunityStats from '../../components/admin/statistics/AdminCommunityStats'
+import AdminContentTypeChart from '../../components/admin/statistics/AdminContentTypeChart'
+import AdminDataInsights from '../../components/admin/statistics/AdminDataInsights'
 import AdminStatsOverview from '../../components/admin/statistics/AdminStatsOverview'
 import AdminTimeFilter from '../../components/admin/statistics/AdminTimeFilter'
+import AdminTopDevices from '../../components/admin/statistics/AdminTopDevices'
+import AdminTopSavedPosts from '../../components/admin/statistics/AdminTopSavedPosts'
+import {
+  getActivityTrend,
+  getAdminStats,
+  getContentTypeBreakdown,
+  getTopDevices,
+  getTopSavedPosts,
+} from '../../services/analyticsService'
 import '../../styles/admin-statistics.css'
 
 function StatisticsPage() {
   const [timeFilter, setTimeFilter] = useState('30 ngày qua')
   const [statsData, setStatsData] = useState(null)
+  const [activityData, setActivityData] = useState([])
+  const [contentTypeData, setContentTypeData] = useState([])
+  const [topSavedPosts, setTopSavedPosts] = useState([])
+  const [topDevices, setTopDevices] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     let isMounted = true
+
     async function loadStats() {
-      const data = await getDashboardStats()
-      if (isMounted) {
-        setStatsData(data)
-        setIsLoading(false)
-      }
+      setIsLoading(true)
+
+      const [stats, activity, contentTypes, savedPosts, devices] = await Promise.all([
+        getAdminStats(timeFilter),
+        getActivityTrend(timeFilter),
+        getContentTypeBreakdown(timeFilter),
+        getTopSavedPosts(5),
+        getTopDevices(5),
+      ])
+
+      if (!isMounted) return
+
+      setStatsData(stats)
+      setActivityData(activity)
+      setContentTypeData(contentTypes)
+      setTopSavedPosts(savedPosts)
+      setTopDevices(devices)
+      setIsLoading(false)
     }
+
     loadStats()
-    return () => { isMounted = false }
-  }, [])
+
+    return () => {
+      isMounted = false
+    }
+  }, [timeFilter])
+
+  const overviewStats = useMemo(() => {
+    if (!statsData) return []
+
+    return [
+      { label: 'Tổng bài viết', value: statsData.totalPosts, change: '', changeLabel: '', icon: 'posts', accent: 'success' },
+      { label: 'Bài chờ duyệt', value: statsData.pendingPosts, change: '', changeLabel: '', icon: 'posts', accent: 'warning' },
+      { label: 'Người dùng hoạt động', value: statsData.activeUsers, change: '', changeLabel: '', icon: 'users', accent: 'highlight' },
+      { label: 'Tài khoản bị khóa', value: statsData.lockedUsers, change: '', changeLabel: '', icon: 'users', accent: 'muted' },
+      { label: 'Lượt lưu bài', value: statsData.totalSavedPosts, change: '', changeLabel: '', icon: 'comments', accent: 'warning' },
+      { label: 'Bình luận đã xử lý', value: statsData.hiddenSpamComments, change: '', changeLabel: '', icon: 'comments', accent: 'muted' },
+      { label: 'Thiết bị điện', value: statsData.totalDevices, change: '', changeLabel: '', icon: 'electricity', accent: 'highlight' },
+      { label: 'Lượt kiểm tra điện', value: statsData.totalElectricityChecks, change: '', changeLabel: '', icon: 'electricity', accent: 'success' },
+    ]
+  }, [statsData])
+
+  const communityStats = useMemo(() => {
+    if (!statsData) return []
+    return [
+      { label: 'Tổng bình luận', value: statsData.totalComments.toLocaleString('vi-VN'), icon: 'comment' },
+      { label: 'Tổng bài đã lưu', value: statsData.totalSavedPosts.toLocaleString('vi-VN'), icon: 'bookmark' },
+      { label: 'Bài đã duyệt', value: statsData.approvedPosts.toLocaleString('vi-VN'), icon: 'heart' },
+      { label: 'Tài khoản chờ xử lý', value: (statsData.lockedUsers + statsData.deletedUsers).toLocaleString('vi-VN'), icon: 'share' },
+    ]
+  }, [statsData])
+
+  const insights = useMemo(() => {
+    if (!statsData) return ['Chưa có đủ dữ liệu trong khoảng thời gian này.']
+
+    const dominantContent = [...contentTypeData].sort((left, right) => (right.raw ?? 0) - (left.raw ?? 0))[0]
+    return [
+      dominantContent?.raw
+        ? `${dominantContent.label} đang là nhóm nội dung nổi bật nhất trong khoảng thời gian đã chọn.`
+        : 'Chưa có đủ dữ liệu để xác định nhóm nội dung nổi bật.',
+      statsData.pendingPosts > 0
+        ? `Hiện có ${statsData.pendingPosts} bài viết chờ duyệt, nên ưu tiên rà hàng đợi kiểm duyệt.`
+        : 'Không có bài chờ duyệt trong khoảng thời gian hiện tại.',
+      statsData.hiddenSpamComments > 0
+        ? `Có ${statsData.hiddenSpamComments} bình luận đã bị ẩn/spam/xóa mềm, cần tiếp tục theo dõi chất lượng thảo luận.`
+        : 'Chưa phát hiện bình luận cần xử lý trong khoảng thời gian hiện tại.',
+    ]
+  }, [contentTypeData, statsData])
+
+  const hasActivity = activityData.some((item) => item.posts || item.comments || item.saves || item.checks)
 
   if (isLoading) {
     return (
@@ -29,18 +107,6 @@ function StatisticsPage() {
       </div>
     )
   }
-
-  const formatValue = (val) => {
-    if (val === '-' || val === null || val === undefined) return 'Không có dữ liệu'
-    if (val === 0) return 'Chưa có dữ liệu'
-    return val
-  }
-
-  const realOverviewStats = [
-    { label: 'Tổng bài viết', value: formatValue(statsData?.totalPosts), change: '', changeLabel: '', icon: 'posts', accent: 'green' },
-    { label: 'Người dùng', value: formatValue(statsData?.totalUsers), change: '', changeLabel: '', icon: 'users', accent: 'blue' },
-    { label: 'Lượt lưu bài', value: formatValue(statsData?.totalSavedPosts), change: '', changeLabel: '', icon: 'comments', accent: 'orange' },
-  ]
 
   return (
     <div className="as-page page">
@@ -51,20 +117,48 @@ function StatisticsPage() {
         <div className="as-page__hero-copy">
           <h2>Thống kê hệ thống</h2>
           <p>
-            Theo dõi số liệu hoạt động, tương tác và xu hướng sử dụng trên
-            nền tảng E-XANH.
+            Theo dõi số liệu hoạt động, nội dung cộng đồng, thiết bị điện và mức độ tương tác theo dữ liệu thật từ Supabase.
           </p>
         </div>
       </section>
 
       <AdminTimeFilter active={timeFilter} onChange={setTimeFilter} />
 
-      <AdminStatsOverview stats={realOverviewStats} />
+      <AdminStatsOverview stats={overviewStats} />
 
-      <div style={{ padding: '60px 24px', textAlign: 'center', background: 'rgba(255,255,255,0.8)', borderRadius: '24px', border: '1px dashed #ccc', marginTop: '24px' }}>
-        <h3 style={{ marginBottom: '8px' }}>Biểu đồ phân tích chi tiết đang được phát triển</h3>
-        <p style={{ color: '#666' }}>Tính năng thống kê dạng biểu đồ (hoạt động hàng tuần, thiết bị) sẽ sớm ra mắt với dữ liệu thực tế.</p>
-      </div>
+      <section className="as-charts-grid">
+        {hasActivity ? (
+          <AdminActivityChart data={activityData} />
+        ) : (
+          <div className="as-chart-card">
+            <div className="as-chart-card__header">
+              <h3>Lượt hoạt động theo ngày</h3>
+            </div>
+            <p>Chưa có đủ dữ liệu trong khoảng thời gian này.</p>
+          </div>
+        )}
+
+        {contentTypeData.some((item) => (item.raw ?? 0) > 0) ? (
+          <AdminContentTypeChart data={contentTypeData} />
+        ) : (
+          <div className="as-chart-card">
+            <div className="as-chart-card__header">
+              <h3>Tỷ lệ loại nội dung</h3>
+            </div>
+            <p>Chưa có đủ dữ liệu trong khoảng thời gian này.</p>
+          </div>
+        )}
+      </section>
+
+      <section className="as-secondary-grid">
+        <AdminTopSavedPosts posts={topSavedPosts} />
+        <AdminTopDevices devices={topDevices} />
+      </section>
+
+      <section className="as-secondary-grid">
+        <AdminCommunityStats stats={communityStats} />
+        <AdminDataInsights insights={insights} />
+      </section>
     </div>
   )
 }

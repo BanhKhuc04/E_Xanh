@@ -10,7 +10,8 @@ import { countMarkdownImages, MARKDOWN_IMAGE_LIMIT } from '../utils/markdown'
 
 const DRAFT_STORAGE_KEY = 'exanh_draft_post'
 const POST_COOLDOWN_MS = 30 * 1000
-const TITLE_MAX_LENGTH = 90
+const TITLE_MIN_LENGTH = 10
+const TITLE_MAX_LENGTH = 120
 const DESCRIPTION_MAX_LENGTH = 180
 const CONTENT_MIN_LENGTH = 80
 const CONTENT_MAX_LENGTH = 4000
@@ -27,6 +28,7 @@ function buildInitialForm(defaultType = '') {
     coverFile: null,
     coverPreview: '',
     content: '',
+    content_blocks: [],
     tags: '',
   }
 }
@@ -52,15 +54,31 @@ function parseTags(tags = '') {
     .filter(Boolean)
 }
 
+function extractPlainTextFromBlocks(blocks) {
+  if (!Array.isArray(blocks)) return ''
+  return blocks.map(block => {
+    if (block.type === 'list' && Array.isArray(block.items)) {
+      return block.items.join('\n')
+    }
+    return block.content || block.label || block.alt || ''
+  }).join('\n\n')
+}
+
 function validatePostForm(form) {
   const errors = {}
   const trimmedTitle = form.title.trim()
   const trimmedDescription = form.description.trim()
-  const trimmedContent = form.content.trim()
   const tags = parseTags(form.tags)
+  
+  const blocksContent = form.content_blocks && form.content_blocks.length > 0 
+    ? extractPlainTextFromBlocks(form.content_blocks) 
+    : form.content
+  const trimmedContent = (blocksContent || '').trim()
 
   if (!trimmedTitle) {
     errors.title = 'Tiêu đề là phần đầu tiên người đọc nhìn thấy. Hãy nhập một tiêu đề ngắn gọn và rõ ý.'
+  } else if (trimmedTitle.length < TITLE_MIN_LENGTH) {
+    errors.title = `Tiêu đề cần tối thiểu ${TITLE_MIN_LENGTH} ký tự.`
   } else if (trimmedTitle.length > TITLE_MAX_LENGTH) {
     errors.title = `Tiêu đề chỉ nên tối đa ${TITLE_MAX_LENGTH} ký tự để dễ đọc hơn.`
   }
@@ -103,6 +121,7 @@ export function usePostComposerForm({
       category: draft.category || '',
       description: draft.description || '',
       content: draft.content || '',
+      content_blocks: draft.content_blocks || [],
       tags: draft.tags || '',
     }
   })
@@ -224,6 +243,7 @@ export function usePostComposerForm({
             category: form.category,
             description: form.description,
             content: form.content,
+            content_blocks: form.content_blocks,
             tags: form.tags,
           })
         )
@@ -397,6 +417,7 @@ export function usePostComposerForm({
         category: form.category,
         description: form.description,
         content: form.content,
+        content_blocks: form.content_blocks,
         tags: form.tags,
       }
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftToSave))
@@ -420,8 +441,12 @@ export function usePostComposerForm({
 
   function handlePreview() {
     setSuccessMessage('')
-    setInfoMessage('Khung xem trước đã được cập nhật theo nội dung bạn đang nhập.')
+    setInfoMessage('')
     setPreviewHighlight(true)
+  }
+
+  function closePreview() {
+    setPreviewHighlight(false)
   }
 
   async function handleInlineImageUpload(file) {
@@ -431,7 +456,11 @@ export function usePostComposerForm({
       throw error
     }
 
-    if (countMarkdownImages(form.content) >= MARKDOWN_IMAGE_LIMIT) {
+    const blocksContent = form.content_blocks && form.content_blocks.length > 0 
+      ? extractPlainTextFromBlocks(form.content_blocks) 
+      : form.content
+      
+    if (countMarkdownImages(blocksContent) >= MARKDOWN_IMAGE_LIMIT) {
       const error = new Error(`Bạn chỉ có thể chèn tối đa ${MARKDOWN_IMAGE_LIMIT} ảnh trong nội dung bài viết.`)
       setFieldErrors((current) => ({
         ...current,
@@ -504,11 +533,16 @@ export function usePostComposerForm({
     }
 
     setIsSubmitting(true)
+    const blocksContent = form.content_blocks && form.content_blocks.length > 0 
+      ? extractPlainTextFromBlocks(form.content_blocks) 
+      : form.content
+      
     const result = await createPost({
       ...form,
       title: form.title.trim(),
       description: form.description.trim(),
-      content: form.content.trim(),
+      content: blocksContent.trim(),
+      content_blocks: form.content_blocks,
       tags: parseTags(form.tags).join(', '),
     })
 
@@ -566,6 +600,7 @@ export function usePostComposerForm({
     handleSaveDraft,
     clearDraft,
     handlePreview,
+    closePreview,
     handleInlineImageUpload,
     handleSubmit,
     resetForm,

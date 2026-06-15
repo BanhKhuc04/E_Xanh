@@ -1,4 +1,13 @@
 function AdminTopSavedPosts({ posts }) {
+  if (!posts.length) {
+    return (
+      <div className="as-section-card">
+        <h3>Bài viết được lưu nhiều nhất</h3>
+        <p>Chưa có đủ dữ liệu trong khoảng thời gian này.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="as-section-card">
       <h3>Bài viết được lưu nhiều nhất</h3>

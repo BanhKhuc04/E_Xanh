@@ -19,7 +19,7 @@ function AdminRoute() {
       }, 6000)
 
       try {
-        const { getCurrentSession, getCurrentUserProfile } = await import('../../services/authService')
+        const { getCurrentSession, ensureActiveProfileSession } = await import('../../services/authService')
         const session = await getCurrentSession()
         if (!session?.user) {
           if (isMounted) setLoading(false)
@@ -28,11 +28,13 @@ function AdminRoute() {
         }
 
         if (isMounted) setUser(session.user)
-        const profile = await getCurrentUserProfile(session.user.id)
+        const { profile, allowed } = await ensureActiveProfileSession(session.user.id)
         
         if (isMounted) {
-          if (isStaff(profile)) {
+          if (allowed && isStaff(profile)) {
             setIsAdmin(true)
+          } else if (!allowed) {
+            setUser(null)
           }
           setLoading(false)
         }

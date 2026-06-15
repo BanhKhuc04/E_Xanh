@@ -3,6 +3,13 @@
   gap: 28px;
 }
 
+.static-page > *,
+.static-page__section > *,
+.static-page__terms-layout > *,
+.static-page__contact-layout > * {
+  min-width: 0;
+}
+
 .static-page__breadcrumb {
   display: flex;
   flex-wrap: wrap;
@@ -324,7 +331,7 @@
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .static-page__grid--three,
   .static-page__grid--four,
   .static-page__form-row {
@@ -345,5 +352,24 @@
   .static-page__contact-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .static-page__hero,
+  .static-page__mission,
+  .static-page__terms-menu,
+  .static-page__terms-content,
+  .static-page__contact-form-card,
+  .static-page__contact-card,
+  .static-page__cta,
+  .static-page__card,
+  .static-page__value-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .static-page__hero-content h1 {
+    font-size: clamp(2rem, 10vw, 2.9rem);
   }
 }

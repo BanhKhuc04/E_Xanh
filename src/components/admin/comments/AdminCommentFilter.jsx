@@ -10,8 +10,8 @@ function AdminCommentFilter({
   dateRange,
   onDateRangeChange,
   postTitles,
-  onFilter,
   onReset,
+  onRefresh,
 }) {
   return (
     <section className="ac-filter" aria-label="Bộ lọc bình luận">
@@ -22,7 +22,7 @@ function AdminCommentFilter({
           </svg>
           <input
             type="text"
-            placeholder="Tìm theo nội dung, người bình luận..."
+            placeholder="Tìm theo nội dung, người bình luận, bài viết..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
           />
@@ -70,11 +70,11 @@ function AdminCommentFilter({
       </div>
 
       <div className="ac-filter__actions">
-        <button type="button" className="btn btn--primary" onClick={onFilter}>
-          Lọc bình luận
+        <button type="button" className="btn btn--primary" onClick={onRefresh}>
+          Làm mới dữ liệu
         </button>
         <button type="button" className="btn btn--ghost" onClick={onReset}>
-          Làm mới
+          Đặt lại bộ lọc
         </button>
       </div>
     </section>

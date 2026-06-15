@@ -3,6 +3,45 @@ import { supabase } from '../lib/supabase'
 import { resolvePostImageSource } from '../utils/postMedia'
 import { getCurrentSession } from './authService'
 
+function isCommentSchemaMismatch(error) {
+  const message = String(error?.message || '').toLowerCase()
+
+  return (
+    error?.code === '42703' ||
+    message.includes('column') ||
+    message.includes('admin_note') ||
+    message.includes('moderation_reason') ||
+    message.includes('hidden_at') ||
+    message.includes('hidden_by') ||
+    message.includes('spam_at') ||
+    message.includes('spam_by') ||
+    message.includes('deleted_at') ||
+    message.includes('deleted_by')
+  )
+}
+
+function mapCommentNotificationError(error) {
+  const message = String(error?.message || '').toLowerCase()
+
+  if (error?.code === 'PGRST205' || message.includes('could not find the table')) {
+    return new Error('Supabase chưa có bảng notifications. Hãy chạy migration notification center trước khi gửi cảnh báo bình luận.')
+  }
+
+  if (
+    message.includes('row-level security') ||
+    message.includes('permission') ||
+    message.includes('not authorized')
+  ) {
+    return new Error('Supabase RLS đang chặn insert vào bảng notifications. Hãy kiểm tra policy staff insert.')
+  }
+
+  if (message.includes('user_id')) {
+    return new Error('Thiếu user_id hợp lệ của chủ bình luận nên không thể gửi thông báo.')
+  }
+
+  return new Error(error?.message || 'Insert notification thất bại.')
+}
+
 export async function savePost(postId) {
   const session = await getCurrentSession()
   if (!session?.user) return { error: new Error('Bạn cần đăng nhập để lưu bài viết.') }
@@ -76,9 +115,9 @@ export async function getMySavedPosts() {
   const { data: postsData, error: postsError } = await supabase
     .from('posts')
     .select(`
-      id, title, slug, description, image_url, category_id, type, status,
+      id, title, slug, description, image_url, category_id, type, status, author_id,
       likes_count, comments_count, saved_count, read_time,
-      profiles (name, email, avatar_url)
+      profiles:author_id (name, email, avatar_url)
     `)
     .in('id', postIds)
 
@@ -103,6 +142,7 @@ export async function getMySavedPosts() {
       category: post.type === 'tip' ? 'Mẹo tiết kiệm' : post.type === 'community' ? 'Cộng đồng' : 'Hỏi đáp',
       savedCategoryLabel: post.type === 'tip' ? 'Mẹo hay' : post.type === 'community' ? 'Cộng đồng' : 'Giải đáp',
       author: post.profiles?.name || post.profiles?.email || 'Người dùng',
+      authorId: post.author_id,
       savedAt: new Date(row.created_at).toLocaleDateString('vi-VN'),
       likes: post.likes_count || 0,
       savedType: post.type === 'tip' ? 'Mẹo tiết kiệm' : post.type === 'community' ? 'Cộng đồng' : 'Review thiết bị',
@@ -213,7 +253,7 @@ export async function addComment(postId, content) {
     })
     .select(`
       *,
-      profiles (name, email, avatar_url, role)
+      profiles:user_id (name, email, avatar_url, role)
     `)
     .single()
 
@@ -229,7 +269,7 @@ export async function getCommentsByPostId(postId) {
     .from('comments')
     .select(`
       *,
-      profiles (name, email, avatar_url, role)
+      profiles:user_id (name, email, avatar_url, role)
     `)
     .eq('post_id', postId)
     .eq('status', 'visible')
@@ -267,8 +307,9 @@ export async function getAllCommentsAdmin() {
     .from('comments')
     .select(`
       *,
-      profiles (name, email, avatar_url),
-      posts (title)
+      profiles:user_id (name, email, avatar_url),
+      posts (title),
+      reports (id, reason)
     `)
     .order('created_at', { ascending: false })
 
@@ -295,16 +336,154 @@ export async function updateCommentStatusAdmin(commentId, status) {
 }
 
 export async function deleteCommentAdmin(commentId) {
-  const { error } = await supabase
+  const session = await getCurrentSession()
+  const adminId = session?.user?.id || null
+
+  let { data, error } = await supabase
     .from('comments')
-    .delete()
+    .update({
+      status: 'deleted',
+      deleted_at: new Date().toISOString(),
+      deleted_by: adminId,
+    })
     .eq('id', commentId)
+    .select()
+    .single()
+
+  if (error && isCommentSchemaMismatch(error)) {
+    logError('[E-XANH] Comments schema cũ, fallback xóa mềm cơ bản.', error)
+
+    const fallbackResult = await supabase
+      .from('comments')
+      .update({
+        status: 'deleted',
+      })
+      .eq('id', commentId)
+      .select()
+      .single()
+
+    data = fallbackResult.data
+    error = fallbackResult.error
+  }
 
   if (error) {
-    logError('[E-XANH] Lỗi xóa bình luận (admin):', error?.message || error)
+    logError('[E-XANH] Lỗi xóa mềm bình luận (admin):', error?.message || error)
     return { error }
   }
-  return { error: null }
+  return { data, error: null }
+}
+
+export async function updateCommentAdminNote(commentId, adminNote, moderationReason) {
+  const updates = {}
+  if (adminNote !== undefined) updates.admin_note = adminNote
+  if (moderationReason !== undefined) updates.moderation_reason = moderationReason
+
+  let { data, error } = await supabase
+    .from('comments')
+    .update(updates)
+    .eq('id', commentId)
+    .select()
+    .single()
+
+  if (error && isCommentSchemaMismatch(error)) {
+    logError('[E-XANH] Comments schema cũ, chưa lưu được admin note.', error)
+    return {
+      data: null,
+      error: new Error('Supabase hiện tại chưa có cột ghi chú moderation cho comments. Hãy chạy migration admin-upgrade để dùng ghi chú admin.'),
+    }
+  }
+
+  if (error) {
+    logError('[E-XANH] Lỗi lưu ghi chú admin:', error?.message || error)
+    return { data: null, error }
+  }
+  return { data, error: null }
+}
+
+export async function updateCommentStatusAdminFull(commentId, status, adminId) {
+  const updates = { status }
+
+  if (status === 'hidden') {
+    updates.hidden_at = new Date().toISOString()
+    updates.hidden_by = adminId
+  } else if (status === 'spam') {
+    updates.spam_at = new Date().toISOString()
+    updates.spam_by = adminId
+  } else if (status === 'visible') {
+    updates.hidden_at = null
+    updates.hidden_by = null
+    updates.spam_at = null
+    updates.spam_by = null
+    updates.deleted_at = null
+    updates.deleted_by = null
+  }
+
+  let { data, error } = await supabase
+    .from('comments')
+    .update(updates)
+    .eq('id', commentId)
+    .select()
+    .single()
+
+  if (error && isCommentSchemaMismatch(error)) {
+    logError('[E-XANH] Comments schema cũ, fallback cập nhật status cơ bản.', error)
+
+    const fallbackResult = await supabase
+      .from('comments')
+      .update({ status })
+      .eq('id', commentId)
+      .select()
+      .single()
+
+    data = fallbackResult.data
+    error = fallbackResult.error
+  }
+
+  if (error) {
+    logError('[E-XANH] Lỗi cập nhật trạng thái bình luận:', error?.message || error)
+    return { data: null, error }
+  }
+  return { data, error: null }
+}
+
+export async function sendCommentNotification(userId, commentContent, action, postTitle, commentId = null) {
+  const session = await getCurrentSession()
+  if (!session?.user) return { error: new Error('Not logged in') }
+
+  const actionMessages = {
+    hidden: 'Bình luận của bạn đã bị ẩn vì vi phạm quy định cộng đồng.',
+    spam: 'Bình luận của bạn đã bị đánh dấu spam.',
+    deleted: 'Bình luận của bạn đã bị xóa vì vi phạm quy định cộng đồng.',
+    warning: 'Bạn nhận được cảnh báo về bình luận vi phạm quy định cộng đồng.',
+  }
+
+  const message = actionMessages[action] || `Bình luận của bạn trong bài "${postTitle}" đã bị xử lý bởi quản trị viên.`
+  const notificationType = action === 'warning' ? 'comment_warning' : 'moderation'
+  const severity = action === 'warning' ? 'warning' : 'critical'
+
+  try {
+    const { error } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        title: 'Thông báo về bình luận',
+        message: `${message}\n\nNội dung: "${commentContent?.slice(0, 100)}${commentContent?.length > 100 ? '...' : ''}"${postTitle ? `\nBài viết: ${postTitle}` : ''}`,
+        type: notificationType,
+        severity,
+        related_type: 'comment',
+        related_id: commentId ? String(commentId) : null,
+        created_by: session.user.id,
+      })
+
+    if (error) {
+      logError('[E-XANH] Lỗi gửi thông báo bình luận:', error?.message || error)
+      return { error: mapCommentNotificationError(error) }
+    }
+    return { error: null }
+  } catch (err) {
+    logError('[E-XANH] Exception gửi thông báo:', err)
+    return { error: mapCommentNotificationError(err) }
+  }
 }
 
 export async function followUser(followingId) {

@@ -6,6 +6,22 @@ import {
   isCompressibleImageType,
 } from '../utils/imageCompress'
 
+export function extractPlainTextFromBlocks(blocks) {
+  if (!Array.isArray(blocks)) return ''
+  return blocks.map(block => {
+    if (block.type === 'list' && Array.isArray(block.items)) {
+      return block.items.join('\n')
+    }
+    if (block.type === 'image' && block.url) {
+      return `![${block.alt || 'Ảnh minh họa'}](${block.url})`
+    }
+    if (block.type === 'link' && block.url) {
+      return `[${block.label || 'Link'}](${block.url})`
+    }
+    return block.content || block.label || block.alt || ''
+  }).join('\n\n')
+}
+
 function generateSlug(title) {
   return title
     .toLowerCase()
@@ -183,12 +199,15 @@ export async function createPost(postData) {
     imageUrl = postData.image_url
   }
 
+
+
   const payload = {
     author_id: userId,
     title: postData.title,
     slug: slug,
     description: postData.description,
-    content: postData.content,
+    content: postData.content_blocks ? extractPlainTextFromBlocks(postData.content_blocks) : postData.content,
+    content_blocks: postData.content_blocks || null,
     type: validType,
     status: postData.status || 'pending',
     image_url: imageUrl,
@@ -247,7 +266,7 @@ export async function getApprovedPosts() {
 export async function getTipPosts() {
   const { data, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
+    .select(`*, profiles:author_id (name, avatar_url, bio, role), categories:category_id (id, name, slug)`)
     .eq('status', 'approved')
     .eq('type', 'tip')
     .order('created_at', { ascending: false })
@@ -262,7 +281,21 @@ export async function getPostBySlug(slug) {
     .eq('slug', slug)
     .single()
 
-  return { data, error }
+  if (error || !data) return { data: null, error }
+
+  if (data.status !== 'approved') {
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData?.session) return { data: null, error: new Error('Không có quyền xem') }
+    const userId = sessionData.session.user.id
+    if (data.author_id !== userId) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
+      if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
+         return { data: null, error: new Error('Không có quyền xem') }
+      }
+    }
+  }
+
+  return { data, error: null }
 }
 
 export async function getPostById(id) {
@@ -272,7 +305,21 @@ export async function getPostById(id) {
     .eq('id', id)
     .single()
 
-  return { data, error }
+  if (error || !data) return { data: null, error }
+
+  if (data.status !== 'approved') {
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData?.session) return { data: null, error: new Error('Không có quyền xem') }
+    const userId = sessionData.session.user.id
+    if (data.author_id !== userId) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
+      if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
+         return { data: null, error: new Error('Không có quyền xem') }
+      }
+    }
+  }
+
+  return { data, error: null }
 }
 
 export async function getCommunityPosts() {
@@ -369,12 +416,31 @@ export async function getMyPosts(userId) {
   return { data, error }
 }
 
+export async function getPublicPostsByUser(userId) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select(`
+      *, 
+      profiles:author_id (name, avatar_url, role)
+    `)
+    .eq('author_id', userId)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+
+  return { data, error }
+}
+
 
 export async function updatePostStatus(postId, status, adminNote = null) {
   const updatePayload = { status }
   
-  if (adminNote !== null && status === 'rejected') {
-    updatePayload.rejection_reason = adminNote
+  if (status === 'rejected') {
+    if (adminNote !== null) {
+      updatePayload.rejection_reason = adminNote
+    }
+    const { data: post } = await supabase.from('posts').select('rejection_count').eq('id', postId).single()
+    const currentCount = post?.rejection_count || 0
+    updatePayload.rejection_count = currentCount + 1
   }
 
   const { data, error } = await supabase
@@ -416,18 +482,33 @@ export async function updatePost(postId, postData) {
     'review': 'review',
   }
   
+
+
   const payload = {
     title: postData.title,
     description: postData.description,
-    content: postData.content,
+  }
+
+  if (postData.content_blocks) {
+    payload.content_blocks = postData.content_blocks
+    payload.content = extractPlainTextFromBlocks(postData.content_blocks)
+  } else if (postData.content !== undefined) {
+    payload.content = postData.content
   }
 
   if (postData.type) {
     payload.type = normalizedTypeMap[postData.type] || 'community'
   }
 
+  const { data: currentPost } = await supabase.from('posts').select('status, author_id').eq('id', postId).single()
+  
   if (postData.status) {
     payload.status = postData.status
+  }
+
+  // Auto reset to pending if owner updates a rejected post
+  if (currentPost?.status === 'rejected') {
+    payload.status = 'pending'
   }
 
   // Nếu có ảnh mới upload
@@ -460,3 +541,12 @@ export async function deletePost(postId) {
 
   return { data, error }
 }
+
+export async function getCategories() {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name')
+  return { data, error }
+}
+

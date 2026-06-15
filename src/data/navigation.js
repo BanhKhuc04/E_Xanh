@@ -13,6 +13,7 @@ export const adminNavLinks = [
   { to: '/admin/quan-ly-nguoi-dung', label: 'Quản lý người dùng', shortLabel: 'ND' },
   { to: '/admin/quan-ly-thiet-bi', label: 'Quản lý thiết bị điện', shortLabel: 'TB' },
   { to: '/admin/thong-ke', label: 'Thống kê', shortLabel: 'TK' },
+  { to: '/admin/thong-bao-he-thong', label: 'Thông báo', shortLabel: 'HT' },
   { to: '/admin/cai-dat', label: 'Cài đặt', shortLabel: 'CD' },
   { to: '/admin/cai-dat-giao-dien', label: 'Cài đặt giao diện', shortLabel: 'GD' },
 ]

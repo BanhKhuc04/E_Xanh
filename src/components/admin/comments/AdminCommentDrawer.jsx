@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { commentStatusMap } from '../../../data/adminComments'
 
 function formatTime(isoString) {
@@ -11,19 +12,39 @@ function formatTime(isoString) {
   return `${day}/${month}/${year} ${hours}:${mins}`
 }
 
-function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete }) {
+function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete, onSendNotification, onSaveAdminNote, isBusy }) {
   const [adminNote, setAdminNote] = useState('')
+  const [noteSaved, setNoteSaved] = useState(false)
+
+  // Sync admin note when comment changes
+  if (comment && adminNote === '' && comment.adminNote && !noteSaved) {
+    setAdminNote(comment.adminNote)
+  }
 
   if (!comment) return null
 
   const statusInfo =
     commentStatusMap[comment.status] ?? commentStatusMap.visible
 
+  const isHiddenOrSpamOrDeleted = ['hidden', 'spam', 'deleted'].includes(comment.status)
+  const postUrl = comment.postId ? `/cong-dong/${comment.postId}?comment=${comment.id}` : null
+
+  function handleSaveNote() {
+    onSaveAdminNote(comment.id, adminNote)
+    setNoteSaved(true)
+  }
+
+  function handleClose() {
+    setAdminNote('')
+    setNoteSaved(false)
+    onClose()
+  }
+
   return (
     <>
       <div
         className="ac-drawer-overlay"
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
       <aside className="ac-drawer" role="dialog" aria-label="Chi tiết bình luận">
@@ -32,7 +53,7 @@ function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete }) {
           <button
             type="button"
             className="ac-drawer__close"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Đóng"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -46,7 +67,6 @@ function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete }) {
             <span className="ac-drawer__avatar">{comment.avatar}</span>
             <div>
               <strong>{comment.userName}</strong>
-              <span className="ac-drawer__email">{comment.userEmail}</span>
             </div>
           </div>
 
@@ -62,7 +82,13 @@ function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete }) {
 
           <div className="ac-drawer__field">
             <span className="ac-drawer__label">Bài viết liên quan</span>
-            <span className="ac-drawer__post-link">{comment.postTitle}</span>
+            {postUrl ? (
+              <Link to={postUrl} className="ac-drawer__post-link" style={{ color: 'var(--color-primary, #4f8428)', textDecoration: 'underline' }}>
+                {comment.postTitle} →
+              </Link>
+            ) : (
+              <span className="ac-drawer__post-link">{comment.postTitle}</span>
+            )}
           </div>
 
           <div className="ac-drawer__field">
@@ -86,42 +112,71 @@ function AdminCommentDrawer({ comment, onClose, onChangeStatus, onDelete }) {
               rows="3"
               placeholder="Nhập ghi chú xử lý bình luận..."
               value={adminNote}
-              onChange={(e) => setAdminNote(e.target.value)}
+              onChange={(e) => { setAdminNote(e.target.value); setNoteSaved(false) }}
             />
+            <button
+              type="button"
+              className="btn btn--ghost"
+              style={{ marginTop: '8px', fontSize: '0.85rem' }}
+              onClick={handleSaveNote}
+              disabled={isBusy}
+            >
+              {noteSaved ? '✓ Đã lưu ghi chú' : 'Lưu ghi chú'}
+            </button>
           </div>
         </div>
 
         <div className="ac-drawer__footer">
-          <button
-            type="button"
-            className="btn btn--ghost"
-            onClick={() => onChangeStatus(comment.id, 'hidden')}
-          >
-            Ẩn bình luận
-          </button>
-          <button
-            type="button"
-            className="btn btn--primary"
-            onClick={() => onChangeStatus(comment.id, 'visible')}
-          >
-            Khôi phục
-          </button>
-          <button
-            type="button"
-            className="btn btn--ghost"
-            onClick={() => onChangeStatus(comment.id, 'spam')}
-          >
-            Đánh dấu spam
-          </button>
+          {comment.status !== 'hidden' && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => onChangeStatus(comment.id, 'hidden')}
+              disabled={isBusy}
+            >
+              Ẩn bình luận
+            </button>
+          )}
+
+          {isHiddenOrSpamOrDeleted && (
+            <button
+              type="button"
+              className="btn btn--primary"
+              onClick={() => onChangeStatus(comment.id, 'visible')}
+              disabled={isBusy}
+            >
+              Khôi phục
+            </button>
+          )}
+
+          {comment.status !== 'spam' && (
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => onChangeStatus(comment.id, 'spam')}
+              disabled={isBusy}
+            >
+              Đánh dấu spam
+            </button>
+          )}
+
           <button
             type="button"
             className="btn btn--secondary ac-drawer__delete-btn"
             onClick={() => onDelete(comment.id)}
+            disabled={isBusy}
           >
             Xóa bình luận
           </button>
-          <button type="button" className="btn btn--secondary" disabled title="Tính năng đang phát triển" aria-disabled="true">
-            Gửi email cảnh báo
+
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => onSendNotification(comment.id)}
+            disabled={isBusy}
+            style={{ color: '#e67e22' }}
+          >
+            ⚠ Gửi thông báo cảnh báo
           </button>
         </div>
 

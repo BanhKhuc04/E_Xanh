@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function ArticleHeader({ post }) {
   return (
     <header className="article-header">
@@ -7,13 +9,15 @@ function ArticleHeader({ post }) {
 
       <div className="article-header__meta">
         <div className="article-header__author">
-          <span className="article-header__avatar">{post.author.slice(0, 2).toUpperCase()}</span>
-          <div>
-            <strong>{post.author}</strong>
-            <span>
-              {post.date} • {post.readTime}
-            </span>
-          </div>
+          <Link to={`/nguoi-dung/${post.author_id || post.authorId}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
+            <span className="article-header__avatar">{post.author.slice(0, 2).toUpperCase()}</span>
+            <div>
+              <strong>{post.author}</strong>
+              <span style={{ display: 'block', color: 'var(--color-text-muted)' }}>
+                {post.date} • {post.readTime}
+              </span>
+            </div>
+          </Link>
         </div>
 
         <div className="article-header__stats">

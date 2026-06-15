@@ -120,6 +120,42 @@ CREATE POLICY "Only admins can modify banners"
 ON website_banners FOR ALL 
 USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'admin');
 
+-- BẢNG WEBSITE_ANNOUNCEMENTS
+
+ALTER TABLE website_announcements ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "website_announcements_public_select_active" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_select_all" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_insert" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_update" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_admin_delete" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_delete" ON website_announcements;
+
+CREATE POLICY "website_announcements_public_select_active"
+ON website_announcements FOR SELECT
+USING (
+  is_active = true
+  AND (start_at IS NULL OR start_at <= now())
+  AND (end_at IS NULL OR end_at >= now())
+);
+
+CREATE POLICY "website_announcements_staff_select_all"
+ON website_announcements FOR SELECT
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'));
+
+CREATE POLICY "website_announcements_staff_insert"
+ON website_announcements FOR INSERT
+WITH CHECK ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'));
+
+CREATE POLICY "website_announcements_staff_update"
+ON website_announcements FOR UPDATE
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'))
+WITH CHECK ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'));
+
+CREATE POLICY "website_announcements_staff_delete"
+ON website_announcements FOR DELETE
+USING ((SELECT role FROM profiles WHERE id = auth.uid()) IN ('admin', 'moderator'));
+
 -- GHI CHÚ QUAN TRỌNG:
 -- Chạy đoạn script này trên Supabase SQL Editor.
 -- Client-side whitelist đã được bổ sung nhưng RLS là lớp khiên bảo mật cuối cùng chặn hacker!

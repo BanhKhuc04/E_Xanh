@@ -16,7 +16,12 @@ CREATE TABLE profiles (
   role TEXT NOT NULL DEFAULT 'user'
     CHECK (role IN ('user', 'moderator', 'admin')),
   status TEXT NOT NULL DEFAULT 'active'
-    CHECK (status IN ('active', 'locked', 'pending')),
+    CHECK (status IN ('active', 'locked', 'pending', 'blocked', 'deleted')),
+  ban_reason TEXT,
+  banned_at TIMESTAMPTZ,
+  banned_by UUID REFERENCES profiles(id),
+  deleted_at TIMESTAMPTZ,
+  deleted_by UUID REFERENCES profiles(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -108,9 +113,17 @@ CREATE TABLE comments (
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'visible'
-    CHECK (status IN ('visible', 'hidden', 'reported', 'spam')),
+    CHECK (status IN ('visible', 'hidden', 'reported', 'spam', 'deleted')),
   reports_count INT NOT NULL DEFAULT 0,
   likes_count INT NOT NULL DEFAULT 0,
+  admin_note TEXT,
+  moderation_reason TEXT,
+  hidden_at TIMESTAMPTZ,
+  hidden_by UUID REFERENCES profiles(id),
+  spam_at TIMESTAMPTZ,
+  spam_by UUID REFERENCES profiles(id),
+  deleted_at TIMESTAMPTZ,
+  deleted_by UUID REFERENCES profiles(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -220,3 +233,46 @@ CREATE TABLE platform_settings (
 );
 
 ALTER TABLE platform_settings ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 11.5 SYSTEM_BACKUPS — Sao lưu ứng dụng mức dữ liệu
+-- ============================================
+CREATE TABLE IF NOT EXISTS system_backups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  label TEXT NOT NULL,
+  snapshot JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE system_backups ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- 12. WEBSITE_ANNOUNCEMENTS — Thông báo website
+-- ============================================
+CREATE TABLE IF NOT EXISTS website_announcements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT,
+  message TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'info'
+    CHECK (type IN ('info', 'success', 'warning', 'danger')),
+  display_mode TEXT NOT NULL DEFAULT 'static'
+    CHECK (display_mode IN ('static', 'marquee')),
+  position TEXT NOT NULL DEFAULT 'top'
+    CHECK (position IN ('top')),
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  start_at TIMESTAMPTZ,
+  end_at TIMESTAMPTZ,
+  cta_label TEXT,
+  cta_url TEXT,
+  priority INT NOT NULL DEFAULT 100,
+  created_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CHECK (end_at IS NULL OR start_at IS NULL OR end_at >= start_at)
+);
+
+CREATE INDEX IF NOT EXISTS website_announcements_priority_idx
+  ON website_announcements (priority DESC, created_at DESC);
+
+ALTER TABLE website_announcements ENABLE ROW LEVEL SECURITY;

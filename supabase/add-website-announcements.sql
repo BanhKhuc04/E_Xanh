@@ -35,29 +35,69 @@ DROP POLICY IF EXISTS "website_announcements_staff_select_all" ON public.website
 DROP POLICY IF EXISTS "website_announcements_staff_insert" ON public.website_announcements;
 DROP POLICY IF EXISTS "website_announcements_staff_update" ON public.website_announcements;
 DROP POLICY IF EXISTS "website_announcements_admin_delete" ON public.website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_delete" ON public.website_announcements;
 
 CREATE POLICY "website_announcements_public_select_active"
   ON public.website_announcements
   FOR SELECT
-  USING (is_active = true);
+  USING (
+    is_active = true
+    AND (start_at IS NULL OR start_at <= now())
+    AND (end_at IS NULL OR end_at >= now())
+  );
 
 CREATE POLICY "website_announcements_staff_select_all"
   ON public.website_announcements
   FOR SELECT
-  USING (public.is_staff());
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('admin', 'moderator')
+    )
+  );
 
 CREATE POLICY "website_announcements_staff_insert"
   ON public.website_announcements
   FOR INSERT
-  WITH CHECK (public.is_staff());
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('admin', 'moderator')
+    )
+  );
 
 CREATE POLICY "website_announcements_staff_update"
   ON public.website_announcements
   FOR UPDATE
-  USING (public.is_staff())
-  WITH CHECK (public.is_staff());
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('admin', 'moderator')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('admin', 'moderator')
+    )
+  );
 
-CREATE POLICY "website_announcements_admin_delete"
+CREATE POLICY "website_announcements_staff_delete"
   ON public.website_announcements
   FOR DELETE
-  USING (public.is_admin());
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('admin', 'moderator')
+    )
+  );

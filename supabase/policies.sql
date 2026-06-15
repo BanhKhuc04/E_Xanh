@@ -389,3 +389,88 @@ CREATE POLICY "platform_settings_admin_update"
       WHERE id = auth.uid() AND role = 'admin'
     )
   );
+
+-- ============================================
+-- SYSTEM_BACKUPS
+-- ============================================
+
+CREATE POLICY "system_backups_admin_select"
+  ON system_backups FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "system_backups_admin_insert"
+  ON system_backups FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- ============================================
+-- WEBSITE_ANNOUNCEMENTS
+-- ============================================
+
+ALTER TABLE website_announcements ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "website_announcements_public_select_active" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_select_all" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_insert" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_update" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_admin_delete" ON website_announcements;
+DROP POLICY IF EXISTS "website_announcements_staff_delete" ON website_announcements;
+
+CREATE POLICY "website_announcements_public_select_active"
+  ON website_announcements FOR SELECT
+  USING (
+    is_active = true
+    AND (start_at IS NULL OR start_at <= now())
+    AND (end_at IS NULL OR end_at >= now())
+  );
+
+CREATE POLICY "website_announcements_staff_select_all"
+  ON website_announcements FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+    )
+  );
+
+CREATE POLICY "website_announcements_staff_insert"
+  ON website_announcements FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+    )
+  );
+
+CREATE POLICY "website_announcements_staff_update"
+  ON website_announcements FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+    )
+  );
+
+CREATE POLICY "website_announcements_staff_delete"
+  ON website_announcements FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+    )
+  );

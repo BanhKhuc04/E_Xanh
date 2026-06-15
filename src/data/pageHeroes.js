@@ -19,6 +19,15 @@ export const pageHeroContent = {
     fallbackImage: heroImage,
     imageAlt: 'Nhóm sinh viên đang chia sẻ kinh nghiệm sống xanh',
   },
+  'saved-posts': {
+    pageKey: 'saved-posts',
+    badge: 'Kho nội dung cá nhân',
+    title: 'Bài viết đã lưu',
+    description:
+      'Lưu lại những mẹo tiết kiệm điện, kinh nghiệm sống xanh và bài viết hữu ích để xem lại bất cứ lúc nào.',
+    fallbackImage: heroImage,
+    imageAlt: 'Người dùng đang xem lại bài viết đã lưu trên laptop',
+  },
   'electricity-check': {
     pageKey: 'electricity-check',
     badge: 'Công cụ tính tiền điện',
@@ -45,6 +54,7 @@ export const heroPageOptions = [
   { key: 'auth', label: 'Đăng nhập / Đăng ký', aspectRatio: 16 / 9 },
   { key: 'tips', label: 'Mẹo tiết kiệm', aspectRatio: 16 / 9 },
   { key: 'community', label: 'Cộng đồng', aspectRatio: 16 / 9 },
+  { key: 'saved-posts', label: 'Bài đã lưu', aspectRatio: 16 / 9 },
   { key: 'electricity-check', label: 'Kiểm tra tiền điện', aspectRatio: 16 / 9 },
   { key: 'about', label: 'Về chúng tôi', aspectRatio: 16 / 9 },
 ]

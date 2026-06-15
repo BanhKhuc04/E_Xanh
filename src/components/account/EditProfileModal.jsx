@@ -10,6 +10,7 @@ import {
 function EditProfileModal({ user, onClose, onSuccess }) {
   const [name, setName] = useState(user?.name || '')
   const [bio, setBio] = useState(user?.bio || '')
+  const [facebookUrl, setFacebookUrl] = useState(user?.facebook_url || '')
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '')
   const [pendingAvatarFile, setPendingAvatarFile] = useState(null)
   const [cropSource, setCropSource] = useState('')
@@ -79,6 +80,19 @@ function EditProfileModal({ user, onClose, onSuccess }) {
       return
     }
 
+    if (facebookUrl.trim()) {
+      const fbUrl = facebookUrl.trim().toLowerCase()
+      const isValidFb = fbUrl.startsWith('https://facebook.com/') || 
+                        fbUrl.startsWith('https://www.facebook.com/') || 
+                        fbUrl.startsWith('https://fb.com/') || 
+                        fbUrl.startsWith('https://www.fb.com/')
+      if (!isValidFb) {
+        setError('Liên kết Facebook không hợp lệ (phải bắt đầu bằng https://facebook.com/ hoặc https://fb.com/).')
+        setSuccess('')
+        return
+      }
+    }
+
     setLoading(true)
     setError('')
     setSuccess('')
@@ -99,6 +113,7 @@ function EditProfileModal({ user, onClose, onSuccess }) {
     const updates = {
       name: name.trim(),
       bio: bio.trim(),
+      facebook_url: facebookUrl.trim(),
       avatar_url: nextAvatarUrl,
     }
 
@@ -169,6 +184,18 @@ function EditProfileModal({ user, onClose, onSuccess }) {
                   onChange={(event) => setBio(event.target.value)}
                   disabled={loading}
                   placeholder="Giới thiệu ngắn về bạn..."
+                />
+              </div>
+
+              <div className="account-modal__field">
+                <label htmlFor="profile-facebook">Liên kết Facebook</label>
+                <input
+                  id="profile-facebook"
+                  type="url"
+                  value={facebookUrl}
+                  onChange={(event) => setFacebookUrl(event.target.value)}
+                  disabled={loading}
+                  placeholder="https://facebook.com/..."
                 />
               </div>
 

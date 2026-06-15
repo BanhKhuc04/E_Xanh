@@ -782,3 +782,115 @@
     width: 100%;
   }
 }
+
+/* ---- Deleted Badge ---- */
+.ac-badge.is-deleted {
+  color: #8a3030;
+  background: rgba(200, 80, 80, 0.18);
+}
+
+/* ---- Restore Button ---- */
+.ac-list__action-btn--restore {
+  color: #2a5e1f;
+  background: rgba(128, 177, 85, 0.2);
+  border-color: rgba(79, 132, 40, 0.18);
+}
+
+.ac-list__action-btn--restore:hover {
+  background: rgba(128, 177, 85, 0.38);
+}
+
+/* ---- Toast Error ---- */
+.ac-toast--error {
+  background: linear-gradient(135deg, #8a3030, #c0392b);
+}
+
+/* ---- Confirm Modal ---- */
+.ac-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(23, 55, 21, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ac-fade-in 0.2s ease;
+}
+
+.ac-modal {
+  width: min(480px, 90vw);
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(23, 55, 21, 0.2);
+  animation: ac-slide-in 0.25s ease;
+  overflow: hidden;
+}
+
+.ac-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px;
+  border-bottom: 1px solid rgba(79, 132, 40, 0.08);
+}
+
+.ac-modal__header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.ac-modal__close {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(79, 132, 40, 0.12);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ac-modal__close:hover {
+  background: rgba(234, 245, 157, 0.3);
+}
+
+.ac-modal__close svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ac-modal__body {
+  padding: 24px;
+}
+
+.ac-modal__body p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.ac-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(79, 132, 40, 0.08);
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  border: none;
+}
+
+.btn--danger:hover {
+  background: linear-gradient(135deg, #a93226, #c0392b);
+}
+

@@ -1,17 +1,22 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   createWebsiteAnnouncement,
   deleteWebsiteAnnouncement,
   fetchWebsiteAnnouncements,
   updateWebsiteAnnouncement,
 } from '../../../services/announcementService'
+import {
+  evaluateAnnouncementVisibility,
+  getVietnamTimeWindowLabel,
+  toUtcIsoFromVietnamDateTimeLocal,
+  toVietnamDateTimeLocalValue,
+} from '../../../utils/announcementTime'
 
 const INITIAL_FORM = {
   title: '',
   message: '',
   type: 'info',
-  display_mode: 'static',
-  position: 'top',
+  display_type: 'top_bar',
   is_active: true,
   start_at: '',
   end_at: '',
@@ -20,13 +25,22 @@ const INITIAL_FORM = {
   priority: 100,
 }
 
-function toDateTimeLocalValue(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16)
+const TYPE_OPTIONS = [
+  { value: 'info', label: 'Thông tin', description: 'Thông báo chung, ít gây gián đoạn.' },
+  { value: 'success', label: 'Thành công', description: 'Xác nhận hoàn tất hoặc mở tính năng mới.' },
+  { value: 'warning', label: 'Cảnh báo', description: 'Nhắc người dùng lưu ý thay đổi hoặc rủi ro.' },
+  { value: 'maintenance', label: 'Bảo trì', description: 'Thông báo nâng cấp, downtime hoặc bảo trì định kỳ.' },
+  { value: 'critical', label: 'Khẩn cấp', description: 'Sự cố nghiêm trọng cần người dùng chú ý ngay.' },
+]
+
+const DISPLAY_OPTIONS = [
+  { value: 'top_bar', label: 'Thanh cố định đầu website' },
+  { value: 'marquee', label: 'Chữ chạy website' },
+  { value: 'popup', label: 'Popup nổi giữa màn hình' },
+]
+
+function getOptionMeta(options, value, fallbackLabel = value) {
+  return options.find((option) => option.value === value) || { value, label: fallbackLabel, description: '' }
 }
 
 function AdminAnnouncementManager() {
@@ -54,6 +68,18 @@ function AdminAnnouncementManager() {
     loadAnnouncements()
   }, [loadAnnouncements])
 
+  const previewVisibility = useMemo(
+    () =>
+      evaluateAnnouncementVisibility({
+        ...form,
+        start_at: toUtcIsoFromVietnamDateTimeLocal(form.start_at),
+        end_at: toUtcIsoFromVietnamDateTimeLocal(form.end_at),
+      }),
+    [form],
+  )
+  const selectedType = useMemo(() => getOptionMeta(TYPE_OPTIONS, form.type, 'Thông tin'), [form.type])
+  const selectedDisplay = useMemo(() => getOptionMeta(DISPLAY_OPTIONS, form.display_type, 'Thanh cố định đầu website'), [form.display_type])
+
   function resetForm() {
     setForm(INITIAL_FORM)
     setEditingId(null)
@@ -76,13 +102,32 @@ function AdminAnnouncementManager() {
       ...form,
       title: form.title.trim(),
       message: form.message.trim(),
-      start_at: form.start_at ? new Date(form.start_at).toISOString() : null,
-      end_at: form.end_at ? new Date(form.end_at).toISOString() : null,
+      display_type: form.display_type,
+      start_at: toUtcIsoFromVietnamDateTimeLocal(form.start_at),
+      end_at: toUtcIsoFromVietnamDateTimeLocal(form.end_at),
       priority: Number(form.priority) || 0,
     }
 
+    if (!payload.title) {
+      setErrorMsg('Thông báo website cần có tiêu đề ngắn để quản trị dễ theo dõi.')
+      setSaving(false)
+      return
+    }
+
     if (!payload.message) {
-      setErrorMsg('Thông báo cần có nội dung hiển thị.')
+      setErrorMsg('Thông báo website cần có nội dung hiển thị.')
+      setSaving(false)
+      return
+    }
+
+    if ((form.start_at && !payload.start_at) || (form.end_at && !payload.end_at)) {
+      setErrorMsg('Thời gian hiệu lực không hợp lệ. Hãy nhập lại theo giờ Việt Nam.')
+      setSaving(false)
+      return
+    }
+
+    if (payload.start_at && payload.end_at && new Date(payload.start_at) > new Date(payload.end_at)) {
+      setErrorMsg('Thời gian kết thúc phải sau thời gian bắt đầu.')
       setSaving(false)
       return
     }
@@ -108,11 +153,10 @@ function AdminAnnouncementManager() {
       title: announcement.title || '',
       message: announcement.message || '',
       type: announcement.type || 'info',
-      display_mode: announcement.display_mode || 'static',
-      position: announcement.position || 'top',
+      display_type: announcement.display_type || 'top_bar',
       is_active: Boolean(announcement.is_active),
-      start_at: toDateTimeLocalValue(announcement.start_at),
-      end_at: toDateTimeLocalValue(announcement.end_at),
+      start_at: toVietnamDateTimeLocalValue(announcement.start_at),
+      end_at: toVietnamDateTimeLocalValue(announcement.end_at),
       cta_label: announcement.cta_label || '',
       cta_url: announcement.cta_url || '',
       priority: announcement.priority ?? 100,
@@ -122,7 +166,7 @@ function AdminAnnouncementManager() {
   }
 
   async function handleDelete(id) {
-    if (!window.confirm('Xóa thông báo này khỏi website?')) return
+    if (!window.confirm('Xóa hoặc archive thông báo này khỏi website?')) return
 
     const { error } = await deleteWebsiteAnnouncement(id)
     if (error) {
@@ -134,7 +178,7 @@ function AdminAnnouncementManager() {
       resetForm()
     }
 
-    setSuccessMsg('Đã xóa thông báo.')
+    setSuccessMsg('Đã xóa thông báo website.')
     await loadAnnouncements()
   }
 
@@ -148,7 +192,7 @@ function AdminAnnouncementManager() {
       return
     }
 
-    setSuccessMsg('Đã cập nhật trạng thái thông báo.')
+    setSuccessMsg('Đã cập nhật trạng thái thông báo website.')
     await loadAnnouncements()
   }
 
@@ -158,7 +202,7 @@ function AdminAnnouncementManager() {
         <div>
           <h2 className="st-card__title">Thông báo website</h2>
           <p className="announcement-manager__intro">
-            Tạo thanh thông báo cố định hoặc chữ chạy ở đầu website. Chỉ thông báo đang active và còn trong thời gian hiệu lực mới được hiển thị.
+            Dùng cho thông báo công khai ngoài website. Mục này không gửi vào chuông người dùng hoặc admin.
           </p>
         </div>
       </div>
@@ -166,115 +210,196 @@ function AdminAnnouncementManager() {
       {errorMsg ? <div className="admin-alert admin-alert--error">{errorMsg}</div> : null}
       {successMsg ? <div className="admin-alert admin-alert--success">{successMsg}</div> : null}
 
-      <form className="announcement-manager__form" onSubmit={handleSubmit}>
-        <div className="announcement-manager__grid">
-          <label className="st-card__field">
-            <span className="st-card__label">Tiêu đề</span>
-            <input className="st-card__input" value={form.title} onChange={(event) => handleChange('title', event.target.value)} placeholder="Ví dụ: Bảo trì hệ thống" />
+      <div className="announcement-manager__workspace">
+        <form className="announcement-manager__form" onSubmit={handleSubmit}>
+          <div className="announcement-manager__grid">
+            <label className="st-card__field">
+              <span className="st-card__label">Tiêu đề</span>
+              <input className="st-card__input" value={form.title} onChange={(event) => handleChange('title', event.target.value)} placeholder="Ví dụ: Bảo trì hệ thống ban đêm" />
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">Loại</span>
+              <select className="st-card__input" value={form.type} onChange={(event) => handleChange('type', event.target.value)}>
+                {TYPE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">Kiểu hiển thị</span>
+              <select className="st-card__input" value={form.display_type} onChange={(event) => handleChange('display_type', event.target.value)}>
+                {DISPLAY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">Ưu tiên</span>
+              <input className="st-card__input" type="number" value={form.priority} onChange={(event) => handleChange('priority', event.target.value)} />
+            </label>
+
+            <label className="st-card__field announcement-manager__field--full">
+              <span className="st-card__label">Nội dung</span>
+              <textarea className="st-card__input st-card__textarea" rows="4" value={form.message} onChange={(event) => handleChange('message', event.target.value)} placeholder="Ví dụ: E-XANH sẽ bảo trì từ 23:00 đến 06:00 sáng mai để nâng cấp hệ thống." />
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">Hiệu lực từ</span>
+              <input className="st-card__input" type="datetime-local" value={form.start_at} onChange={(event) => handleChange('start_at', event.target.value)} />
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">Hiệu lực đến</span>
+              <input className="st-card__input" type="datetime-local" value={form.end_at} onChange={(event) => handleChange('end_at', event.target.value)} />
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">CTA label</span>
+              <input className="st-card__input" value={form.cta_label} onChange={(event) => handleChange('cta_label', event.target.value)} placeholder="Tìm hiểu thêm" />
+            </label>
+
+            <label className="st-card__field">
+              <span className="st-card__label">CTA URL</span>
+              <input className="st-card__input" value={form.cta_url} onChange={(event) => handleChange('cta_url', event.target.value)} placeholder="/bao-tri hoặc https://..." />
+            </label>
+          </div>
+
+          <label className="announcement-manager__toggle">
+            <input type="checkbox" checked={form.is_active} onChange={(event) => handleChange('is_active', event.target.checked)} />
+            <span>Bật hiển thị khi announcement còn trong khung giờ hiệu lực</span>
           </label>
 
-          <label className="st-card__field">
-            <span className="st-card__label">Loại</span>
-            <select className="st-card__input" value={form.type} onChange={(event) => handleChange('type', event.target.value)}>
-              <option value="info">Info</option>
-              <option value="success">Success</option>
-              <option value="warning">Warning</option>
-              <option value="danger">Danger</option>
-            </select>
-          </label>
+          <div className="st-card__actions">
+            <button type="submit" className="btn btn--primary" disabled={saving}>
+              {saving ? 'Đang lưu...' : editingId ? 'Cập nhật thông báo' : 'Tạo thông báo'}
+            </button>
+            <button type="button" className="btn btn--secondary" onClick={resetForm} disabled={saving}>
+              {editingId ? 'Hủy sửa' : 'Làm mới form'}
+            </button>
+          </div>
+        </form>
 
-          <label className="st-card__field">
-            <span className="st-card__label">Kiểu hiển thị</span>
-            <select className="st-card__input" value={form.display_mode} onChange={(event) => handleChange('display_mode', event.target.value)}>
-              <option value="static">Thanh tĩnh</option>
-              <option value="marquee">Chữ chạy</option>
-            </select>
-          </label>
-
-          <label className="st-card__field">
-            <span className="st-card__label">Ưu tiên</span>
-            <input className="st-card__input" type="number" value={form.priority} onChange={(event) => handleChange('priority', event.target.value)} />
-          </label>
-
-          <label className="st-card__field announcement-manager__field--full">
-            <span className="st-card__label">Nội dung</span>
-            <textarea className="st-card__input st-card__textarea" rows="3" value={form.message} onChange={(event) => handleChange('message', event.target.value)} placeholder="Ví dụ: Hệ thống sẽ bảo trì ngắn lúc 22:00 tối nay." />
-          </label>
-
-          <label className="st-card__field">
-            <span className="st-card__label">Hiệu lực từ</span>
-            <input className="st-card__input" type="datetime-local" value={form.start_at} onChange={(event) => handleChange('start_at', event.target.value)} />
-          </label>
-
-          <label className="st-card__field">
-            <span className="st-card__label">Hiệu lực đến</span>
-            <input className="st-card__input" type="datetime-local" value={form.end_at} onChange={(event) => handleChange('end_at', event.target.value)} />
-          </label>
-
-          <label className="st-card__field">
-            <span className="st-card__label">CTA label</span>
-            <input className="st-card__input" value={form.cta_label} onChange={(event) => handleChange('cta_label', event.target.value)} placeholder="Tìm hiểu thêm" />
-          </label>
-
-          <label className="st-card__field">
-            <span className="st-card__label">CTA URL</span>
-            <input className="st-card__input" value={form.cta_url} onChange={(event) => handleChange('cta_url', event.target.value)} placeholder="/lien-he hoặc https://..." />
-          </label>
-        </div>
-
-        <label className="announcement-manager__toggle">
-          <input type="checkbox" checked={form.is_active} onChange={(event) => handleChange('is_active', event.target.checked)} />
-          <span>Hiển thị ngay khi nằm trong thời gian hiệu lực</span>
-        </label>
-
-        <div className="st-card__actions">
-          <button type="submit" className="btn btn--primary" disabled={saving}>
-            {saving ? 'Đang lưu...' : editingId ? 'Cập nhật thông báo' : 'Tạo thông báo'}
-          </button>
-          <button type="button" className="btn btn--secondary" onClick={resetForm} disabled={saving}>
-            {editingId ? 'Hủy sửa' : 'Làm mới form'}
-          </button>
-        </div>
-      </form>
+        <aside className="announcement-manager__preview">
+          <div className={`announcement-manager__preview-card announcement-manager__preview-card--${form.type}`}>
+            <div className="announcement-manager__preview-top">
+              <div>
+                <strong>{form.title || 'Tiêu đề thông báo website'}</strong>
+                <div className="announcement-manager__preview-pills">
+                  <span className={`announcement-tone-pill announcement-tone-pill--${form.type}`}>
+                    {selectedType.label}
+                  </span>
+                  <span className="announcement-tone-pill announcement-tone-pill--display">
+                    {selectedDisplay.label}
+                  </span>
+                  <span className={form.is_active ? 'st-badge st-badge--active' : 'st-badge st-badge--warning'}>
+                    {form.is_active ? 'Đang bật' : 'Đã tắt'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className={`announcement-manager__preview-surface announcement-manager__preview-surface--${form.display_type}`}>
+              {form.display_type === 'marquee' ? (
+                <div className="announcement-manager__preview-marquee">
+                  <div className="announcement-manager__preview-marquee-track">
+                    <span className="announcement-manager__preview-marquee-item">
+                      <strong>{form.title || 'Tiêu đề thông báo website'}</strong>
+                      <span>•</span>
+                      <span>{form.message || 'Nội dung preview sẽ hiển thị tại đây để kiểm tra cảm giác ngoài website.'}</span>
+                    </span>
+                    <span className="announcement-manager__preview-marquee-item" aria-hidden="true">
+                      <strong>{form.title || 'Tiêu đề thông báo website'}</strong>
+                      <span>•</span>
+                      <span>{form.message || 'Nội dung preview sẽ hiển thị tại đây để kiểm tra cảm giác ngoài website.'}</span>
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="announcement-manager__preview-body">
+                  <p>{form.message || 'Nội dung preview sẽ hiển thị tại đây để kiểm tra cảm giác ngoài website.'}</p>
+                </div>
+              )}
+            </div>
+            <div className="announcement-manager__preview-meta">
+              <span>{selectedType.description}</span>
+              <span>{selectedDisplay.label}</span>
+              <span>{getVietnamTimeWindowLabel(toUtcIsoFromVietnamDateTimeLocal(form.start_at), toUtcIsoFromVietnamDateTimeLocal(form.end_at))}</span>
+              <span>{previewVisibility.visible ? 'Sẽ hiển thị nếu publish ngay bây giờ' : 'Hiện chưa đủ điều kiện hiển thị'}</span>
+            </div>
+            {form.cta_label && form.cta_url ? (
+              <button type="button" className="announcement-manager__preview-cta">
+                {form.cta_label}
+              </button>
+            ) : (
+              <span className="announcement-manager__preview-nocta">Không render CTA khi label hoặc URL đang trống.</span>
+            )}
+          </div>
+        </aside>
+      </div>
 
       <div className="announcement-manager__list">
         {loading ? <p>Đang tải thông báo...</p> : null}
-        {!loading && announcements.length === 0 ? <p>Chưa có thông báo nào.</p> : null}
+        {!loading && announcements.length === 0 ? <p>Chưa có thông báo website nào.</p> : null}
 
         {!loading && announcements.length > 0
-          ? announcements.map((announcement) => (
-            <article key={announcement.id} className={`announcement-manager__item announcement-manager__item--${announcement.type || 'info'}`}>
-              <div className="announcement-manager__item-top">
-                <div>
-                  <strong>{announcement.title || 'Thông báo không tiêu đề'}</strong>
-                  <p>{announcement.message}</p>
+          ? announcements.map((announcement) => {
+            const visibility = evaluateAnnouncementVisibility(announcement)
+            const visibilityLabel = visibility.visible
+              ? 'Đang nằm trong khung giờ hiển thị'
+              : visibility.reasons.includes('before_start')
+                ? 'Chưa tới giờ hiển thị'
+                : visibility.reasons.includes('after_end')
+                  ? 'Đã hết hạn hiển thị'
+                  : 'Đang tắt'
+
+            return (
+              <article key={announcement.id} className={`announcement-manager__item announcement-manager__item--${announcement.type || 'info'}`}>
+                <div className="announcement-manager__item-top">
+                  <div>
+                    <div className="announcement-manager__item-tags">
+                      <span className={`announcement-tone-pill announcement-tone-pill--${announcement.type || 'info'}`}>
+                        {getOptionMeta(TYPE_OPTIONS, announcement.type || 'info', announcement.type || 'info').label}
+                      </span>
+                      <span className="announcement-tone-pill announcement-tone-pill--display">
+                        {getOptionMeta(DISPLAY_OPTIONS, announcement.display_type || 'top_bar', announcement.display_type || 'top_bar').label}
+                      </span>
+                    </div>
+                    <strong>{announcement.title || 'Thông báo không tiêu đề'}</strong>
+                    <p>{announcement.message}</p>
+                  </div>
+                  <span className={announcement.is_active ? 'st-badge st-badge--active' : 'st-badge st-badge--warning'}>
+                    {announcement.is_active ? 'Đang bật' : 'Đã tắt'}
+                  </span>
                 </div>
-                <span className={`st-badge ${announcement.is_active ? 'st-badge--active' : 'st-badge--warning'}`}>
-                  {announcement.is_active ? 'Đang bật' : 'Đã tắt'}
-                </span>
-              </div>
 
-              <div className="announcement-manager__meta">
-                <span>{announcement.display_mode === 'marquee' ? 'Chữ chạy' : 'Thanh tĩnh'}</span>
-                <span>Ưu tiên {announcement.priority ?? 0}</span>
-                <span>
-                  {announcement.start_at ? new Date(announcement.start_at).toLocaleString('vi-VN') : 'Bắt đầu ngay'}
-                </span>
-              </div>
+                <div className="announcement-manager__meta">
+                  <span>{getOptionMeta(DISPLAY_OPTIONS, announcement.display_type || 'top_bar', announcement.display_type || 'top_bar').label}</span>
+                  <span>Ưu tiên {announcement.priority ?? 0}</span>
+                  <span>{getVietnamTimeWindowLabel(announcement.start_at, announcement.end_at)}</span>
+                  <span>{visibilityLabel}</span>
+                  {announcement.cta_label && announcement.cta_url ? (
+                    <span>CTA: {announcement.cta_label} ({announcement.cta_url})</span>
+                  ) : (
+                    <span>CTA: Không dùng</span>
+                  )}
+                </div>
 
-              <div className="st-card__actions">
-                <button type="button" className="btn btn--secondary" onClick={() => handleEdit(announcement)}>
-                  Sửa
-                </button>
-                <button type="button" className="btn btn--ghost" onClick={() => handleToggleActive(announcement)}>
-                  {announcement.is_active ? 'Tắt hiển thị' : 'Bật hiển thị'}
-                </button>
-                <button type="button" className="btn btn--ghost" style={{ color: '#b23b2a' }} onClick={() => handleDelete(announcement.id)}>
-                  Xóa
-                </button>
-              </div>
-            </article>
-          ))
+                <div className="st-card__actions">
+                  <button type="button" className="btn btn--secondary" onClick={() => handleEdit(announcement)}>
+                    Sửa
+                  </button>
+                  <button type="button" className="btn btn--ghost" onClick={() => handleToggleActive(announcement)}>
+                    {announcement.is_active ? 'Tắt hiển thị' : 'Bật hiển thị'}
+                  </button>
+                  <button type="button" className="btn btn--ghost" style={{ color: '#b23b2a' }} onClick={() => handleDelete(announcement.id)}>
+                    Xóa / Archive
+                  </button>
+                </div>
+              </article>
+            )
+          })
           : null}
       </div>
     </section>

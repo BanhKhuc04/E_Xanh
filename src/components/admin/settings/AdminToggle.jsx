@@ -1,4 +1,4 @@
-function AdminToggle({ checked, onChange, label, description }) {
+function AdminToggle({ checked, onChange, label, description, disabled = false }) {
   return (
     <label className="st-toggle">
       <div className="st-toggle__text">
@@ -13,6 +13,7 @@ function AdminToggle({ checked, onChange, label, description }) {
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
           className="st-toggle__input"
+          disabled={disabled}
         />
         <span className="st-toggle__track">
           <span className="st-toggle__thumb" />

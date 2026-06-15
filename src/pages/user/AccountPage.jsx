@@ -107,7 +107,10 @@ function AccountPage() {
           name: profile?.name || session.user.email.split('@')[0],
           avatar: getAvatar(profile?.name, session.user.email, profile?.avatar_url),
           avatar_url: profile?.avatar_url || '',
+          cover_url: profile?.cover_url || '',
+          facebook_url: profile?.facebook_url || '',
           role: profile?.role || 'user',
+          status: profile?.status || 'active',
           bio: profile?.bio,
           created_at: profile?.created_at,
         })
@@ -234,15 +237,20 @@ function AccountPage() {
 
           <div className="account-layout__side">
             <AccountInfoCard user={currentUser} />
-            <section className="account-side-card account-side-card--tips">
-              <h2>Gợi ý dành cho bạn</h2>
-              <p>
-                Bạn thường kiểm tra thiết bị điều hòa. Hãy xem thêm mẹo tiết kiệm điện khi dùng điều hòa.
-              </p>
-              <p>
-                Bạn đã lưu nhiều bài về laptop. Có thể bạn quan tâm đến chủ đề sạc pin đúng cách.
-              </p>
-            </section>
+            {myPostsData.length > 0 || savedPostsData.length > 0 ? (
+              <section className="account-side-card account-side-card--tips">
+                <h2>Gợi ý dành cho bạn</h2>
+                {myPostsData.some(p => p.type === 'tip' || p.category?.includes('Điều hòa')) || savedPostsData.some(p => p.category?.includes('Điều hòa')) ? (
+                  <p>Bạn thường quan tâm đến thiết bị điều hòa. Hãy xem thêm các mẹo tiết kiệm điện khi dùng điều hòa trong mục Mẹo tiết kiệm.</p>
+                ) : null}
+                {savedPostsData.some(p => p.category?.includes('Laptop')) ? (
+                  <p>Bạn đã lưu bài viết về laptop. Có thể bạn quan tâm đến chủ đề sạc pin và bảo vệ thiết bị.</p>
+                ) : null}
+                {!myPostsData.some(p => p.type === 'tip' || p.category?.includes('Điều hòa')) && !savedPostsData.some(p => p.category?.includes('Điều hòa')) && !savedPostsData.some(p => p.category?.includes('Laptop')) ? (
+                  <p>Hãy tiếp tục khám phá các bài viết và lưu lại các mẹo hữu ích để nhận được gợi ý cá nhân hóa.</p>
+                ) : null}
+              </section>
+            ) : null}
           </div>
         </div>
       </div>

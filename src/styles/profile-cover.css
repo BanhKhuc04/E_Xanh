@@ -1,0 +1,102 @@
+.profile-cover-section {
+  position: relative;
+  width: 100%;
+  margin-bottom: 60px; /* Space for overlapped avatar */
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.profile-cover-img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+  background: linear-gradient(135deg, var(--color-primary-100) 0%, var(--color-primary-300) 100%);
+}
+
+@media (max-width: 768px) {
+  .profile-cover-section {
+    margin-bottom: 46px;
+  }
+
+  .profile-cover-img {
+    height: 180px;
+  }
+
+  .account-profile-header {
+    margin-top: -46px;
+  }
+
+  .account-profile-header__identity {
+    align-items: flex-start !important;
+  }
+
+  .account-profile-header__avatar {
+    width: 96px !important;
+    height: 96px !important;
+  }
+}
+
+/* Overlapping Avatar adjustments */
+.account-profile-header {
+  position: relative;
+  margin-top: -60px;
+  padding-top: 0 !important;
+  border-top: none !important;
+  background: transparent !important;
+}
+
+.account-profile-header__identity {
+  align-items: flex-end !important;
+}
+
+.account-profile-header__avatar {
+  width: 120px !important;
+  height: 120px !important;
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: var(--color-primary-100) !important;
+  z-index: 2;
+}
+
+.public-profile-header {
+  position: relative;
+}
+
+.public-profile-cover {
+  width: 100%;
+  height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-primary-100) 0%, var(--color-primary-300) 100%);
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .public-profile-cover {
+    height: 180px;
+  }
+
+  .public-profile-info {
+    margin-top: -42px;
+  }
+}
+
+.public-profile-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-profile-info {
+  margin-top: -60px;
+  position: relative;
+  z-index: 2;
+}
+
+.public-profile-avatar {
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: #ffffff;
+}

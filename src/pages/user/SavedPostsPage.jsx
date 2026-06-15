@@ -1,17 +1,20 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import PageHero from '../../components/common/PageHero'
 import SavedPostCard from '../../components/posts/SavedPostCard'
 import SavedPostsFilter from '../../components/posts/SavedPostsFilter'
 import SavedSidebar from '../../components/posts/SavedSidebar'
+import PageLoader from '../../components/common/PageLoader'
+import EmptyState from '../../components/common/EmptyState'
+import { pageHeroContent } from '../../data/pageHeroes'
 import {
   savedFilterChips,
-  savedFolderSummary,
-  savedPosts,
-  savedRecentlyRead,
   savedSortOptions,
 } from '../../data/posts'
 import heroImage from '../../assets/hero.png'
+import { getRuntimeSetting } from '../../services/settingsService'
+import { fetchFirstActiveBanner } from '../../services/bannerService'
 import '../../styles/saved-posts.css'
 
 function sortSavedPosts(items, sortValue) {
@@ -36,6 +39,7 @@ function SavedPostsPage() {
   
   const [dbSavedPosts, setDbSavedPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [heroSrc, setHeroSrc] = useState(heroImage)
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
 
@@ -57,6 +61,26 @@ function SavedPostsPage() {
       setLoading(false)
     }
     loadSavedPosts()
+  }, [])
+
+  useEffect(() => {
+    async function loadHero() {
+      const { data: banner } = await fetchFirstActiveBanner('saved-posts')
+      if (banner?.image_url) {
+        setHeroSrc(banner.image_url)
+        return
+      }
+
+      const { data } = await getRuntimeSetting('saved_posts_hero_image', heroImage)
+      if (typeof data === 'string' && data.trim()) {
+        setHeroSrc(data)
+        return
+      }
+
+      setHeroSrc(heroImage)
+    }
+
+    loadHero()
   }, [])
 
   async function handleUnsave(postId) {
@@ -84,7 +108,7 @@ function SavedPostsPage() {
         post.category.toLowerCase().includes(keyword)
 
       const matchesFilter =
-        selectedFilter === 'Tất cả' || post.savedType === selectedFilter
+        selectedFilter === 'Tất cả' || post.category === selectedFilter
 
       return matchesSearch && matchesFilter
     })
@@ -98,8 +122,15 @@ function SavedPostsPage() {
     { value: dbSavedPosts.filter(p => p.category === 'Cộng đồng').length.toString(), label: 'bài cộng đồng' },
   ]
 
+  const dynamicFolders = [
+    { id: 'all', label: 'Tất cả bài lưu', count: dbSavedPosts.length, isActive: selectedFilter === 'Tất cả' },
+    { id: 'tip', label: 'Mẹo tiết kiệm', count: dbSavedPosts.filter(p => p.category === 'Mẹo tiết kiệm').length, isActive: selectedFilter === 'Mẹo tiết kiệm' },
+    { id: 'community', label: 'Cộng đồng', count: dbSavedPosts.filter(p => p.category === 'Cộng đồng').length, isActive: selectedFilter === 'Cộng đồng' },
+    { id: 'review', label: 'Review thiết bị', count: dbSavedPosts.filter(p => p.category === 'Review thiết bị').length, isActive: selectedFilter === 'Review thiết bị' },
+  ]
+
   if (loading) {
-    return <div className="saved-posts-page"><div style={{ padding: '60px', textAlign: 'center', color: '#666' }}>Đang tải...</div></div>
+    return <PageLoader message="Đang tải danh sách bài lưu..." />
   }
 
   return (
@@ -124,28 +155,12 @@ function SavedPostsPage() {
       </Helmet>
 
       <div className="saved-posts-page">
-        <nav className="saved-posts-page__breadcrumb" aria-label="Breadcrumb">
-        <Link to="/">Trang chủ</Link>
-        <span>/</span>
-        <span>Bài đã lưu</span>
-      </nav>
 
-      <section className="saved-posts-hero">
-        <div className="saved-posts-hero__content">
-          <span className="saved-posts-hero__badge">Kho nội dung cá nhân</span>
-          <h1>Bài viết đã lưu</h1>
-          <p>
-            Lưu lại những mẹo tiết kiệm điện, kinh nghiệm sống xanh và bài viết hữu ích để xem lại bất cứ lúc nào.
-          </p>
-        </div>
-
-        <div className="saved-posts-hero__visual">
-          <img
-            src={heroImage}
-            alt="Người dùng đang xem lại bài viết đã lưu trên laptop"
-          />
-        </div>
-      </section>
+      <PageHero
+        {...pageHeroContent['saved-posts']}
+        fallbackImage={heroSrc}
+        className="saved-posts-page__hero"
+      />
 
       <section className="saved-posts-stats">
         {stats.map((item) => (
@@ -176,18 +191,20 @@ function SavedPostsPage() {
               ))}
             </div>
           ) : (
-            <section className="saved-posts-empty">
-              <span className="saved-posts-empty__icon">⌘</span>
-              <h2>Bạn chưa lưu bài viết nào.</h2>
-              <p>Hãy lưu lại các mẹo hữu ích để xem lại khi cần.</p>
-              <Link className="btn btn--primary" to="/meo-tiet-kiem">
-                Khám phá mẹo tiết kiệm
-              </Link>
-            </section>
+            <EmptyState 
+              icon="⌘"
+              title="Bạn chưa lưu bài viết nào."
+              message="Hãy lưu lại các mẹo hữu ích để xem lại khi cần."
+              action={
+                <Link className="btn btn--primary" to="/meo-tiet-kiem">
+                  Khám phá mẹo tiết kiệm
+                </Link>
+              }
+            />
           )}
         </div>
 
-        <SavedSidebar folders={savedFolderSummary} recentlyRead={savedRecentlyRead} />
+        <SavedSidebar folders={dynamicFolders} recentlyRead={[]} />
       </div>
     </div>
     </>

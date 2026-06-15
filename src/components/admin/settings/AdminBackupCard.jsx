@@ -1,4 +1,4 @@
-function AdminBackupCard({ backup, onBackup }) {
+function AdminBackupCard({ backup, onBackup, onDownloadLatest, isDownloading = false }) {
   return (
     <div className="st-card">
       <h3 className="st-card__title">Sao lưu dữ liệu</h3>
@@ -24,8 +24,8 @@ function AdminBackupCard({ backup, onBackup }) {
         <button type="button" className="btn btn--primary" onClick={onBackup}>
           Sao lưu ngay
         </button>
-        <button type="button" className="btn btn--ghost">
-          Tải bản sao lưu
+        <button type="button" className="btn btn--ghost" onClick={onDownloadLatest} disabled={isDownloading}>
+          {isDownloading ? 'Đang chuẩn bị...' : 'Tải bản sao lưu'}
         </button>
       </div>
     </div>

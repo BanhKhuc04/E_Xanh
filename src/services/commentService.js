@@ -2,12 +2,30 @@ import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
 
 export function formatComment(comment) {
+  let authorName = 'Người dùng E-XANH'
+  let avatarUrl = `https://ui-avatars.com/api/?name=U&background=c1d95c&color=fff`
+
+  if (comment.profiles === undefined) {
+    // Fallback if not processed
+    authorName = 'Người dùng E-XANH'
+  } else if (comment.profiles === null) {
+    authorName = 'Người dùng đã ẩn'
+  } else {
+    if (comment.profiles.name && comment.profiles.name.trim() !== '') {
+      authorName = comment.profiles.name
+    }
+    if (comment.profiles.avatar_url) {
+      avatarUrl = comment.profiles.avatar_url
+    } else {
+      avatarUrl = `https://ui-avatars.com/api/?name=${authorName}&background=c1d95c&color=fff`
+    }
+  }
+
   return {
     id: comment.id,
-    author: comment.profiles?.name || 'Người dùng E-XANH',
-    avatar:
-      comment.profiles?.avatar_url ||
-      `https://ui-avatars.com/api/?name=${comment.profiles?.name || 'U'}&background=c1d95c&color=fff`,
+    authorId: comment.user_id,
+    author: authorName,
+    avatar: avatarUrl,
     content: comment.content,
     createdAt: comment.created_at,
   }
@@ -18,9 +36,9 @@ export async function getCommentsByPost(postId) {
     .from('comments')
     .select(`
       id,
+      user_id,
       content,
-      created_at,
-      profiles:user_id (name, avatar_url)
+      created_at
     `)
     .eq('post_id', postId)
     .eq('status', 'visible')
@@ -29,6 +47,25 @@ export async function getCommentsByPost(postId) {
   if (error) {
     logError('Error fetching comments:', error?.message || error)
     return { data: null, error }
+  }
+
+  const userIds = [...new Set(data.map(c => c.user_id))]
+  if (userIds.length > 0) {
+    const { data: profilesData } = await supabase
+      .from('public_profiles')
+      .select('id, name, avatar_url')
+      .in('id', userIds)
+
+    if (profilesData) {
+      const profileMap = Object.fromEntries(profilesData.map(p => [p.id, p]))
+      data.forEach(comment => {
+        comment.profiles = profileMap[comment.user_id] || null
+      })
+    } else {
+      data.forEach(comment => {
+        comment.profiles = null
+      })
+    }
   }
 
   const formattedData = data.map(formatComment)
@@ -55,9 +92,9 @@ export async function createComment(postId, content) {
     ])
     .select(`
       id,
+      user_id,
       content,
-      created_at,
-      profiles:user_id (name, avatar_url)
+      created_at
     `)
     .single()
 
@@ -65,6 +102,14 @@ export async function createComment(postId, content) {
     logError('Error creating comment:', error?.message || error)
     return { data: null, error }
   }
+
+  const { data: profile } = await supabase
+    .from('public_profiles')
+    .select('name, avatar_url')
+    .eq('id', userId)
+    .single()
+    
+  data.profiles = profile || null
 
   const formattedData = formatComment(data)
 

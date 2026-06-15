@@ -1,9 +1,11 @@
 function AdminContentTypeChart({ data }) {
   const total = data.reduce((sum, d) => sum + d.value, 0)
 
+  const safeTotal = total || 1
+
   const segments = data.reduce((acc, item) => {
     const startDeg = acc.length > 0 ? acc[acc.length - 1].startDeg + acc[acc.length - 1].deg : 0
-    const deg = (item.value / total) * 360
+    const deg = (item.value / safeTotal) * 360
     return [...acc, { ...item, startDeg, deg }]
   }, [])
 
@@ -23,7 +25,7 @@ function AdminContentTypeChart({ data }) {
           style={{ background: `conic-gradient(${conicGradient})` }}
         >
           <div className="as-donut__center">
-            <strong>186</strong>
+            <strong>{data.reduce((sum, item) => sum + (item.raw ?? 0), 0)}</strong>
             <span>bài</span>
           </div>
         </div>
@@ -36,7 +38,7 @@ function AdminContentTypeChart({ data }) {
                 style={{ background: item.color }}
               />
               <span className="as-donut__legend-label">{item.label}</span>
-              <strong>{item.value}%</strong>
+              <strong>{item.raw ?? item.value}</strong>
             </li>
           ))}
         </ul>

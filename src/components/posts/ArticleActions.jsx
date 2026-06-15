@@ -1,6 +1,6 @@
 
 
-function ArticleActions({ post, onToggleLike, onToggleSave }) {
+function ArticleActions({ post, onToggleLike, onToggleSave, onReport }) {
   return (
     <div className="article-actions">
       <button 
@@ -19,6 +19,16 @@ function ArticleActions({ post, onToggleLike, onToggleSave }) {
         {post.isSaved ? 'Đã lưu' : 'Lưu bài'}
       </button>
       <button type="button" className="article-actions__button">Chia sẻ</button>
+      {onReport && (
+        <button 
+          type="button" 
+          className="article-actions__button"
+          onClick={onReport}
+          style={{ color: '#e53935' }}
+        >
+          Báo cáo
+        </button>
+      )}
     </div>
   )
 }

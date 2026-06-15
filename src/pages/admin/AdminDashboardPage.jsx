@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getDashboardStats } from '../../services/adminStatsService'
+import { getAdminStats } from '../../services/analyticsService'
 import { postStatusMap } from '../../data/adminPosts'
 
 function DashboardIcon({ icon }) {
@@ -46,16 +46,34 @@ function AdminDashboardPage() {
 
   useEffect(() => {
     let isMounted = true
+
     async function loadStats() {
-      const data = await getDashboardStats()
+      const data = await getAdminStats('30 ngày qua')
       if (isMounted) {
         setStatsData(data)
         setIsLoading(false)
       }
     }
+
     loadStats()
-    return () => { isMounted = false }
+
+    return () => {
+      isMounted = false
+    }
   }, [])
+
+  const dashboardStats = useMemo(() => {
+    if (!statsData) return []
+
+    return [
+      { label: 'Tổng bài viết', value: statsData.totalPosts, icon: 'total', accent: 'green' },
+      { label: 'Đã duyệt', value: statsData.approvedPosts, icon: 'approved', accent: 'blue' },
+      { label: 'Chờ duyệt', value: statsData.pendingPosts, icon: 'pending', accent: 'yellow' },
+      { label: 'Từ chối / Khóa', value: statsData.rejectedHiddenPosts, icon: 'rejected', accent: 'red' },
+      { label: 'Tổng người dùng', value: statsData.totalUsers, icon: 'users', accent: 'purple' },
+      { label: 'Lượt lưu bài', value: statsData.totalSavedPosts, icon: 'saved', accent: 'orange' },
+    ]
+  }, [statsData])
 
   if (isLoading) {
     return (
@@ -65,16 +83,6 @@ function AdminDashboardPage() {
     )
   }
 
-  // Cấu trúc lại danh sách card từ dữ liệu fetch được
-  const dashboardStats = [
-    { label: 'Tổng bài viết', value: statsData.totalPosts, icon: 'total', accent: 'green', change: '' },
-    { label: 'Đã duyệt', value: statsData.approvedPosts, icon: 'approved', accent: 'blue', change: '' },
-    { label: 'Chờ duyệt', value: statsData.pendingPosts, icon: 'pending', accent: 'yellow', change: '' },
-    { label: 'Từ chối / Ẩn', value: statsData.rejectedHiddenPosts, icon: 'rejected', accent: 'red', change: '' },
-    { label: 'Tổng người dùng', value: statsData.totalUsers, icon: 'users', accent: 'purple', change: '' },
-    { label: 'Lượt lưu bài', value: statsData.totalSavedPosts, icon: 'saved', accent: 'orange', change: '' },
-  ]
-
   return (
     <div className="admin-dashboard page">
       <section className="admin-dashboard__hero">
@@ -82,7 +90,7 @@ function AdminDashboardPage() {
         <div className="admin-dashboard__hero-copy">
           <h2>Tổng quan hệ thống</h2>
           <p>
-            Theo dõi tình trạng bài viết, người dùng và các hoạt động đang diễn ra.
+            Theo dõi nhanh nội dung chờ duyệt, hoạt động người dùng và xu hướng tương tác trên nền tảng.
           </p>
         </div>
       </section>
@@ -94,7 +102,6 @@ function AdminDashboardPage() {
               <span className="admin-metric-card__icon" aria-hidden="true">
                 <DashboardIcon icon={item.icon} />
               </span>
-              <span className="admin-metric-card__change">{item.change}</span>
             </div>
             <div className="admin-metric-card__body">
               <p>{item.label}</p>
@@ -105,20 +112,16 @@ function AdminDashboardPage() {
       </section>
 
       <section className="admin-dashboard__secondary" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '32px' }}>
-        
-        {/* Khu vực 5 bài viết mới nhất */}
         <article className="admin-panel">
           <div className="admin-panel__header">
             <div>
               <h3>Bài viết gần đây</h3>
-              <p>5 bài viết mới được thêm vào hệ thống (mọi trạng thái).</p>
+              <p>5 bài viết mới được thêm vào hệ thống.</p>
             </div>
             <Link to="/admin/quan-ly-bai-viet" className="btn btn--ghost" style={{ fontSize: '0.85rem' }}>Quản lý</Link>
           </div>
 
-          {statsData.recentPosts.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', color: '#666' }}>Chưa có bài viết nào.</div>
-          ) : (
+          {statsData?.recentPosts?.length ? (
             <ul className="admin-comment-list">
               {statsData.recentPosts.map((post) => {
                 const statusInfo = postStatusMap[post.status] ?? postStatusMap.pending
@@ -139,40 +142,33 @@ function AdminDashboardPage() {
                 )
               })}
             </ul>
+          ) : (
+            <div style={{ padding: '24px', textAlign: 'center', color: '#666' }}>Chưa có bài viết nào.</div>
           )}
         </article>
 
-        {/* Khu vực bài cần duyệt ngay */}
         <article className="admin-panel">
           <div className="admin-panel__header">
             <div>
               <h3>Cần phê duyệt ngay</h3>
               <p>Các bài viết đang ở trạng thái chờ duyệt.</p>
             </div>
-            <span className="admin-panel__count">{statsData.pendingPostsList.length}</span>
+            <span className="admin-panel__count">{statsData?.pendingPostsList?.length ?? 0}</span>
           </div>
 
-          {statsData.pendingPostsList.length === 0 ? (
-            <div style={{ padding: '40px 24px', textAlign: 'center', color: '#4f8428', background: '#f1f8e9', borderRadius: '8px', margin: '16px' }}>
-              <svg viewBox="0 0 24 24" style={{ width: 48, height: 48, fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, margin: '0 auto 12px' }}>
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <p style={{ fontWeight: 600 }}>Thật tuyệt!</p>
-              <span style={{ fontSize: '0.9rem' }}>Không có bài viết nào đang chờ duyệt lúc này.</span>
-            </div>
-          ) : (
+          {statsData?.pendingPostsList?.length ? (
             <ul className="admin-comment-list">
               {statsData.pendingPostsList.map((post) => (
                 <li key={post.id} className="admin-comment-item" style={{ alignItems: 'center', padding: '16px 0', gap: '16px' }}>
                   <div className="admin-comment-item__content" style={{ flex: 1, minWidth: 0 }}>
-                    <strong style={{ 
-                      display: '-webkit-box', 
-                      WebkitLineClamp: 2, 
-                      WebkitBoxOrient: 'vertical', 
-                      overflow: 'hidden', 
+                    <strong style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       lineHeight: '1.4',
-                      marginBottom: '6px'
+                      marginBottom: '6px',
                     }}>
                       {post.title}
                     </strong>
@@ -190,9 +186,16 @@ function AdminDashboardPage() {
                 </li>
               ))}
             </ul>
+          ) : (
+            <div style={{ padding: '40px 24px', textAlign: 'center', color: '#4f8428', background: '#f1f8e9', borderRadius: '8px', margin: '16px' }}>
+              <svg viewBox="0 0 24 24" style={{ width: 48, height: 48, fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, margin: '0 auto 12px' }}>
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p style={{ fontWeight: 600 }}>Thật tuyệt!</p>
+              <span style={{ fontSize: '0.9rem' }}>Không có bài viết nào đang chờ duyệt lúc này.</span>
+            </div>
           )}
         </article>
-
       </section>
     </div>
   )

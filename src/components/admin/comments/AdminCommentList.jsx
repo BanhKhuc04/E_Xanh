@@ -18,6 +18,7 @@ function AdminCommentList({
   onViewDetail,
   onQuickHide,
   onQuickSpam,
+  onQuickRestore,
 }) {
   const allSelected =
     comments.length > 0 && comments.every((c) => selectedIds.includes(c.id))
@@ -47,6 +48,7 @@ function AdminCommentList({
         {comments.map((comment) => {
           const statusInfo =
             commentStatusMap[comment.status] ?? commentStatusMap.visible
+          const isHiddenOrSpam = ['hidden', 'spam', 'deleted'].includes(comment.status)
 
           return (
             <article key={comment.id} className="ac-list__card">
@@ -63,7 +65,6 @@ function AdminCommentList({
 
                 <div className="ac-list__user">
                   <strong>{comment.userName}</strong>
-                  <span className="ac-list__email">{comment.userEmail}</span>
                 </div>
 
                 <span className="ac-list__time">
@@ -99,20 +100,33 @@ function AdminCommentList({
                   >
                     Xem chi tiết
                   </button>
-                  <button
-                    type="button"
-                    className="ac-list__action-btn ac-list__action-btn--subtle"
-                    onClick={() => onQuickHide(comment.id)}
-                  >
-                    Ẩn
-                  </button>
-                  <button
-                    type="button"
-                    className="ac-list__action-btn ac-list__action-btn--subtle"
-                    onClick={() => onQuickSpam(comment.id)}
-                  >
-                    Đánh dấu spam
-                  </button>
+
+                  {isHiddenOrSpam ? (
+                    <button
+                      type="button"
+                      className="ac-list__action-btn ac-list__action-btn--restore"
+                      onClick={() => onQuickRestore(comment.id)}
+                    >
+                      Khôi phục
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="ac-list__action-btn ac-list__action-btn--subtle"
+                        onClick={() => onQuickHide(comment.id)}
+                      >
+                        Ẩn
+                      </button>
+                      <button
+                        type="button"
+                        className="ac-list__action-btn ac-list__action-btn--subtle"
+                        onClick={() => onQuickSpam(comment.id)}
+                      >
+                        Spam
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </article>

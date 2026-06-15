@@ -1,44 +1,68 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { getPendingPostsOverview } from '../../../services/adminStatsService'
+import { getCurrentSession, getCurrentUserProfile, signOut } from '../../../services/authService'
+import {
+  getMyNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from '../../../services/userNotificationService'
 
-const topbarMeta = {
-  '/admin': {
+const topbarMeta = [
+  {
+    match: '/admin/cai-dat-giao-dien',
+    eyebrow: 'Giao diện công khai',
+    title: 'Cài đặt giao diện',
+    description: 'Quản lý hero, banner và thông báo website hiển thị công khai ngoài E-XANH.',
+  },
+  {
+    match: '/admin/thong-bao-he-thong',
+    eyebrow: 'Thông báo nội bộ',
+    title: 'Thông báo hệ thống',
+    description: 'Gửi thông báo nội bộ tới người dùng và quản lý lịch sử gửi.',
+  },
+  {
+    match: '/admin/quan-ly-bai-viet',
+    eyebrow: 'Nội dung cộng đồng',
+    title: 'Quản lý bài viết',
+    description: 'Xem, duyệt và cập nhật trạng thái bài viết trong hệ thống E-XANH.',
+  },
+  {
+    match: '/admin/quan-ly-binh-luan',
+    eyebrow: 'Moderation',
+    title: 'Quản lý bình luận',
+    description: 'Theo dõi các bình luận cần xử lý, gửi cảnh báo và quản lý moderation.',
+  },
+  {
+    match: '/admin/quan-ly-nguoi-dung',
+    eyebrow: 'Thành viên nền tảng',
+    title: 'Quản lý người dùng',
+    description: 'Theo dõi trạng thái tài khoản, phân quyền và xử lý các trường hợp đặc biệt.',
+  },
+  {
+    match: '/admin/quan-ly-thiet-bi',
+    eyebrow: 'Dữ liệu thiết bị',
+    title: 'Quản lý thiết bị điện',
+    description: 'Quản lý danh mục thiết bị và dữ liệu hỗ trợ công cụ kiểm tra điện năng.',
+  },
+  {
+    match: '/admin/thong-ke',
+    eyebrow: 'Phân tích dữ liệu',
+    title: 'Thống kê hệ thống',
+    description: 'Theo dõi tăng trưởng cộng đồng, bài viết và tín hiệu vận hành quan trọng.',
+  },
+  {
+    match: '/admin/cai-dat',
+    eyebrow: 'Hạ tầng vận hành',
+    title: 'Cài đặt hệ thống',
+    description: 'Điều chỉnh thông tin nền tảng, bảo mật, notification và trạng thái dịch vụ.',
+  },
+  {
+    match: '/admin',
     eyebrow: 'Bảng điều khiển',
     title: 'Tổng quan quản trị',
     description: 'Theo dõi hoạt động và nội dung mới nhất trên E-XANH.',
   },
-  '/admin/duyet-bai-viet': {
-    eyebrow: 'Kiểm duyệt nội dung',
-    title: 'Duyệt bài viết',
-    description: 'Xem nhanh những bài viết đang chờ duyệt và ưu tiên xử lý.',
-  },
-  '/admin/quan-ly-binh-luan': {
-    eyebrow: 'Thảo luận cộng đồng',
-    title: 'Quản lý bình luận',
-    description: 'Theo dõi bình luận mới, bình luận cần xem và phản hồi nổi bật.',
-  },
-  '/admin/quan-ly-nguoi-dung': {
-    eyebrow: 'Hồ sơ thành viên',
-    title: 'Quản lý người dùng',
-    description: 'Nắm bắt mức độ hoạt động và hỗ trợ các tài khoản trong hệ thống.',
-  },
-  '/admin/quan-ly-thiet-bi': {
-    eyebrow: 'Dữ liệu thiết bị',
-    title: 'Quản lý thiết bị điện',
-    description: 'Cập nhật danh mục thiết bị và công suất tham chiếu cho công cụ tính điện.',
-  },
-  '/admin/thong-ke': {
-    eyebrow: 'Phân tích hệ thống',
-    title: 'Thống kê',
-    description: 'Tổng hợp xu hướng sử dụng, nội dung được quan tâm và tăng trưởng cộng đồng.',
-  },
-  '/admin/cai-dat': {
-    eyebrow: 'Cấu hình nền tảng',
-    title: 'Cài đặt',
-    description: 'Điều chỉnh các thiết lập quản trị để vận hành E-XANH ổn định hơn.',
-  },
-}
+]
 
 function BellIcon() {
   return (
@@ -56,52 +80,98 @@ function HelpIcon() {
   )
 }
 
+function GlobeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
+    </svg>
+  )
+}
+
+function formatNotificationTime(dateString) {
+  if (!dateString) return 'Vừa xong'
+
+  const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return 'Vừa xong'
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'Asia/Ho_Chi_Minh',
+  }).format(date)
+}
+
+function getMetaByPathname(pathname) {
+  return topbarMeta.find((item) => pathname === item.match || pathname.startsWith(`${item.match}/`)) ?? topbarMeta[topbarMeta.length - 1]
+}
+
 function AdminTopbar() {
   const location = useLocation()
-  const meta = topbarMeta[location.pathname] ?? topbarMeta['/admin']
-
+  const meta = useMemo(() => getMetaByPathname(location.pathname), [location.pathname])
   const [adminName, setAdminName] = useState('Admin E-XANH')
   const [adminInitials, setAdminInitials] = useState('AD')
   const [adminRole, setAdminRole] = useState('Quản trị hệ thống')
-
   const [showBellMenu, setShowBellMenu] = useState(false)
   const [showHelpMenu, setShowHelpMenu] = useState(false)
-  
-  const [pendingCount, setPendingCount] = useState(0)
-  const [pendingPosts, setPendingPosts] = useState([])
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loadingNotifications, setLoadingNotifications] = useState(false)
+  const [notificationError, setNotificationError] = useState('')
+  const [notificationsSupported, setNotificationsSupported] = useState(true)
 
   const bellRef = useRef(null)
   const helpRef = useRef(null)
 
   useEffect(() => {
     async function loadAdmin() {
-      const { getCurrentSession, getCurrentUserProfile } = await import('../../../services/authService')
       const session = await getCurrentSession()
-      if (session?.user) {
-        const profile = await getCurrentUserProfile(session.user.id)
-        if (profile) {
-          const name = profile.name || session.user.email || 'Admin E-XANH'
-          setAdminName(name)
-          setAdminInitials(name.slice(0, 2).toUpperCase())
-          setAdminRole(profile.role === 'admin' ? 'Quản trị viên' : 'Điều hành viên')
-        }
-      }
+      if (!session?.user) return
+
+      const profile = await getCurrentUserProfile(session.user.id)
+      if (!profile) return
+
+      const name = profile.name || session.user.email || 'Admin E-XANH'
+      const roleLabel = profile.role === 'admin' ? 'Quản trị viên' : 'Điều hành viên'
+
+      setAdminName(name)
+      setAdminInitials(name.slice(0, 2).toUpperCase())
+      setAdminRole(roleLabel)
     }
+
     loadAdmin()
   }, [])
 
   useEffect(() => {
-    let isMounted = true
-    async function loadPending() {
-      const result = await getPendingPostsOverview()
-      if (isMounted) {
-        setPendingCount(result.count)
-        setPendingPosts(result.posts)
+    let timerId
+    let cancelled = false
+
+    async function loadNotifications() {
+      setLoadingNotifications(true)
+      const { data, error } = await getMyNotifications({ limit: 8 })
+
+      if (cancelled) return
+
+      if (error) {
+        setNotificationError(error.message || 'Không thể tải thông báo.')
+      } else {
+        setNotificationError('')
       }
+
+      setNotifications(data?.items ?? [])
+      setUnreadCount(data?.unreadCount ?? 0)
+      setNotificationsSupported(data?.supported ?? true)
+      setLoadingNotifications(false)
     }
-    loadPending()
-    return () => { isMounted = false }
-  }, [location.pathname]) // Refresh pending posts when navigating
+
+    loadNotifications()
+    timerId = window.setInterval(loadNotifications, 45000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(timerId)
+    }
+  }, [location.pathname])
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -112,9 +182,39 @@ function AdminTopbar() {
         setShowHelpMenu(false)
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  async function handleReadNotification(notification) {
+    if (notification?.id && !notification.is_read) {
+      const { error } = await markNotificationAsRead(notification.id)
+      if (!error) {
+        setNotifications((current) =>
+          current.map((item) =>
+            item.id === notification.id ? { ...item, is_read: true } : item,
+          ),
+        )
+        setUnreadCount((current) => Math.max(0, current - 1))
+      }
+    }
+
+    if (notification?.action_url) {
+      window.location.href = notification.action_url
+    }
+  }
+
+  async function handleMarkAllRead() {
+    const { error } = await markAllNotificationsAsRead()
+    if (error) {
+      setNotificationError(error.message || 'Không thể đánh dấu tất cả đã đọc.')
+      return
+    }
+
+    setNotifications((current) => current.map((item) => ({ ...item, is_read: true })))
+    setUnreadCount(0)
+  }
 
   return (
     <header className="admin-topbar">
@@ -125,118 +225,115 @@ function AdminTopbar() {
       </div>
 
       <div className="admin-topbar__actions" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
-        
-        {/* Nút Chuông */}
+        <Link to="/" className="admin-topbar__website-link" aria-label="Xem website thường">
+          <GlobeIcon />
+          <span>Xem website</span>
+        </Link>
+
         <div style={{ position: 'relative' }} ref={bellRef}>
-          <button 
-            type="button" 
-            className="admin-topbar__icon-button" 
-            aria-label="Thông báo"
+          <button
+            type="button"
+            className="admin-topbar__icon-button"
+            aria-label="Thông báo hệ thống"
             onClick={() => {
-              setShowBellMenu(!showBellMenu)
+              setShowBellMenu((current) => !current)
               setShowHelpMenu(false)
             }}
-            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', color: '#666' }}
           >
             <BellIcon />
-            {pendingCount > 0 && (
-              <span style={{ position: 'absolute', top: 4, right: 4, background: '#e53935', color: '#fff', fontSize: '10px', fontWeight: 'bold', width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {pendingCount}
+            {unreadCount > 0 ? (
+              <span className="admin-topbar__dot-badge">
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
-            )}
+            ) : null}
           </button>
-          
-          {showBellMenu && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '320px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 100, overflow: 'hidden', border: '1px solid #eee' }}>
-              <div style={{ padding: '16px', borderBottom: '1px solid #eee', background: '#fafafa', fontWeight: 'bold' }}>
-                Thông báo mới
+
+          {showBellMenu ? (
+            <div className="admin-topbar__dropdown">
+              <div className="admin-topbar__dropdown-header">
+                <div>
+                  <strong>Chuông thông báo</strong>
+                  <p>Thông báo nội bộ gửi tới tài khoản quản trị hiện tại.</p>
+                </div>
+                {notificationsSupported && unreadCount > 0 ? (
+                  <button type="button" onClick={handleMarkAllRead}>Đánh dấu tất cả đã đọc</button>
+                ) : null}
               </div>
-              <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                {pendingPosts.length > 0 ? (
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                    {pendingPosts.map(post => (
-                      <li key={post.id} style={{ padding: '12px 16px', borderBottom: '1px solid #f5f5f5' }}>
-                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#333', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          Bài mới: {post.title}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#888' }}>
-                          Bởi {post.profiles?.name || 'Ẩn danh'} - Đang chờ duyệt
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+
+              <div className="admin-topbar__dropdown-body">
+                {loadingNotifications ? (
+                  <div className="admin-topbar__dropdown-empty">Đang tải thông báo...</div>
+                ) : !notificationsSupported ? (
+                  <div className="admin-topbar__dropdown-empty">Schema notification center chưa sẵn sàng trên Supabase.</div>
+                ) : notificationError ? (
+                  <div className="admin-topbar__dropdown-empty">{notificationError}</div>
+                ) : notifications.length === 0 ? (
+                  <div className="admin-topbar__dropdown-empty">Chưa có thông báo nào.</div>
                 ) : (
-                  <div style={{ padding: '32px 16px', textAlign: 'center', color: '#888', fontSize: '14px' }}>
-                    Không có thông báo mới
+                  <div className="admin-topbar__notification-list">
+                    {notifications.map((notification) => (
+                      <button
+                        key={notification.id}
+                        type="button"
+                        className={`admin-topbar__notification-item${notification.is_read ? '' : ' is-unread'}`}
+                        onClick={() => handleReadNotification(notification)}
+                      >
+                        <div>
+                          <strong>{notification.title}</strong>
+                          <p>{notification.message}</p>
+                        </div>
+                        <span>{formatNotificationTime(notification.created_at)}</span>
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
-              {pendingCount > 0 && (
-                <div style={{ padding: '12px', borderTop: '1px solid #eee', textAlign: 'center', background: '#fafafa' }}>
-                  <Link 
-                    to="/admin/quan-ly-bai-viet" 
-                    style={{ fontSize: '13px', color: '#4f8428', fontWeight: 500, textDecoration: 'none' }}
-                    onClick={() => setShowBellMenu(false)}
-                  >
-                    Xem tất cả ({pendingCount})
-                  </Link>
-                </div>
-              )}
             </div>
-          )}
+          ) : null}
         </div>
 
-        {/* Nút Help */}
         <div style={{ position: 'relative' }} ref={helpRef}>
-          <button 
-            type="button" 
-            className="admin-topbar__icon-button" 
+          <button
+            type="button"
+            className="admin-topbar__icon-button"
             aria-label="Trợ giúp"
             onClick={() => {
-              setShowHelpMenu(!showHelpMenu)
+              setShowHelpMenu((current) => !current)
               setShowBellMenu(false)
             }}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', color: '#666' }}
           >
             <HelpIcon />
           </button>
-          
-          {showHelpMenu && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: '280px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 100, border: '1px solid #eee' }}>
-              <div style={{ padding: '16px', borderBottom: '1px solid #eee', background: '#fafafa', fontWeight: 'bold' }}>
-                Trợ giúp nhanh
+
+          {showHelpMenu ? (
+            <div className="admin-topbar__dropdown admin-topbar__dropdown--compact">
+              <div className="admin-topbar__dropdown-header">
+                <div>
+                  <strong>Trợ giúp nhanh</strong>
+                  <p>Những việc quản trị nên kiểm tra trong ca làm việc hiện tại.</p>
+                </div>
               </div>
-              <ul style={{ listStyle: 'none', margin: 0, padding: '12px 0', fontSize: '13px', color: '#555' }}>
-                <li style={{ padding: '8px 16px' }}>• <strong>Dashboard:</strong> xem thống kê tổng quan.</li>
-                <li style={{ padding: '8px 16px' }}>• <strong>Quản lý bài viết:</strong> duyệt, thêm, sửa bài.</li>
-                <li style={{ padding: '8px 16px' }}>• <strong>Quản lý người dùng:</strong> chỉ Admin mới được cấp quyền.</li>
-                <li style={{ padding: '8px 16px' }}>• <em>Lưu ý:</em> Sau khi đổi role, người dùng có thể cần đăng nhập lại để cập nhật quyền hạn.</li>
+
+              <ul className="admin-topbar__help-list">
+                <li>Chuông thông báo ở đây lấy trực tiếp từ bảng `notifications` của Supabase.</li>
+                <li>Trang Thông báo hệ thống chỉ hoạt động đầy đủ khi có cả `notifications` và `notification_batches`.</li>
+                <li>Thông báo website ở Cài đặt giao diện là loại công khai, không đi vào chuông user/admin.</li>
               </ul>
-              <div style={{ padding: '12px', borderTop: '1px solid #eee', textAlign: 'center', background: '#fafafa' }}>
-                <Link 
-                  to="/admin/quan-ly-bai-viet" 
-                  style={{ fontSize: '13px', color: '#4f8428', fontWeight: 500, textDecoration: 'none' }}
-                  onClick={() => setShowHelpMenu(false)}
-                >
-                  Đi tới Quản lý bài viết
-                </Link>
-              </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         <div className="admin-topbar__profile" style={{ marginLeft: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span className="admin-topbar__avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#4f8428', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+          <span className="admin-topbar__avatar">
             {adminInitials}
           </span>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <strong style={{ fontSize: '14px', color: '#333' }}>{adminName}</strong>
             <small style={{ fontSize: '12px', color: '#888' }}>{adminRole}</small>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={async () => {
-              const { signOut } = await import('../../../services/authService')
               await signOut()
               window.location.href = '/dang-nhap'
             }}

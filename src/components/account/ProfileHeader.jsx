@@ -1,15 +1,25 @@
 import { Link } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
+import '../../styles/profile-cover.css'
 
 function ProfileHeader({ user, onLogout }) {
   return (
-    <section className="account-profile-header">
-      <div className="account-profile-header__identity">
-        {isValidImageUrl(user.avatar_url) ? (
-          <img src={user.avatar_url} alt="Avatar" className="account-profile-header__avatar" style={{ objectFit: 'cover' }} />
+    <>
+      <div className="profile-cover-section">
+        {user.cover_url ? (
+          <img src={user.cover_url} alt="Cover" className="profile-cover-img" />
         ) : (
-          <div className="account-profile-header__avatar">{getInitials(user.name || user.email)}</div>
+          <div className="profile-cover-img"></div>
         )}
+      </div>
+
+      <section className="account-profile-header">
+        <div className="account-profile-header__identity">
+          {isValidImageUrl(user.avatar_url) ? (
+            <img src={user.avatar_url} alt="Avatar" className="account-profile-header__avatar" style={{ objectFit: 'cover' }} />
+          ) : (
+            <div className="account-profile-header__avatar">{getInitials(user.name || user.email)}</div>
+          )}
 
         <div className="account-profile-header__content">
           <h1>{user.name || 'Thành viên'}</h1>
@@ -30,6 +40,7 @@ function ProfileHeader({ user, onLogout }) {
         </button>
       </div>
     </section>
+    </>
   )
 }
 

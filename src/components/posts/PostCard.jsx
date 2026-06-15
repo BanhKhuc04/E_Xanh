@@ -75,13 +75,15 @@ function PostCard({ post }) {
 
         <div className="post-card-ui__meta">
           <div className="post-card-ui__author">
-            <span className="post-card-ui__avatar">{getAuthorInitials(post.author)}</span>
-            <div>
-              <strong>{post.author}</strong>
-              <span>
-                {post.date} • {post.readTime}
-              </span>
-            </div>
+            <Link to={`/nguoi-dung/${post.authorId}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
+              <span className="post-card-ui__avatar">{getAuthorInitials(post.author)}</span>
+              <div>
+                <strong>{post.author}</strong>
+                <span style={{ display: 'block', color: 'var(--color-text-muted)' }}>
+                  {post.date} • {post.readTime}
+                </span>
+              </div>
+            </Link>
           </div>
 
           <div className="post-card-ui__stats">

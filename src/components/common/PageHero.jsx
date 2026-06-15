@@ -12,23 +12,31 @@ function PageHero({
   className = '',
   children,
 }) {
-  const [heroImage, setHeroImage] = useState(fallbackImage)
+  const [heroImage, setHeroImage] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     let isMounted = true
 
     async function loadBanner() {
-      if (!pageKey) return
+      if (!pageKey) {
+        if (isMounted) {
+          setHeroImage(fallbackImage)
+          setIsLoading(false)
+        }
+        return
+      }
 
+      setIsLoading(true)
       const { data, error } = await fetchFirstActiveBanner(pageKey)
       if (!isMounted) return
 
       if (!error && data?.image_url) {
         setHeroImage(data.image_url)
-        return
+      } else {
+        setHeroImage(fallbackImage)
       }
-
-      setHeroImage(fallbackImage)
+      setIsLoading(false)
     }
 
     loadBanner()
@@ -50,8 +58,12 @@ function PageHero({
         {children}
       </div>
 
-      <div className="page-hero__visual">
-        <img src={heroImage || fallbackImage} alt={imageAlt || title} />
+      <div className="page-hero__visual" style={{ position: 'relative' }}>
+        {isLoading ? (
+          <div style={{ position: 'absolute', inset: 0, background: '#e0e0e0', animation: 'pulse 1.5s infinite ease-in-out' }} />
+        ) : (
+          <img src={heroImage} alt={imageAlt || title} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
+        )}
       </div>
     </section>
   )

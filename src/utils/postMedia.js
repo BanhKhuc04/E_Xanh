@@ -7,7 +7,7 @@ export function resolvePostImageSource(post = {}) {
     post.thumbnail_url ||
     post.banner_url ||
     post.image ||
-    FALLBACK_ILLUSTRATION
+    null
   )
 }
 

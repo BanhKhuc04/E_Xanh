@@ -63,6 +63,7 @@ function PostDetailPage() {
           image: data.image_url,
           description: data.description || '',
           content: data.content || '',
+          contentBlocks: data.content_blocks || [],
           contentSections: [
             {
               heading: 'Nội dung bài viết',
@@ -92,6 +93,7 @@ function PostDetailPage() {
               title: p.title,
               slug: p.slug,
               author: p.profiles?.name || 'Thành viên',
+              authorId: p.author_id,
               authorAvatar: p.profiles?.avatar_url || 'EX',
               category: categoryMap[p.type] || 'Cộng đồng',
               status: 'published',
@@ -286,7 +288,26 @@ function PostDetailPage() {
         <article className="post-detail-main">
           <ArticleHeader post={post} />
           <ArticleContent post={post} />
-          <ArticleActions post={post} onToggleLike={handleToggleLike} onToggleSave={handleToggleSave} />
+          <ArticleActions 
+            post={post} 
+            onToggleLike={handleToggleLike} 
+            onToggleSave={handleToggleSave} 
+            onReport={async () => {
+              const reason = window.prompt('Nhập lý do báo cáo bài viết này:')
+              if (reason === null) return
+              if (!reason.trim()) {
+                alert('Vui lòng nhập lý do báo cáo.')
+                return
+              }
+              const { createReport } = await import('../../services/reportService')
+              const { error } = await createReport({ postId: post.id, reason: reason.trim() })
+              if (error) {
+                alert(error.message || 'Lỗi gửi báo cáo.')
+              } else {
+                alert('Báo cáo bài viết thành công.')
+              }
+            }}
+          />
           <CommentSection post={post} comments={post.commentItems.slice(0, 2)} />
         </article>
 

@@ -39,6 +39,15 @@ export async function signInWithEmail({ email, password }) {
   })
 }
 
+export async function signInWithGoogle() {
+  return await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  })
+}
+
 export async function signOut() {
   return await supabase.auth.signOut()
 }
@@ -66,6 +75,42 @@ export async function getCurrentUserProfile(userId) {
     return null
   }
   return data
+}
+
+export function getBlockedProfileMessage(profile) {
+  if (!profile) return ''
+
+  if (profile.status === 'deleted') {
+    return 'Tài khoản này đã bị vô hiệu hóa. Vui lòng liên hệ support@exanh.vn để được hỗ trợ.'
+  }
+
+  if (profile.status === 'locked' || profile.status === 'blocked') {
+    return profile.ban_reason
+      ? `Tài khoản của bạn đã bị khóa bởi quản trị viên.\n\nLý do: ${profile.ban_reason}`
+      : 'Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ support@exanh.vn nếu bạn cho rằng đây là nhầm lẫn.'
+  }
+
+  return ''
+}
+
+export async function ensureActiveProfileSession(userId) {
+  const profile = await getCurrentUserProfile(userId)
+  const message = getBlockedProfileMessage(profile)
+
+  if (message) {
+    await signOut()
+    return {
+      profile,
+      allowed: false,
+      message,
+    }
+  }
+
+  return {
+    profile,
+    allowed: true,
+    message: '',
+  }
 }
 
 export function onAuthStateChange(callback) {

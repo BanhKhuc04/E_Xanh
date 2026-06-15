@@ -7,6 +7,9 @@ function AdminUserList({
   onSelectAll,
   onViewDetail,
   onQuickToggleLock,
+  onQuickDeactivate,
+  isBusy = false,
+  canManageUsers = true,
 }) {
   const allSelected =
     users.length > 0 && users.every((u) => selectedIds.includes(u.id))
@@ -36,7 +39,8 @@ function AdminUserList({
         {users.map((user) => {
           const roleInfo = userRoleMap[user.role] ?? userRoleMap.user
           const statusInfo = userStatusMap[user.status] ?? userStatusMap.active
-          const isLocked = user.status === 'locked'
+          const isLocked = ['locked', 'blocked'].includes(user.status)
+          const isDeleted = user.status === 'deleted'
 
           return (
             <article key={user.id} className="au-list__card">
@@ -89,6 +93,7 @@ function AdminUserList({
                     type="button"
                     className="au-list__action-btn"
                     onClick={() => onViewDetail(user.id)}
+                    disabled={isBusy}
                   >
                     Xem chi tiết
                   </button>
@@ -96,8 +101,17 @@ function AdminUserList({
                     type="button"
                     className={`au-list__action-btn au-list__action-btn--subtle${isLocked ? ' au-list__action-btn--unlock' : ''}`}
                     onClick={() => onQuickToggleLock(user.id)}
+                    disabled={isBusy || !canManageUsers || isDeleted}
                   >
                     {isLocked ? 'Mở khóa' : 'Khóa'}
+                  </button>
+                  <button
+                    type="button"
+                    className="au-list__action-btn au-list__action-btn--danger"
+                    onClick={() => onQuickDeactivate(user.id)}
+                    disabled={isBusy || !canManageUsers || isDeleted}
+                  >
+                    {isDeleted ? 'Đã vô hiệu hóa' : 'Vô hiệu hóa'}
                   </button>
                 </div>
               </div>

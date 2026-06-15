@@ -13,13 +13,29 @@ function DeviceInputForm({
       <div className="electricity-form__grid">
         <label>
           <span>Loại thiết bị</span>
-          <select value={form.name} onChange={(event) => onSelectDevice(event.target.value)}>
+          <select
+            value={deviceOptions.some(opt => opt.value === form.name) ? form.name : (form.name ? 'Khác' : '')}
+            onChange={(event) => onSelectDevice(event.target.value)}
+            style={{ colorScheme: 'light' }}
+          >
+            <option value="" disabled hidden>Chọn thiết bị...</option>
             {deviceOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
+          {(!deviceOptions.some(opt => opt.value === form.name) && form.name !== '') || form.showCustomInput ? (
+            <input
+              type="text"
+              value={form.name === 'Khác' ? '' : form.name}
+              onChange={(event) => onChange('name', event.target.value)}
+              placeholder="Nhập tên thiết bị..."
+              style={{ marginTop: '8px' }}
+              autoFocus
+            />
+          ) : null}
+          {form.errors?.name && <span style={{ color: '#e53935', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{form.errors.name}</span>}
         </label>
 
         <label>

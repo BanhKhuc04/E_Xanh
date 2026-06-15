@@ -21,7 +21,13 @@ function AdminProfileCard({ profile }) {
       </div>
 
       <div className="st-card__actions">
-        <button type="button" className="btn btn--primary">
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={() => {
+            window.location.href = '/tai-khoan/cai-dat'
+          }}
+        >
           Chỉnh sửa hồ sơ
         </button>
         <button 

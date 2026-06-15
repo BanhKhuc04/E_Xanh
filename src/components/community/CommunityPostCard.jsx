@@ -38,6 +38,7 @@ function CommunityPostCard({
   isShareActive,
   currentUser,
   onCommentCountChange,
+  highlightCommentId = '',
 }) {
   const [toast, setToast] = useState('')
   const shareRef = useRef(null)
@@ -79,28 +80,66 @@ function CommunityPostCard({
     <article className="community-post-card" id={post.id} data-testid="community-post-card" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
       <div className="community-post-card__header">
         <div className="community-post-card__author">
-          {isValidImageUrl(post.avatar) ? (
-            <img
-              src={post.avatar}
-              alt={`Ảnh đại diện của ${post.author}`}
-              width="40"
-              height="40"
-              loading="lazy"
-              style={{ objectFit: 'cover' }}
-            />
-          ) : (
-            <div className="community-post-card__avatar-placeholder" style={{ width: 40, height: 40, borderRadius: '50%', background: '#c1d95c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-              {getInitials(post.author)}
-            </div>
-          )}
+          <Link to={`/nguoi-dung/${post.authorId}`} onClick={(e) => e.stopPropagation()}>
+            {isValidImageUrl(post.avatar) ? (
+              <img
+                src={post.avatar}
+                alt={`Ảnh đại diện của ${post.author}`}
+                width="40"
+                height="40"
+                loading="lazy"
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div className="community-post-card__avatar-placeholder" style={{ width: 40, height: 40, borderRadius: '50%', background: '#c1d95c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                {getInitials(post.author)}
+              </div>
+            )}
+          </Link>
           <div>
-            <strong>{post.author}</strong>
+            <Link to={`/nguoi-dung/${post.authorId}`} onClick={(e) => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
+              <strong>{post.author}</strong>
+            </Link>
             <span>
               {post.time} {post.role ? `• ${post.role}` : ''}
             </span>
           </div>
         </div>
-        <span className="community-post-card__menu">...</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {currentUser && currentUser.id !== post.authorId && (
+            <button
+              type="button"
+              onClick={async (e) => {
+                e.stopPropagation()
+                const reason = window.prompt('Nhập lý do báo cáo bài viết này:')
+                if (reason === null) return
+                if (!reason.trim()) {
+                  alert('Vui lòng nhập lý do báo cáo.')
+                  return
+                }
+                const { createReport } = await import('../../services/reportService')
+                const { error } = await createReport({ postId: post.id, reason: reason.trim() })
+                if (error) {
+                  alert(error.message || 'Lỗi gửi báo cáo.')
+                } else {
+                  alert('Báo cáo bài viết thành công.')
+                }
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#e53935',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                padding: '4px 8px'
+              }}
+            >
+              Báo cáo bài viết
+            </button>
+          )}
+          <span className="community-post-card__menu">...</span>
+        </div>
       </div>
 
       <div className="community-post-card__tags">
@@ -124,72 +163,72 @@ function CommunityPostCard({
       ) : null}
 
       {/* Buttons */}
-      <div className="community-post-card__actions" style={{ position: 'relative' }}>
-        <button
-          type="button"
-          className={post.isLiked ? 'is-active' : ''}
-          onClick={(event) => {
-            event.stopPropagation()
-            onToggleLike(post.id)
-          }}
-        >
-          <HeartIcon isLiked={post.isLiked} /> Thích {post.likes}
-        </button>
-        <button
-          type="button"
-          className={`comment-toggle-btn ${isCommentActive ? 'is-active' : ''}`}
-          onClick={(event) => {
-            event.stopPropagation()
-            onToggleComment(post.id)
-          }}
-        >
-          <CommentIcon isActive={isCommentActive} /> Bình luận {post.commentsCount}
-        </button>
-        <button
-          type="button"
-          className={post.isSaved ? 'is-active' : ''}
-          onClick={(event) => {
-            event.stopPropagation()
-            onToggleSave(post.id)
-          }}
-        >
-          <SaveIcon isSaved={post.isSaved} /> {post.isSaved ? 'Đã lưu' : 'Lưu bài'} {post.savedCount}
-        </button>
-        <div style={{ position: 'relative' }} ref={shareRef}>
+      {(!post.status || post.status === 'approved') && (
+        <div className="community-post-card__actions" style={{ position: 'relative' }}>
           <button
             type="button"
-            className={isShareActive ? 'is-active' : ''}
+            className={post.isLiked ? 'is-active' : ''}
             onClick={(event) => {
               event.stopPropagation()
-              onToggleShare(post.id)
+              onToggleLike(post.id)
             }}
           >
-            <ShareIcon /> Chia sẻ {post.shares}
+            <HeartIcon isLiked={post.isLiked} /> Thích {post.likes}
           </button>
-          
-          {isShareActive && (
-            <div className="community-post-card__share-modal" style={{ padding: '12px', minWidth: '300px', cursor: 'default' }} onClick={(event) => event.stopPropagation()}>
-              <div style={{ fontSize: '0.85rem', marginBottom: '8px', color: '#555', textAlign: 'left' }}>Liên kết bài viết:</div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input 
-                  type="text" 
-                  value={shareUrl} 
-                  readOnly 
-                  onClick={(e) => e.target.select()}
-                  style={{ flex: 1, padding: '6px 8px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '0.85rem', outline: 'none', backgroundColor: '#f9f9f9', color: '#333' }} 
-                />
-                <button 
-                  className="btn btn--primary" 
-                  onClick={handleCopyLink} 
-                  style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: '4px', whiteSpace: 'nowrap' }}
-                >
-                  Sao chép
-                </button>
+          <button
+            type="button"
+            className={`comment-toggle-btn ${isCommentActive ? 'is-active' : ''}`}
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggleComment(post.id)
+            }}
+          >
+            <CommentIcon isActive={isCommentActive} /> Bình luận {post.commentsCount}
+          </button>
+          <button
+            type="button"
+            className={post.isSaved ? 'is-active' : ''}
+            onClick={(event) => {
+              event.stopPropagation()
+              onToggleSave(post.id)
+            }}
+          >
+            <SaveIcon isSaved={post.isSaved} /> {post.isSaved ? 'Đã lưu' : 'Lưu bài'} {post.savedCount}
+          </button>
+          <div style={{ position: 'relative' }} ref={shareRef}>
+            <button
+              type="button"
+              className={isShareActive ? 'is-active' : ''}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleShare(post.id)
+              }}
+            >
+              <ShareIcon /> Chia sẻ {post.shares}
+            </button>
+            
+            {isShareActive && (
+              <div className="community-post-card__share-modal" style={{ cursor: 'default' }} onClick={(event) => event.stopPropagation()}>
+                <div className="community-post-card__share-copy">Liên kết bài viết:</div>
+                <div className="community-post-card__share-row">
+                  <input 
+                    type="text" 
+                    value={shareUrl} 
+                    readOnly 
+                    onClick={(e) => e.target.select()}
+                  />
+                  <button 
+                    className="btn btn--primary" 
+                    onClick={handleCopyLink}
+                  >
+                    Sao chép
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {isCommentActive && (
         <div style={{ marginTop: '16px' }} onClick={(event) => event.stopPropagation()}>
@@ -199,6 +238,7 @@ function CommunityPostCard({
             initialCount={post.commentsCount}
             isOpen={isCommentActive}
             onCountChange={onCommentCountChange}
+            highlightCommentId={highlightCommentId}
           />
         </div>
       )}

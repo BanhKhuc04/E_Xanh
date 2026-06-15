@@ -12,7 +12,7 @@ import { pageHeroContent } from '../../data/pageHeroes'
 import {
   calculateDeviceKwh,
   deviceOptions,
-  electricityHistory,
+
   electricitySampleDevices,
   formatKwh,
   getDefaultPowerByName,
@@ -26,6 +26,7 @@ import {
   getScrollToResultFlag,
   getRecalculateDevices,
   saveElectricityHistory,
+  getElectricityHistories,
 } from '../../utils/electricityStorage'
 import '../../styles/electricity-check.css'
 
@@ -40,10 +41,11 @@ function buildDevice(device) {
 
 function createInitialForm() {
   return {
-    name: 'Điều hòa 9000BTU',
-    power: getDefaultPowerByName('Điều hòa 9000BTU'),
+    name: '',
+    power: '',
     hoursPerDay: '',
     daysPerMonth: '',
+    showCustomInput: false,
     error: '',
     errors: {}
   }
@@ -77,7 +79,7 @@ function getInitialElectricityState() {
   }
 
   return {
-    devices: electricitySampleDevices.map(buildDevice),
+    devices: [],
     notice: '',
     shouldScrollToResult: false,
   }
@@ -92,6 +94,8 @@ function ElectricityCheckPage() {
   const [form, setForm] = useState(createInitialForm())
   const [feedbackMessage, setFeedbackMessage] = useState(initialNotice)
   const [isSavingHistory, setIsSavingHistory] = useState(false)
+  const [recentHistories, setRecentHistories] = useState([])
+  const [hasCalculated, setHasCalculated] = useState(false)
 
   const [dbDeviceOptions, setDbDeviceOptions] = useState(deviceOptions)
 
@@ -106,13 +110,26 @@ function ElectricityCheckPage() {
           defaultPower: d.default_power,
           tone: d.icon === 'snowflake' ? 'teal' : d.icon === 'laptop' ? 'lime' : 'green',
         }))
-        // Ensure "Khác" is always at the bottom
-        options.push({ label: 'Khác', value: 'Khác', defaultPower: '', tone: 'gray' })
         setDbDeviceOptions(options)
       }
     }
     loadDevices()
   }, [])
+
+  useEffect(() => {
+    async function fetchRecentHistories() {
+      const { getCurrentSession } = await import('../../services/authService')
+      const session = await getCurrentSession()
+      let h = []
+      if (session?.user) {
+        h = getElectricityHistories(session.user.id)
+      } else {
+        h = getElectricityHistories('guest')
+      }
+      setRecentHistories(h.slice(0, 3))
+    }
+    fetchRecentHistories()
+  }, [feedbackMessage])
 
   useEffect(() => {
     if (!feedbackMessage) {
@@ -181,13 +198,15 @@ function ElectricityCheckPage() {
   }
 
   function handleSelectDevice(name) {
-    const defaultPower = dbDeviceOptions.find(d => d.value === name)?.defaultPower ?? ''
+    const found = dbDeviceOptions.find(d => d.value === name)
+    const isCustom = name === 'Khác'
     setForm((current) => ({
       ...current,
-      name,
-      power: defaultPower,
+      name: isCustom ? 'Khác' : name,
+      showCustomInput: isCustom,
+      ...(found && found.defaultPower ? { power: found.defaultPower } : {}),
       error: '',
-      errors: {}
+      errors: { ...current.errors, name: '' }
     }))
   }
 
@@ -201,28 +220,28 @@ function ElectricityCheckPage() {
     let hasError = false
     const newErrors = {}
 
-    if (!form.name || !form.power || !form.hoursPerDay || !form.daysPerMonth) {
-      setForm((current) => ({ ...current, error: 'Vui lòng nhập đầy đủ thông tin thiết bị.' }))
-      return
+    if (!form.name || !form.name.trim()) {
+      newErrors.name = 'Tên thiết bị không được rỗng'
+      hasError = true
     }
 
-    if (isNaN(power) || power <= 0) {
+    if (!form.power || isNaN(power) || power <= 0) {
       newErrors.power = 'Công suất > 0'
       hasError = true
     }
 
-    if (isNaN(hours) || hours <= 0 || hours > 24) {
+    if (!form.hoursPerDay || isNaN(hours) || hours <= 0 || hours > 24) {
       newErrors.hours = 'Giờ: 1-24'
       hasError = true
     }
 
-    if (isNaN(days) || days <= 0 || days > 31) {
+    if (!form.daysPerMonth || isNaN(days) || days <= 0 || days > 31) {
       newErrors.days = 'Ngày: 1-31'
       hasError = true
     }
 
     if (hasError) {
-      setForm((current) => ({ ...current, errors: newErrors, error: '' }))
+      setForm((current) => ({ ...current, errors: newErrors, error: 'Vui lòng kiểm tra lại thông tin.' }))
       return
     }
 
@@ -244,19 +263,31 @@ function ElectricityCheckPage() {
 
   function handleRemoveDevice(id) {
     setDevices((current) => current.filter((item) => item.id !== id))
+    if (devices.length === 1) {
+      setHasCalculated(false)
+    }
   }
 
   function handleReset() {
-    setDevices(electricitySampleDevices.map(buildDevice))
+    setDevices([])
     setForm(createInitialForm())
     setFeedbackMessage('')
+    setHasCalculated(false)
   }
 
-  function handleScrollToResult() {
-    document.getElementById('ket-qua-dien')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
+  function handleCalculate() {
+    if (devices.length === 0) {
+      setFeedbackMessage('Bạn cần thêm ít nhất một thiết bị.')
+      return
+    }
+    setHasCalculated(true)
+    handleSaveHistory()
+    setTimeout(() => {
+      document.getElementById('ket-qua-dien')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }, 100)
   }
 
   async function handleSaveHistory() {
@@ -286,8 +317,20 @@ function ElectricityCheckPage() {
     }
 
     if (session?.user) {
-      saveElectricityHistory(historyPayload, session.user.id)
-      setFeedbackMessage('Đã lưu lịch sử')
+      try {
+        const { saveElectricityCheck } = await import('../../services/electricityService')
+        const { error } = await saveElectricityCheck({ summary, devices })
+        if (!error) {
+          setFeedbackMessage('Đã lưu lịch sử')
+        } else {
+          saveElectricityHistory(historyPayload, session.user.id)
+          setFeedbackMessage('Đã lưu lịch sử')
+        }
+      } catch (err) {
+        console.error(err)
+        saveElectricityHistory(historyPayload, session.user.id)
+        setFeedbackMessage('Đã lưu lịch sử')
+      }
     } else {
       saveElectricityHistory(historyPayload, 'guest')
       setFeedbackMessage('Đã lưu lịch sử kiểm tra cục bộ (hãy đăng nhập để đồng bộ)')
@@ -347,7 +390,7 @@ function ElectricityCheckPage() {
             <button
               type="button"
               className="btn btn--primary electricity-tool-layout__primary"
-              onClick={handleScrollToResult}
+              onClick={handleCalculate}
             >
               Tính tiền điện
             </button>
@@ -356,29 +399,24 @@ function ElectricityCheckPage() {
             </button>
           </div>
 
-          <div className="electricity-tool-layout__save">
-            <button
-              type="button"
-              className="btn electricity-tool-layout__save-button"
-              onClick={handleSaveHistory}
-              disabled={devices.length === 0 || isSavingHistory}
-            >
-              {isSavingHistory ? 'Đang lưu...' : 'Lưu lịch sử'}
-            </button>
-            {feedbackMessage ? (
-              <span className="electricity-tool-layout__save-message">{feedbackMessage}</span>
+          <div className="electricity-tool-layout__save" style={{ minHeight: '24px' }}>
+            {feedbackMessage && feedbackMessage !== 'Bạn cần thêm ít nhất một thiết bị.' ? (
+              <span className="electricity-tool-layout__save-message" style={{ color: '#80b155', fontWeight: 'bold' }}>{feedbackMessage}</span>
             ) : null}
+            {feedbackMessage === 'Bạn cần thêm ít nhất một thiết bị.' && !hasCalculated && (
+              <span className="electricity-tool-layout__error-message" style={{ color: '#e53935', fontSize: '0.9rem', fontWeight: 'bold' }}>{feedbackMessage}</span>
+            )}
           </div>
         </div>
 
-        <div ref={resultRef} className="electricity-tool-layout__right">
+        <div ref={resultRef} id="ket-qua-dien" className="electricity-tool-layout__right">
           <ElectricityResultCard summary={summary} />
           <ElectricityBreakdown items={summary.breakdown} />
         </div>
       </section>
 
       <SavingSuggestions suggestions={savingSuggestions} />
-      <RecentElectricityHistory history={electricityHistory} />
+      {recentHistories.length > 0 && <RecentElectricityHistory history={recentHistories} />}
 
       <section id="cach-tinh" className="electricity-formula">
         <div className="electricity-formula__header">

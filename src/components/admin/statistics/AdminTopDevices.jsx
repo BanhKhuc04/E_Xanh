@@ -1,4 +1,13 @@
 function AdminTopDevices({ devices }) {
+  if (!devices.length) {
+    return (
+      <div className="as-section-card">
+        <h3>Thiết bị được kiểm tra nhiều nhất</h3>
+        <p>Chưa có đủ dữ liệu trong khoảng thời gian này.</p>
+      </div>
+    )
+  }
+
   const maxCount = devices[0]?.count ?? 1
 
   return (

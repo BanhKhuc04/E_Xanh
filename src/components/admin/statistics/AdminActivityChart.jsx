@@ -1,5 +1,6 @@
 function AdminActivityChart({ data }) {
   const maxValue = Math.max(
+    1,
     ...data.flatMap((d) => [d.posts, d.comments, d.saves, d.checks]),
   )
 

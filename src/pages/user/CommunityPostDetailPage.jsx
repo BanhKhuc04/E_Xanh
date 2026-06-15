@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useParams, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
-import MarkdownContent from '../../components/common/MarkdownContent'
+import PostBlockRenderer from '../../components/community/PostBlockRenderer'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 
@@ -12,6 +12,8 @@ function CommunityPostDetailPage() {
   const [post, setPost] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
+  const [searchParams] = useSearchParams()
+  const highlightCommentId = searchParams.get('comment') || ''
   
   // We use this just to let CommunityPostCard manage its own UI states
   const [activeCommentPostId, setActiveCommentPostId] = useState(id)
@@ -55,6 +57,7 @@ function CommunityPostDetailPage() {
           const formattedPost = {
             id: data.id,
             author: data.profiles?.name || 'Ẩn danh',
+            authorId: data.author_id,
             avatar: data.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${data.profiles?.name || 'U'}&background=c1d95c&color=fff`,
             time: new Date(data.published_at || data.created_at).toLocaleDateString('vi-VN'),
             role: data.profiles?.role === 'admin' ? 'Quản trị viên' : (data.profiles?.role === 'moderator' ? 'Điều hành viên' : 'Thành viên'),
@@ -69,7 +72,10 @@ function CommunityPostDetailPage() {
             savedCount: data.saved_count || 0,
             shares: 0,
             isLiked,
-            isSaved
+            isSaved,
+            status: data.status,
+            rejection_count: data.rejection_count || 0,
+            rejection_reason: data.rejection_reason || ''
           }
           setPost(formattedPost)
         }
@@ -206,6 +212,21 @@ function CommunityPostDetailPage() {
           <div style={{ textAlign: 'center', padding: '40px' }}>Không tìm thấy bài viết!</div>
         ) : (
           <>
+            {post.status !== 'approved' && (
+              <div style={{ background: '#fff3cd', color: '#856404', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid #ffeeba' }}>
+                <strong>Lưu ý:</strong> Bài viết này chưa được công khai. Chỉ bạn và quản trị viên mới có thể xem.
+              </div>
+            )}
+            {post.status === 'rejected' && (
+              <div style={{ background: '#f8d7da', color: '#721c24', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid #f5c6cb' }}>
+                <strong>Bài viết đã bị từ chối.</strong>
+                {post.rejection_reason && <p style={{ margin: '8px 0 0 0' }}>Lý do: {post.rejection_reason}</p>}
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.9em' }}>Số lần bị từ chối: {post.rejection_count}/3</p>
+                {post.rejection_count >= 3 && (
+                  <p style={{ margin: '8px 0 0 0', fontWeight: 'bold' }}>Bài viết đã bị từ chối quá 3 lần và không thể nộp lại.</p>
+                )}
+              </div>
+            )}
             <CommunityPostCard
               post={post}
               onToggleLike={handleToggleLike}
@@ -216,12 +237,13 @@ function CommunityPostDetailPage() {
               isShareActive={activeSharePostId === post.id}
               currentUser={currentUser}
               onCommentCountChange={handleCommentCountChange}
+              highlightCommentId={highlightCommentId}
             />
 
-            {post.content ? (
+            {post.content || (post.content_blocks && post.content_blocks.length > 0) ? (
               <section className="post-side-card" style={{ marginTop: '20px' }}>
                 <h2>Nội dung bài chia sẻ</h2>
-                <MarkdownContent content={post.content} className="article-content__markdown" />
+                <PostBlockRenderer blocks={post.content_blocks} fallbackContent={post.content} />
               </section>
             ) : null}
           </>

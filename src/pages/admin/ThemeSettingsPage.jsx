@@ -194,7 +194,12 @@ function ThemeSettingsPage() {
           </label>
         </div>
 
-        {loading ? <p>Đang tải...</p> : null}
+        {loading ? (
+          <div style={{ display: 'grid', gap: '18px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+            <div style={{ height: '240px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+            <div style={{ height: '240px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+          </div>
+        ) : null}
         {!loading && banners.length === 0 ? (
           <p className="text-muted">Chưa có ảnh nào cho trang này.</p>
         ) : null}
