@@ -26,8 +26,6 @@ function normalizeNullableValue(value) {
 }
 
 function mapLegacyAnnouncementType(type) {
-  if (type === 'critical') return 'danger'
-  if (type === 'maintenance') return 'warning'
   return type || 'info'
 }
 

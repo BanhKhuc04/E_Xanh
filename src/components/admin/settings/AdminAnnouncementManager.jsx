@@ -137,7 +137,11 @@ function AdminAnnouncementManager() {
       : await createWebsiteAnnouncement(payload)
 
     if (result.error) {
-      setErrorMsg(result.error.message)
+      if (result.error.message?.includes('website_announcements_type_check')) {
+        setErrorMsg('Loại thông báo không hợp lệ. Vui lòng chọn loại khác.')
+      } else {
+        setErrorMsg(result.error.message)
+      }
     } else {
       setSuccessMsg(editingId ? 'Đã cập nhật thông báo website.' : 'Đã tạo thông báo website mới.')
       resetForm()
