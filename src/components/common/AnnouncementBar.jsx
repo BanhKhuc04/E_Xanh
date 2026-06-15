@@ -4,9 +4,10 @@ import { logError, logWarn } from '../../utils/logger'
 
 const DISMISS_PREFIX = 'exanh_announcement_dismissed_'
 
-function isAnnouncementDismissed(id) {
+function isAnnouncementDismissed(id, updatedAt) {
   try {
-    return Boolean(localStorage.getItem(`${DISMISS_PREFIX}${id}`))
+    const key = `${DISMISS_PREFIX}${id}_${updatedAt || ''}`
+    return Boolean(localStorage.getItem(key))
   } catch (error) {
     logWarn('[E-XANH][announcement] Cannot read dismiss state from localStorage.', error)
     return false
@@ -59,7 +60,7 @@ function AnnouncementBar() {
   }, [])
 
   const visibleAnnouncement = useMemo(() => {
-    return announcements.find((announcement) => !isAnnouncementDismissed(announcement.id))
+    return announcements.find((announcement) => !isAnnouncementDismissed(announcement.id, announcement.updated_at))
   }, [announcements])
 
   const displayType = useMemo(() => {
@@ -98,7 +99,8 @@ function AnnouncementBar() {
 
   function handleDismiss() {
     try {
-      localStorage.setItem(`${DISMISS_PREFIX}${visibleAnnouncement.id}`, '1')
+      const key = `${DISMISS_PREFIX}${visibleAnnouncement.id}_${visibleAnnouncement.updated_at || ''}`
+      localStorage.setItem(key, '1')
     } catch (error) {
       logWarn('[E-XANH][announcement] Cannot persist dismiss state.', error)
     }
