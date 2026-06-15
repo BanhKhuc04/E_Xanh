@@ -106,8 +106,11 @@ async function normalizeAnnouncementPayload(payload = {}, { partial = false } = 
 
   const nextDisplayType = normalizeDisplayTypeValue(payload.display_type || payload.display_mode)
   if (nextDisplayType) {
+    let dbValue = nextDisplayType
+    if (dbValue === 'marquee') dbValue = 'banner'
+
     if (capabilities.hasDisplayType) {
-      normalized.display_type = nextDisplayType
+      normalized.display_type = dbValue
     } else {
       normalized.display_mode = nextDisplayType === 'marquee' ? 'marquee' : 'static'
     }
