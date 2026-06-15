@@ -9,6 +9,27 @@ import './styles/global.css'
 import './styles/layout.css'
 import './styles/social-ui.css'
 
+// Xóa cờ reload khi app load thành công
+sessionStorage.removeItem('exanh_chunk_reload_once')
+
+// Bắt lỗi chunk load ngoài router context (VD: lỗi dynamic import chưa kịp vào ErrorBoundary)
+window.addEventListener('unhandledrejection', (event) => {
+  const msg = event.reason?.message || ''
+  if (
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('Importing a module script failed') ||
+    msg.includes('ChunkLoadError') ||
+    msg.includes('Loading chunk') ||
+    event.reason?.name === 'ChunkLoadError'
+  ) {
+    console.warn('[E-XANH][Global] Caught unhandled chunk load error:', msg)
+    if (!sessionStorage.getItem('exanh_chunk_reload_once')) {
+      sessionStorage.setItem('exanh_chunk_reload_once', 'true')
+      window.location.reload()
+    }
+  }
+})
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HelmetProvider>
