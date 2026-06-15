@@ -1,31 +1,16 @@
 import { useRouteError } from 'react-router-dom'
 import { logWarn, logError } from '../../utils/logger'
-
-const CHUNK_RELOAD_KEY = 'exanh_chunk_reload_once'
+import { isChunkLoadError, handleChunkErrorReload, clearChunkErrorReload } from '../../utils/chunkError'
 
 export default function RouteErrorBoundary() {
   const error = useRouteError()
 
-  const isChunkError = (err) => {
-    if (!err) return false
-    const msg = err.message || ''
-    return (
-      msg.includes('Failed to fetch dynamically imported module') ||
-      msg.includes('Importing a module script failed') ||
-      msg.includes('ChunkLoadError') ||
-      msg.includes('Loading chunk') ||
-      err.name === 'ChunkLoadError'
-    )
-  }
-
-  if (isChunkError(error)) {
+  if (isChunkLoadError(error)) {
     logWarn('[E-XANH][Router] Caught chunk load error:', error.message)
-    const hasReloaded = sessionStorage.getItem(CHUNK_RELOAD_KEY)
     
-    if (!hasReloaded) {
+    const reloadTriggered = handleChunkErrorReload()
+    if (reloadTriggered) {
       logWarn('[E-XANH][Router] Auto-reloading once to fetch new chunks...')
-      sessionStorage.setItem(CHUNK_RELOAD_KEY, 'true')
-      window.location.reload()
       return (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px', color: '#666' }}>
           Đang cập nhật phiên bản mới...
@@ -42,7 +27,7 @@ export default function RouteErrorBoundary() {
         </p>
         <button
           onClick={() => {
-            sessionStorage.removeItem(CHUNK_RELOAD_KEY)
+            clearChunkErrorReload()
             window.location.reload()
           }}
           style={{
