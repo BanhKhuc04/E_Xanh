@@ -2,15 +2,15 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import ScrollToTop from '../components/common/ScrollToTop'
 import DevelopmentNotice from '../components/common/DevelopmentNotice'
-import AdminRoute from '../components/auth/AdminRoute'
-import UserRoute from '../components/auth/UserRoute'
-import AdminLayout from '../layouts/AdminLayout'
-import UserLayout from '../layouts/UserLayout'
+import AdminRoute from '../app/guards/AdminRoute'
+import UserRoute from '../app/guards/UserRoute'
+import AdminLayout from '../layouts/admin/AdminLayout'
+import UserLayout from '../layouts/user/UserLayout'
 
 // ─── Eager pages (critical path — kept small) ────────────────────────────────
 import HomePage from '../pages/user/HomePage'
-import LoginPage from '../pages/user/LoginPage'
-import RegisterPage from '../pages/user/RegisterPage'
+import LoginPage from '../pages/auth/LoginPage'
+import RegisterPage from '../pages/auth/RegisterPage'
 import NotFoundPage from '../pages/shared/NotFoundPage'
 
 // ─── Lazy pages — User ────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ const ElectricityHistoryPage = lazy(() => import('../pages/user/ElectricityHisto
 const SavedPostsPage = lazy(() => import('../pages/user/SavedPostsPage'))
 const SettingsUserPage = lazy(() => import('../pages/user/SettingsUserPage'))
 const PublicProfilePage = lazy(() => import('../pages/user/PublicProfilePage'))
-const AuthCallbackPage = lazy(() => import('../pages/user/AuthCallbackPage'))
+const AuthCallbackPage = lazy(() => import('../pages/auth/AuthCallbackPage'))
 
 // ─── Lazy pages — Admin ───────────────────────────────────────────────────────
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))

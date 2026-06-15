@@ -1,4 +1,4 @@
-import { postStatusMap } from '../../../data/adminPosts'
+import { postStatusMap } from '../../../data/mock/adminPosts'
 
 function AdminPostList({
   posts,

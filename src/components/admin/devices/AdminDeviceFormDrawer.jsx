@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { deviceGroupOptions } from '../../../data/adminDevices'
+import { deviceGroupOptions } from '../../../data/mock/adminDevices'
 
 const emptyForm = {
   name: '',

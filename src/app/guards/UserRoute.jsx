@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import BrandLogo from '../common/BrandLogo'
+import BrandLogo from '../../components/common/BrandLogo'
 
 function UserRoute() {
   const [loading, setLoading] = useState(true)

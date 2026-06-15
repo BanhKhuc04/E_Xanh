@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { getCurrentSession, getCurrentUserProfile, signOut } from '../../../services/authService'
+import { getCurrentSession, getCurrentUserProfile, signOut } from '../../services/authService'
 import {
   getMyNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
-} from '../../../services/userNotificationService'
+} from '../../services/userNotificationService'
 
 const topbarMeta = [
   {

@@ -357,6 +357,15 @@
   font-size: 0.78rem;
 }
 
+.user-footer__copyright a {
+  color: rgba(234, 245, 157, 0.96);
+  font-weight: 700;
+}
+
+.user-footer__copyright a:hover {
+  color: #fff;
+}
+
 .user-footer__badge {
   display: inline-flex;
   align-items: center;

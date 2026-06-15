@@ -1,4 +1,4 @@
-import { timeFilterOptions } from '../../../data/adminStatistics'
+import { timeFilterOptions } from '../../../data/mock/adminStatistics'
 
 function AdminTimeFilter({ active, onChange }) {
   return (

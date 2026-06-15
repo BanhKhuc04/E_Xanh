@@ -7,7 +7,7 @@ import MyPostsList from '../../components/account/MyPostsList'
 import RecentSavedPosts from '../../components/account/RecentSavedPosts'
 import RecentComments from '../../components/account/RecentComments'
 import AccountInfoCard from '../../components/account/AccountInfoCard'
-import { savedPosts } from '../../data/posts'
+import { savedPosts } from '../../data/mock/posts'
 import {
   getCurrentSession,
   getCurrentUserProfile,

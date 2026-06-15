@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   commentStatusMap,
-} from '../../data/adminComments'
+} from '../../data/mock/adminComments'
 import AdminCommentStats from '../../components/admin/comments/AdminCommentStats'
 import AdminCommentFilter from '../../components/admin/comments/AdminCommentFilter'
 import AdminCommentBulkAction from '../../components/admin/comments/AdminCommentBulkAction'

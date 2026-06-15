@@ -2,7 +2,7 @@ import {
   postCategories,
   postStatusOptions,
   postDateOptions,
-} from '../../../data/adminPosts'
+} from '../../../data/mock/adminPosts'
 
 function AdminPostFilter({
   search,

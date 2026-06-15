@@ -29,3 +29,13 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Custom E-Xanh ignores
+exanh-playwright-tests/node_modules/
+exanh-playwright-tests/playwright-report/
+exanh-playwright-tests/test-results/
+run-*-log.txt
+vite-test.log
+.env
+.env.local
+.env.*.local

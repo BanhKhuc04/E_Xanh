@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { getInitials, isValidImageUrl } from '../../../utils/avatar'
-import { isStaff } from '../../../utils/permissions'
-import BrandLogo from '../../common/BrandLogo'
-import { userNavLinks } from '../../../data/navigation'
-import { usePostComposer } from '../../community/PostComposerContext'
+import { getInitials, isValidImageUrl } from '../../utils/avatar'
+import { isStaff } from '../../utils/permissions'
+import BrandLogo from '../../components/common/BrandLogo'
+import { userNavLinks } from '../../data/navigation'
+import { usePostComposer } from '../../components/community/PostComposerContext'
 import {
   getMyNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
-} from '../../../services/userNotificationService'
+} from '../../services/userNotificationService'
 
 function getShortName(name, email) {
   if (name) {
@@ -56,7 +56,7 @@ function UserNavbar() {
 
     async function loadUser() {
       try {
-        const { getCurrentSession, ensureActiveProfileSession } = await import('../../../services/authService')
+        const { getCurrentSession, ensureActiveProfileSession } = await import('../../services/authService')
         const session = await getCurrentSession()
         if (session?.user) {
           const { profile, allowed } = await ensureActiveProfileSession(session.user.id)
@@ -87,7 +87,7 @@ function UserNavbar() {
 
     async function initAuth() {
       await loadUser()
-      const { onAuthStateChange } = await import('../../../services/authService')
+      const { onAuthStateChange } = await import('../../services/authService')
       unsubscribe = onAuthStateChange((event) => {
         if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
           loadUser()
@@ -157,7 +157,7 @@ function UserNavbar() {
   }, [])
 
   async function handleLogout() {
-    const { signOut } = await import('../../../services/authService')
+    const { signOut } = await import('../../services/authService')
     await signOut()
     setIsOpen(false)
     setIsNotificationOpen(false)

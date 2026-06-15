@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router-dom'
-import AnnouncementBar from '../components/common/AnnouncementBar'
-import UserFooter from '../components/layout/user/UserFooter'
-import UserNavbar from '../components/layout/user/UserNavbar'
-import { PostComposerProvider } from '../components/community/PostComposerContext'
+import AnnouncementBar from '../../components/common/AnnouncementBar'
+import UserFooter from './UserFooter'
+import UserNavbar from './UserNavbar'
+import { PostComposerProvider } from '../../components/community/PostComposerContext'
 
 function UserLayout() {
   return (

@@ -1,4 +1,4 @@
-import { commentStatusOptions, commentDateOptions } from '../../../data/adminComments'
+import { commentStatusOptions, commentDateOptions } from '../../../data/mock/adminComments'
 
 function AdminCommentFilter({
   search,

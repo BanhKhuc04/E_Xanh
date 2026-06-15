@@ -11,7 +11,7 @@ import { pageHeroContent } from '../../data/pageHeroes'
 import {
   savedFilterChips,
   savedSortOptions,
-} from '../../data/posts'
+} from '../../data/mock/posts'
 import heroImage from '../../assets/hero.png'
 import { getRuntimeSetting } from '../../services/settingsService'
 import { fetchFirstActiveBanner } from '../../services/bannerService'

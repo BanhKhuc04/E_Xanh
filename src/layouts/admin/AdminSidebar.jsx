@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import BrandLogo from '../../common/BrandLogo'
-import { adminNavLinks } from '../../../data/navigation'
+import BrandLogo from '../../components/common/BrandLogo'
+import { adminNavLinks } from '../../data/navigation'
 
 function SidebarIcon({ iconKey }) {
   const icons = {

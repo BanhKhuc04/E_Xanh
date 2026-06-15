@@ -1,4 +1,4 @@
-import { commentStatusMap } from '../../../data/adminComments'
+import { commentStatusMap } from '../../../data/mock/adminComments'
 
 function formatTime(isoString) {
   const date = new Date(isoString)

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { postStatusMap } from '../../../data/adminPosts'
+import { postStatusMap } from '../../../data/mock/adminPosts'
 import PostImage from '../../common/PostImage'
 import PostBlockRenderer from '../../community/PostBlockRenderer'
 

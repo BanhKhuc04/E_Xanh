@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import BrandLogo from '../../common/BrandLogo'
-import { userNavLinks } from '../../../data/navigation'
+import BrandLogo from '../../components/common/BrandLogo'
+import { userNavLinks } from '../../data/navigation'
 
 function UserFooter() {
   return (
@@ -32,7 +32,16 @@ function UserFooter() {
         </nav>
 
         <div className="user-footer__copyright">
-          <p>© 2024 E-XANH. Made by VanhKhucDev</p>
+          <p>
+            © 2026 E-XANH. Made by{' '}
+            <a
+              href="https://banhkhuc04.github.io/contact.vanhkhuc/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              VanhKhucDev
+            </a>
+          </p>
         </div>
       </div>
     </footer>

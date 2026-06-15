@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { userRoleMap, userStatusMap } from '../../../data/adminUsers'
+import { userRoleMap, userStatusMap } from '../../../data/mock/adminUsers'
 
 function AdminUserDrawer({
   user,

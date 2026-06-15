@@ -1,4 +1,4 @@
-import { userRoleMap, userStatusMap } from '../../../data/adminUsers'
+import { userRoleMap, userStatusMap } from '../../../data/mock/adminUsers'
 
 function AdminUserList({
   users,

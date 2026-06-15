@@ -2,7 +2,7 @@ import {
   userRoleOptions,
   userStatusOptions,
   userDateOptions,
-} from '../../../data/adminUsers'
+} from '../../../data/mock/adminUsers'
 
 function AdminUserFilter({
   search,

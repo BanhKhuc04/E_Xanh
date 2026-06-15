@@ -2,7 +2,7 @@ import {
   deviceGroupOptions,
   deviceLevelOptions,
   deviceStatusOptions,
-} from '../../../data/adminDevices'
+} from '../../../data/mock/adminDevices'
 
 function AdminDeviceFilter({
   search,

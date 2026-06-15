@@ -15,13 +15,6 @@ function FeaturedPosts() {
         const { data, error } = await getFeaturedPosts()
         if (error) throw error
         
-        console.log('--- DEBUG getFeaturedPosts ---')
-        console.log('Total returned:', data?.length)
-        data?.forEach(p => {
-          console.log(`[${p.id}] ${p.title} | Status: ${p.status} | Image: ${p.image_url ? 'YES' : 'NO'}`)
-        })
-        console.log('------------------------------')
-
         if (data) {
           setPosts(data)
         }

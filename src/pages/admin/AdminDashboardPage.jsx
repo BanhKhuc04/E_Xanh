@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAdminStats } from '../../services/analyticsService'
-import { postStatusMap } from '../../data/adminPosts'
+import { postStatusMap } from '../../data/mock/adminPosts'
 
 function DashboardIcon({ icon }) {
   const icons = {
