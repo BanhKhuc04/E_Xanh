@@ -143,6 +143,13 @@
   border-radius: inherit;
 }
 
+/* Ensure the carousel wrapper fills the placeholder instead of using a fixed 16:9 ratio */
+.auth-carousel-placeholder > div {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+}
+
 .auth-card {
   display: flex;
   flex-direction: column;
