@@ -1,10 +1,33 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import CommunityPostCard from '../../components/community/CommunityPostCard'
 import PostBlockRenderer from '../../components/community/PostBlockRenderer'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
+import InlineCommentSection from '../../components/community/InlineCommentSection'
+import './CommunityPostDetailPage.css'
+
+// SVG Icons
+const HeartIcon = ({ isLiked }) => (
+  <svg viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+  </svg>
+)
+const CommentIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+)
+const SaveIcon = ({ isSaved }) => (
+  <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+  </svg>
+)
+const ShareIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+  </svg>
+)
 
 function CommunityPostDetailPage() {
   const { id } = useParams()
@@ -15,9 +38,8 @@ function CommunityPostDetailPage() {
   const [searchParams] = useSearchParams()
   const highlightCommentId = searchParams.get('comment') || ''
   
-  // We use this just to let CommunityPostCard manage its own UI states
-  const [activeCommentPostId, setActiveCommentPostId] = useState(id)
-  const [activeSharePostId, setActiveSharePostId] = useState(null)
+  const [isCommentActive, setIsCommentActive] = useState(false)
+  const [toastMsg, setToastMsg] = useState('')
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
@@ -27,18 +49,19 @@ function CommunityPostDetailPage() {
   useEffect(() => {
     async function loadData() {
       let userId = null
+      let userRole = null
       try {
         const session = await getCurrentSession()
         if (session?.user) {
           userId = session.user.id
           const profile = await getCurrentUserProfile(session.user.id)
-          setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null })
+          userRole = profile?.role
+          setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null, role: userRole })
         }
       } catch (e) {
         console.warn('Cannot fetch user for community post detail page:', e)
       }
 
-      // Load post
       try {
         const { data, error } = await getPostById(id)
         if (!error && data) {
@@ -88,23 +111,36 @@ function CommunityPostDetailPage() {
     loadData()
   }, [id])
 
-  async function handleToggleComment(postId) {
-    if (!currentUser) {
-      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để bình luận bài viết.' } })
-      return
-    }
-
-    if (activeCommentPostId === postId) {
-      setActiveCommentPostId(null)
-    } else {
-      setActiveCommentPostId(postId)
-      setActiveSharePostId(null)
-    }
+  const showToast = (msg) => {
+    setToastMsg(msg)
+    setTimeout(() => setToastMsg(''), 3000)
   }
 
-  function handleToggleShare(postId) {
-    setActiveSharePostId(prev => prev === postId ? null : postId)
-    setActiveCommentPostId(null)
+  const checkLogin = (featureName) => {
+    if (!currentUser) {
+      showToast(`Bạn cần đăng nhập để ${featureName}.`)
+      return false
+    }
+    return true
+  }
+
+  async function handleToggleComment() {
+    if (!checkLogin('bình luận')) return
+    setIsCommentActive(!isCommentActive)
+  }
+
+  function handleToggleShare() {
+    if (post.status !== 'approved') {
+      showToast('Bài viết chưa công khai nên không thể chia sẻ.')
+      return
+    }
+    
+    const shareUrl = `${window.location.origin}/cong-dong/${post.id}`
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Đã sao chép liên kết bài viết.')
+    }).catch(() => {
+      prompt('Vui lòng copy liên kết bên dưới:', shareUrl)
+    })
   }
 
   function handleCommentCountChange(count) {
@@ -115,72 +151,56 @@ function CommunityPostDetailPage() {
   }
 
   async function handleToggleLike() {
-    if (!currentUser) {
-      alert('Vui lòng đăng nhập để thích bài viết.')
-      return
-    }
-    
+    if (!checkLogin('thích bài viết')) return
     if (!post) return
-    const isCurrentlyLiked = post.isLiked
 
-    setPost(current => {
-      if (!current) return current
-      return {
-        ...current,
-        isLiked: !isCurrentlyLiked,
-        likes: isCurrentlyLiked ? current.likes - 1 : current.likes + 1,
-      }
-    })
+    const isCurrentlyLiked = post.isLiked
+    setPost(current => ({
+      ...current,
+      isLiked: !isCurrentlyLiked,
+      likes: isCurrentlyLiked ? current.likes - 1 : current.likes + 1,
+    }))
 
     const { likePost, unlikePost } = await import('../../services/interactionService')
     const { error } = isCurrentlyLiked ? await unlikePost(post.id) : await likePost(post.id)
 
     if (error) {
-      setPost(current => {
-        if (!current) return current
-        return {
-          ...current,
-          isLiked: isCurrentlyLiked,
-          likes: isCurrentlyLiked ? current.likes + 1 : current.likes - 1,
-        }
-      })
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      setPost(current => ({
+        ...current,
+        isLiked: isCurrentlyLiked,
+        likes: isCurrentlyLiked ? current.likes + 1 : current.likes - 1,
+      }))
+      showToast('Đã xảy ra lỗi, vui lòng thử lại.')
     }
   }
 
   async function handleToggleSave() {
-    if (!currentUser) {
-      alert('Vui lòng đăng nhập để lưu bài viết.')
-      return
-    }
-
+    if (!checkLogin('lưu bài viết')) return
     if (!post) return
-    const isCurrentlySaved = post.isSaved
 
-    setPost(current => {
-      if (!current) return current
-      return {
-        ...current,
-        isSaved: !isCurrentlySaved,
-        savedCount: isCurrentlySaved ? current.savedCount - 1 : current.savedCount + 1,
-      }
-    })
+    const isCurrentlySaved = post.isSaved
+    setPost(current => ({
+      ...current,
+      isSaved: !isCurrentlySaved,
+      savedCount: isCurrentlySaved ? current.savedCount - 1 : current.savedCount + 1,
+    }))
 
     const { savePost, unsavePost } = await import('../../services/interactionService')
     const { error } = isCurrentlySaved ? await unsavePost(post.id) : await savePost(post.id)
 
     if (error) {
-      setPost(current => {
-        if (!current) return current
-        return {
-          ...current,
-          isSaved: isCurrentlySaved,
-          savedCount: isCurrentlySaved ? current.savedCount + 1 : current.savedCount - 1,
-        }
-      })
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      setPost(current => ({
+        ...current,
+        isSaved: isCurrentlySaved,
+        savedCount: isCurrentlySaved ? current.savedCount + 1 : current.savedCount - 1,
+      }))
+      showToast('Đã xảy ra lỗi, vui lòng thử lại.')
     }
   }
+
+  const isAuthor = currentUser?.id === post?.authorId
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'moderator'
+  const canView = post?.status === 'approved' || isAuthor || isAdmin
 
   return (
     <>
@@ -198,58 +218,123 @@ function CommunityPostDetailPage() {
       </Helmet>
 
       <div className="community-page">
-      <div className="container" style={{ padding: '20px 0', maxWidth: '800px', margin: '0 auto' }}>
-        <Link to="/cong-dong" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4F8428', textDecoration: 'none', marginBottom: '24px', fontWeight: 'bold' }}>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Quay lại Cộng đồng
-        </Link>
+        <div className="container" style={{ padding: '20px 0' }}>
+          <Link to="/cong-dong" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#4F8428', textDecoration: 'none', fontWeight: 'bold' }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Quay lại Cộng đồng
+          </Link>
 
-        {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>Đang tải bài viết...</div>
-        ) : !post ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>Không tìm thấy bài viết!</div>
-        ) : (
-          <>
-            {post.status !== 'approved' && (
-              <div style={{ background: '#fff3cd', color: '#856404', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid #ffeeba' }}>
-                <strong>Lưu ý:</strong> Bài viết này chưa được công khai. Chỉ bạn và quản trị viên mới có thể xem.
-              </div>
-            )}
-            {post.status === 'rejected' && (
-              <div style={{ background: '#f8d7da', color: '#721c24', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', borderLeft: '4px solid #f5c6cb' }}>
-                <strong>Bài viết đã bị từ chối.</strong>
-                {post.rejection_reason && <p style={{ margin: '8px 0 0 0' }}>Lý do: {post.rejection_reason}</p>}
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.9em' }}>Số lần bị từ chối: {post.rejection_count}/3</p>
-                {post.rejection_count >= 3 && (
-                  <p style={{ margin: '8px 0 0 0', fontWeight: 'bold' }}>Bài viết đã bị từ chối quá 3 lần và không thể nộp lại.</p>
-                )}
-              </div>
-            )}
-            <CommunityPostCard
-              post={post}
-              onToggleLike={handleToggleLike}
-              onToggleSave={handleToggleSave}
-              onToggleComment={handleToggleComment}
-              onToggleShare={handleToggleShare}
-              isCommentActive={activeCommentPostId === post.id}
-              isShareActive={activeSharePostId === post.id}
-              currentUser={currentUser}
-              onCommentCountChange={handleCommentCountChange}
-              highlightCommentId={highlightCommentId}
-            />
+          {isLoading ? (
+            <div style={{ textAlign: 'center', padding: '100px 0' }}>Đang tải bài viết...</div>
+          ) : !post ? (
+            <div style={{ textAlign: 'center', padding: '100px 0' }}>
+              <h2>Không tìm thấy bài viết!</h2>
+              <p>Bài viết có thể đã bị xóa hoặc không tồn tại.</p>
+            </div>
+          ) : !canView ? (
+            <div style={{ textAlign: 'center', padding: '100px 0' }}>
+              <h2>Không có quyền truy cập</h2>
+              <p>Bạn không có quyền xem bài viết này hoặc bài viết chưa được công khai.</p>
+              <Link to="/" className="btn btn--primary" style={{ marginTop: '16px' }}>Về trang chủ</Link>
+            </div>
+          ) : (
+            <div className="community-detail-container">
+              {post.status !== 'approved' && (
+                <div style={{ background: '#fff3cd', color: '#856404', padding: '12px 16px', borderRadius: '8px', marginBottom: '24px', borderLeft: '4px solid #ffeeba' }}>
+                  <strong>Lưu ý:</strong> Bài viết này chưa được công khai. Chỉ bạn và quản trị viên mới có thể xem.
+                </div>
+              )}
 
-            {post.content || (post.content_blocks && post.content_blocks.length > 0) ? (
-              <section className="post-side-card" style={{ marginTop: '20px' }}>
-                <h2>Nội dung bài chia sẻ</h2>
-                <PostBlockRenderer blocks={post.content_blocks} fallbackContent={post.content} />
-              </section>
-            ) : null}
-          </>
-        )}
+              <div className="community-detail__header">
+                <Link to={`/nguoi-dung/${post.authorId}`}>
+                  <img src={post.avatar} alt={post.author} className="community-detail__avatar" />
+                </Link>
+                <div className="community-detail__meta">
+                  <h3>
+                    <Link to={`/nguoi-dung/${post.authorId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                      {post.author}
+                    </Link>
+                    {post.role !== 'Thành viên' && <span className="community-detail__role">{post.role}</span>}
+                  </h3>
+                  <p>{post.time}</p>
+                </div>
+              </div>
+
+              <div className="community-detail__tags">
+                <span className="community-detail__tag community-detail__tag--primary">{post.topic}</span>
+                <span className="community-detail__tag">{post.category}</span>
+              </div>
+
+              <h1 className="community-detail__title">{post.title}</h1>
+
+              {post.image && (
+                <div className="community-detail__image-wrapper">
+                  <img src={post.image} alt={post.title} className="community-detail__image" loading="lazy" decoding="async" />
+                </div>
+              )}
+
+              {post.content || (post.content_blocks && post.content_blocks.length > 0) ? (
+                <div className="community-detail__content">
+                  <PostBlockRenderer blocks={post.content_blocks} fallbackContent={post.content} />
+                </div>
+              ) : null}
+
+              <div className="community-detail__actions">
+                <button 
+                  type="button" 
+                  className={`community-detail__action-btn ${post.isLiked ? 'is-active' : ''}`}
+                  onClick={handleToggleLike}
+                >
+                  <HeartIcon isLiked={post.isLiked} /> Thích {post.likes > 0 && post.likes}
+                </button>
+                <button 
+                  type="button" 
+                  className={`community-detail__action-btn ${isCommentActive ? 'is-active' : ''}`}
+                  onClick={handleToggleComment}
+                >
+                  <CommentIcon /> Bình luận {post.commentsCount > 0 && post.commentsCount}
+                </button>
+                <button 
+                  type="button" 
+                  className={`community-detail__action-btn ${post.isSaved ? 'is-active' : ''}`}
+                  onClick={handleToggleSave}
+                >
+                  <SaveIcon isSaved={post.isSaved} /> {post.isSaved ? 'Đã lưu' : 'Lưu bài'}
+                </button>
+                <button 
+                  type="button" 
+                  className="community-detail__action-btn"
+                  onClick={handleToggleShare}
+                >
+                  <ShareIcon /> Chia sẻ
+                </button>
+              </div>
+
+              {isCommentActive && (
+                <div style={{ marginTop: '24px' }}>
+                  <InlineCommentSection
+                    postId={post.id}
+                    currentUser={currentUser}
+                    initialCount={post.commentsCount}
+                    isOpen={isCommentActive}
+                    onCountChange={handleCommentCountChange}
+                    highlightCommentId={highlightCommentId}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {toastMsg && (
+        <div className="ui-toast">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          {toastMsg}
+        </div>
+      )}
     </>
   )
 }

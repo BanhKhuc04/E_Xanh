@@ -173,7 +173,7 @@ function CommunityPostCard({
               onToggleLike(post.id)
             }}
           >
-            <HeartIcon isLiked={post.isLiked} /> Thích {post.likes}
+            <HeartIcon isLiked={post.isLiked} /> Thích {post.likes > 0 && post.likes}
           </button>
           <button
             type="button"
@@ -183,7 +183,7 @@ function CommunityPostCard({
               onToggleComment(post.id)
             }}
           >
-            <CommentIcon isActive={isCommentActive} /> Bình luận {post.commentsCount}
+            <CommentIcon isActive={isCommentActive} /> Bình luận {post.commentsCount > 0 && post.commentsCount}
           </button>
           <button
             type="button"
@@ -193,40 +193,17 @@ function CommunityPostCard({
               onToggleSave(post.id)
             }}
           >
-            <SaveIcon isSaved={post.isSaved} /> {post.isSaved ? 'Đã lưu' : 'Lưu bài'} {post.savedCount}
+            <SaveIcon isSaved={post.isSaved} /> {post.isSaved ? 'Đã lưu' : 'Lưu bài'}
           </button>
-          <div style={{ position: 'relative' }} ref={shareRef}>
-            <button
-              type="button"
-              className={isShareActive ? 'is-active' : ''}
-              onClick={(event) => {
-                event.stopPropagation()
-                onToggleShare(post.id)
-              }}
-            >
-              <ShareIcon /> Chia sẻ {post.shares}
-            </button>
-            
-            {isShareActive && (
-              <div className="community-post-card__share-modal" style={{ cursor: 'default' }} onClick={(event) => event.stopPropagation()}>
-                <div className="community-post-card__share-copy">Liên kết bài viết:</div>
-                <div className="community-post-card__share-row">
-                  <input 
-                    type="text" 
-                    value={shareUrl} 
-                    readOnly 
-                    onClick={(e) => e.target.select()}
-                  />
-                  <button 
-                    className="btn btn--primary" 
-                    onClick={handleCopyLink}
-                  >
-                    Sao chép
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              handleCopyLink()
+            }}
+          >
+            <ShareIcon /> Chia sẻ
+          </button>
         </div>
       )}
 

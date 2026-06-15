@@ -117,8 +117,7 @@ function PublicProfilePage() {
 
   const handleFollowToggle = async () => {
     if (!currentUser) {
-      // Must be logged in to follow
-      navigate('/dang-nhap', { state: { from: `/nguoi-dung/${userId}` } })
+      alert('Bạn cần đăng nhập để sử dụng tính năng này.')
       return
     }
 

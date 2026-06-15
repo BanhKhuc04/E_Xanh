@@ -154,11 +154,21 @@ function CommunityPage() {
     setVisibleCount(3)
   }
 
-  async function handleToggleLike(postId) {
+  const showToastMsg = (msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(''), 3000)
+  }
+
+  const checkLogin = (featureName) => {
     if (!currentUser) {
-      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để thích bài viết.' } })
-      return
+      showToastMsg(`Bạn cần đăng nhập để ${featureName}.`)
+      return false
     }
+    return true
+  }
+
+  async function handleToggleLike(postId) {
+    if (!checkLogin('thích bài viết')) return
 
     const postToUpdate = posts.find(p => p.id === postId)
     if (!postToUpdate) return
@@ -191,15 +201,12 @@ function CommunityPage() {
           }
         })
       )
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      showToastMsg('Đã xảy ra lỗi, vui lòng thử lại.')
     }
   }
 
   async function handleToggleSave(postId) {
-    if (!currentUser) {
-      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để lưu bài viết.' } })
-      return
-    }
+    if (!checkLogin('lưu bài viết')) return
 
     const postToUpdate = posts.find(p => p.id === postId)
     if (!postToUpdate) return
@@ -232,15 +239,12 @@ function CommunityPage() {
           }
         })
       )
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      showToastMsg('Đã xảy ra lỗi, vui lòng thử lại.')
     }
   }
 
   async function handleToggleComment(postId) {
-    if (!currentUser) {
-      navigate('/dang-nhap', { state: { message: 'Vui lòng đăng nhập để bình luận bài viết.' } })
-      return
-    }
+    if (!checkLogin('bình luận')) return
 
     if (activeCommentPostId === postId) {
       setActiveCommentPostId(null)
