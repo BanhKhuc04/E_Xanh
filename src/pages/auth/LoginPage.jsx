@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
 import { Helmet } from 'react-helmet-async'
 import { signInWithEmail, ensureActiveProfileSession } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
@@ -25,6 +26,8 @@ function LoginPage() {
   const [banners, setBanners] = useState([])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
 
   useEffect(() => {
     async function load() {
@@ -60,6 +63,12 @@ function LoginPage() {
     if (!form.password.trim()) {
       setSuccessMessage('')
       setErrorMessage('Vui lòng nhập mật khẩu.')
+      return
+    }
+
+    if (!turnstileToken) {
+      setSuccessMessage('')
+      setErrorMessage('Vui lòng xác minh bạn là người.')
       return
     }
 
@@ -216,6 +225,20 @@ function LoginPage() {
                   Quên mật khẩu?
                 </button>
               </div>
+
+              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
+                <Turnstile
+                  siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
+                  onSuccess={(token) => {
+                    setTurnstileToken(token)
+                    setErrorMessage('')
+                  }}
+                  onError={() => setErrorMessage('Lỗi xác minh. Vui lòng tải lại trang.')}
+                  onExpire={() => setTurnstileToken('')}
+                  options={{ theme: 'light' }}
+                />
+              </div>
+              {/* TODO: Gửi turnstileToken lên backend/Supabase Edge Function để verify an toàn hơn */}
 
               <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}

@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
 import { Helmet } from 'react-helmet-async'
 import { signUpWithEmail } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
@@ -28,6 +29,8 @@ function RegisterPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccessMode, setIsSuccessMode] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
 
   useEffect(() => {
     async function load() {
@@ -87,6 +90,12 @@ function RegisterPage() {
     if (!form.agree) {
       setSuccessMessage('')
       setErrorMessage('Vui lòng đồng ý với điều khoản sử dụng của E-XANH.')
+      return
+    }
+
+    if (!turnstileToken) {
+      setSuccessMessage('')
+      setErrorMessage('Vui lòng xác minh bạn là người.')
       return
     }
 
@@ -285,6 +294,20 @@ function RegisterPage() {
                 của E-XANH
               </span>
             </label>
+
+            <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
+              <Turnstile
+                siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
+                onSuccess={(token) => {
+                  setTurnstileToken(token)
+                  setErrorMessage('')
+                }}
+                onError={() => setErrorMessage('Lỗi xác minh. Vui lòng tải lại trang.')}
+                onExpire={() => setTurnstileToken('')}
+                options={{ theme: 'light' }}
+              />
+            </div>
+            {/* TODO: Gửi turnstileToken lên backend/Supabase Edge Function để verify an toàn hơn */}
 
             <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
               {isSubmitting ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
