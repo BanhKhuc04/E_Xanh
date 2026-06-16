@@ -81,6 +81,7 @@ function AccountPage() {
   const [currentUser, setCurrentUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [myPostsData, setMyPostsData] = useState([])
+  const [postsLoading, setPostsLoading] = useState(true)
   const [savedPostsData, setSavedPostsData] = useState([])
   const [recentCommentsData, setRecentCommentsData] = useState([])
 
@@ -96,6 +97,7 @@ function AccountPage() {
         if (isMounted) {
           setCurrentUser(null)
           setLoading(false)
+          setPostsLoading(false)
         }
         return
       }
@@ -138,6 +140,7 @@ function AccountPage() {
           if (myPostsRes.data) setMyPostsData(myPostsRes.data)
           if (savedRes.data) setSavedPostsData(savedRes.data)
           if (commentsRes.data) setRecentCommentsData(commentsRes.data)
+          setPostsLoading(false)
         }
       }
     }
@@ -230,7 +233,7 @@ function AccountPage() {
 
         <div className="account-layout">
           <div className="account-layout__main">
-            <MyPostsList posts={myPostsData} />
+            <MyPostsList posts={myPostsData} loading={postsLoading} />
             <RecentSavedPosts posts={savedPostsData.slice(0, 3)} />
             <RecentComments comments={recentCommentsData.slice(0, 3)} />
           </div>

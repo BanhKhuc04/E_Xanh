@@ -18,6 +18,7 @@ function PublicProfilePage() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [posts, setPosts] = useState([])
+  const [postsLoading, setPostsLoading] = useState(true)
   const [accessState, setAccessState] = useState('allowed')
   
   const [currentUser, setCurrentUser] = useState(null)
@@ -103,6 +104,7 @@ function PublicProfilePage() {
         })
         setAccessState(nextAccessState)
         if (postsData) setPosts(postsData)
+        setPostsLoading(false)
         setFollowStats(stats)
         setLoading(false)
       }
@@ -313,7 +315,7 @@ function PublicProfilePage() {
                   <p>Cài đặt quyền riêng tư hiện không cho hiển thị bài viết công khai trên trang cá nhân.</p>
                 </div>
               ) : posts.length > 0 ? (
-                <MyPostsList posts={posts} isPublicView={true} />
+                <MyPostsList posts={posts} isPublicView={true} loading={postsLoading} />
               ) : (
                 <div className="public-profile-empty">
                   <h3>Chưa có bài viết</h3>

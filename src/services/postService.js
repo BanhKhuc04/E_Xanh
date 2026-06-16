@@ -275,13 +275,25 @@ export async function getTipPosts() {
 }
 
 export async function getPostBySlug(slug) {
-  const { data, error } = await supabase
+  const { data: postData, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
+    .select(`*`)
     .eq('slug', slug)
     .single()
 
-  if (error || !data) return { data: null, error }
+  if (error || !postData) return { data: null, error }
+
+  let profileData = null
+  if (postData.author_id) {
+    const { data: pData } = await supabase
+      .from('profiles')
+      .select('id, name, avatar_url, bio, role')
+      .eq('id', postData.author_id)
+      .single()
+    profileData = pData
+  }
+  
+  const data = { ...postData, profiles: profileData }
 
   if (data.status !== 'approved') {
     const { data: sessionData } = await supabase.auth.getSession()
@@ -299,13 +311,25 @@ export async function getPostBySlug(slug) {
 }
 
 export async function getPostById(id) {
-  const { data, error } = await supabase
+  const { data: postData, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
+    .select(`*`)
     .eq('id', id)
     .single()
 
-  if (error || !data) return { data: null, error }
+  if (error || !postData) return { data: null, error }
+
+  let profileData = null
+  if (postData.author_id) {
+    const { data: pData } = await supabase
+      .from('profiles')
+      .select('id, name, avatar_url, bio, role')
+      .eq('id', postData.author_id)
+      .single()
+    profileData = pData
+  }
+  
+  const data = { ...postData, profiles: profileData }
 
   if (data.status !== 'approved') {
     const { data: sessionData } = await supabase.auth.getSession()

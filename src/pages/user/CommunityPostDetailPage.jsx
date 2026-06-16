@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import PostBlockRenderer from '../../components/community/PostBlockRenderer'
+import PostImage from '../../components/common/PostImage'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 import InlineCommentSection from '../../components/community/InlineCommentSection'
+import { getImageUrl } from '../../utils/imageUrl'
 import './CommunityPostDetailPage.css'
 
 // SVG Icons
@@ -227,7 +229,21 @@ function CommunityPostDetailPage() {
           </Link>
 
           {isLoading ? (
-            <div style={{ textAlign: 'center', padding: '100px 0' }}>Đang tải bài viết...</div>
+            <div className="community-detail-container">
+              <div className="community-skeleton-header">
+                <div className="community-skeleton-avatar"></div>
+                <div className="community-skeleton-meta">
+                  <div className="community-skeleton-text" style={{ width: '120px' }}></div>
+                  <div className="community-skeleton-text" style={{ width: '80px', height: '12px' }}></div>
+                </div>
+              </div>
+              <div className="community-skeleton-text title"></div>
+              <div className="community-skeleton-image"></div>
+              <div className="community-skeleton-text" style={{ width: '100%' }}></div>
+              <div className="community-skeleton-text" style={{ width: '90%' }}></div>
+              <div className="community-skeleton-text" style={{ width: '95%' }}></div>
+              <div className="community-skeleton-text" style={{ width: '60%' }}></div>
+            </div>
           ) : !post ? (
             <div style={{ textAlign: 'center', padding: '100px 0' }}>
               <h2>Không tìm thấy bài viết!</h2>
@@ -271,7 +287,7 @@ function CommunityPostDetailPage() {
 
               {post.image && (
                 <div className="community-detail__image-wrapper">
-                  <img src={post.image} alt={post.title} className="community-detail__image" loading="lazy" decoding="async" />
+                  <PostImage src={post.image} alt={post.title} variant="detail" className="community-detail__image" />
                 </div>
               )}
 

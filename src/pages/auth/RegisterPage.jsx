@@ -8,6 +8,7 @@ import BrandLogo from '../../components/common/BrandLogo'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -26,6 +27,7 @@ function RegisterPage() {
   const [banners, setBanners] = useState([])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccessMode, setIsSuccessMode] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -70,9 +72,9 @@ function RegisterPage() {
       return
     }
 
-    if (form.password.trim().length < 6) {
+    if (!passwordPattern.test(form.password)) {
       setSuccessMessage('')
-      setErrorMessage('Mật khẩu cần tối thiểu 6 ký tự.')
+      setErrorMessage('Mật khẩu cần ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số.')
       return
     }
 
@@ -97,30 +99,24 @@ function RegisterPage() {
     })
 
     if (error) {
-      let viError = 'Đã xảy ra lỗi, vui lòng thử lại.'
+      let viError = 'Không thể kết nối máy chủ. Vui lòng thử lại.'
       if (error.message.includes('already registered')) {
         viError = 'Email này đã được đăng ký.'
-      } else if (error.message.includes('Password should be at least')) {
-        viError = 'Mật khẩu phải có ít nhất 6 ký tự.'
+      } else if (error.message.includes('Password should be at least') || error.message.includes('weak')) {
+        viError = 'Mật khẩu chưa đủ mạnh.'
+      } else if (error.message.toLowerCase().includes('invalid') || error.message.toLowerCase().includes('format')) {
+        viError = 'Email không hợp lệ.'
       } else if (error.message) {
         viError = error.message
       }
-      setErrorMessage(`Lỗi đăng ký: ${viError}`)
+      setErrorMessage(`${viError}`)
       setIsSubmitting(false)
       return
     }
 
     setErrorMessage('')
-    setSuccessMessage('Đăng ký thành công. Vui lòng kiểm tra email nếu hệ thống yêu cầu xác nhận.')
+    setIsSuccessMode(true)
     setIsSubmitting(false)
-
-    window.setTimeout(() => {
-      if (data?.session) {
-        navigate('/tai-khoan')
-      } else {
-        navigate('/')
-      }
-    }, 2000)
   }
 
 
@@ -173,15 +169,52 @@ function RegisterPage() {
         </section>
 
         <section className="auth-card">
-          <div className="auth-card__header">
-            <h2>Tạo tài khoản E-XANH</h2>
-            <p>Đăng ký để lưu bài viết, bình luận, đăng bài chia sẻ và theo dõi lịch sử kiểm tra tiền điện.</p>
-          </div>
+          {isSuccessMode ? (
+            <div className="auth-success-state" style={{ textAlign: 'center', padding: '32px 16px' }}>
+              <div style={{ width: '64px', height: '64px', background: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#16a34a' }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <h2 style={{ fontSize: '1.5rem', color: '#1a1a1a', marginBottom: '16px' }}>Kiểm tra email của bạn</h2>
+              <p style={{ color: '#4b5563', lineHeight: '1.6', marginBottom: '32px' }}>
+                E-XANH đã gửi email xác nhận đến <strong style={{ color: '#4f8428' }}>{form.email}</strong>.<br/><br/>
+                Vui lòng mở email và bấm nút xác nhận để kích hoạt tài khoản.
+              </p>
+              <button 
+                type="button"
+                className="btn btn--primary" 
+                style={{ width: '100%', marginBottom: '16px' }}
+                onClick={() => navigate('/dang-nhap')}
+              >
+                Đã hiểu, chuyển sang đăng nhập
+              </button>
+              <button 
+                type="button"
+                className="btn btn--secondary" 
+                style={{ width: '100%', border: 'none', background: 'transparent' }}
+                onClick={async () => {
+                  try {
+                    const { supabase } = await import('../../lib/supabase')
+                    await supabase.auth.resend({ type: 'signup', email: form.email })
+                    alert('Đã gửi lại email xác nhận!')
+                  } catch (e) {
+                    alert('Lỗi gửi lại email. Vui lòng thử lại sau.')
+                  }
+                }}
+              >
+                Gửi lại email xác nhận
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="auth-card__header">
+                <h2>Tạo tài khoản E-XANH</h2>
+                <p>Đăng ký để lưu bài viết, bình luận, đăng bài chia sẻ và theo dõi lịch sử kiểm tra tiền điện.</p>
+              </div>
 
-          <div className="auth-card__switcher">
-            <Link to="/dang-nhap">Đăng nhập</Link>
-            <span className="is-active">Đăng ký</span>
-          </div>
+              <div className="auth-card__switcher">
+                <Link to="/dang-nhap">Đăng nhập</Link>
+                <span className="is-active">Đăng ký</span>
+              </div>
 
           {errorMessage ? <div className="auth-card__message auth-card__message--error" role="alert" data-testid="register-error">{errorMessage}</div> : null}
           {successMessage ? (
@@ -282,12 +315,14 @@ function RegisterPage() {
                 Tiếp tục với Google
               </button>
             </div>
-          <div className="auth-note">
-            <strong>Bảo mật thông tin</strong>
-            <p>
-              E-XANH cam kết bảo vệ dữ liệu cá nhân của bạn. Thông tin được mã hóa an toàn và không chia sẻ cho bên thứ ba.
-            </p>
-          </div>
+              <div className="auth-note">
+                <strong>Bảo mật thông tin</strong>
+                <p>
+                  E-XANH cam kết bảo vệ dữ liệu cá nhân của bạn. Thông tin được mã hóa an toàn và không chia sẻ cho bên thứ ba.
+                </p>
+              </div>
+            </>
+          )}
         </section>
       </div>
     </div>

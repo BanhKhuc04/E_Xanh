@@ -1,5 +1,5 @@
 .community-detail-container {
-  max-width: 800px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 32px;
   background: #ffffff;
@@ -60,6 +60,9 @@
   color: #1a1a1a;
   line-height: 1.3;
   margin-bottom: 16px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -89,23 +92,32 @@
 }
 
 .community-detail__image-wrapper {
-  margin: 24px -32px;
+  margin: 24px 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
   position: relative;
-  background: #f8f9fa;
   min-height: 200px;
 }
 
 @media (max-width: 768px) {
   .community-detail__image-wrapper {
-    margin: 24px -16px;
+    margin: 24px 0;
   }
 }
 
-.community-detail__image {
+.community-detail__image img,
+.post-image--detail img {
   width: 100%;
-  max-height: 600px;
+  height: auto !important;
+  max-height: 680px;
   object-fit: contain;
+  object-position: center;
   display: block;
+  margin: auto;
+  border-radius: 20px;
+  background: #f7f8ef;
 }
 
 .community-detail__content {
@@ -113,6 +125,9 @@
   line-height: 1.8;
   color: #333;
   margin-bottom: 32px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .community-detail__actions {
@@ -151,4 +166,53 @@
 .community-detail__action-btn svg {
   width: 20px;
   height: 20px;
+}
+
+/* Skeleton Loading */
+.community-skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.community-skeleton-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #eee;
+  animation: pulse 1.5s infinite;
+}
+
+.community-skeleton-meta {
+  flex: 1;
+}
+
+.community-skeleton-text {
+  height: 16px;
+  background: #eee;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+.community-skeleton-text.title {
+  height: 32px;
+  width: 80%;
+  margin-bottom: 24px;
+}
+
+.community-skeleton-image {
+  width: 100%;
+  height: 400px;
+  background: #eee;
+  border-radius: 20px;
+  margin-bottom: 32px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
