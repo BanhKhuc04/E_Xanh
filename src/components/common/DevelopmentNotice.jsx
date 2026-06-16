@@ -27,37 +27,30 @@ function DevelopmentNotice() {
     window.open(formUrl, "_blank", "noopener,noreferrer")
   }
 
-  if (!shouldShow) return null
+  if (!shouldShow || isDismissed) return null
 
   return (
     <div className="development-notice-container">
-      {!isDismissed ? (
-        <div className="development-notice-box">
-          <button className="development-notice-close" onClick={handleDismiss} aria-label="Đóng thông báo">
-            &times;
-          </button>
-          <h4 className="development-notice-title">E-XANH đang trong quá trình phát triển</h4>
-          <p className="development-notice-desc">
-            Website có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.
-          </p>
-          
-          <div className="development-notice-info">
-            <p>Phiên bản hiện tại: <strong>Beta v1.1</strong></p>
-            <p>Cập nhật gần nhất: <strong>11/06/2026</strong></p>
-            <p>Dự kiến cập nhật tiếp theo: <strong>Sắp cập nhật</strong></p>
-          </div>
-          
-          <button onClick={handleReportClick} className="development-report-button">
-            <ReportIcon />
-            Báo cáo lỗi
-          </button>
+      <div className="development-notice-box">
+        <button className="development-notice-close" onClick={handleDismiss} aria-label="Đóng thông báo">
+          &times;
+        </button>
+        <h4 className="development-notice-title">E-XANH đang trong quá trình phát triển</h4>
+        <p className="development-notice-desc">
+          Website có thể phát sinh vấn đề, mong bạn phản hồi để nhóm phát triển cải thiện.
+        </p>
+        
+        <div className="development-notice-info">
+          <p>Phiên bản hiện tại: <strong>Beta v1.1</strong></p>
+          <p>Cập nhật gần nhất: <strong>11/06/2026</strong></p>
+          <p>Dự kiến cập nhật tiếp theo: <strong>Sắp cập nhật</strong></p>
         </div>
-      ) : (
-        <button onClick={handleReportClick} className="development-report-button development-notice-mini-btn" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
+        
+        <button onClick={handleReportClick} className="development-report-button">
           <ReportIcon />
           Báo cáo lỗi
         </button>
-      )}
+      </div>
     </div>
   )
 }

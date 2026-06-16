@@ -5,13 +5,8 @@ import { logError, logWarn } from '../../utils/logger'
 const DISMISS_PREFIX = 'exanh_announcement_dismissed_'
 
 function isAnnouncementDismissed(id, updatedAt) {
-  try {
-    const key = `${DISMISS_PREFIX}${id}_${updatedAt || ''}`
-    return Boolean(localStorage.getItem(key))
-  } catch (error) {
-    logWarn('[E-XANH][announcement] Cannot read dismiss state from localStorage.', error)
-    return false
-  }
+  // Yêu cầu: Luôn hiển thị lại thông báo khi F5, không lưu trạng thái đã đóng vào localStorage nữa
+  return false
 }
 
 function AnnouncementBar() {
@@ -98,12 +93,6 @@ function AnnouncementBar() {
   }
 
   function handleDismiss() {
-    try {
-      const key = `${DISMISS_PREFIX}${visibleAnnouncement.id}_${visibleAnnouncement.updated_at || ''}`
-      localStorage.setItem(key, '1')
-    } catch (error) {
-      logWarn('[E-XANH][announcement] Cannot persist dismiss state.', error)
-    }
     setAnnouncements((current) =>
       current.filter((announcement) => announcement.id !== visibleAnnouncement.id)
     )

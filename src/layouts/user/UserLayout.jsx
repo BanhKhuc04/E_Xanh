@@ -3,6 +3,7 @@ import AnnouncementBar from '../../components/common/AnnouncementBar'
 import UserFooter from './UserFooter'
 import UserNavbar from './UserNavbar'
 import { PostComposerProvider } from '../../components/community/PostComposerContext'
+import FloatingBugReport from '../../components/common/FloatingBugReport'
 
 function UserLayout() {
   return (
@@ -14,6 +15,7 @@ function UserLayout() {
           <Outlet />
         </main>
         <UserFooter />
+        <FloatingBugReport />
       </div>
     </PostComposerProvider>
   )
