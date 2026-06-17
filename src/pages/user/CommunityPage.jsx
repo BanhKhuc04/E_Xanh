@@ -59,6 +59,9 @@ function CommunityPage() {
   const [visibleCount, setVisibleCount] = useState(3)
   const [isLoading, setIsLoading] = useState(true)
   const [toast, setToast] = useState('')
+  const [activeMembers, setActiveMembers] = useState([])
+  const [activeMembersLoading, setActiveMembersLoading] = useState(true)
+  const [activeMembersError, setActiveMembersError] = useState('')
 
   const [activeCommentPostId, setActiveCommentPostId] = useState(null)
   const [activeSharePostId, setActiveSharePostId] = useState(null)
@@ -82,8 +85,11 @@ function CommunityPage() {
 
       // Load posts
       try {
-        const { getCommunityPosts } = await import('../../services/postService')
-        const { data, error } = await getCommunityPosts()
+        const { getCommunityPosts, getTopActiveMembers } = await import('../../services/postService')
+        const [{ data, error }, activeMembersResult] = await Promise.all([
+          getCommunityPosts(),
+          getTopActiveMembers(5),
+        ])
         
         if (!error && data) {
           let likedMap = {}
@@ -98,32 +104,74 @@ function CommunityPage() {
             saves?.forEach(s => savedMap[s.post_id] = true)
           }
 
-          const formattedPosts = data.map(p => ({
-            id: p.id,
-            author: p.profiles?.name || 'Ẩn danh',
-            authorId: p.author_id,
-            avatar: p.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${p.profiles?.name || 'U'}&background=c1d95c&color=fff`,
-            time: new Date(p.published_at || p.created_at).toLocaleDateString('vi-VN'),
-            publishedAt: p.published_at || p.created_at,
-            role: p.profiles?.role === 'admin' ? 'Quản trị viên' : (p.profiles?.role === 'moderator' ? 'Điều hành viên' : 'Thành viên'),
-            topic: p.type === 'qa' ? 'Hỏi đáp' : (p.type === 'community' ? 'Kinh nghiệm' : 'Mẹo tiết kiệm'),
-            category: 'Chia sẻ',
-            title: p.title,
-            excerpt: p.description || (p.content ? `${p.content.substring(0, 150)}...` : 'Chia sẻ mới từ cộng đồng E-XANH.'),
-            image: p.image_url,
-            likes: p.likes_count || 0,
-            commentsCount: p.comments_count || 0,
-            savedCount: p.saved_count || 0,
-            shares: 0,
-            isLiked: !!likedMap[p.id], 
-            isSaved: !!savedMap[p.id]  
-          }))
+          const formattedPosts = data.map(p => {
+            const prefs = p.profiles?.user_preferences || {}
+            const visibility = prefs.profile_visibility || 'public'
+            
+            let authorName = 'Thành viên E-XANH'
+            let avatar = null
+            
+            // Logic lấy tên: name -> display_name -> email prefix (nếu chính chủ) -> Thành viên E-XANH
+            const getRealName = () => {
+              if (p.profiles?.name) return p.profiles.name
+              if (p.profiles?.display_name) return p.profiles.display_name
+              if (userId && p.author_id === userId) {
+                 // Không có email trong profiles public thông thường trừ khi session
+                 // Ở đây ta không có email user khác nên chỉ dùng "Thành viên E-XANH"
+                 return 'Thành viên E-XANH'
+              }
+              return 'Thành viên E-XANH'
+            }
+
+            if (visibility === 'public' || (visibility === 'authenticated' && userId)) {
+              authorName = getRealName()
+              avatar = p.profiles?.avatar_url || null
+            } else if (visibility === 'private' && p.author_id === userId) {
+              authorName = getRealName()
+              avatar = p.profiles?.avatar_url || null
+            } else if (visibility === 'private' || (visibility === 'authenticated' && !userId)) {
+              authorName = 'Thành viên E-XANH'
+              avatar = null
+            }
+
+            return {
+              id: p.id,
+              author: authorName,
+              authorId: visibility === 'private' && p.author_id !== userId ? null : p.author_id,
+              avatar: avatar,
+              time: new Date(p.published_at || p.created_at).toLocaleDateString('vi-VN'),
+              publishedAt: p.published_at || p.created_at,
+              role: p.profiles?.role === 'admin' ? 'Quản trị viên' : (p.profiles?.role === 'moderator' ? 'Điều hành viên' : null),
+              topic: p.type === 'qa' ? 'Hỏi đáp' : (p.type === 'community' ? 'Kinh nghiệm' : 'Mẹo tiết kiệm'),
+              category: 'Chia sẻ',
+              title: p.title,
+              excerpt: p.description || (p.content ? `${p.content.substring(0, 150)}...` : 'Chia sẻ mới từ cộng đồng E-XANH.'),
+              image: p.image_url,
+              likes: p.likes_count || 0,
+              commentsCount: p.comments_count || 0,
+              savedCount: p.saved_count || 0,
+              shares: 0,
+              isLiked: !!likedMap[p.id],
+              isSaved: !!savedMap[p.id]
+            }
+          })
           setPosts(formattedPosts)
+        }
+
+        if (activeMembersResult?.error) {
+          console.error('[CommunityPage] active members error:', activeMembersResult.error)
+          setActiveMembersError('Không thể tải thành viên tích cực.')
+          setActiveMembers([])
+        } else {
+          setActiveMembers(activeMembersResult?.data || [])
+          setActiveMembersError('')
         }
       } catch (e) {
         console.error('Error fetching community posts:', e)
+        setActiveMembersError('Không thể tải thành viên tích cực.')
       } finally {
         setIsLoading(false)
+        setActiveMembersLoading(false)
       }
     }
     loadData()
@@ -284,30 +332,6 @@ function CommunityPage() {
     return [...posts].sort((a, b) => b.likes - a.likes).slice(0, 5)
   }, [posts])
 
-  const dynamicActiveMembers = useMemo(() => {
-    const map = new Map()
-    posts.forEach(p => {
-      if (!p.authorId) return
-      if (!map.has(p.authorId)) {
-        map.set(p.authorId, {
-          id: p.authorId,
-          name: p.author,
-          avatar: p.avatar,
-          count: 0
-        })
-      }
-      map.get(p.authorId).count++
-    })
-    return Array.from(map.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-      .map(m => ({
-        ...m,
-        contribution: `${m.count} bài viết`,
-        badge: m.count > 2 ? 'Top đóng góp' : 'Thành viên'
-      }))
-  }, [posts])
-
   return (
     <div className="community-page">
       <Helmet>
@@ -402,7 +426,9 @@ function CommunityPage() {
         </div>
 
         <CommunitySidebar
-          activeMembers={dynamicActiveMembers}
+          activeMembers={activeMembers}
+          activeMembersLoading={activeMembersLoading}
+          activeMembersError={activeMembersError}
           trendingTopics={dynamicTrendingTopics}
           popularCommunityPosts={dynamicPopularPosts}
         />

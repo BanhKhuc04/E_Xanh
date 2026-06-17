@@ -2,13 +2,11 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { Helmet } from 'react-helmet-async'
-import { signInWithEmail, ensureActiveProfileSession } from '../../services/authService'
+import { EMAIL_PATTERN, signInWithEmail, ensureActiveProfileSession } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
 import BannerCarousel from '../../components/common/BannerCarousel'
 import BrandLogo from '../../components/common/BrandLogo'
 import '../../styles/auth.css'
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -28,6 +26,7 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  const isCaptchaDisabled = import.meta.env.VITE_DISABLE_CAPTCHA === 'true'
 
   useEffect(() => {
     async function load() {
@@ -54,7 +53,7 @@ function LoginPage() {
       return
     }
 
-    if (!emailPattern.test(form.email.trim())) {
+    if (!EMAIL_PATTERN.test(form.email.trim())) {
       setSuccessMessage('')
       setErrorMessage('Email không hợp lệ.')
       return
@@ -66,7 +65,7 @@ function LoginPage() {
       return
     }
 
-    if (!turnstileToken) {
+    if (!isCaptchaDisabled && !turnstileToken) {
       setSuccessMessage('')
       setErrorMessage('Vui lòng xác minh bạn là người.')
       return
@@ -221,23 +220,25 @@ function LoginPage() {
                   <span>Ghi nhớ đăng nhập</span>
                 </label>
 
-                <button type="button" className="auth-form__link-button" disabled title="Tính năng đang phát triển" aria-disabled="true">
+                <Link to="/quen-mat-khau" className="auth-form__text-link">
                   Quên mật khẩu?
-                </button>
+                </Link>
               </div>
 
-              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
-                <Turnstile
-                  siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
-                  onSuccess={(token) => {
-                    setTurnstileToken(token)
-                    setErrorMessage('')
-                  }}
-                  onError={() => setErrorMessage('Lỗi xác minh. Vui lòng tải lại trang.')}
-                  onExpire={() => setTurnstileToken('')}
-                  options={{ theme: 'light' }}
-                />
-              </div>
+              {!isCaptchaDisabled && (
+                <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
+                  <Turnstile
+                    siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
+                    onSuccess={(token) => {
+                      setTurnstileToken(token)
+                      setErrorMessage('')
+                    }}
+                    onError={() => setErrorMessage('Lỗi xác minh. Vui lòng tải lại trang.')}
+                    onExpire={() => setTurnstileToken('')}
+                    options={{ theme: 'light' }}
+                  />
+                </div>
+              )}
               {/* TODO: Gửi turnstileToken lên backend/Supabase Edge Function để verify an toàn hơn */}
 
               <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>

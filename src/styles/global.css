@@ -1,3 +1,5 @@
+@import "./responsive-fix.css";
+
 /* Font loaded via <link> in index.html for better performance */
 
 :root {
@@ -280,4 +282,3 @@ select:focus-visible {
   outline-offset: 3px;
 }
 
-@import "./responsive-fix.css";

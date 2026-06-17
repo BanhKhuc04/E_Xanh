@@ -19,7 +19,7 @@
 
 .post-card-ui__media {
   position: relative;
-  height: 220px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(234, 245, 157, 0.52), rgba(193, 217, 92, 0.18));
 }
@@ -50,11 +50,15 @@
 }
 
 .post-card-ui__save-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   right: 16px;
   border: 0;
-  padding: 10px 12px;
+  padding: 10px 14px;
   color: #336a29;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .post-card-ui__body {
@@ -69,12 +73,21 @@
   font-size: 1.38rem;
   line-height: 1.4;
   letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .post-card-ui__body p {
   margin: 0;
   color: rgba(23, 55, 21, 0.74);
   line-height: 1.72;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .post-card-ui__meta {
@@ -90,28 +103,47 @@
   gap: 12px;
 }
 
-.post-card-ui__avatar {
+.post-card-ui__author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-card-ui__author-link.is-disabled {
+  cursor: default;
+}
+
+.post-card-ui__author-copy {
   display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  color: #336a29;
-  background: #eaf59d;
-  font-size: 0.78rem;
-  font-weight: 800;
+  gap: 4px;
+  min-width: 0;
 }
 
 .post-card-ui__author strong,
-.post-card-ui__author span,
+.post-card-ui__author-copy span,
 .post-card-ui__stats span {
   display: block;
 }
 
-.post-card-ui__author span,
+.post-card-ui__author strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-card-ui__author-copy span,
 .post-card-ui__stats {
   color: rgba(23, 55, 21, 0.62);
   font-size: 0.9rem;
+}
+
+.post-card-ui__author-copy span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .post-card-ui__stats {
@@ -120,19 +152,29 @@
   gap: 14px;
 }
 
+.post-card-ui__stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .post-card-ui__link {
   width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: #4f8428;
   font-size: 0.95rem;
   font-weight: 800;
+  text-decoration: none;
 }
 
 @media (max-width: 720px) {
-  .post-card-ui__media {
-    height: 200px;
-  }
-
   .post-card-ui__body {
     padding: 20px;
+  }
+
+  .post-card-ui__save-button {
+    padding: 9px 12px;
   }
 }

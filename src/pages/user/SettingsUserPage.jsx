@@ -15,8 +15,12 @@ import {
 } from 'lucide-react'
 import ProfileAvatarSettings from '../../components/account/ProfileAvatarSettings'
 import ProfileCoverSettings from '../../components/account/ProfileCoverSettings'
-import { supabase } from '../../lib/supabase'
-import { getCurrentSession, signOut } from '../../services/authService'
+import {
+  getCurrentAuthUser,
+  getCurrentSession,
+  requestPasswordReset,
+  signOut,
+} from '../../services/authService'
 import {
   DEFAULT_USER_PREFERENCES,
   getCurrentProfile,
@@ -176,13 +180,15 @@ function ToggleRow({
 
 function SettingsUserPage() {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname, state } = location
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
 
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState('account')
   const [toast, setToast] = useState(null)
   const [currentUser, setCurrentUser] = useState(null)
+  const [accountEmail, setAccountEmail] = useState('')
   const [schemaNeedsMigration, setSchemaNeedsMigration] = useState(false)
 
   const [profileForm, setProfileForm] = useState({
@@ -203,17 +209,13 @@ function SettingsUserPage() {
     notify_comment_moderation: DEFAULT_USER_PREFERENCES.notify_comment_moderation,
     notify_interactions: DEFAULT_USER_PREFERENCES.notify_interactions,
   })
-  const [passwordForm, setPasswordForm] = useState({
-    newPassword: '',
-    confirmPassword: '',
-  })
   const [profileErrors, setProfileErrors] = useState({})
-  const [passwordError, setPasswordError] = useState('')
 
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPrivacy, setSavingPrivacy] = useState(false)
   const [savingNotifications, setSavingNotifications] = useState(false)
-  const [savingPassword, setSavingPassword] = useState(false)
+  const [sendingPasswordReset, setSendingPasswordReset] = useState(false)
+  const [passwordResetCooldown, setPasswordResetCooldown] = useState(0)
 
   useEffect(() => {
     let isMounted = true
@@ -227,10 +229,11 @@ function SettingsUserPage() {
         return
       }
 
+      const { user: authUser } = await getCurrentAuthUser()
       const { data, error } = await getCurrentProfile()
       const profile = normalizeProfileRecord({
         id: session.user.id,
-        email: session.user.email,
+        email: authUser?.email || session.user.email,
         name: session.user.email?.split('@')[0] || 'Thành viên E-XANH',
         ...data,
       })
@@ -242,6 +245,7 @@ function SettingsUserPage() {
       if (isMounted) {
         setSchemaNeedsMigration(Boolean(error) || !hasPreferencesColumn || !hasWebsiteColumn || !hasCoverColumn)
         setCurrentUser(profile)
+        setAccountEmail(authUser?.email || session.user.email || profile.email || '')
         setProfileForm({
           name: profile.name || '',
           bio: profile.bio || '',
@@ -282,6 +286,23 @@ function SettingsUserPage() {
 
     return () => window.clearTimeout(timer)
   }, [toast])
+
+  useEffect(() => {
+    if (!state?.message) return
+
+    showToast(state.message, state.tone || 'success')
+    navigate(pathname, { replace: true, state: null })
+  }, [navigate, pathname, state])
+
+  useEffect(() => {
+    if (passwordResetCooldown <= 0) return undefined
+
+    const timer = window.setInterval(() => {
+      setPasswordResetCooldown((current) => (current <= 1 ? 0 : current - 1))
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [passwordResetCooldown])
 
   function showToast(message, tone = 'success') {
     setToast({ message, tone })
@@ -420,38 +441,27 @@ function SettingsUserPage() {
     setSavingNotifications(false)
   }
 
-  async function handleChangePassword(event) {
-    event.preventDefault()
-
-    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
-      setPasswordError('Mật khẩu mới phải có ít nhất 6 ký tự.')
+  async function handleSendPasswordResetEmail() {
+    if (!accountEmail) {
+      showToast('Không xác định được email của tài khoản hiện tại.', 'error')
       return
     }
 
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError('Mật khẩu xác nhận chưa khớp.')
-      return
-    }
+    setSendingPasswordReset(true)
 
-    setPasswordError('')
-    setSavingPassword(true)
-
-    const { error } = await supabase.auth.updateUser({
-      password: passwordForm.newPassword,
+    const { error } = await requestPasswordReset(accountEmail, {
+      source: 'settings',
     })
 
     if (error) {
-      setPasswordError(error.message || 'Không thể cập nhật mật khẩu.')
-      setSavingPassword(false)
+      showToast(error.message || 'Không thể gửi email đổi mật khẩu lúc này.', 'error')
+      setSendingPasswordReset(false)
       return
     }
 
-    setPasswordForm({
-      newPassword: '',
-      confirmPassword: '',
-    })
-    showToast('Đổi mật khẩu thành công.')
-    setSavingPassword(false)
+    showToast('Đã gửi email đổi mật khẩu. Vui lòng kiểm tra hộp thư của bạn.')
+    setPasswordResetCooldown(60)
+    setSendingPasswordReset(false)
   }
 
   if (loading) {
@@ -497,7 +507,7 @@ function SettingsUserPage() {
             <span className="settings-badge">Cài đặt tài khoản</span>
             <h1>Quản lý hồ sơ và trải nghiệm E-XANH theo cách gọn gàng hơn.</h1>
             <p>
-              Cập nhật hồ sơ thật, đổi mật khẩu bằng Supabase Auth, kiểm soát trang cá nhân công khai
+              Cập nhật hồ sơ thật, gửi liên kết đổi mật khẩu bằng Supabase Auth, kiểm soát trang cá nhân công khai
               và chuẩn bị sẵn dữ liệu cho Notification Center nội bộ.
             </p>
           </div>
@@ -697,48 +707,38 @@ function SettingsUserPage() {
                   <div className="settings-section-card__header">
                     <div>
                       <span className="settings-section-card__eyebrow">Đổi mật khẩu</span>
-                      <h2>Cập nhật mật khẩu bằng Supabase Auth</h2>
+                      <h2>Bảo mật tài khoản</h2>
                     </div>
                     <KeyRound size={22} />
                   </div>
 
-                  <form className="settings-form" onSubmit={handleChangePassword}>
-                    <div className="settings-form__grid">
-                      <label className="settings-field">
-                        <span>Mật khẩu mới</span>
-                        <input
-                          type="password"
-                          value={passwordForm.newPassword}
-                          onChange={(event) => setPasswordForm((current) => ({
-                            ...current,
-                            newPassword: event.target.value,
-                          }))}
-                          placeholder="Nhập mật khẩu mới"
-                        />
-                      </label>
+                  <div className="settings-security-card">
+                    <p className="settings-security-card__copy">
+                      Để bảo mật tài khoản, E-XANH sẽ gửi liên kết đặt lại mật khẩu về email của bạn.
+                    </p>
 
-                      <label className="settings-field">
-                        <span>Xác nhận mật khẩu</span>
-                        <input
-                          type="password"
-                          value={passwordForm.confirmPassword}
-                          onChange={(event) => setPasswordForm((current) => ({
-                            ...current,
-                            confirmPassword: event.target.value,
-                          }))}
-                          placeholder="Nhập lại mật khẩu mới"
-                        />
-                      </label>
+                    <div className="settings-summary-list">
+                      <div>
+                        <span>Email nhận liên kết</span>
+                        <strong>{accountEmail || 'Chưa xác định'}</strong>
+                      </div>
                     </div>
-
-                    {passwordError ? <div className="settings-inline-alert settings-inline-alert--error">{passwordError}</div> : null}
 
                     <div className="settings-form__actions">
-                      <button type="submit" className="btn btn--primary" disabled={savingPassword}>
-                        {savingPassword ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+                      <button
+                        type="button"
+                        className="btn btn--primary"
+                        disabled={sendingPasswordReset || passwordResetCooldown > 0}
+                        onClick={handleSendPasswordResetEmail}
+                      >
+                        {sendingPasswordReset
+                          ? 'Đang gửi email...'
+                          : passwordResetCooldown > 0
+                            ? `Gửi lại sau ${passwordResetCooldown}s`
+                            : 'Gửi email đổi mật khẩu'}
                       </button>
                     </div>
-                  </form>
+                  </div>
                 </section>
 
                 <div className="settings-split">
@@ -754,7 +754,7 @@ function SettingsUserPage() {
                     <div className="settings-summary-list">
                       <div>
                         <span>Email đăng nhập</span>
-                        <strong>{currentUser?.email}</strong>
+                        <strong>{accountEmail || currentUser?.email}</strong>
                       </div>
                       <div>
                         <span>Vai trò</span>

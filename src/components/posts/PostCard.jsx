@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, Bookmark, Clock3, Heart, MessageCircle } from 'lucide-react'
 import PostImage from '../common/PostImage'
+import PostAuthorAvatar from './PostAuthorAvatar'
 import './PostCard.css'
-
-function getAuthorInitials(author) {
-  return author
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-}
 
 function PostCard({ post }) {
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const authorHref = post.authorId ? `/nguoi-dung/${post.authorId}` : null
 
   useEffect(() => {
     async function checkSaved() {
@@ -65,36 +58,59 @@ function PostCard({ post }) {
           onClick={handleToggleSave}
           style={{ opacity: isSaved ? 1 : undefined, background: isSaved ? '#4f8428' : undefined, color: isSaved ? '#fff' : undefined }}
         >
-          {isSaved ? 'Đã lưu' : 'Lưu'}
+          <Bookmark size={16} strokeWidth={2.1} />
+          <span>{isSaved ? 'Đã lưu' : 'Lưu'}</span>
         </button>
       </div>
 
       <div className="post-card-ui__body">
         <h3>{post.title}</h3>
-        <p>{post.description}</p>
+        <p>{post.description || 'Khám phá mẹo tiết kiệm điện thực tế, gần gũi và dễ áp dụng trong sinh hoạt hằng ngày.'}</p>
 
         <div className="post-card-ui__meta">
           <div className="post-card-ui__author">
-            <Link to={`/nguoi-dung/${post.authorId}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
-              <span className="post-card-ui__avatar">{getAuthorInitials(post.author)}</span>
-              <div>
+            <Link
+              to={authorHref || '#'}
+              className={`post-card-ui__author-link${authorHref ? '' : ' is-disabled'}`}
+              onClick={(e) => {
+                if (!authorHref) e.preventDefault()
+              }}
+              aria-disabled={authorHref ? undefined : 'true'}
+            >
+              <PostAuthorAvatar
+                src={post.authorAvatar}
+                name={post.author}
+                size="md"
+              />
+              <div className="post-card-ui__author-copy">
                 <strong>{post.author}</strong>
-                <span style={{ display: 'block', color: 'var(--color-text-muted)' }}>
-                  {post.date} • {post.readTime}
+                <span>
+                  <Clock3 size={13} strokeWidth={2} />
+                  {post.date} · {post.readTime}
                 </span>
               </div>
             </Link>
           </div>
 
           <div className="post-card-ui__stats">
-            <span>{post.likes} thích</span>
-            <span>{post.comments} bình luận</span>
-            <span>{post.savedCount} lưu</span>
+            <span>
+              <Heart size={14} strokeWidth={2.1} />
+              {post.likes} lượt thích
+            </span>
+            <span>
+              <MessageCircle size={14} strokeWidth={2.1} />
+              {post.comments} bình luận
+            </span>
+            <span>
+              <Bookmark size={14} strokeWidth={2.1} />
+              {post.savedCount} lượt lưu
+            </span>
           </div>
         </div>
 
         <Link className="post-card-ui__link" to={`/meo-tiet-kiem/${post.slug || post.id}`} data-testid="tip-card-link">
-          Đọc tiếp
+          <span>Đọc tiếp</span>
+          <ArrowRight size={16} strokeWidth={2.2} />
         </Link>
       </div>
     </article>

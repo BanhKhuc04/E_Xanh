@@ -1,22 +1,25 @@
 import { Link, useParams, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ArticleActions from '../../components/posts/ArticleActions'
 import ArticleContent from '../../components/posts/ArticleContent'
 import ArticleHeader from '../../components/posts/ArticleHeader'
 import CommentSection from '../../components/posts/CommentSection'
+import PostAuthorAvatar from '../../components/posts/PostAuthorAvatar'
 import PostCard from '../../components/posts/PostCard'
 import RelatedPosts from '../../components/posts/RelatedPosts'
 import { getPostBySlug, getApprovedPosts } from '../../services/postService'
-import { getInitials, isValidImageUrl } from '../../utils/avatar'
 import '../../styles/post-detail.css'
 
 function PostDetailPage() {
   const { slug } = useParams()
+  const location = useLocation()
   const [post, setPost] = useState(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [relatedPosts, setRelatedPosts] = useState([])
+  const [toast, setToast] = useState('')
+  const commentsRef = useRef(null)
 
   useEffect(() => {
     async function loadPost() {
@@ -55,8 +58,8 @@ function PostDetailPage() {
           title: data.title,
           slug: data.slug,
           type: data.type,
-          author: data.profiles?.name || data.profiles?.email || 'Thành viên E-XANH',
-          authorAvatar: data.profiles?.avatar_url || 'EX',
+          author: data.profiles?.name || 'Thành viên E-XANH',
+          authorAvatar: data.profiles?.avatar_url || '',
           authorBio: data.profiles?.bio || 'Thành viên cộng đồng E-XANH',
           category: categoryMap[data.type] || 'Cộng đồng',
           status: 'published',
@@ -85,16 +88,18 @@ function PostDetailPage() {
         // Fetch related posts based on type
         const { data: allPosts } = await getApprovedPosts()
         if (allPosts) {
-          const related = allPosts
-            .filter(p => p.type === data.type && p.id !== data.id)
-            .slice(0, 6)
+          const sameTypePosts = allPosts.filter((postItem) => postItem.type === data.type && postItem.id !== data.id)
+          const fallbackPosts = allPosts.filter((postItem) => postItem.id !== data.id && postItem.type !== data.type)
+
+          const related = [...sameTypePosts, ...fallbackPosts]
+            .slice(0, 9)
             .map(p => ({
               id: p.id,
               title: p.title,
               slug: p.slug,
               author: p.profiles?.name || 'Thành viên',
               authorId: p.author_id,
-              authorAvatar: p.profiles?.avatar_url || 'EX',
+              authorAvatar: p.profiles?.avatar_url || '',
               category: categoryMap[p.type] || 'Cộng đồng',
               status: 'published',
               image: p.image_url,
@@ -250,15 +255,34 @@ function PostDetailPage() {
   }
 
   const sidebarRelated = relatedPosts.slice(0, 3)
-  const bottomSuggested = relatedPosts.slice(3, 6)
+  const bottomSuggested = relatedPosts.length > 3
+    ? relatedPosts.slice(3, 9)
+    : relatedPosts.slice(0, 6)
 
   const isCommunity = post.type === 'community'
   const parentLink = isCommunity ? '/cong-dong' : '/meo-tiet-kiem'
   const parentName = isCommunity ? 'Cộng đồng' : 'Mẹo tiết kiệm'
 
-  const { pathname } = useLocation()
-  const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const canonicalUrl = `https://e-xanh.vercel.app${location.pathname}`
   const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
+
+  function showToast(message) {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 2600)
+  }
+
+  function handleScrollToComments() {
+    commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      showToast('Đã sao chép liên kết bài viết')
+    } catch {
+      showToast('Không sao chép được liên kết')
+    }
+  }
 
   return (
     <div className="post-detail-page">
@@ -292,6 +316,8 @@ function PostDetailPage() {
             post={post} 
             onToggleLike={handleToggleLike} 
             onToggleSave={handleToggleSave} 
+            onScrollToComments={handleScrollToComments}
+            onShare={handleShare}
             onReport={async () => {
               const reason = window.prompt('Nhập lý do báo cáo bài viết này:')
               if (reason === null) return
@@ -308,23 +334,19 @@ function PostDetailPage() {
               }
             }}
           />
-          <CommentSection post={post} comments={post.commentItems.slice(0, 2)} />
+          <div ref={commentsRef}>
+            <CommentSection post={post} comments={post.commentItems.slice(0, 2)} />
+          </div>
         </article>
 
         <aside className="post-detail-sidebar">
           <section className="post-side-card post-side-card--author">
-            {isValidImageUrl(post.authorAvatar) ? (
-              <img
-                src={post.authorAvatar}
-                alt={`Ảnh đại diện của ${post.author}`}
-                width="60"
-                height="60"
-                loading="lazy"
-                style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '16px' }}
-              />
-            ) : (
-              <span className="post-side-card__author-avatar" style={{ background: '#c1d95c', color: '#fff' }}>{getInitials(post.author)}</span>
-            )}
+            <PostAuthorAvatar
+              src={post.authorAvatar}
+              name={post.author}
+              size="lg"
+              className="post-side-card__author-avatar"
+            />
             <h3>{post.author}</h3>
             <p>{post.authorBio}</p>
             <button 
@@ -374,6 +396,12 @@ function PostDetailPage() {
           <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '20px' }}>Chưa có bài viết đề xuất.</p>
         )}
       </section>
+
+      {toast ? (
+        <div className="ui-toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      ) : null}
     </div>
   )
 }

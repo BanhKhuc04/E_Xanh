@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import { Bookmark, Flame, Lightbulb, PenSquare } from 'lucide-react'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
 import PageHero from '../../components/common/PageHero'
 import PageLoader from '../../components/common/PageLoader'
 import EmptyState from '../../components/common/EmptyState'
 import { pageHeroContent } from '../../data/pageHeroes'
-import { getTipPosts } from '../../services/postService'
+import { getCategories, getTipPosts } from '../../services/postService'
+import heroImage from '../../assets/hero.png'
 import '../../styles/tips.css'
 
 const postSortOptions = [
@@ -37,44 +39,45 @@ function TipsPage() {
   const [dbPosts, setDbPosts] = useState([])
   const [categories, setCategories] = useState(['Tất cả'])
   const [isLoading, setIsLoading] = useState(true)
-  // eslint-disable-next-line no-unused-vars
   const [errorMsg, setErrorMsg] = useState('')
   const location = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${location.pathname}`
 
   useEffect(() => {
     let isMounted = true
+
     async function loadData() {
-      // Timeout fallback
-      const timer = setTimeout(() => {
-        if (isMounted && isLoading) setIsLoading(false)
-      }, 4500)
+      if (isMounted) {
+        setIsLoading(true)
+        setErrorMsg('')
+      }
 
       try {
-        const { getTipPosts, getCategories } = await import('../../services/postService')
         const [postsRes, catsRes] = await Promise.all([
           getTipPosts(),
-          getCategories()
+          getCategories(),
         ])
 
-        if (postsRes.error) throw postsRes.error
+        if (postsRes.error) {
+          throw postsRes.error
+        }
 
         if (isMounted) {
-          if (catsRes.data) {
-            setCategories(['Tất cả', ...catsRes.data.map(c => c.name)])
+          if (!catsRes.error && catsRes.data) {
+            setCategories(['Tất cả', ...catsRes.data.map((category) => category.name)])
           }
 
           if (postsRes.data) {
-            const mapped = postsRes.data.map(post => ({
-              id: post.id || Math.random().toString(),
+            const mapped = postsRes.data.map((post, index) => ({
+              id: post.id || post.slug || `tip-${index}`,
               title: post.title || 'Bài viết',
               slug: post.slug || '',
-              author: post.profiles?.name || post.profiles?.email || 'Thành viên E-XANH',
+              author: post.profiles?.name || 'Thành viên E-XANH',
               authorId: post.author_id,
-              authorAvatar: post.profiles?.avatar_url || 'EX',
+              authorAvatar: post.profiles?.avatar_url || '',
               category: post.categories?.name || 'Mẹo tiết kiệm',
               status: 'published',
-              image: post.image_url || 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&h=260&fit=crop',
+              image: post.image_url || heroImage,
               description: post.description || '',
               content: post.content || '',
               likes: post.likes_count || 0,
@@ -88,17 +91,23 @@ function TipsPage() {
           }
         }
       } catch (err) {
-        console.error("Lỗi fetch data:", err)
-        if (isMounted) setErrorMsg('Không thể tải bài viết lúc này.')
+        console.error('Lỗi fetch data:', err)
+
+        if (isMounted) {
+          setDbPosts([])
+          setErrorMsg('Không thể tải bài viết lúc này.')
+        }
       } finally {
-        if (isMounted) setIsLoading(false)
-        clearTimeout(timer)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
+
     loadData()
+
     return () => { isMounted = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [location.key])
 
   const currentPosts = dbPosts
 
@@ -162,91 +171,113 @@ function TipsPage() {
       </Helmet>
       
       <div className="tips-page">
-      <PageHero {...pageHeroContent.tips} className="tips-hero" />
+        <PageHero {...pageHeroContent.tips} className="tips-hero" />
 
-      <PostFilterBar
-        searchValue={searchValue}
-        selectedCategory={selectedCategory}
-        sortValue={sortValue}
-        categories={categories}
-        sortOptions={postSortOptions}
-        onSearchChange={setSearchValue}
-        onCategoryChange={setSelectedCategory}
-        onSortChange={setSortValue}
-      />
+        <PostFilterBar
+          searchValue={searchValue}
+          selectedCategory={selectedCategory}
+          sortValue={sortValue}
+          categories={categories}
+          sortOptions={postSortOptions}
+          onSearchChange={setSearchValue}
+          onCategoryChange={setSelectedCategory}
+          onSortChange={setSortValue}
+        />
 
-      <div className="tips-layout">
-        <div className="tips-layout__content">
-          <div className="tips-post-grid">
-            {visiblePosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+        <div className="tips-layout">
+          <section className="tips-layout__sidebar">
+            <section className="tips-side-card tips-side-card--suggestion">
+              <h2>{dynamicTodaySuggestion.title}</h2>
+              <p>{dynamicTodaySuggestion.content}</p>
+            </section>
+
+            {dynamicFeaturedTopics.length > 0 && (
+              <section className="tips-side-card">
+                <h2>Chủ đề nổi bật</h2>
+                <div className="tips-topic-list">
+                  {dynamicFeaturedTopics.map((topic) => (
+                    <button
+                      key={topic}
+                      type="button"
+                      className="tips-topic-chip"
+                      onClick={() => setSelectedCategory(topic === 'Thiết bị gia dụng' ? 'Thiết bị điện' : topic)}
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {dynamicSavedHighlights.length > 0 && (
+              <section className="tips-side-card">
+                <h2>Bài viết được lưu nhiều</h2>
+                <div className="tips-saved-list">
+                  {dynamicSavedHighlights.map((item, index) => (
+                    <Link key={item.id} to={`/meo-tiet-kiem/${item.slug || item.id}`} className="tips-saved-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <span className="tips-saved-item__icon" aria-hidden="true">
+                        {index === 0 ? <Flame size={18} strokeWidth={2.1} /> : index === 1 ? <Bookmark size={18} strokeWidth={2.1} /> : <Lightbulb size={18} strokeWidth={2.1} />}
+                      </span>
+                      <div>
+                        <h3 style={{ margin: '0 0 4px 0', fontSize: '0.95rem' }}>{item.title}</h3>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{item.savedCount} lượt lưu</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="tips-side-card tips-side-card--cta">
+              <span className="tips-side-card__cta-icon" aria-hidden="true">
+                <PenSquare size={26} strokeWidth={2.1} />
+              </span>
+              <h2>Bạn có mẹo hay?</h2>
+              <p>
+                Chia sẻ kinh nghiệm tiết kiệm điện của bạn để lan tỏa lối sống xanh đến
+                cộng đồng.
+              </p>
+              <Link className="btn btn--light" to="/cong-dong">
+                Đăng bài chia sẻ
+              </Link>
+            </section>
+          </section>
+
+          <div className="tips-layout__content">
+            <div className="tips-results-bar">
+              <div>
+                <strong>{visiblePosts.length}</strong>
+                <span> mẹo đang hiển thị</span>
+              </div>
+              <p>
+                Kho bài viết được sắp theo dạng thư viện để bạn dễ duyệt nhanh nhiều mẹo hơn.
+              </p>
+            </div>
+
+            {errorMsg ? (
+              <EmptyState
+                icon="!"
+                title="Không tải được dữ liệu"
+                message={errorMsg}
+              />
+            ) : null}
+
+            <div className="tips-post-grid">
+              {visiblePosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+
+            {!errorMsg && visiblePosts.length === 0 ? (
+              <EmptyState 
+                icon="!"
+                title="Không tìm thấy kết quả phù hợp"
+                message="Hãy thử đổi từ khóa tìm kiếm hoặc chọn lại bộ lọc chủ đề."
+              />
+            ) : null}
           </div>
-
-          {visiblePosts.length === 0 ? (
-            <EmptyState 
-              icon="🔍"
-              title="Không tìm thấy kết quả phù hợp"
-              message="Hãy thử đổi từ khóa tìm kiếm hoặc chọn lại bộ lọc chủ đề."
-            />
-          ) : null}
         </div>
-
-        <aside className="tips-layout__sidebar">
-          <section className="tips-side-card tips-side-card--suggestion">
-            <h2>{dynamicTodaySuggestion.title}</h2>
-            <p>{dynamicTodaySuggestion.content}</p>
-          </section>
-
-          {dynamicFeaturedTopics.length > 0 && (
-            <section className="tips-side-card">
-              <h2>Chủ đề nổi bật</h2>
-              <div className="tips-topic-list">
-                {dynamicFeaturedTopics.map((topic) => (
-                  <button
-                    key={topic}
-                    type="button"
-                    className="tips-topic-chip"
-                    onClick={() => setSelectedCategory(topic === 'Thiết bị gia dụng' ? 'Thiết bị điện' : topic)}
-                  >
-                    {topic}
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {dynamicSavedHighlights.length > 0 && (
-            <section className="tips-side-card">
-              <h2>Bài viết được lưu nhiều</h2>
-              <div className="tips-saved-list">
-                {dynamicSavedHighlights.map((item, index) => (
-                  <Link key={item.id} to={`/meo-tiet-kiem/${item.slug || item.id}`} className="tips-saved-item" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <span className="tips-saved-item__icon">{['🔥', '⭐', '💡'][index] || '📌'}</span>
-                    <div>
-                      <h3 style={{ margin: '0 0 4px 0', fontSize: '0.95rem' }}>{item.title}</h3>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{item.savedCount} lượt lưu</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="tips-side-card tips-side-card--cta">
-            <span className="tips-side-card__cta-icon">✎</span>
-            <h2>Bạn có mẹo hay?</h2>
-            <p>
-              Chia sẻ kinh nghiệm tiết kiệm điện của bạn để lan tỏa lối sống xanh đến
-              cộng đồng.
-            </p>
-            <Link className="btn btn--light" to="/cong-dong">
-              Đăng bài chia sẻ
-            </Link>
-          </section>
-        </aside>
       </div>
-    </div>
     </>
   )
 }

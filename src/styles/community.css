@@ -1,13 +1,19 @@
 .community-page {
   display: grid;
-  gap: 28px;
+  gap: 32px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 0;
 }
 
-.community-page > *,
-.community-page__layout > *,
-.community-post-card > *,
-.community-composer > * {
-  min-width: 0;
+body {
+  background: #f4f7ef;
+}
+
+.community-page__layout > main {
+  background: linear-gradient(180deg, #f7faef 0%, #eef6df 100%);
+  border-radius: 28px;
+  padding: 24px;
 }
 
 .community-page__hero {
@@ -224,9 +230,313 @@
 }
 
 .community-post-card {
-  display: grid;
-  gap: 18px;
   padding: 24px;
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid rgba(79, 132, 40, 0.08);
+  box-shadow: 0 10px 30px rgba(30, 60, 30, 0.06);
+  overflow: hidden;
+}
+
+.community-card {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* ═══════════════════════════════════════════
+   COMMUNITY CARD — Hệ thống layout 2 cột
+   ═══════════════════════════════════════════ */
+
+.community-post-card__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: stretch;
+  min-height: 0;
+}
+
+/* ── Cột trái: nội dung ── */
+.community-post-card__left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ── Cột phải: ảnh ── */
+.community-post-card__right {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #eef7d8;
+  display: flex;
+}
+
+.community-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #eef3e8;
+}
+
+.community-post-card__image-wrap {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+}
+
+.community-post-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.community-post-card__right:hover .community-post-card__image {
+  transform: scale(1.03);
+}
+
+/* ── Pill "Chia sẻ" — overlay góc phải cột ảnh ── */
+.community-post-card__share-pill {
+  text-decoration: none;
+}
+
+/* ── Placeholder xanh nhạt ── */
+.pc-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  background: linear-gradient(135deg, rgba(193, 217, 92, 0.15), rgba(128, 177, 85, 0.1));
+  border: 1.5px dashed rgba(79, 132, 40, 0.2);
+  border-radius: 20px;
+}
+
+.pc-image-placeholder span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(79, 132, 40, 0.55);
+  text-align: center;
+}
+
+/* ── Tiêu đề bài viết — clamp 2 dòng ── */
+.community-card-title {
+  margin: 0 0 6px;
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Excerpt/Nội dung tóm tắt — clamp 3 dòng ── */
+.community-card-excerpt {
+  margin: 0;
+  line-height: 1.72;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Giữ các class cũ để backward compat ── */
+.community-post-card__report-btn {
+  background: none;
+  border: none;
+  color: #e53935;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Footer & Reactions ── */
+.community-post-card__footer {
+  margin-top: auto;
+  display: grid;
+  gap: 0;
+}
+
+.post-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  margin-top: auto;
+  color: #667085;
+  font-size: 14px;
+}
+
+.post-stats span {
+  min-width: 0;
+}
+
+.post-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #edf0ea;
+}
+
+.post-action-btn {
+  height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #53645a;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.post-action-btn svg {
+  flex: 0 0 auto;
+}
+
+.post-action-btn:hover {
+  background: #f0f7e8;
+  color: #2f6f35;
+}
+
+.post-action-btn:active {
+  transform: scale(0.98);
+}
+
+.post-action-btn.is-active {
+  background: #ecf8e8;
+  color: #2f7d32;
+}
+
+.post-action-btn.is-liked {
+  color: #d6455d;
+}
+
+.post-action-btn.is-liked svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.share-pill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 13px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+  color: #12351f;
+  font-weight: 800;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.share-pill:hover {
+  background: #ffffff;
+  color: #2f7d32;
+}
+
+/* ── Section bình luận (full-width dưới grid) ── */
+.community-post-card__comments {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(79, 132, 40, 0.1);
+}
+.pc-avatar-placeholder {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-400));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.pc-avatar-placeholder__icon {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: #2f7d32;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}
+
+/* Tiêu đề và excerpt cũ (bảo đảm backward compat) */
+.community-post-card__title {
+  margin: 0 0 6px;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.community-post-card__excerpt {
+  margin: 0;
+  line-height: 1.72;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .community-post-card__header,
@@ -244,6 +554,41 @@
 
 .community-post-card__author {
   gap: 12px;
+}
+
+.community-sidebar-panel__member-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.community-sidebar-panel__member-badge {
+  font-size: 0.75rem;
+  background: rgba(193, 217, 92, 0.25);
+  color: var(--color-primary-600);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-style: normal;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.community-post-card__author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.community-post-card__author-name {
+  font-weight: 700;
+  color: #123b1f;
+  text-decoration: none;
+}
+
+.community-post-card__date {
+  font-size: 13px;
+  color: #6b7b6c;
 }
 
 .community-post-card__author img,
@@ -305,23 +650,38 @@
 .community-post-card__comment p {
   overflow-wrap: anywhere;
   word-break: break-word;
-  white-space: pre-wrap;
   max-width: 100%;
   min-width: 0;
 }
 
-.community-post-card__body h2 {
-  margin: 0 0 10px;
-  font-size: clamp(1.6rem, 3vw, 2.3rem);
-  line-height: 1.2;
-  letter-spacing: -0.04em;
+/* Tiêu đề bài viết — clamp 2 dòng */
+.community-post-card__title {
+  margin: 0 0 8px;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.community-post-card__body p {
+/* Nội dung excerpt — clamp 3 dòng */
+.community-post-card__excerpt {
   margin: 0;
-  line-height: 1.78;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
+/* Legacy media (không dùng trong layout 2 cột mới, giữ lại để không vỡ post detail nếu dùng) */
 .community-post-card__media {
   overflow: hidden;
   border-radius: 22px;
@@ -359,38 +719,6 @@
 .community-post-card__comment p {
   margin: 4px 0 0;
   line-height: 1.65;
-}
-
-.community-post-card__actions {
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: space-between;
-  padding-top: 16px;
-  border-top: 1px solid rgba(79, 132, 40, 0.1);
-}
-
-.community-post-card__actions button {
-  border: 0;
-  padding: 8px 12px;
-  border-radius: 8px;
-  color: rgba(23, 55, 21, 0.76);
-  background: transparent;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.community-post-card__actions button:hover {
-  background: rgba(193, 217, 92, 0.15);
-  color: var(--color-primary-500);
-}
-
-.community-post-card__actions button.is-active {
-  color: var(--color-primary-500);
-  background: rgba(193, 217, 92, 0.1);
 }
 
 .community-post-card__comment-input-area {
@@ -511,6 +839,99 @@
 .community-sidebar-panel__popular {
   display: grid;
   gap: 14px;
+}
+
+.sidebar-title {
+  margin: 0 0 18px;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #12351f;
+  letter-spacing: -0.03em;
+}
+
+.active-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.active-member {
+  display: grid;
+  grid-template-columns: 26px 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.active-member__rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #f3c134;
+  color: #12351f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.active-member__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #8bbf3d, #d7ec76);
+  color: #12351f;
+  font-weight: 900;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.active-member__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.active-member__info {
+  min-width: 0;
+}
+
+.active-member__name {
+  font-weight: 800;
+  color: #12351f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-member__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.active-member__meta {
+  margin-top: 3px;
+  color: #667085;
+  font-size: 13px;
+}
+
+.active-members-state {
+  display: grid;
+  gap: 6px;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.active-members-state--error {
+  color: #8a5a0b;
 }
 
 .community-sidebar-panel__member {
@@ -638,10 +1059,35 @@
   }
 }
 
+@media (max-width: 768px) {
+  /* Mobile: card 1 cột — ảnh lên trên, nội dung xuống */
+  .community-post-card__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .community-post-card__right {
+    order: -1;
+    border-radius: 18px;
+  }
+
+  .community-card {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .community-preview__post-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .community-preview__post-image-col {
+    order: -1;
+    border-radius: 18px;
+  }
+}
+
 @media (max-width: 640px) {
   .community-page__hero-actions,
-  .community-post-card__header,
-  .community-post-card__actions {
+  .community-post-card__header {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -651,22 +1097,26 @@
     border-radius: 28px;
   }
 
-  .community-post-card__body h2 {
-    font-size: 1.45rem;
+  .community-post-card {
+    padding: 14px 16px;
   }
 
-  .community-post-card__share-modal {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: min(100vw - 24px, 320px);
+  /* Pill chia sẻ nhỏ hơn trên mobile */
+  .share-pill {
+    top: 8px;
+    right: 8px;
+    height: 34px;
+    padding: 0 11px;
+    font-size: 12px;
   }
 
-  .community-post-card__share-row {
-    flex-direction: column;
+  .post-stats {
+    font-size: 13px;
   }
 
-  .community-post-card__share-row .btn {
-    width: 100%;
+  .post-action-btn {
+    height: 40px;
+    font-size: 13px;
+    gap: 6px;
   }
 }

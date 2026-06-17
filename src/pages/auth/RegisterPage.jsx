@@ -31,6 +31,7 @@ function RegisterPage() {
   const [isSuccessMode, setIsSuccessMode] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  const isCaptchaDisabled = import.meta.env.VITE_DISABLE_CAPTCHA === 'true'
 
   useEffect(() => {
     async function load() {
@@ -93,7 +94,7 @@ function RegisterPage() {
       return
     }
 
-    if (!turnstileToken) {
+    if (!isCaptchaDisabled && !turnstileToken) {
       setSuccessMessage('')
       setErrorMessage('Vui lòng xác minh bạn là người.')
       return
@@ -295,18 +296,20 @@ function RegisterPage() {
               </span>
             </label>
 
-            <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
-              <Turnstile
-                siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
-                onSuccess={(token) => {
-                  setTurnstileToken(token)
-                  setErrorMessage('')
-                }}
-                onError={() => setErrorMessage('Lỗi xác minh. Vui lòng tải lại trang.')}
-                onExpire={() => setTurnstileToken('')}
-                options={{ theme: 'light' }}
-              />
-            </div>
+            {!isCaptchaDisabled && (
+              <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
+                <Turnstile
+                  siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
+                  onSuccess={(token) => {
+                    setTurnstileToken(token)
+                    setErrorMessage('')
+                  }}
+                  onError={() => setErrorMessage('Lỗi xác minh. Vui lòng tải lại trang.')}
+                  onExpire={() => setTurnstileToken('')}
+                  options={{ theme: 'light' }}
+                />
+              </div>
+            )}
             {/* TODO: Gửi turnstileToken lên backend/Supabase Edge Function để verify an toàn hơn */}
 
             <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>

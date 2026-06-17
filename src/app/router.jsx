@@ -15,6 +15,8 @@ import RegisterPage from '../pages/auth/RegisterPage'
 import NotFoundPage from '../pages/shared/NotFoundPage'
 
 // ─── Lazy pages — User ────────────────────────────────────────────────────────
+const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage'))
 const TipsPage = lazy(() => import('../pages/user/TipsPage'))
 const PostDetailPage = lazy(() => import('../pages/user/PostDetailPage'))
 const CommunityPage = lazy(() => import('../pages/user/CommunityPage'))
@@ -109,6 +111,14 @@ const router = createBrowserRouter([
           {
             path: 'dang-ky',
             element: <RegisterPage />,
+          },
+          {
+            path: 'quen-mat-khau',
+            element: <Suspense fallback={<PageFallback />}><ForgotPasswordPage /></Suspense>,
+          },
+          {
+            path: 'dat-lai-mat-khau',
+            element: <Suspense fallback={<PageFallback />}><ResetPasswordPage /></Suspense>,
           },
           {
             path: 'auth/callback',

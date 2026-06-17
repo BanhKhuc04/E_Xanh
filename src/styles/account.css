@@ -1031,7 +1031,8 @@
 .settings-media-card,
 .settings-switch-list,
 .settings-form,
-.settings-summary-list {
+.settings-summary-list,
+.settings-security-card {
   display: grid;
   gap: 18px;
 }
@@ -1275,6 +1276,12 @@
 .settings-sidebar__meta div:last-child {
   padding-bottom: 0;
   border-bottom: 0;
+}
+
+.settings-security-card__copy {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.75;
 }
 
 .settings-toast {

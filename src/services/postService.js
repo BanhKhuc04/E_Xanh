@@ -1,5 +1,6 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
+import { normalizeAvatarUrl } from '../utils/avatar'
 import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
 import {
   compressImageToWebp,
@@ -256,22 +257,32 @@ export async function getPendingPosts() {
 export async function getApprovedPosts() {
   const { data, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url)`)
+    .select('*')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
 
-  return { data, error }
+  if (error || !data) {
+    return { data, error }
+  }
+
+  const hydratedPosts = await attachPublicProfilesToPosts(data)
+  return { data: hydratedPosts, error: null }
 }
 
 export async function getTipPosts() {
   const { data, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url, bio, role), categories:category_id (id, name, slug)`)
+    .select('*, categories:category_id (id, name, slug)')
     .eq('status', 'approved')
     .eq('type', 'tip')
     .order('created_at', { ascending: false })
 
-  return { data, error }
+  if (error || !data) {
+    return { data, error }
+  }
+
+  const hydratedPosts = await attachPublicProfilesToPosts(data)
+  return { data: hydratedPosts, error: null }
 }
 
 export async function getPostBySlug(slug) {
@@ -285,12 +296,17 @@ export async function getPostBySlug(slug) {
 
   let profileData = null
   if (postData.author_id) {
-    const { data: pData } = await supabase
-      .from('profiles')
-      .select('id, name, avatar_url, bio, role')
-      .eq('id', postData.author_id)
-      .single()
-    profileData = pData
+    if (postData.status === 'approved') {
+      const profileMap = await fetchPublicProfilesMap([postData.author_id])
+      profileData = profileMap.get(postData.author_id) || null
+    } else {
+      const { data: pData } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, bio, role')
+        .eq('id', postData.author_id)
+        .single()
+      profileData = pData
+    }
   }
   
   const data = { ...postData, profiles: profileData }
@@ -321,12 +337,17 @@ export async function getPostById(id) {
 
   let profileData = null
   if (postData.author_id) {
-    const { data: pData } = await supabase
-      .from('profiles')
-      .select('id, name, avatar_url, bio, role')
-      .eq('id', postData.author_id)
-      .single()
-    profileData = pData
+    if (postData.status === 'approved') {
+      const profileMap = await fetchPublicProfilesMap([postData.author_id])
+      profileData = profileMap.get(postData.author_id) || null
+    } else {
+      const { data: pData } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, bio, role')
+        .eq('id', postData.author_id)
+        .single()
+      profileData = pData
+    }
   }
   
   const data = { ...postData, profiles: profileData }
@@ -349,85 +370,206 @@ export async function getPostById(id) {
 export async function getCommunityPosts() {
   const { data, error } = await supabase
     .from('posts')
-    .select(`
-      *, 
-      profiles:author_id (name, avatar_url, role)
-    `)
+    .select('*')
     .eq('status', 'approved')
     .eq('type', 'community')
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
 
-  return { data, error }
+  if (error || !data) {
+    return { data, error }
+  }
+
+  const hydratedPosts = await attachPublicProfilesToPosts(data)
+  return { data: hydratedPosts, error: null }
 }
 
 export async function getRecentCommunityPosts(limitCount = 2) {
   const { data, error } = await supabase
     .from('posts')
-    .select(`
-      *, 
-      profiles:author_id (name, avatar_url, role)
-    `)
+    .select('*')
     .eq('status', 'approved')
     .eq('type', 'community')
     .order('created_at', { ascending: false })
     .limit(limitCount)
 
-  return { data, error }
+  if (error || !data) {
+    return { data, error }
+  }
+
+  const hydratedPosts = await attachPublicProfilesToPosts(data)
+  return { data: hydratedPosts, error: null }
+}
+
+async function attachPublicProfilesToPosts(posts = []) {
+  const authorIds = [...new Set(
+    posts
+      .map((post) => post.author_id)
+      .filter(Boolean),
+  )]
+
+  if (authorIds.length === 0) {
+    return posts.map((post) => ({ ...post, profiles: null }))
+  }
+
+  const profileMap = await fetchPublicProfilesMap(authorIds)
+
+  return posts.map((post) => ({
+    ...post,
+    profiles: profileMap.get(post.author_id) || post.profiles || null,
+  }))
+}
+
+async function fetchPublicProfilesMap(authorIds = []) {
+  if (authorIds.length === 0) {
+    return new Map()
+  }
+
+  const { data: profiles, error } = await supabase
+    .from('public_profiles')
+    .select('id, name, avatar_url, bio, cover_url, facebook_url, website_url, profile_visibility, show_public_posts, show_facebook, allow_search_index')
+    .in('id', authorIds)
+
+  if (error) {
+    logError('[fetchPublicProfilesMap] Failed to fetch public profiles.', error)
+    return new Map()
+  }
+
+  return new Map((profiles || []).map((profile) => [
+    profile.id,
+    {
+      ...profile,
+      user_preferences: {
+        profile_visibility: profile.profile_visibility || 'public',
+        show_public_posts: profile.show_public_posts !== false && profile.show_public_posts !== 'false',
+        show_facebook: profile.show_facebook !== false && profile.show_facebook !== 'false',
+        allow_search_index: profile.allow_search_index !== false && profile.allow_search_index !== 'false',
+      },
+    },
+  ]))
+}
+
+function isMissingRelationError(error) {
+  return error?.code === '42P01' || String(error?.message || '').toLowerCase().includes('does not exist')
+}
+
+function normalizeActiveMember(member = {}) {
+  const name = String(member.name || '').trim() || 'Thành viên E-XANH'
+  const avatarUrl = normalizeAvatarUrl(member.avatar_url || member.avatarUrl || member.avatar || '')
+
+  return {
+    id: member.id || null,
+    name,
+    avatarUrl,
+    avatar_url: avatarUrl,
+    postCount: Number(member.post_count ?? member.postCount ?? member.approved_posts_count ?? 0),
+    approved_posts_count: Number(member.post_count ?? member.postCount ?? member.approved_posts_count ?? 0),
+    latestPostAt: member.latest_post_at || member.latestPostAt || null,
+  }
+}
+
+async function getActiveMembersFromProfiles(limitCount = 5) {
+  const { data: posts, error: postsError } = await supabase
+    .from('posts')
+    .select('author_id, created_at')
+    .eq('status', 'approved')
+    .eq('type', 'community')
+    .not('author_id', 'is', null)
+    .order('created_at', { ascending: false })
+
+  if (postsError) {
+    return { data: null, error: postsError }
+  }
+
+  const countMap = new Map()
+  const latestMap = new Map()
+
+  for (const post of posts || []) {
+    countMap.set(post.author_id, (countMap.get(post.author_id) || 0) + 1)
+
+    const currentLatest = latestMap.get(post.author_id)
+    if (!currentLatest || new Date(post.created_at) > new Date(currentLatest)) {
+      latestMap.set(post.author_id, post.created_at)
+    }
+  }
+
+  const userIds = [...countMap.keys()]
+  if (userIds.length === 0) {
+    return { data: [], error: null }
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from('public_profiles')
+    .select('id, name, avatar_url')
+    .in('id', userIds)
+
+  if (profilesError) {
+    return { data: null, error: profilesError }
+  }
+
+  const profileMap = new Map((profiles || []).map((profile) => [profile.id, profile]))
+
+  const normalizedMembers = userIds
+    .map((userId) => {
+      const profile = profileMap.get(userId)
+
+      return normalizeActiveMember({
+        id: userId,
+        name: profile?.name,
+        avatar_url: profile?.avatar_url,
+        post_count: countMap.get(userId) || 0,
+        latest_post_at: latestMap.get(userId) || null,
+      })
+    })
+    .sort((first, second) => {
+      if (second.postCount !== first.postCount) {
+        return second.postCount - first.postCount
+      }
+
+      return new Date(second.latestPostAt || 0) - new Date(first.latestPostAt || 0)
+    })
+    .slice(0, limitCount)
+
+  return { data: normalizedMembers, error: null }
 }
 
 export async function getTopActiveMembers(limitCount = 3) {
-  const { data: posts, error } = await supabase
-    .from('posts')
-    .select('author_id')
-    .eq('status', 'approved')
+  const { data, error } = await supabase
+    .from('community_active_members')
+    .select('id, name, avatar_url, post_count, latest_post_at')
+    .order('post_count', { ascending: false })
+    .order('latest_post_at', { ascending: false })
+    .limit(limitCount)
 
-  if (error) return { data: null, error }
-
-  const counts = {}
-  posts.forEach(p => {
-    if (p.author_id) {
-      counts[p.author_id] = (counts[p.author_id] || 0) + 1
-    }
-  })
-
-  const topIds = Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limitCount)
-    .map(entry => entry[0])
-
-  if (topIds.length === 0) return { data: [], error: null }
-
-  const { data: profiles, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, name, avatar_url')
-    .in('id', topIds)
-
-  if (profileError) return { data: null, error: profileError }
-
-  const result = topIds.map(id => {
-    const profile = profiles.find(p => p.id === id) || { name: 'Ẩn danh', avatar_url: null }
+  if (!error) {
     return {
-      id,
-      name: profile.name || 'Ẩn danh',
-      avatar_url: profile.avatar_url,
-      approved_posts_count: counts[id]
+      data: (data || []).map(normalizeActiveMember),
+      error: null,
     }
-  })
+  }
 
-  return { data: result, error: null }
+  if (!isMissingRelationError(error)) {
+    return getActiveMembersFromProfiles(limitCount)
+  }
+
+  return getActiveMembersFromProfiles(limitCount)
 }
 
 export async function getFeaturedPosts() {
   const { data, error } = await supabase
     .from('posts')
-    .select(`*, profiles:author_id (name, avatar_url, bio, role)`)
+    .select('*')
     .eq('status', 'approved')
     .eq('type', 'tip')
     .order('likes_count', { ascending: false })
     .limit(3)
 
-  return { data, error }
+  if (error || !data) {
+    return { data, error }
+  }
+
+  const hydratedPosts = await attachPublicProfilesToPosts(data)
+  return { data: hydratedPosts, error: null }
 }
 
 export async function getMyPosts(userId) {
@@ -573,4 +715,3 @@ export async function getCategories() {
     .order('name')
   return { data, error }
 }
-

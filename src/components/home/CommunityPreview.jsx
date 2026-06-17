@@ -1,6 +1,72 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  Bookmark,
+  Heart,
+  MessageCircle,
+  Share2,
+  UserRound,
+} from 'lucide-react'
+import ActiveMembersPanel from '../community/ActiveMembersPanel'
 import { usePostComposer } from '../community/PostComposerContext'
+import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
+
+/* ── Tính thời gian tương đối ── */
+function getTimeAgo(dateString) {
+  const diff = Math.floor((Date.now() - new Date(dateString)) / 1000)
+  if (diff < 60) return 'Vừa xong'
+  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`
+  return new Date(dateString).toLocaleDateString('vi-VN')
+}
+
+/* ── Placeholder ảnh xanh nhạt ── */
+function ImagePlaceholder() {
+  return (
+    <div className="pc-image-placeholder pc-image-placeholder--sm" aria-hidden="true">
+      <svg viewBox="0 0 48 48" width="34" height="34" fill="none">
+        <path
+          d="M24 4C14 4 7 14 7 25c0 8 5 14 11 16 1-8 6-14 14-17-7 5-10 11-10 17 6-2 11-8 11-16 0-11-3-19-9-21z"
+          fill="rgba(79,132,40,0.25)"
+          stroke="rgba(79,132,40,0.45)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
+        <path d="M27 18l-6 9h5l-2 8 8-11h-6l1-6z" fill="rgba(79,132,40,0.48)" />
+      </svg>
+      <span>Bài chia sẻ cộng đồng</span>
+    </div>
+  )
+}
+
+function PreviewAuthorAvatar({ src, name }) {
+  const [failed, setFailed] = useState(false)
+  const normalizedSrc = normalizeAvatarUrl(src)
+
+  if (!normalizedSrc || !isValidImageUrl(normalizedSrc) || failed) {
+    return (
+      <span
+        className="community-composer__avatar--fallback community-preview__avatar-fallback"
+        style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold' }}
+      >
+        <span className="community-preview__avatar-icon" aria-hidden="true">
+          <UserRound size={16} strokeWidth={2.1} />
+        </span>
+        {getInitials(name)}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={normalizedSrc}
+      alt={name}
+      className="community-post-card__avatar-img"
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  )
+}
 
 function CommunityPreview() {
   const { openComposer } = usePostComposer()
@@ -8,6 +74,7 @@ function CommunityPreview() {
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
   const [membersLoading, setMembersLoading] = useState(true)
+  const [membersError, setMembersError] = useState('')
 
   useEffect(() => {
     async function load() {
@@ -15,15 +82,21 @@ function CommunityPreview() {
         const { getRecentCommunityPosts, getTopActiveMembers } = await import('../../services/postService')
         const [postsRes, membersRes] = await Promise.all([
           getRecentCommunityPosts(3),
-          getTopActiveMembers(3)
+          getTopActiveMembers(3),
         ])
-        
         if (postsRes.error) throw postsRes.error
         if (postsRes.data) setPosts(postsRes.data)
-
-        if (membersRes.data) setMembers(membersRes.data)
+        if (membersRes.error) {
+          console.error('[CommunityPreview] active members error:', membersRes.error)
+          setMembersError('Không thể tải thành viên tích cực.')
+          setMembers([])
+        } else if (membersRes.data) {
+          setMembers(membersRes.data)
+          setMembersError('')
+        }
       } catch (err) {
-        console.error('Lỗi lấy dữ liệu cộng đồng:', err)
+        console.error('Lỗi tải dữ liệu cộng đồng:', err)
+        setMembersError('Không thể tải thành viên tích cực.')
       } finally {
         setLoading(false)
         setMembersLoading(false)
@@ -32,24 +105,11 @@ function CommunityPreview() {
     load()
   }, [])
 
-  function getInitials(name) {
-    if (!name) return 'U'
-    return name.charAt(0).toUpperCase()
-  }
-
-  function getTimeAgo(dateString) {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = Math.floor((now - date) / 1000)
-    if (diff < 60) return 'Vừa xong'
-    if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`
-    if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`
-    return date.toLocaleDateString('vi-VN')
-  }
-
   return (
     <section className="home-section">
       <div className="community-preview">
+
+        {/* ════ Feed bài viết ════ */}
         <div className="community-preview__feed">
           <div className="home-section__header home-section__header--stacked">
             <div>
@@ -60,55 +120,131 @@ function CommunityPreview() {
 
           <div className="community-preview__posts">
             {loading ? (
-              <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '20px' }}>Đang tải hoạt động cộng đồng...</p>
+              <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '20px' }}>
+                Đang tải...
+              </p>
             ) : posts.length === 0 ? (
-              <div style={{
-                textAlign: 'center', 
-                padding: '40px 20px', 
-                background: 'rgba(234, 245, 157, 0.3)', 
-                borderRadius: '24px',
-                border: '1px dashed rgba(79, 132, 40, 0.3)',
-                margin: '20px 0'
-              }}>
-                <svg viewBox="0 0 24 24" style={{ width: '48px', height: '48px', margin: '0 auto 12px', fill: 'none', stroke: 'var(--color-primary-500)', strokeWidth: 1.5 }}>
+              <div className="community-preview__empty">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--color-primary-500)" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                 </svg>
-                <h3 style={{ color: 'var(--color-primary-500)', fontSize: '1.2rem', margin: '0 0 8px' }}>Chưa có hoạt động cộng đồng</h3>
-                <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>Các bài viết được duyệt sẽ xuất hiện tại đây.</p>
+                <p>Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!</p>
               </div>
             ) : (
               posts.map((post) => {
-                const authorName = post.profiles?.name || 'Ẩn danh'
+                const prefs = post.profiles?.user_preferences || {}
+                const visibility = prefs.profile_visibility || 'public'
+                
+                let authorName = 'Thành viên E-XANH'
+                let avatarUrl = null
+                
+                const getRealName = () => {
+                  if (post.profiles?.name) return post.profiles.name
+                  if (post.profiles?.display_name) return post.profiles.display_name
+                  return 'Thành viên E-XANH'
+                }
+
+                if (visibility === 'public') {
+                  authorName = getRealName()
+                  avatarUrl = post.profiles?.avatar_url || null
+                } else {
+                  authorName = 'Thành viên E-XANH'
+                  avatarUrl = null
+                }
+
+                const hasImage = post.image_url?.startsWith('http')
+
                 return (
-                  <article key={post.id} className="community-preview__post">
-                    <div className="community-preview__post-top">
-                      <div className="community-preview__author">
-                        <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()}>
-                          {post.profiles?.avatar_url ? (
-                            <img src={post.profiles.avatar_url} alt={authorName} className="home-avatar" style={{ objectFit: 'cover' }} />
-                          ) : (
-                            <span className="home-avatar home-avatar--primary">
-                              {getInitials(authorName)}
-                            </span>
-                          )}
-                        </Link>
-                        <div>
-                          <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>
-                            <strong>{authorName}</strong>
+                  <article key={post.id} className="community-preview__post community-card">
+                    {/* Grid 2 cột */}
+                    <div className="community-preview__post-grid">
+
+                      {/* Cột trái */}
+                      <div className="community-preview__post-left">
+                        <div className="community-post-card__author">
+                          <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()} className="community-post-card__avatar-link">
+                            <PreviewAuthorAvatar src={avatarUrl} name={authorName} />
                           </Link>
-                          <span>{getTimeAgo(post.created_at)}</span>
+                          <div className="community-post-card__author-info">
+                            <Link
+                              to={`/nguoi-dung/${post.author_id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="community-post-card__author-name"
+                            >
+                              {authorName}
+                            </Link>
+                            <span className="community-post-card__date">
+                              {getTimeAgo(post.created_at)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Excerpt */}
+                        <Link to={`/cong-dong/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <p className="community-preview__excerpt">
+                            {post.description ||
+                              (post.content
+                                ? post.content.substring(0, 180) + (post.content.length > 180 ? '…' : '')
+                                : '')}
+                          </p>
+                        </Link>
+
+                        {/* Footer: Reactions Summary + Actions */}
+                        <div className="community-post-card__footer">
+                          <div className="post-stats">
+                            <span>{post.likes_count || 0} lượt thích</span>
+                            <span>{post.comments_count || 0} bình luận</span>
+                          </div>
+
+                          <div className="post-actions">
+                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
+                              <Heart size={18} strokeWidth={2.2} />
+                              <span>Thích</span>
+                            </Link>
+
+                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
+                              <MessageCircle size={18} strokeWidth={2.2} />
+                              <span>Bình luận</span>
+                            </Link>
+
+                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
+                              <Bookmark size={18} strokeWidth={2.2} />
+                              <span>Lưu bài</span>
+                            </Link>
+                          </div>
                         </div>
                       </div>
 
-                      <span className="community-preview__pill">Chia sẻ</span>
-                    </div>
+                      {/* Cột phải: ảnh */}
+                      <div className="community-preview__post-image-col community-card__media">
+                        <Link
+                          to={`/cong-dong/${post.id}`}
+                          className="community-preview__post-image-wrap"
+                          tabIndex={-1}
+                          aria-hidden="true"
+                        >
+                          {hasImage ? (
+                            <img
+                              src={post.image_url}
+                              alt={post.title || 'Ảnh bài viết'}
+                              className="community-preview__post-image"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <ImagePlaceholder />
+                          )}
+                        </Link>
+                        {/* Pill nhỏ */}
+                        <Link
+                          to={`/cong-dong/${post.id}`}
+                          className="share-pill community-preview__share-pill"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Share2 size={16} strokeWidth={2.2} />
+                          <span>Chia sẻ</span>
+                        </Link>
+                      </div>
 
-                    <p>{post.description || post.content?.substring(0, 150) + '...'}</p>
-
-                    <div className="community-preview__actions">
-                      <span>{post.likes_count || 0} thích</span>
-                      <span>{post.comments_count || 0} bình luận</span>
-                      <span>Lưu bài</span>
                     </div>
                   </article>
                 )
@@ -121,48 +257,18 @@ function CommunityPreview() {
           </Link>
         </div>
 
+        {/* ════ Sidebar ════ */}
         <aside className="community-preview__sidebar">
-          <section className="community-preview__members">
-            <h3>Thành viên tích cực</h3>
-            {membersLoading ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Đang tải...</div>
-            ) : members.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-muted)', background: '#f8fdf5', borderRadius: '16px', marginTop: '16px' }}>
-                Chưa có dữ liệu thành viên tích cực.
-              </div>
-            ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0 0 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {members.map((member, index) => {
-                  let rankClass = 'community-preview__rank--default'
-                  if (index === 0) rankClass = 'community-preview__rank--1'
-                  else if (index === 1) rankClass = 'community-preview__rank--2'
-                  else if (index === 2) rankClass = 'community-preview__rank--3'
-                  
-                  return (
-                    <li key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span className={`community-preview__rank ${rankClass}`} style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold', fontSize: '0.8rem' }}>
-                        {index + 1}
-                      </span>
-                      <Link to={`/nguoi-dung/${member.id}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'inherit', textDecoration: 'none' }}>
-                        {member.avatar_url ? (
-                          <img src={member.avatar_url} alt={member.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                        ) : (
-                          <span style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--color-primary-100)', color: 'var(--color-primary-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                            {getInitials(member.name)}
-                          </span>
-                        )}
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <strong style={{ fontSize: '0.95rem' }}>{member.name}</strong>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{member.approved_posts_count} bài viết</span>
-                        </div>
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </section>
 
+          {/* Thành viên tích cực */}
+          <ActiveMembersPanel
+            members={members}
+            loading={membersLoading}
+            error={membersError}
+            className="community-preview__members"
+          />
+
+          {/* CTA */}
           <section className="community-preview__cta">
             <h3>Có kinh nghiệm hay?</h3>
             <p>Chia sẻ mẹo tiết kiệm điện của bạn để giúp nhiều người hơn.</p>
@@ -175,6 +281,7 @@ function CommunityPreview() {
             </button>
           </section>
         </aside>
+
       </div>
     </section>
   )

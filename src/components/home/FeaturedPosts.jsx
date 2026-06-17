@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Bookmark, MessageCircle, UserRound } from 'lucide-react'
 import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
+import PostAuthorAvatar from '../posts/PostAuthorAvatar'
 import heroImage from '../../assets/hero.png'
 
 function FeaturedPosts() {
@@ -26,11 +28,6 @@ function FeaturedPosts() {
     }
     load()
   }, [])
-
-  function getInitials(name) {
-    if (!name) return 'U'
-    return name.charAt(0).toUpperCase()
-  }
 
   function getTypeLabel(type) {
     switch (type) {
@@ -84,7 +81,8 @@ function FeaturedPosts() {
       ) : (
         <div className="home-post-grid">
           {posts.map((post) => {
-            const authorName = post.profiles?.name || 'Ẩn danh'
+            const authorName = post.profiles?.name || 'Thành viên E-XANH'
+            const authorHref = post.author_id ? `/nguoi-dung/${post.author_id}` : null
             return (
               <article 
                 key={post.id} 
@@ -111,19 +109,47 @@ function FeaturedPosts() {
                     disabled
                     aria-disabled="true"
                   >
-                    <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/></svg>
+                    <Bookmark size={18} strokeWidth={2.1} />
                   </button>
                 </div>
 
                 <div className="home-post-card__body">
                   <h3>{post.title}</h3>
+                  <p className="home-post-card__excerpt">
+                    {post.description || 'Khám phá mẹo tiết kiệm điện thực tế, dễ áp dụng mỗi ngày cùng E-XANH.'}
+                  </p>
+
+                  <div className="home-post-card__stats">
+                    <span>{post.likes_count || 0} lượt thích</span>
+                    <span>{post.saved_count || 0} lượt lưu</span>
+                    <span>
+                      <MessageCircle size={14} strokeWidth={2.1} />
+                      {post.comments_count || 0} bình luận
+                    </span>
+                  </div>
 
                   <div className="home-post-card__meta">
-                    <Link to={`/nguoi-dung/${post.author_id}`} onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
-                      <span className="home-avatar home-avatar--primary">
-                        {getInitials(authorName)}
+                    <Link
+                      to={authorHref || '#'}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (!authorHref) e.preventDefault()
+                      }}
+                      className={`home-post-card__author-link${authorHref ? '' : ' is-disabled'}`}
+                      aria-disabled={authorHref ? undefined : 'true'}
+                    >
+                      <PostAuthorAvatar
+                        src={post.profiles?.avatar_url}
+                        name={authorName}
+                        size="sm"
+                      />
+                      <span className="home-post-card__author-copy">
+                        <strong>{authorName}</strong>
+                        <small>
+                          <UserRound size={12} strokeWidth={2} />
+                          Thành viên E-XANH
+                        </small>
                       </span>
-                      <strong>{authorName}</strong>
                     </Link>
                     <span>{new Date(post.created_at).toLocaleDateString('vi-VN')}</span>
                   </div>

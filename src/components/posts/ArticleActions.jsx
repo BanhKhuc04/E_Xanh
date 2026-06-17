@@ -1,6 +1,7 @@
 
+import { AlertTriangle, Bookmark, Heart, MessageCircle, Share2 } from 'lucide-react'
 
-function ArticleActions({ post, onToggleLike, onToggleSave, onReport }) {
+function ArticleActions({ post, onToggleLike, onToggleSave, onReport, onScrollToComments, onShare }) {
   return (
     <div className="article-actions">
       <button 
@@ -8,17 +9,25 @@ function ArticleActions({ post, onToggleLike, onToggleSave, onReport }) {
         className={`article-actions__button${post.isLiked ? ' is-accent' : ''}`}
         onClick={onToggleLike}
       >
-        {post.isLiked ? 'Đã thích' : 'Thích'}
+        <Heart size={18} strokeWidth={2.1} />
+        <span>{post.isLiked ? 'Đã thích' : 'Thích'}</span>
       </button>
-      <button type="button" className="article-actions__button">Bình luận</button>
+      <button type="button" className="article-actions__button" onClick={onScrollToComments}>
+        <MessageCircle size={18} strokeWidth={2.1} />
+        <span>Bình luận</span>
+      </button>
       <button 
         type="button" 
         className={`article-actions__button${post.isSaved ? ' is-accent' : ''}`}
         onClick={onToggleSave}
       >
-        {post.isSaved ? 'Đã lưu' : 'Lưu bài'}
+        <Bookmark size={18} strokeWidth={2.1} />
+        <span>{post.isSaved ? 'Đã lưu' : 'Lưu bài'}</span>
       </button>
-      <button type="button" className="article-actions__button">Chia sẻ</button>
+      <button type="button" className="article-actions__button" onClick={onShare}>
+        <Share2 size={18} strokeWidth={2.1} />
+        <span>Chia sẻ</span>
+      </button>
       {onReport && (
         <button 
           type="button" 
@@ -26,7 +35,8 @@ function ArticleActions({ post, onToggleLike, onToggleSave, onReport }) {
           onClick={onReport}
           style={{ color: '#e53935' }}
         >
-          Báo cáo
+          <AlertTriangle size={18} strokeWidth={2.1} />
+          <span>Báo cáo</span>
         </button>
       )}
     </div>
