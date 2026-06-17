@@ -16,7 +16,7 @@
   position: relative;
   overflow: hidden;
   min-height: calc(100vh - 140px);
-  padding: 44px 28px 32px;
+  padding: 44px 28px 64px;
   border-radius: 40px;
   background: linear-gradient(180deg, #f7faef 0%, #ffffff 100%);
   display: flex;
@@ -233,8 +233,8 @@
 }
 
 .home-floating-card--tip {
-  left: 84px;
-  bottom: -18px;
+  left: 40px;
+  bottom: -64px;
   max-width: 270px;
   color: #fff;
   background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
