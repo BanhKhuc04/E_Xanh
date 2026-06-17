@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchFirstActiveBanner } from '../../services/bannerService'
+import HeroMedia from './HeroMedia'
 
 function PageHero({
   pageKey,
@@ -12,16 +13,24 @@ function PageHero({
   className = '',
   children,
 }) {
-  const [heroImage, setHeroImage] = useState(null)
+  const [heroBanner, setHeroBanner] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     let isMounted = true
 
+    const fallbackBanner = {
+      media_type: 'image',
+      image_url: fallbackImage,
+      poster_url: fallbackImage,
+      video_url: '',
+      title: imageAlt || title,
+    }
+
     async function loadBanner() {
       if (!pageKey) {
         if (isMounted) {
-          setHeroImage(fallbackImage)
+          setHeroBanner(fallbackBanner)
           setIsLoading(false)
         }
         return
@@ -31,10 +40,10 @@ function PageHero({
       const { data, error } = await fetchFirstActiveBanner(pageKey)
       if (!isMounted) return
 
-      if (!error && data?.image_url) {
-        setHeroImage(data.image_url)
+      if (!error && data && (data.image_url || data.video_url || data.poster_url)) {
+        setHeroBanner(data)
       } else {
-        setHeroImage(fallbackImage)
+        setHeroBanner(fallbackBanner)
       }
       setIsLoading(false)
     }
@@ -44,7 +53,7 @@ function PageHero({
     return () => {
       isMounted = false
     }
-  }, [fallbackImage, pageKey])
+  }, [fallbackImage, imageAlt, pageKey, title])
 
   return (
     <section className={['page-hero', className].filter(Boolean).join(' ')}>
@@ -62,7 +71,15 @@ function PageHero({
         {isLoading ? (
           <div style={{ position: 'absolute', inset: 0, background: '#e0e0e0', animation: 'pulse 1.5s infinite ease-in-out' }} />
         ) : (
-          <img src={heroImage} alt={imageAlt || title} style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
+          <HeroMedia
+            mediaType={heroBanner?.media_type}
+            imageUrl={heroBanner?.image_url}
+            videoUrl={heroBanner?.video_url}
+            posterUrl={heroBanner?.poster_url}
+            fallbackImage={fallbackImage}
+            alt={imageAlt || title}
+            prioritize
+          />
         )}
       </div>
     </section>

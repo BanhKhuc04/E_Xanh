@@ -18,11 +18,11 @@ function HeroSection() {
           setBanners(data)
         } else {
           // Fallback
-          setBanners([{ image_url: homeHero.image, title: homeHero.imageAlt }])
+          setBanners([{ media_type: 'image', image_url: homeHero.image, poster_url: homeHero.image, title: homeHero.imageAlt }])
         }
       } catch (err) {
         console.error('Lỗi hệ thống khi tải banner:', err)
-        setBanners([{ image_url: homeHero.image, title: homeHero.imageAlt }])
+        setBanners([{ media_type: 'image', image_url: homeHero.image, poster_url: homeHero.image, title: homeHero.imageAlt }])
       }
     }
     load()

@@ -1,29 +1,66 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Power, PowerOff, Trash2, Video } from 'lucide-react'
 import AdminAnnouncementManager from '../../components/admin/settings/AdminAnnouncementManager'
+import HeroMedia from '../../components/common/HeroMedia'
 import ImageCropModal from '../../components/common/ImageCropModal'
-import PostImage from '../../components/common/PostImage'
 import { getHeroPageLabel, heroPageOptions } from '../../data/pageHeroes'
 import {
   addBanner,
   deleteBanner,
   fetchBannersByPageKeys,
+  removeBannerStorageFiles,
   updateBanner,
   uploadBannerImage,
+  uploadBannerVideo,
 } from '../../services/bannerService'
+import {
+  ALLOWED_PROFILE_IMAGE_TYPES,
+  MAX_VIDEO_SIZE,
+  validateImageFile,
+  validateVideoFile,
+} from '../../utils/fileValidation'
 import '../../styles/admin.css'
 import '../../styles/admin-settings.css'
+
+const VIDEO_LIMIT_MB = Math.round(MAX_VIDEO_SIZE / (1024 * 1024))
+
+function createInitialBannerDraft() {
+  return {
+    mediaType: 'image',
+    imageStatus: '',
+    videoFile: null,
+    videoName: '',
+    videoPreview: '',
+    posterFile: null,
+    posterName: '',
+    posterPreview: '',
+  }
+}
+
+function revokePreviewUrl(url) {
+  if (typeof url === 'string' && url.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
 
 function ThemeSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [activeUpload, setActiveUpload] = useState({ pageKey: '', kind: '' })
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [bannerMap, setBannerMap] = useState({})
   const [cropPageKey, setCropPageKey] = useState('')
   const [cropSource, setCropSource] = useState('')
+  const [cropFileName, setCropFileName] = useState('')
 
   const pageKeys = useMemo(() => heroPageOptions.map((item) => item.key), [])
+  const [bannerDrafts, setBannerDrafts] = useState(() =>
+    pageKeys.reduce((accumulator, key) => {
+      accumulator[key] = createInitialBannerDraft()
+      return accumulator
+    }, {}),
+  )
 
   const loadBanners = useCallback(async () => {
     setLoading(true)
@@ -71,26 +108,92 @@ function ThemeSettingsPage() {
     }, 5000)
   }
 
-  function handleFileChange(event, pageKey) {
+  function updateDraft(pageKey, updater) {
+    setBannerDrafts((current) => {
+      const previousDraft = current[pageKey] || createInitialBannerDraft()
+      const nextDraft =
+        typeof updater === 'function'
+          ? updater(previousDraft)
+          : { ...previousDraft, ...updater }
+
+      return {
+        ...current,
+        [pageKey]: nextDraft,
+      }
+    })
+  }
+
+  function resetDraft(pageKey) {
+    setBannerDrafts((current) => {
+      const previousDraft = current[pageKey]
+      if (previousDraft) {
+        revokePreviewUrl(previousDraft.videoPreview)
+        revokePreviewUrl(previousDraft.posterPreview)
+      }
+
+      return {
+        ...current,
+        [pageKey]: createInitialBannerDraft(),
+      }
+    })
+  }
+
+  function handleMediaTypeChange(pageKey, mediaType) {
+    setBannerDrafts((current) => {
+      const previousDraft = current[pageKey] || createInitialBannerDraft()
+      revokePreviewUrl(previousDraft.videoPreview)
+      revokePreviewUrl(previousDraft.posterPreview)
+
+      return {
+        ...current,
+        [pageKey]: {
+          ...createInitialBannerDraft(),
+          mediaType,
+        },
+      }
+    })
+  }
+
+  function handleImageFileChange(event, pageKey) {
     const file = event.target.files?.[0]
+    event.target.value = ''
+
     if (!file) return
+
+    const validation = validateImageFile(file, {
+      allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
+      invalidTypeMessage: 'Chỉ chấp nhận ảnh JPG, JPEG, PNG hoặc WebP.',
+    })
+
+    if (!validation.valid) {
+      showMessage(validation.error, true)
+      return
+    }
+
+    updateDraft(pageKey, {
+      imageStatus: `Đã chọn ảnh ${file.name}. Hãy cắt ảnh theo tỉ lệ 16:9 rồi lưu.`,
+    })
 
     const reader = new FileReader()
     reader.onload = () => {
       setCropPageKey(pageKey)
       setCropSource(String(reader.result || ''))
+      setCropFileName(file.name)
     }
     reader.readAsDataURL(file)
-    event.target.value = ''
   }
 
   async function handleCropSubmit(croppedBlob) {
     if (!cropPageKey) return
 
     setUploading(true)
+    setActiveUpload({ pageKey: cropPageKey, kind: 'image' })
 
     try {
-      const { publicUrl, error: uploadError } = await uploadBannerImage(croppedBlob)
+      const { publicUrl, error: uploadError } = await uploadBannerImage(croppedBlob, {
+        folder: 'images',
+        prefix: 'banner-image',
+      })
       if (uploadError) {
         throw new Error(uploadError.message || 'Lỗi upload ảnh.')
       }
@@ -99,7 +202,7 @@ function ThemeSettingsPage() {
       const { error: dbError } = await addBanner({
         page_key: cropPageKey,
         image_url: publicUrl,
-        title: `${cropPageKey}-hero.jpeg`,
+        title: cropFileName || `${cropPageKey}-hero-image`,
         is_active: true,
         sort_order: nextList.length,
       })
@@ -108,14 +211,141 @@ function ThemeSettingsPage() {
         throw new Error(dbError.message || 'Không thể lưu cấu hình hero.')
       }
 
-      showMessage(`Đã thêm ảnh cho ${getHeroPageLabel(cropPageKey)}.`)
+      showMessage(`Đã thêm ảnh banner cho ${getHeroPageLabel(cropPageKey)}.`)
       setCropSource('')
       setCropPageKey('')
+      setCropFileName('')
+      resetDraft(cropPageKey)
       await loadBanners()
     } catch (error) {
       showMessage(error.message, true)
     } finally {
       setUploading(false)
+      setActiveUpload({ pageKey: '', kind: '' })
+    }
+  }
+
+  function handleVideoChange(event, pageKey) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) return
+
+    const validation = validateVideoFile(file)
+    if (!validation.valid) {
+      showMessage(validation.error, true)
+      return
+    }
+
+    const nextPreview = URL.createObjectURL(file)
+
+    updateDraft(pageKey, (draft) => {
+      revokePreviewUrl(draft.videoPreview)
+
+      return {
+        ...draft,
+        mediaType: 'video',
+        videoFile: file,
+        videoName: file.name,
+        videoPreview: nextPreview,
+      }
+    })
+  }
+
+  function handlePosterChange(event, pageKey) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) return
+
+    const validation = validateImageFile(file, {
+      allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
+      invalidTypeMessage: 'Poster chỉ chấp nhận JPG, JPEG, PNG hoặc WebP.',
+    })
+    if (!validation.valid) {
+      showMessage(validation.error, true)
+      return
+    }
+
+    const nextPreview = URL.createObjectURL(file)
+
+    updateDraft(pageKey, (draft) => {
+      revokePreviewUrl(draft.posterPreview)
+
+      return {
+        ...draft,
+        mediaType: 'video',
+        posterFile: file,
+        posterName: file.name,
+        posterPreview: nextPreview,
+      }
+    })
+  }
+
+  async function handleCreateVideoBanner(pageKey) {
+    const draft = bannerDrafts[pageKey] || createInitialBannerDraft()
+
+    if (!draft.videoFile) {
+      showMessage('Vui lòng chọn video MP4 hoặc WebM trước khi lưu.', true)
+      return
+    }
+
+    if (!draft.posterFile) {
+      showMessage('Vui lòng chọn poster image cho video để luôn có fallback an toàn.', true)
+      return
+    }
+
+    setUploading(true)
+    setActiveUpload({ pageKey, kind: 'video' })
+
+    const uploadedUrls = []
+
+    try {
+      const { publicUrl: videoUrl, error: videoError } = await uploadBannerVideo(draft.videoFile, {
+        folder: 'videos',
+        prefix: 'banner-video',
+      })
+      if (videoError) {
+        throw new Error(videoError.message || 'Không thể upload video banner.')
+      }
+      uploadedUrls.push(videoUrl)
+
+      const { publicUrl: posterUrl, error: posterError } = await uploadBannerImage(draft.posterFile, {
+        folder: 'posters',
+        prefix: 'banner-poster',
+      })
+      if (posterError) {
+        throw new Error(posterError.message || 'Không thể upload poster cho video.')
+      }
+      uploadedUrls.push(posterUrl)
+
+      const nextList = bannerMap[pageKey] || []
+      const { error: dbError } = await addBanner({
+        page_key: pageKey,
+        media_type: 'video',
+        image_url: posterUrl,
+        video_url: videoUrl,
+        poster_url: posterUrl,
+        title: draft.videoName || `${pageKey}-hero-video`,
+        is_active: true,
+        sort_order: nextList.length,
+      })
+
+      if (dbError) {
+        throw new Error(dbError.message || 'Không thể lưu banner video.')
+      }
+
+      showMessage(`Đã thêm video banner cho ${getHeroPageLabel(pageKey)}.`)
+      resetDraft(pageKey)
+      await loadBanners()
+    } catch (error) {
+      if (uploadedUrls.length > 0) {
+        await removeBannerStorageFiles(uploadedUrls)
+      }
+      showMessage(error.message, true)
+    } finally {
+      setUploading(false)
+      setActiveUpload({ pageKey: '', kind: '' })
     }
   }
 
@@ -130,15 +360,15 @@ function ThemeSettingsPage() {
   }
 
   async function handleDelete(banner) {
-    if (!window.confirm(`Xóa ảnh của ${getHeroPageLabel(banner.page_key)}?`)) return
+    if (!window.confirm(`Xóa banner của ${getHeroPageLabel(banner.page_key)}?`)) return
 
-    const { error } = await deleteBanner(banner.id, banner.image_url)
+    const { error } = await deleteBanner(banner)
     if (error) {
       showMessage(`Lỗi khi xóa: ${error.message}`, true)
       return
     }
 
-    showMessage('Đã xóa ảnh hero.')
+    showMessage('Đã xóa banner hero.')
     await loadBanners()
   }
 
@@ -168,59 +398,207 @@ function ThemeSettingsPage() {
     await loadBanners()
   }
 
-  function renderBannerSection(pageKey) {
-    const banners = bannerMap[pageKey] || []
-
+  function renderImageUploader(pageKey, draft) {
     return (
-      <section key={pageKey} className="admin-section" style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '18px' }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>{getHeroPageLabel(pageKey)}</h2>
-            <p style={{ margin: '6px 0 0', color: 'var(--color-text-muted)' }}>
-              Quản lý ảnh hero/banner cho trang này. Ảnh active đầu tiên sẽ được ưu tiên hiển thị ngoài public.
-            </p>
-          </div>
+      <div className="banner-upload-card__body">
+        <div className="banner-upload-card__field">
+          <strong>Ảnh banner</strong>
+          <p>
+            Chấp nhận JPG, JPEG, PNG, WebP. Ảnh sẽ được cắt theo tỉ lệ 16:9 và tối ưu trước khi lưu.
+          </p>
+        </div>
 
+        <div className="banner-upload-card__actions">
           <label className="btn btn--primary" style={{ cursor: 'pointer' }}>
-            <Plus size={18} />
-            <span>{uploading && cropPageKey === pageKey ? 'Đang tải lên...' : 'Thêm ảnh'}</span>
+            <ImageIcon size={18} />
+            <span>
+              {uploading && activeUpload.pageKey === pageKey && activeUpload.kind === 'image'
+                ? 'Đang xử lý ảnh...'
+                : '+ Upload ảnh'}
+            </span>
             <input
               type="file"
               accept="image/png, image/jpeg, image/webp"
-              onChange={(event) => handleFileChange(event, pageKey)}
+              onChange={(event) => handleImageFileChange(event, pageKey)}
               disabled={uploading}
               hidden
             />
           </label>
         </div>
 
-        {loading ? (
-          <div style={{ display: 'grid', gap: '18px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
-            <div style={{ height: '240px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
-            <div style={{ height: '240px', background: 'rgba(255,255,255,0.7)', borderRadius: '18px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+        <div className="banner-upload-card__status-list">
+          {draft.imageStatus ? (
+            <span className="page-badge page-badge--soft">{draft.imageStatus}</span>
+          ) : (
+            <span className="banner-upload-card__hint">
+              Chọn ảnh để mở công cụ crop rồi lưu ngay vào banner của trang này.
+            </span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  function renderVideoUploader(pageKey, draft) {
+    const isCurrentUpload = uploading && activeUpload.pageKey === pageKey && activeUpload.kind === 'video'
+
+    return (
+      <div className="banner-upload-card__body banner-upload-card__body--video">
+        <div className="banner-upload-card__field-grid">
+          <div className="banner-upload-card__field">
+            <strong>Video banner</strong>
+            <p>Chỉ chấp nhận MP4 hoặc WebM, tối đa {VIDEO_LIMIT_MB}MB. Khuyến nghị dưới 5MB để load nhanh hơn.</p>
+            <label className="btn btn--secondary" style={{ cursor: 'pointer' }}>
+              <Video size={18} />
+              <span>{draft.videoName ? 'Đổi video' : 'Chọn video'}</span>
+              <input
+                type="file"
+                accept="video/mp4,video/webm"
+                onChange={(event) => handleVideoChange(event, pageKey)}
+                disabled={uploading}
+                hidden
+              />
+            </label>
+          </div>
+
+          <div className="banner-upload-card__field">
+            <strong>Poster image</strong>
+            <p>Poster là ảnh chờ và ảnh fallback khi video lỗi hoặc khi truy cập bằng mobile/reduced-motion.</p>
+            <label className="btn btn--secondary" style={{ cursor: 'pointer' }}>
+              <ImageIcon size={18} />
+              <span>{draft.posterName ? 'Đổi poster' : 'Chọn poster'}</span>
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={(event) => handlePosterChange(event, pageKey)}
+                disabled={uploading}
+                hidden
+              />
+            </label>
+          </div>
+        </div>
+
+        {(draft.videoPreview || draft.posterPreview) ? (
+          <div className="banner-upload-card__preview">
+            <div className="banner-upload-card__preview-media">
+              {draft.videoPreview ? (
+                <video
+                  src={draft.videoPreview}
+                  poster={draft.posterPreview || undefined}
+                  controls
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <img src={draft.posterPreview} alt="Poster preview" />
+              )}
+            </div>
+
+            <div className="banner-upload-card__preview-copy">
+              <strong>Xem trước banner video</strong>
+              <p>Video sẽ autoplay dạng trang trí ở desktop, còn mobile và reduced-motion sẽ ưu tiên poster.</p>
+            </div>
           </div>
         ) : null}
+
+        <div className="banner-upload-card__status-list">
+          {draft.videoName ? <span className="page-badge page-badge--soft">Đã chọn video: {draft.videoName}</span> : null}
+          {draft.posterName ? <span className="page-badge page-badge--soft">Đã chọn poster: {draft.posterName}</span> : null}
+          {!draft.posterName ? (
+            <span className="banner-upload-card__hint">Poster là bắt buộc để banner không bị trắng khi video chậm hoặc lỗi.</span>
+          ) : null}
+        </div>
+
+        <div className="banner-upload-card__actions">
+          <button type="button" className="btn btn--primary" onClick={() => handleCreateVideoBanner(pageKey)} disabled={uploading}>
+            <Plus size={18} />
+            {isCurrentUpload ? 'Đang lưu video...' : '+ Lưu banner video'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  function renderBannerSection(pageKey) {
+    const banners = bannerMap[pageKey] || []
+    const draft = bannerDrafts[pageKey] || createInitialBannerDraft()
+
+    return (
+      <section key={pageKey} className="admin-section banner-section">
+        <div className="banner-section__header">
+          <div>
+            <h2>{getHeroPageLabel(pageKey)}</h2>
+            <p>
+              Chọn 1 trong 2 loại banner: ảnh hoặc video. Banner active đầu tiên sẽ được ưu tiên hiển thị ngoài public.
+            </p>
+          </div>
+        </div>
+
+        <article className="admin-card banner-upload-card">
+          <div className="banner-upload-card__switch">
+            <button
+              type="button"
+              className={`banner-upload-card__switch-btn ${draft.mediaType === 'image' ? 'is-active' : ''}`}
+              onClick={() => handleMediaTypeChange(pageKey, 'image')}
+            >
+              <ImageIcon size={16} />
+              Upload ảnh
+            </button>
+            <button
+              type="button"
+              className={`banner-upload-card__switch-btn ${draft.mediaType === 'video' ? 'is-active' : ''}`}
+              onClick={() => handleMediaTypeChange(pageKey, 'video')}
+            >
+              <Video size={16} />
+              Upload video
+            </button>
+          </div>
+
+          {draft.mediaType === 'image'
+            ? renderImageUploader(pageKey, draft)
+            : renderVideoUploader(pageKey, draft)}
+        </article>
+
+        {loading ? (
+          <div className="banner-grid banner-grid--loading">
+            <div className="banner-grid__skeleton"></div>
+            <div className="banner-grid__skeleton"></div>
+          </div>
+        ) : null}
+
         {!loading && banners.length === 0 ? (
-          <p className="text-muted">Chưa có ảnh nào cho trang này.</p>
+          <p className="text-muted">Chưa có banner nào cho trang này.</p>
         ) : null}
 
         {!loading && banners.length > 0 ? (
-          <div className="banner-grid" style={{ display: 'grid', gap: '18px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+          <div className="banner-grid">
             {banners.map((banner, index) => (
-              <article key={banner.id} className="admin-card" style={{ padding: '16px', display: 'grid', gap: '14px' }}>
-                <PostImage src={banner.image_url} alt={`${getHeroPageLabel(pageKey)} banner`} variant="card" />
+              <article key={banner.id} className="admin-card banner-card">
+                <HeroMedia
+                  className="banner-card__preview"
+                  mediaType={banner.media_type}
+                  imageUrl={banner.image_url}
+                  videoUrl={banner.video_url}
+                  posterUrl={banner.poster_url}
+                  alt={`${getHeroPageLabel(pageKey)} banner`}
+                />
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                  <span className="page-badge page-badge--soft">
-                    {banner.is_active ? 'Đang hoạt động' : 'Đã ẩn'}
-                  </span>
-                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.88rem' }}>
-                    Thứ tự #{(banner.sort_order ?? index) + 1}
-                  </span>
+                <div className="banner-card__meta">
+                  <div className="banner-card__meta-left">
+                    <span className="page-badge page-badge--soft">
+                      {banner.media_type === 'video' ? 'Banner video' : 'Banner ảnh'}
+                    </span>
+                    <span className="page-badge page-badge--soft">
+                      {banner.is_active ? 'Đang hoạt động' : 'Đã ẩn'}
+                    </span>
+                  </div>
+                  <span className="banner-card__order">Thứ tự #{(banner.sort_order ?? index) + 1}</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                <div className="banner-card__actions">
+                  <div className="banner-card__actions-group">
                     <button
                       type="button"
                       className={`btn btn--ghost ${banner.is_active ? '' : 'btn--secondary'}`}
@@ -241,7 +619,7 @@ function ThemeSettingsPage() {
                     </button>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="banner-card__actions-group">
                     <button
                       type="button"
                       className="btn btn--secondary"
@@ -273,7 +651,7 @@ function ThemeSettingsPage() {
       <header className="admin-page__header">
         <div className="admin-page__title">
           <h1>Cài đặt giao diện</h1>
-          <p>Quản lý tập trung hero images, page banners và thứ tự hiển thị cho toàn bộ trải nghiệm E-XANH.</p>
+          <p>Quản lý hero/banner theo 2 chế độ upload ảnh hoặc upload video, vẫn giữ an toàn cho banner ảnh cũ.</p>
         </div>
       </header>
 
@@ -289,12 +667,13 @@ function ThemeSettingsPage() {
       <ImageCropModal
         isOpen={Boolean(cropSource)}
         image={cropSource}
-        title={`Cắt ảnh cho ${getHeroPageLabel(cropPageKey)}`}
+        title={`Cắt ảnh cho ${getHeroPageLabel(cropPageKey)}${cropFileName ? ` • ${cropFileName}` : ''}`}
         aspect={heroPageOptions.find((item) => item.key === cropPageKey)?.aspectRatio || 16 / 9}
         confirmLabel="Cắt & lưu ảnh"
         onClose={() => {
           setCropSource('')
           setCropPageKey('')
+          setCropFileName('')
         }}
         onApply={handleCropSubmit}
       />

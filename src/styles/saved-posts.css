@@ -15,7 +15,7 @@
   max-width: 680px;
 }
 
-.saved-posts-page__hero .page-hero__visual img {
+.saved-posts-page__hero .page-hero__visual .hero-media__surface {
   min-height: 300px;
 }
 

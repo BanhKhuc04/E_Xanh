@@ -1,22 +1,103 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
-import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
+import {
+  validateImageFile,
+  validateVideoFile,
+  createSafeFileName,
+  ALLOWED_PROFILE_IMAGE_TYPES,
+} from '../utils/fileValidation'
 import {
   compressImageToWebp,
   isCompressibleImageType,
 } from '../utils/imageCompress'
 
-function getBannerFilePathFromUrl(imageUrl) {
-  if (!imageUrl || !imageUrl.includes('website-banners/')) {
+function getBannerFilePathFromUrl(fileUrl) {
+  if (!fileUrl || !fileUrl.includes('website-banners/')) {
     return null
   }
 
-  const urlParts = imageUrl.split('website-banners/')
+  const urlParts = fileUrl.split('website-banners/')
   if (urlParts.length <= 1) {
     return null
   }
 
   return urlParts[1].split('?')[0]
+}
+
+function normalizeBannerRecord(record) {
+  if (!record) return null
+
+  const hasVideo = record.media_type === 'video' && Boolean(record.video_url)
+  const posterUrl = record.poster_url || record.image_url || ''
+
+  return {
+    ...record,
+    media_type: hasVideo ? 'video' : 'image',
+    image_url: record.image_url || '',
+    video_url: record.video_url || '',
+    poster_url: posterUrl,
+  }
+}
+
+function normalizeBannerRecords(records) {
+  return Array.isArray(records) ? records.map(normalizeBannerRecord) : []
+}
+
+function getUploadErrorMessage(uploadError, kindLabel) {
+  let viMessage = `Upload ${kindLabel} thất bại, vui lòng thử lại.`
+  const msg = uploadError.message?.toLowerCase() || ''
+
+  if (msg.includes('bucket not found') || msg.includes('could not find bucket')) {
+    viMessage = 'Chưa tìm thấy bucket website-banners.'
+  } else if (msg.includes('violates row-level security') || msg.includes('unauthorized') || msg.includes('jwt') || msg.includes('forbidden')) {
+    viMessage = `Bạn không có quyền upload ${kindLabel}.`
+  }
+
+  return { message: viMessage, original: uploadError }
+}
+
+async function uploadBannerAsset(file, { folder, kindLabel, prefix, contentType }) {
+  const safeFileName = createSafeFileName(file, prefix)
+  const filePath = `${folder}/${safeFileName}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('website-banners')
+    .upload(filePath, file, {
+      cacheControl: '31536000',
+      upsert: false,
+      contentType: contentType || file.type,
+    })
+
+  if (uploadError) {
+    return { error: getUploadErrorMessage(uploadError, kindLabel) }
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('website-banners')
+    .getPublicUrl(filePath)
+
+  return { publicUrl: publicUrlData.publicUrl, filePath }
+}
+
+export async function removeBannerStorageFiles(urls = []) {
+  const filePaths = Array.from(
+    new Set(
+      urls
+        .map((url) => getBannerFilePathFromUrl(url))
+        .filter(Boolean),
+    ),
+  )
+
+  if (filePaths.length === 0) {
+    return { error: null }
+  }
+
+  const { error } = await supabase.storage.from('website-banners').remove(filePaths)
+  if (error) {
+    logError('Failed to delete banner files from storage:', error?.message || error)
+  }
+
+  return { error }
 }
 
 export async function fetchBanners(pageKey, activeOnly = false) {
@@ -32,7 +113,7 @@ export async function fetchBanners(pageKey, activeOnly = false) {
   }
 
   const { data, error } = await query
-  return { data, error }
+  return { data: normalizeBannerRecords(data), error }
 }
 
 export async function fetchBannersByPageKeys(pageKeys, activeOnly = false) {
@@ -52,7 +133,7 @@ export async function fetchBannersByPageKeys(pageKeys, activeOnly = false) {
   }
 
   const { data, error } = await query
-  return { data: data || [], error }
+  return { data: normalizeBannerRecords(data), error }
 }
 
 export async function fetchFirstActiveBanner(pageKey) {
@@ -62,11 +143,15 @@ export async function fetchFirstActiveBanner(pageKey) {
     return { data: null, error }
   }
 
-  return { data: data?.[0] || null, error: null }
+  return { data: normalizeBannerRecord(data?.[0] || null), error: null }
 }
 
-export async function uploadBannerImage(file) {
-  const validation = validateImageFile(file)
+export async function uploadBannerImage(file, options = {}) {
+  const validation = validateImageFile(file, {
+    allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
+    invalidTypeMessage: 'Chỉ chấp nhận ảnh JPG, JPEG, PNG hoặc WebP.',
+    ...options.validation,
+  })
   if (!validation.valid) {
     return { error: { message: validation.error } }
   }
@@ -87,34 +172,26 @@ export async function uploadBannerImage(file) {
     }
   }
 
-  const safeFileName = createSafeFileName(uploadFile, 'banner')
-  const filePath = `banners/${safeFileName}`
+  return uploadBannerAsset(uploadFile, {
+    folder: options.folder || 'images',
+    kindLabel: 'ảnh',
+    prefix: options.prefix || 'banner',
+    contentType: uploadFile.type || file.type,
+  })
+}
 
-  const { error: uploadError } = await supabase.storage
-    .from('website-banners')
-    .upload(filePath, uploadFile, {
-      cacheControl: '31536000',
-      upsert: true,
-      contentType: uploadFile.type || file.type,
-    })
-
-  if (uploadError) {
-    let viMessage = 'Upload ảnh thất bại, vui lòng thử lại.'
-    const msg = uploadError.message?.toLowerCase() || ''
-    
-    if (msg.includes('bucket not found') || msg.includes('could not find bucket')) {
-      viMessage = 'Chưa tìm thấy bucket website-banners.'
-    } else if (msg.includes('violates row-level security') || msg.includes('unauthorized') || msg.includes('jwt') || msg.includes('forbidden')) {
-      viMessage = 'Bạn không có quyền upload banner.'
-    }
-    return { error: { message: viMessage, original: uploadError } }
+export async function uploadBannerVideo(file, options = {}) {
+  const validation = validateVideoFile(file, options.validation)
+  if (!validation.valid) {
+    return { error: { message: validation.error } }
   }
 
-  const { data: publicUrlData } = supabase.storage
-    .from('website-banners')
-    .getPublicUrl(filePath)
-
-  return { publicUrl: publicUrlData.publicUrl, filePath }
+  return uploadBannerAsset(file, {
+    folder: options.folder || 'videos',
+    kindLabel: 'video',
+    prefix: options.prefix || 'banner-video',
+    contentType: file.type,
+  })
 }
 
 export async function addBanner(bannerData) {
@@ -129,13 +206,15 @@ export async function addBanner(bannerData) {
 
     if (msg.includes('does not exist') || msg.includes('relation "public.website_banners"')) {
       viMessage = 'Chưa tìm thấy table website_banners.'
+    } else if (msg.includes('column') && (msg.includes('media_type') || msg.includes('video_url') || msg.includes('poster_url'))) {
+      viMessage = 'Database chưa có cột media_type/video_url/poster_url. Hãy chạy migration banner video trước.'
     } else if (msg.includes('violates row-level security') || msg.includes('unauthorized') || msg.includes('forbidden')) {
       viMessage = 'Bạn không có quyền upload banner.'
     }
     return { error: { message: viMessage, original: error } }
   }
 
-  return { data, error }
+  return { data: normalizeBannerRecords(data), error }
 }
 
 export async function updateBanner(id, updates) {
@@ -145,20 +224,23 @@ export async function updateBanner(id, updates) {
     .eq('id', id)
     .select()
 
-  return { data, error }
+  return { data: normalizeBannerRecords(data), error }
 }
 
-export async function deleteBanner(id, imageUrl) {
-  // Try to extract file path from URL if it's from our storage
-  if (imageUrl && imageUrl.includes('website-banners')) {
-    try {
-      const filePath = getBannerFilePathFromUrl(imageUrl)
-      if (filePath) {
-        await supabase.storage.from('website-banners').remove([filePath])
-      }
-    } catch (err) {
-      logError('Failed to delete image from storage:', err?.message || err)
-    }
+export async function deleteBanner(bannerOrId, imageUrl = '') {
+  const banner = typeof bannerOrId === 'object' && bannerOrId !== null
+    ? normalizeBannerRecord(bannerOrId)
+    : null
+  const id = banner?.id || bannerOrId
+
+  try {
+    await removeBannerStorageFiles([
+      banner?.image_url || imageUrl,
+      banner?.poster_url,
+      banner?.video_url,
+    ])
+  } catch (err) {
+    logError('Failed to delete banner media from storage:', err?.message || err)
   }
 
   const { error } = await supabase

@@ -135,12 +135,13 @@
   padding: 20px;
 }
 
-.auth-carousel-placeholder img {
+.auth-carousel-placeholder .hero-media__surface {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
+  min-height: 100%;
 }
 
 /* Ensure the carousel wrapper fills the placeholder instead of using a fixed 16:9 ratio */

@@ -1,28 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getBannerImageSources } from '../../utils/imageUrl'
-
-function BannerMedia({ banner, prioritize = false }) {
-  const imageSources = getBannerImageSources(banner.image_url)
-
-  return (
-    <picture>
-      <source
-        media="(max-width: 768px)"
-        srcSet={imageSources.mobile}
-      />
-      <img
-        src={imageSources.desktop}
-        alt={banner.title || 'Banner E-XANH'}
-        width="1280"
-        height="720"
-        loading={prioritize ? 'eager' : 'lazy'}
-        fetchPriority={prioritize ? 'high' : 'auto'}
-        decoding="async"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
-      />
-    </picture>
-  )
-}
+import HeroMedia from './HeroMedia'
 
 function BannerCarousel({ banners, interval = 5000 }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -42,7 +19,14 @@ function BannerCarousel({ banners, interval = 5000 }) {
   if (banners.length === 1) {
     return (
       <div style={{ width: '100%', aspectRatio: '16 / 9' }}>
-        <BannerMedia banner={banners[0]} prioritize />
+        <HeroMedia
+          mediaType={banners[0].media_type}
+          imageUrl={banners[0].image_url}
+          videoUrl={banners[0].video_url}
+          posterUrl={banners[0].poster_url}
+          alt={banners[0].title || 'Banner E-XANH'}
+          prioritize
+        />
       </div>
     )
   }
@@ -63,7 +47,15 @@ function BannerCarousel({ banners, interval = 5000 }) {
             zIndex: index === currentIndex ? 1 : 0
           }}
         >
-          <BannerMedia banner={banner} prioritize={index === 0} />
+          <HeroMedia
+            mediaType={banner.media_type}
+            imageUrl={banner.image_url}
+            videoUrl={banner.video_url}
+            posterUrl={banner.poster_url}
+            alt={banner.title || 'Banner E-XANH'}
+            prioritize={index === 0}
+            allowVideoPlayback={index === currentIndex}
+          />
         </div>
       ))}
       
