@@ -2,27 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import PostContentEditor from './PostContentEditor'
 import CustomSelect from '../common/CustomSelect'
 import '../../styles/create-post.css'
-
-function extractPlainText(blocks = [], fallback = '') {
-  if (Array.isArray(blocks) && blocks.length > 0) {
-    return blocks
-      .map((block) => {
-        if (block.type === 'list' && Array.isArray(block.items)) {
-          return block.items.join('\n')
-        }
-
-        return block.content || block.label || block.alt || ''
-      })
-      .join('\n\n')
-      .trim()
-  }
-
-  return String(fallback || '').trim()
-}
-
-function countWords(text = '') {
-  return text.split(/\s+/).map((item) => item.trim()).filter(Boolean).length
-}
+import { countWords, extractPlainTextFromBlocks } from '../../utils/postBlocks'
 
 function CreatePostForm({
   form,
@@ -66,7 +46,7 @@ function CreatePostForm({
   )
 
   const plainContent = useMemo(
-    () => extractPlainText(form.content_blocks, form.content),
+    () => extractPlainTextFromBlocks(form.content_blocks, form.content),
     [form.content, form.content_blocks],
   )
   const wordCount = useMemo(() => countWords(plainContent), [plainContent])
@@ -325,7 +305,7 @@ function CreatePostForm({
         </div>
 
         <p id="post-content-help" className="post-form-group__help">
-          Tối thiểu {limits.contentMin} ký tự để bài viết đủ rõ ràng. Bạn có thể chèn tối đa {limits.contentImageMax} ảnh minh họa vào nội dung.
+          Khuyến nghị từ {limits.contentMin} ký tự để bài viết đủ rõ ràng. Bạn có thể chèn tối đa {limits.contentImageMax} ảnh minh họa vào nội dung.
         </p>
         {fieldErrors.content ? <p id="post-content-error" className="post-form-group__error">{fieldErrors.content}</p> : null}
       </div>

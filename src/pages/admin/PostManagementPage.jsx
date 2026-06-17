@@ -8,6 +8,7 @@ import AdminPostPreview from '../../components/admin/posts/AdminPostPreview'
 import { getAllAdminPosts, updatePostStatus, createPost, updatePost, deletePost, uploadPostInlineImage } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 import PostContentEditor from '../../components/community/PostContentEditor'
+import { countImageBlocks, extractPlainTextFromBlocks } from '../../utils/postBlocks'
 import '../../styles/block-editor.css'
 import '../../styles/admin-posts.css'
 
@@ -246,8 +247,10 @@ function PostManagementPage() {
   const handleSubmitForm = async (e) => {
     e.preventDefault()
     setFormLoading(true)
+    const plainContent = extractPlainTextFromBlocks(formData.content_blocks, formData.content)
+    const hasImages = countImageBlocks(formData.content_blocks) > 0
 
-    if (!formData.title.trim() || (!formData.content.trim() && formData.content_blocks.length === 0)) {
+    if (!formData.title.trim() || (!plainContent.trim() && !hasImages)) {
       showToast('Vui lòng nhập đầy đủ Tiêu đề và Nội dung.')
       setFormLoading(false)
       return

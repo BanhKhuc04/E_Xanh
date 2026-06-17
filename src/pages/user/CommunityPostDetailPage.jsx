@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import PostBlockRenderer from '../../components/community/PostBlockRenderer'
 import PostImage from '../../components/common/PostImage'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 import InlineCommentSection from '../../components/community/InlineCommentSection'
-import { getImageUrl } from '../../utils/imageUrl'
 import './CommunityPostDetailPage.css'
 
 // SVG Icons
@@ -33,7 +32,6 @@ const ShareIcon = () => (
 
 function CommunityPostDetailPage() {
   const { id } = useParams()
-  const navigate = useNavigate()
   const [post, setPost] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
@@ -51,14 +49,12 @@ function CommunityPostDetailPage() {
   useEffect(() => {
     async function loadData() {
       let userId = null
-      let userRole = null
       try {
         const session = await getCurrentSession()
         if (session?.user) {
           userId = session.user.id
           const profile = await getCurrentUserProfile(session.user.id)
-          userRole = profile?.role
-          setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null, role: userRole })
+          setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null, role: profile?.role })
         }
       } catch (e) {
         console.warn('Cannot fetch user for community post detail page:', e)
@@ -92,6 +88,7 @@ function CommunityPostDetailPage() {
             excerpt: data.description || (data.content ? `${data.content.substring(0, 150)}...` : 'Chia sẻ từ cộng đồng E-XANH.'),
             image: data.image_url,
             content: data.content || '',
+            content_blocks: data.content_blocks || [],
             likes: data.likes_count || 0,
             commentsCount: data.comments_count || 0,
             savedCount: data.saved_count || 0,

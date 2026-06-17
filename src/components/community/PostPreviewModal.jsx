@@ -1,5 +1,5 @@
-import React from 'react'
 import PostBlockRenderer from './PostBlockRenderer'
+import { extractPlainTextFromBlocks } from '../../utils/postBlocks'
 
 function PostPreviewModal({
   isOpen,
@@ -10,9 +10,7 @@ function PostPreviewModal({
   if (!isOpen) return null
 
   // Calculate length for warning
-  const blocksContent = form.content_blocks && form.content_blocks.length > 0
-    ? form.content_blocks.map(b => (b.type === 'list' && Array.isArray(b.items) ? b.items.join('\n') : (b.content || b.label || b.alt || ''))).join('\n\n')
-    : form.content
+  const blocksContent = extractPlainTextFromBlocks(form.content_blocks, form.content)
   
   const isTooShort = (blocksContent || '').trim().length < 80
 

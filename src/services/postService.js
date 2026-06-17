@@ -6,22 +6,7 @@ import {
   compressImageToWebp,
   isCompressibleImageType,
 } from '../utils/imageCompress'
-
-export function extractPlainTextFromBlocks(blocks) {
-  if (!Array.isArray(blocks)) return ''
-  return blocks.map(block => {
-    if (block.type === 'list' && Array.isArray(block.items)) {
-      return block.items.join('\n')
-    }
-    if (block.type === 'image' && block.url) {
-      return `![${block.alt || 'Ảnh minh họa'}](${block.url})`
-    }
-    if (block.type === 'link' && block.url) {
-      return `[${block.label || 'Link'}](${block.url})`
-    }
-    return block.content || block.label || block.alt || ''
-  }).join('\n\n')
-}
+import { extractPlainTextFromBlocks } from '../utils/postBlocks'
 
 function generateSlug(title) {
   return title
@@ -207,7 +192,7 @@ export async function createPost(postData) {
     title: postData.title,
     slug: slug,
     description: postData.description,
-    content: postData.content_blocks ? extractPlainTextFromBlocks(postData.content_blocks) : postData.content,
+    content: postData.content_blocks ? extractPlainTextFromBlocks(postData.content_blocks, postData.content) : postData.content,
     content_blocks: postData.content_blocks || null,
     type: validType,
     status: postData.status || 'pending',
@@ -657,7 +642,7 @@ export async function updatePost(postId, postData) {
 
   if (postData.content_blocks) {
     payload.content_blocks = postData.content_blocks
-    payload.content = extractPlainTextFromBlocks(postData.content_blocks)
+    payload.content = extractPlainTextFromBlocks(postData.content_blocks, postData.content)
   } else if (postData.content !== undefined) {
     payload.content = postData.content
   }

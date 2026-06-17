@@ -7,6 +7,7 @@ import {
 import { getCurrentSession, getCurrentUserProfile } from '../services/authService'
 import { getUserSafeError } from '../utils/logger'
 import { countMarkdownImages, MARKDOWN_IMAGE_LIMIT } from '../utils/markdown'
+import { countImageBlocks, createTextBlock, extractPlainTextFromBlocks } from '../utils/postBlocks'
 
 const DRAFT_STORAGE_KEY = 'exanh_draft_post'
 const POST_COOLDOWN_MS = 30 * 1000
@@ -28,7 +29,7 @@ function buildInitialForm(defaultType = '') {
     coverFile: null,
     coverPreview: '',
     content: '',
-    content_blocks: [],
+    content_blocks: [createTextBlock()],
     tags: '',
   }
 }
@@ -54,25 +55,13 @@ function parseTags(tags = '') {
     .filter(Boolean)
 }
 
-function extractPlainTextFromBlocks(blocks) {
-  if (!Array.isArray(blocks)) return ''
-  return blocks.map(block => {
-    if (block.type === 'list' && Array.isArray(block.items)) {
-      return block.items.join('\n')
-    }
-    return block.content || block.label || block.alt || ''
-  }).join('\n\n')
-}
-
 function validatePostForm(form) {
   const errors = {}
   const trimmedTitle = form.title.trim()
   const trimmedDescription = form.description.trim()
   const tags = parseTags(form.tags)
-  
-  const blocksContent = form.content_blocks && form.content_blocks.length > 0 
-    ? extractPlainTextFromBlocks(form.content_blocks) 
-    : form.content
+  const imageCount = countImageBlocks(form.content_blocks)
+  const blocksContent = extractPlainTextFromBlocks(form.content_blocks, form.content)
   const trimmedContent = (blocksContent || '').trim()
 
   if (!trimmedTitle) {
@@ -87,9 +76,9 @@ function validatePostForm(form) {
     errors.description = `Mô tả ngắn nên gói gọn trong ${DESCRIPTION_MAX_LENGTH} ký tự.`
   }
 
-  if (!trimmedContent) {
+  if (!trimmedContent && imageCount === 0) {
     errors.content = 'Hãy viết nội dung bài chia sẻ trước khi gửi duyệt.'
-  } else if (trimmedContent.length < CONTENT_MIN_LENGTH) {
+  } else if (trimmedContent.length > 0 && trimmedContent.length < CONTENT_MIN_LENGTH && imageCount === 0) {
     errors.content = `Nội dung cần ít nhất ${CONTENT_MIN_LENGTH} ký tự để đủ ý và hạn chế spam.`
   } else if (trimmedContent.length > CONTENT_MAX_LENGTH) {
     errors.content = `Nội dung đang vượt quá ${CONTENT_MAX_LENGTH} ký tự. Bạn hãy rút gọn bớt nhé.`
@@ -107,9 +96,9 @@ export function usePostComposerForm({
   onSuccess,
 }) {
   const currentPreviewUrlRef = useRef('')
-  const initialDraftRef = useRef(readDraft())
+  const [initialDraft] = useState(() => readDraft())
   const [form, setForm] = useState(() => {
-    const draft = initialDraftRef.current
+    const draft = initialDraft
     const base = buildInitialForm(defaultType)
 
     if (!draft) return base
@@ -128,10 +117,10 @@ export function usePostComposerForm({
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [infoMessage, setInfoMessage] = useState(
-    initialDraftRef.current ? 'Đã tự động khôi phục bản nháp chưa gửi của bạn.' : '',
+    initialDraft ? 'Đã tự động khôi phục bản nháp chưa gửi của bạn.' : '',
   )
   const [draftMeta, setDraftMeta] = useState(
-    initialDraftRef.current ? 'Đã khôi phục bản nháp trước đó.' : 'Nháp sẽ tự động lưu sau vài giây.'
+    initialDraft ? 'Đã khôi phục bản nháp trước đó.' : 'Nháp sẽ tự động lưu sau vài giây.'
   )
   const [previewHighlight, setPreviewHighlight] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -157,10 +146,12 @@ export function usePostComposerForm({
         setProfile(nextProfile)
         const savedCooldown = Number(localStorage.getItem(getCooldownStorageKey(session.user.id)) || 0)
         setCooldownUntil(savedCooldown > Date.now() ? savedCooldown : 0)
+        setCooldownRemaining(savedCooldown > Date.now() ? Math.ceil((savedCooldown - Date.now()) / 1000) : 0)
       } else {
         setUser(null)
         setProfile(null)
         setCooldownUntil(0)
+        setCooldownRemaining(0)
       }
 
       setAuthLoading(false)
@@ -201,11 +192,8 @@ export function usePostComposerForm({
 
   useEffect(() => {
     if (!cooldownUntil || cooldownUntil <= Date.now()) {
-      setCooldownRemaining(0)
       return undefined
     }
-
-    setCooldownRemaining(Math.ceil((cooldownUntil - Date.now()) / 1000))
 
     const intervalId = window.setInterval(() => {
       const remaining = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000))
@@ -225,7 +213,7 @@ export function usePostComposerForm({
     const hasDraftContent = [
       form.title,
       form.description,
-      form.content,
+      extractPlainTextFromBlocks(form.content_blocks, form.content),
       form.tags,
     ].some((item) => String(item || '').trim().length > 0)
 
@@ -270,7 +258,7 @@ export function usePostComposerForm({
       const hasDraftContent = [
         form.title,
         form.description,
-        form.content,
+        extractPlainTextFromBlocks(form.content_blocks, form.content),
         form.tags,
       ].some((item) => String(item || '').trim().length > 0)
       
@@ -284,6 +272,7 @@ export function usePostComposerForm({
               category: form.category,
               description: form.description,
               content: form.content,
+              content_blocks: form.content_blocks,
               tags: form.tags,
             })
           )
@@ -456,11 +445,11 @@ export function usePostComposerForm({
       throw error
     }
 
-    const blocksContent = form.content_blocks && form.content_blocks.length > 0 
-      ? extractPlainTextFromBlocks(form.content_blocks) 
-      : form.content
-      
-    if (countMarkdownImages(blocksContent) >= MARKDOWN_IMAGE_LIMIT) {
+    const inlineImageCount = Array.isArray(form.content_blocks) && form.content_blocks.length > 0
+      ? countImageBlocks(form.content_blocks)
+      : countMarkdownImages(form.content)
+
+    if (inlineImageCount >= MARKDOWN_IMAGE_LIMIT) {
       const error = new Error(`Bạn chỉ có thể chèn tối đa ${MARKDOWN_IMAGE_LIMIT} ảnh trong nội dung bài viết.`)
       setFieldErrors((current) => ({
         ...current,
@@ -485,7 +474,7 @@ export function usePostComposerForm({
         ...current,
         content: safeMessage,
       }))
-      throw new Error(safeMessage)
+      throw new Error(safeMessage, { cause: error })
     } finally {
       setIsUploadingInlineImage(false)
     }
@@ -533,10 +522,8 @@ export function usePostComposerForm({
     }
 
     setIsSubmitting(true)
-    const blocksContent = form.content_blocks && form.content_blocks.length > 0 
-      ? extractPlainTextFromBlocks(form.content_blocks) 
-      : form.content
-      
+    const blocksContent = extractPlainTextFromBlocks(form.content_blocks, form.content)
+
     const result = await createPost({
       ...form,
       title: form.title.trim(),

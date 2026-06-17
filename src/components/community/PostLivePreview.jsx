@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import PostBlockRenderer from './PostBlockRenderer'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
+import { extractPlainTextFromBlocks } from '../../utils/postBlocks'
 
 const PREVIEW_MODE_STORAGE_KEY = 'e-xanh-composer-preview-mode'
 
@@ -23,26 +24,9 @@ function parseTags(tags = '') {
   return tags.split(',').map((item) => item.trim()).filter(Boolean)
 }
 
-function extractFallbackContent(form) {
-  if (Array.isArray(form.content_blocks) && form.content_blocks.length > 0) {
-    return form.content_blocks
-      .map((block) => {
-        if (block.type === 'list' && Array.isArray(block.items)) {
-          return block.items.join('\n')
-        }
-
-        return block.content || block.label || block.alt || ''
-      })
-      .join('\n\n')
-      .trim()
-  }
-
-  return String(form.content || '').trim()
-}
-
 function PostLivePreview({ form, author }) {
   const [viewMode, setViewMode] = useState(readDefaultPreviewMode)
-  const [hasCoverError, setHasCoverError] = useState(false)
+  const [failedCoverUrl, setFailedCoverUrl] = useState('')
 
   const authorName = author?.name || author?.email?.split('@')[0] || 'Người dùng E-Xanh'
   const authorAvatar = author?.avatar_url || ''
@@ -52,7 +36,7 @@ function PostLivePreview({ form, author }) {
   const description = form.description?.trim() || 'Mô tả ngắn của bài viết sẽ xuất hiện ở đây để người đọc nắm ý chính.'
   const coverUrl = form.coverPreview || ''
   const tags = parseTags(form.tags)
-  const fallbackContent = extractFallbackContent(form)
+  const fallbackContent = extractPlainTextFromBlocks(form.content_blocks, form.content)
 
   const previewBlocks = useMemo(() => {
     if (!Array.isArray(form.content_blocks) || form.content_blocks.length === 0) {
@@ -66,11 +50,9 @@ function PostLivePreview({ form, author }) {
     return form.content_blocks.slice(0, 6)
   }, [form.content_blocks, viewMode])
 
-  const hasContent = previewBlocks.length > 0 || fallbackContent.length > 0
-
-  useEffect(() => {
-    setHasCoverError(false)
-  }, [coverUrl])
+  const hasContent =
+    fallbackContent.length > 0 ||
+    previewBlocks.some((block) => block?.type === 'image' && block.url)
 
   function handleChangeMode(nextMode) {
     setViewMode(nextMode)
@@ -108,12 +90,12 @@ function PostLivePreview({ form, author }) {
       <div className="post-live-preview__scroll">
         <article className={`post-live-preview__card post-live-preview__card--${viewMode}`}>
           <div className="post-live-preview__cover">
-            {coverUrl && !hasCoverError ? (
+            {coverUrl && failedCoverUrl !== coverUrl ? (
               <img
                 src={coverUrl}
                 alt="Preview cover"
                 className="post-live-preview__cover-image"
-                onError={() => setHasCoverError(true)}
+                onError={() => setFailedCoverUrl(coverUrl)}
               />
             ) : (
               <div className="post-live-preview__cover-fallback">
@@ -160,7 +142,7 @@ function PostLivePreview({ form, author }) {
                 />
               ) : (
                 <p className="post-live-preview__empty">
-                  Nội dung bài viết sẽ xuất hiện ở đây. Nhập thêm vài block để thấy preview rõ hơn.
+                  Bài viết của bạn chưa có nội dung. Hãy thêm văn bản hoặc hình ảnh.
                 </p>
               )}
             </div>

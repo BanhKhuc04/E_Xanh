@@ -1,46 +1,62 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useRef } from 'react'
+import {
+  ArrowDown,
+  ArrowUp,
+  Bold,
+  Heading3,
+  ImagePlus,
+  Italic,
+  Link2,
+  List,
+  Trash2,
+  Type,
+} from 'lucide-react'
 import '../../styles/block-editor.css'
+import {
+  countImageBlocks,
+  countWords,
+  createImageBlock,
+  createTextBlock,
+  extractPlainTextFromBlocks,
+  getImageCaption,
+  normalizeEditorBlocks,
+} from '../../utils/postBlocks'
 
-function generateId() {
-  return Math.random().toString(36).substring(2, 9)
+function getSelectionRange(textarea) {
+  return {
+    start: textarea.selectionStart ?? 0,
+    end: textarea.selectionEnd ?? 0,
+  }
 }
 
-function createEmptyBlock(type = 'paragraph') {
-  if (type === 'list') {
-    return { id: generateId(), type, items: [''] }
-  }
+function withWrappedSelection(value, start, end, prefix, suffix, fallbackText = '') {
+  const selectedText = value.slice(start, end) || fallbackText
+  const nextValue = `${value.slice(0, start)}${prefix}${selectedText}${suffix}${value.slice(end)}`
+  const selectionStart = start + prefix.length
+  const selectionEnd = selectionStart + selectedText.length
 
-  if (type === 'link') {
-    return { id: generateId(), type, label: '', url: '' }
-  }
-
-  if (type === 'image') {
-    return { id: generateId(), type, url: '', alt: '' }
-  }
-
-  return { id: generateId(), type, content: '' }
+  return { nextValue, selectionStart, selectionEnd }
 }
 
-function extractEditorText(blocks = []) {
-  return blocks
-    .map((block) => {
-      if (block.type === 'list' && Array.isArray(block.items)) {
-        return block.items.join('\n')
-      }
-      if (block.type === 'image' && block.url) {
-        return `![${block.alt || 'Ảnh minh họa'}](${block.url})`
-      }
-      if (block.type === 'link' && block.url) {
-        return `[${block.label || 'Link'}](${block.url})`
-      }
-      return block.content || block.label || block.alt || ''
+function withLinePrefix(value, start, end, prefix) {
+  const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1
+  const lineEndIndex = value.indexOf('\n', end)
+  const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex
+  const target = value.slice(lineStart, lineEnd)
+  const lines = target.split('\n')
+  const shouldRemove = lines.every((line) => line.startsWith(prefix))
+  const nextTarget = lines
+    .map((line) => {
+      if (!line.trim()) return line
+      return shouldRemove ? line.replace(prefix, '') : `${prefix}${line}`
     })
-    .join('\n\n')
-    .trim()
-}
+    .join('\n')
 
-function countWords(text = '') {
-  return text.split(/\s+/).map((item) => item.trim()).filter(Boolean).length
+  return {
+    nextValue: `${value.slice(0, lineStart)}${nextTarget}${value.slice(lineEnd)}`,
+    selectionStart: lineStart,
+    selectionEnd: lineStart + nextTarget.length,
+  }
 }
 
 function PostContentEditor({
@@ -56,41 +72,30 @@ function PostContentEditor({
   error,
   describedBy,
 }) {
-  const [localBlocks, setLocalBlocks] = useState([createEmptyBlock()])
+  const textareaRefs = useRef({})
+  const localBlocks = useMemo(() => normalizeEditorBlocks(blocks, value), [blocks, value])
 
-  useEffect(() => {
-    if (Array.isArray(blocks) && blocks.length > 0) {
-      setLocalBlocks(blocks)
-      return
-    }
-
-    if (value?.trim()) {
-      setLocalBlocks([{ id: generateId(), type: 'paragraph', content: value }])
-      return
-    }
-
-    setLocalBlocks([createEmptyBlock()])
-  }, [blocks, value])
-
-  const editorText = useMemo(() => extractEditorText(localBlocks), [localBlocks])
-  const wordCount = useMemo(() => countWords(editorText), [editorText])
+  const plainText = useMemo(() => extractPlainTextFromBlocks(localBlocks, value), [localBlocks, value])
+  const wordCount = useMemo(() => countWords(plainText), [plainText])
+  const imageCount = useMemo(() => countImageBlocks(localBlocks), [localBlocks])
 
   function updateBlocks(nextBlocks) {
-    setLocalBlocks(nextBlocks)
-    onChangeBlocks(nextBlocks)
-    onChange(extractEditorText(nextBlocks))
+    onChangeBlocks?.(nextBlocks)
+    onChange?.(extractPlainTextFromBlocks(nextBlocks))
   }
 
-  function handleAddBlock(type, index = localBlocks.length - 1) {
-    const nextBlocks = [...localBlocks]
-    nextBlocks.splice(index + 1, 0, createEmptyBlock(type))
-    updateBlocks(nextBlocks)
+  function handleAddBlock(type) {
+    const nextBlock = type === 'image' ? createImageBlock() : createTextBlock()
+    updateBlocks([...localBlocks, nextBlock])
   }
 
   function handleRemoveBlock(index) {
-    if (localBlocks.length <= 1) return
-    const nextBlocks = [...localBlocks]
-    nextBlocks.splice(index, 1)
+    if (localBlocks.length <= 1) {
+      updateBlocks([createTextBlock()])
+      return
+    }
+
+    const nextBlocks = localBlocks.filter((_, blockIndex) => blockIndex !== index)
     updateBlocks(nextBlocks)
   }
 
@@ -109,199 +114,263 @@ function PostContentEditor({
     }
   }
 
-  function handleChangeBlock(index, field, nextValue) {
+  function handleChangeBlock(index, patch) {
     const nextBlocks = [...localBlocks]
     nextBlocks[index] = {
       ...nextBlocks[index],
-      [field]: nextValue,
+      ...patch,
     }
     updateBlocks(nextBlocks)
+  }
+
+  function focusTextarea(blockId, selectionStart, selectionEnd = selectionStart) {
+    window.requestAnimationFrame(() => {
+      const textarea = textareaRefs.current[blockId]
+      if (!textarea) return
+      textarea.focus()
+      textarea.setSelectionRange(selectionStart, selectionEnd)
+    })
+  }
+
+  function handleFormatText(index, format) {
+    const block = localBlocks[index]
+    if (!block || block.type !== 'text') return
+
+    const textarea = textareaRefs.current[block.id]
+    if (!textarea) return
+
+    const value = block.content || ''
+    const { start, end } = getSelectionRange(textarea)
+    let result = null
+
+    if (format === 'bold') {
+      result = withWrappedSelection(value, start, end, '**', '**', 'chữ đậm')
+    }
+
+    if (format === 'italic') {
+      result = withWrappedSelection(value, start, end, '*', '*', 'chữ nghiêng')
+    }
+
+    if (format === 'heading') {
+      result = withLinePrefix(value, start, end, '### ')
+    }
+
+    if (format === 'list') {
+      result = withLinePrefix(value, start, end, '- ')
+    }
+
+    if (format === 'link') {
+      const selectedText = value.slice(start, end).trim() || 'liên kết này'
+      const url = window.prompt('Nhập đường dẫn cho liên kết:', 'https://')
+      if (!url?.trim()) return
+      result = withWrappedSelection(value, start, end, `[`, `](${url.trim()})`, selectedText)
+    }
+
+    if (!result) return
+
+    handleChangeBlock(index, { content: result.nextValue })
+    focusTextarea(block.id, result.selectionStart, result.selectionEnd)
   }
 
   async function handleUploadImage(index, file) {
     if (!file) return
 
     try {
-      const url = await onInsertImage(file)
+      const url = await onInsertImage?.(file)
       if (!url) return
 
-      const nextBlocks = [...localBlocks]
-      nextBlocks[index] = {
-        ...nextBlocks[index],
+      handleChangeBlock(index, {
         url,
-        alt: file.name || nextBlocks[index].alt || '',
-      }
-      updateBlocks(nextBlocks)
+        alt: file.name || '',
+      })
     } catch {
-      // Hook đã xử lý error/toast phía trên.
+      // Lỗi đã được xử lý ở hook phía trên.
     }
   }
 
-  function renderBlockEditor(block, index) {
-    return (
-      <div key={block.id} className="block-editor-item">
-        <div className="block-editor-item__header">
-          <span className="block-editor-item__type">
-            {block.type === 'paragraph' && 'Đoạn văn'}
-            {block.type === 'heading' && 'Tiêu đề'}
-            {block.type === 'list' && 'Danh sách'}
-            {block.type === 'quote' && 'Trích dẫn'}
-            {block.type === 'image' && 'Hình ảnh'}
-            {block.type === 'link' && 'Liên kết'}
-          </span>
+  function renderTextBlock(block, index) {
+    const textValue = block.content || ''
+    const blockPlainText = extractPlainTextFromBlocks([block])
 
-          <div className="block-editor-item__actions">
-            <button type="button" onClick={() => handleMoveBlock(index, 'up')} disabled={index === 0} title="Di chuyển lên">
-              ▲
+    return (
+      <div key={block.id} className="block-editor-card">
+        <div className="block-editor-card__top">
+          <div className="block-editor-card__title">
+            <Type size={16} />
+            <span>Văn bản</span>
+          </div>
+
+          <div className="block-editor-card__actions">
+            <button type="button" onClick={() => handleMoveBlock(index, 'up')} disabled={index === 0} aria-label="Di chuyển đoạn này lên">
+              <ArrowUp size={15} />
             </button>
-            <button type="button" onClick={() => handleMoveBlock(index, 'down')} disabled={index === localBlocks.length - 1} title="Di chuyển xuống">
-              ▼
+            <button type="button" onClick={() => handleMoveBlock(index, 'down')} disabled={index === localBlocks.length - 1} aria-label="Di chuyển đoạn này xuống">
+              <ArrowDown size={15} />
             </button>
-            <button type="button" onClick={() => handleRemoveBlock(index)} disabled={localBlocks.length <= 1} className="text-danger" title="Xóa block">
-              ✕
+            <button type="button" onClick={() => handleRemoveBlock(index)} aria-label="Xóa đoạn này">
+              <Trash2 size={15} />
             </button>
           </div>
         </div>
 
-        <div className="block-editor-item__content">
-          {block.type === 'heading' ? (
-            <input
-              type="text"
-              className="post-form-control block-editor__heading-input"
-              placeholder="Nhập tiêu đề nhỏ..."
-              value={block.content || ''}
-              onChange={(event) => handleChangeBlock(index, 'content', event.target.value)}
-            />
-          ) : null}
+        <div className="block-editor-card__toolbar" role="toolbar" aria-label="Công cụ định dạng văn bản">
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'bold')}>
+            <Bold size={15} />
+            <span>Đậm</span>
+          </button>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'italic')}>
+            <Italic size={15} />
+            <span>Nghiêng</span>
+          </button>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'heading')}>
+            <Heading3 size={15} />
+            <span>Tiêu đề nhỏ</span>
+          </button>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'list')}>
+            <List size={15} />
+            <span>Danh sách</span>
+          </button>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'link')}>
+            <Link2 size={15} />
+            <span>Liên kết</span>
+          </button>
+        </div>
 
-          {block.type === 'paragraph' ? (
-            <textarea
-              className="post-form-control block-editor__textarea"
-              placeholder="Nhập nội dung đoạn văn..."
-              value={block.content || ''}
-              onChange={(event) => handleChangeBlock(index, 'content', event.target.value)}
-              rows={4}
-            />
-          ) : null}
+        <textarea
+          ref={(node) => {
+            textareaRefs.current[block.id] = node
+          }}
+          className="post-form-control block-editor-card__textarea"
+          placeholder="Viết nội dung bài viết của bạn tại đây..."
+          value={textValue}
+          onChange={(event) => handleChangeBlock(index, { content: event.target.value })}
+          rows={7}
+        />
 
-          {block.type === 'quote' ? (
-            <textarea
-              className="post-form-control block-editor-quote"
-              placeholder="Nhập câu trích dẫn..."
-              value={block.content || ''}
-              onChange={(event) => handleChangeBlock(index, 'content', event.target.value)}
-              rows={3}
-            />
-          ) : null}
+        <div className="block-editor-card__meta">
+          <span>{countWords(blockPlainText)} từ</span>
+          <span>{blockPlainText.length} ký tự</span>
+        </div>
+      </div>
+    )
+  }
 
-          {block.type === 'list' ? (
-            <textarea
-              className="post-form-control block-editor-list"
-              placeholder="Mỗi dòng là một gạch đầu dòng..."
-              value={Array.isArray(block.items) ? block.items.join('\n') : ''}
-              onChange={(event) => handleChangeBlock(index, 'items', event.target.value.split('\n'))}
-              rows={4}
-            />
-          ) : null}
+  function renderImageBlock(block, index) {
+    const caption = getImageCaption(block)
 
-          {block.type === 'link' ? (
-            <div className="block-editor__link-fields">
+    return (
+      <div key={block.id} className="block-editor-card block-editor-card--image">
+        <div className="block-editor-card__top">
+          <div className="block-editor-card__title">
+            <ImagePlus size={16} />
+            <span>Hình ảnh</span>
+          </div>
+
+          <div className="block-editor-card__actions">
+            <button type="button" onClick={() => handleMoveBlock(index, 'up')} disabled={index === 0} aria-label="Di chuyển ảnh này lên">
+              <ArrowUp size={15} />
+            </button>
+            <button type="button" onClick={() => handleMoveBlock(index, 'down')} disabled={index === localBlocks.length - 1} aria-label="Di chuyển ảnh này xuống">
+              <ArrowDown size={15} />
+            </button>
+            <button type="button" onClick={() => handleRemoveBlock(index)} aria-label="Xóa ảnh này">
+              <Trash2 size={15} />
+            </button>
+          </div>
+        </div>
+
+        {block.url ? (
+          <div className="block-editor-image-card">
+            <div className="block-editor-image-card__frame">
+              <img src={block.url} alt={caption || block.alt || 'Ảnh minh họa'} className="block-editor-image-card__preview" />
+            </div>
+
+            <div className="block-editor-image-card__fields">
               <input
                 type="text"
                 className="post-form-control"
-                placeholder="Tên nút hoặc liên kết"
-                value={block.label || ''}
-                onChange={(event) => handleChangeBlock(index, 'label', event.target.value)}
+                placeholder="Thêm chú thích ảnh nếu cần"
+                value={caption}
+                onChange={(event) => handleChangeBlock(index, { caption: event.target.value })}
               />
-              <input
-                type="url"
-                className="post-form-control"
-                placeholder="https://..."
-                value={block.url || ''}
-                onChange={(event) => handleChangeBlock(index, 'url', event.target.value)}
-              />
-            </div>
-          ) : null}
 
-          {block.type === 'image' ? (
-            <div className="block-editor-image">
-              {block.url ? (
-                <div className="block-editor-image__preview">
-                  <img src={block.url} alt={block.alt || 'Ảnh minh họa'} className="block-editor-image__img" />
-                  <input
-                    type="text"
-                    className="post-form-control"
-                    placeholder="Chú thích ảnh (alt text)"
-                    value={block.alt || ''}
-                    onChange={(event) => handleChangeBlock(index, 'alt', event.target.value)}
-                  />
-                  <button type="button" className="btn btn--secondary btn--small" onClick={() => handleChangeBlock(index, 'url', '')}>
-                    Đổi ảnh khác
-                  </button>
-                </div>
-              ) : (
-                <div className="block-editor-image-upload">
-                  <input
-                    id={`image-upload-${block.id}`}
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => handleUploadImage(index, event.target.files?.[0])}
-                    disabled={isUploadingImage}
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor={`image-upload-${block.id}`} className="btn btn--secondary block-editor-image-upload__trigger">
-                    {isUploadingImage ? 'Đang tải lên...' : 'Chèn ảnh vào nội dung'}
-                  </label>
-                </div>
-              )}
+              <div className="block-editor-image-card__buttons">
+                <label htmlFor={`image-upload-${block.id}`} className="btn btn--secondary block-editor-image-card__upload">
+                  {isUploadingImage ? 'Đang tải lên...' : 'Đổi hình ảnh'}
+                </label>
+                <button type="button" className="btn btn--ghost" onClick={() => handleChangeBlock(index, { url: '', caption: '', alt: '' })}>
+                  Xóa ảnh
+                </button>
+              </div>
             </div>
-          ) : null}
-        </div>
 
-        <div className="block-editor-item__add">
-          <div className="block-editor-add-toolbar">
-            <button type="button" onClick={() => handleAddBlock('paragraph', index)}>+ Đoạn văn</button>
-            <button type="button" onClick={() => handleAddBlock('heading', index)}>+ Tiêu đề</button>
-            <button type="button" onClick={() => handleAddBlock('image', index)}>+ Hình ảnh</button>
-            <button type="button" onClick={() => handleAddBlock('list', index)}>+ Danh sách</button>
-            <button type="button" onClick={() => handleAddBlock('quote', index)}>+ Trích dẫn</button>
-            <button type="button" onClick={() => handleAddBlock('link', index)}>+ Liên kết</button>
+            <input
+              id={`image-upload-${block.id}`}
+              type="file"
+              accept="image/*"
+              onChange={(event) => handleUploadImage(index, event.target.files?.[0])}
+              disabled={isUploadingImage}
+              style={{ display: 'none' }}
+            />
           </div>
-        </div>
+        ) : (
+          <div className="block-editor-image-upload">
+            <input
+              id={`image-upload-${block.id}`}
+              type="file"
+              accept="image/*"
+              onChange={(event) => handleUploadImage(index, event.target.files?.[0])}
+              disabled={isUploadingImage}
+              style={{ display: 'none' }}
+            />
+
+            <label htmlFor={`image-upload-${block.id}`} className="block-editor-image-upload__trigger">
+              <ImagePlus size={18} />
+              <span>{isUploadingImage ? 'Đang tải ảnh lên...' : 'Thêm hình ảnh'}</span>
+              <small>Ảnh sẽ được hiển thị theo khung gọn, bo góc và dễ xem trên mobile.</small>
+            </label>
+          </div>
+        )}
       </div>
     )
   }
 
   return (
     <div className={`post-content-editor block-editor ${error ? 'has-error' : ''}`} id={id} aria-describedby={describedBy}>
-      <div className="block-editor__toolbar block-editor__toolbar--sticky">
-        <div className="block-editor__toolbar-copy">
-          <strong>Nội dung dạng block</strong>
-          <span>Tạo đoạn văn, tiêu đề, ảnh và CTA rõ ràng để preview bám sát bài thật.</span>
+      <div className="block-editor__header">
+        <div className="block-editor__header-copy">
+          <h3>Nội dung bài viết</h3>
+          <p>Thêm văn bản hoặc hình ảnh để tạo bài viết rõ ràng, dễ đọc.</p>
         </div>
 
-        <div className="block-editor__toolbar-actions">
-          <button type="button" className="block-editor__chip" onClick={() => handleAddBlock('paragraph', localBlocks.length - 1)}>
-            + Đoạn văn
+        <div className="block-editor__header-actions">
+          <button type="button" className="block-editor__primary-action" onClick={() => handleAddBlock('text')}>
+            <Type size={16} />
+            <span>+ Văn bản</span>
           </button>
-          <button type="button" className="block-editor__chip" onClick={() => handleAddBlock('heading', localBlocks.length - 1)}>
-            + Tiêu đề
-          </button>
-          <button type="button" className="block-editor__chip" onClick={() => handleAddBlock('image', localBlocks.length - 1)}>
-            + Ảnh
+          <button type="button" className="block-editor__primary-action block-editor__primary-action--image" onClick={() => handleAddBlock('image')}>
+            <ImagePlus size={16} />
+            <span>+ Hình ảnh</span>
           </button>
         </div>
       </div>
 
       <div className="block-editor__summary">
         <span>{wordCount} từ</span>
-        <span>{editorText.length}/{maxLength} ký tự</span>
-        <span>Tối thiểu {minLength} ký tự</span>
+        <span>{plainText.length}/{maxLength} ký tự</span>
+        <span>{imageCount} ảnh</span>
+        <span>Khuyến nghị {minLength}+ ký tự</span>
       </div>
 
-      <div className="block-editor__canvas">
-        {localBlocks.map((block, index) => renderBlockEditor(block, index))}
-      </div>
+      {localBlocks.length === 0 ? (
+        <div className="block-editor__empty-state">
+          <p>Bài viết của bạn chưa có nội dung. Hãy thêm văn bản hoặc hình ảnh.</p>
+        </div>
+      ) : (
+        <div className="block-editor__canvas">
+          {localBlocks.map((block, index) => (block.type === 'image' ? renderImageBlock(block, index) : renderTextBlock(block, index)))}
+        </div>
+      )}
     </div>
   )
 }
