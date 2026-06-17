@@ -1,5 +1,7 @@
-function waitForEvent(target, eventName, errorName) {
+function waitForEvent(target, eventName, errorName, timeoutMs = 12000) {
   return new Promise((resolve, reject) => {
+    let timeoutId = null
+
     const handleSuccess = () => {
       cleanup()
       resolve()
@@ -11,12 +13,20 @@ function waitForEvent(target, eventName, errorName) {
     }
 
     const cleanup = () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
       target.removeEventListener(eventName, handleSuccess)
       target.removeEventListener('error', handleError)
     }
 
     target.addEventListener(eventName, handleSuccess, { once: true })
     target.addEventListener('error', handleError, { once: true })
+
+    timeoutId = window.setTimeout(() => {
+      cleanup()
+      reject(new Error(errorName))
+    }, timeoutMs)
   })
 }
 
@@ -154,6 +164,58 @@ export async function generateVideoPosterFile(
       type: outputType,
       lastModified: Date.now(),
     })
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
+export async function inspectVideoFilePlayback(file) {
+  if (!(file instanceof Blob)) {
+    return {
+      playable: false,
+      reason: 'Video không hợp lệ.',
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(file)
+  const video = document.createElement('video')
+  video.preload = 'metadata'
+  video.muted = true
+  video.playsInline = true
+  video.src = objectUrl
+
+  try {
+    await waitForEvent(
+      video,
+      'loadedmetadata',
+      'Không thể đọc metadata video. Có thể codec của file chưa tương thích với trình duyệt.',
+    )
+
+    if (!video.videoWidth || !video.videoHeight) {
+      return {
+        playable: false,
+        reason: 'Video không có khung hình hợp lệ để phát trên trình duyệt.',
+      }
+    }
+
+    await waitForEvent(
+      video,
+      'canplay',
+      'Trình duyệt không giải mã được video này. Hãy xuất lại dưới dạng MP4 H.264 hoặc WebM VP9.',
+      8000,
+    )
+
+    return {
+      playable: true,
+      width: video.videoWidth,
+      height: video.videoHeight,
+      duration: Number.isFinite(video.duration) ? video.duration : 0,
+    }
+  } catch (error) {
+    return {
+      playable: false,
+      reason: error.message || 'Video chưa tương thích để phát trên trình duyệt.',
+    }
   } finally {
     URL.revokeObjectURL(objectUrl)
   }

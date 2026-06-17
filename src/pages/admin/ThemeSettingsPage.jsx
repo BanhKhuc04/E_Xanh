@@ -19,7 +19,11 @@ import {
   validateImageFile,
   validateVideoFile,
 } from '../../utils/fileValidation'
-import { generateFallbackPosterFile, generateVideoPosterFile } from '../../utils/videoPoster'
+import {
+  generateFallbackPosterFile,
+  generateVideoPosterFile,
+  inspectVideoFilePlayback,
+} from '../../utils/videoPoster'
 import '../../styles/admin.css'
 import '../../styles/admin-settings.css'
 
@@ -297,9 +301,39 @@ function ThemeSettingsPage() {
         posterPreview: '',
         }
       })
-      setInlineFeedback(pageKey, 'Video đã được chọn. Hệ thống đang chuẩn bị poster fallback để bạn có thể lưu an toàn.', 'info')
+      setInlineFeedback(pageKey, 'Video đã được chọn. Hệ thống đang kiểm tra khả năng phát và chuẩn bị poster tự động.', 'info')
 
     try {
+      const playbackInspection = await inspectVideoFilePlayback(file)
+      if (!playbackInspection.playable) {
+        updateDraft(pageKey, (draft) => {
+          revokePreviewUrl(draft.videoPreview)
+          revokePreviewUrl(draft.posterPreview)
+
+          return {
+            ...draft,
+            videoFile: null,
+            videoPreview: '',
+            posterFile: null,
+            posterName: '',
+            posterPreview: '',
+            videoStatus: playbackInspection.reason,
+            videoStatusTone: 'error',
+            isPreparingVideo: false,
+          }
+        })
+        setInlineFeedback(
+          pageKey,
+          `${playbackInspection.reason} File này không thể dùng làm banner video. Hãy xuất lại bằng MP4 H.264 hoặc WebM VP9.`,
+          'error',
+        )
+        showMessage(
+          `${playbackInspection.reason} Hãy xuất lại bằng MP4 H.264 hoặc WebM VP9 rồi upload lại.`,
+          true,
+        )
+        return
+      }
+
       const generatedPosterFile = await generateVideoPosterFile(file)
       const posterPreview = URL.createObjectURL(generatedPosterFile)
 
@@ -335,7 +369,7 @@ function ThemeSettingsPage() {
             isPreparingVideo: false,
           }
         })
-        setInlineFeedback(pageKey, 'Video đã sẵn sàng lưu với poster fallback mặc định.', 'warning')
+        setInlineFeedback(pageKey, 'Video phát được nhưng không trích được frame đầu. Hệ thống sẽ dùng poster fallback nếu bạn tiếp tục lưu.', 'warning')
       } catch (fallbackError) {
         updateDraft(pageKey, (draft) => ({
           ...draft,
