@@ -67,7 +67,7 @@ function HeroSection() {
         </div>
 
         <div className="home-hero__visual">
-          <div className="home-hero__image-shell" style={{ overflow: 'hidden' }}>
+          <div className="home-hero__image-shell">
             <BannerCarousel banners={banners} />
           </div>
 

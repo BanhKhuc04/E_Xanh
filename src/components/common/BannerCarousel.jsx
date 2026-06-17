@@ -18,28 +18,25 @@ function BannerCarousel({ banners, interval = 5000 }) {
 
   if (banners.length === 1) {
     return (
-      <div style={{ width: '100%', aspectRatio: '16 / 9' }}>
-        <HeroMedia
-          mediaType={banners[0].media_type}
-          imageUrl={banners[0].image_url}
-          videoUrl={banners[0].video_url}
-          posterUrl={banners[0].poster_url}
-          alt={banners[0].title || 'Banner E-XANH'}
-          prioritize
-        />
-      </div>
+      <HeroMedia
+        mediaType={banners[0].media_type}
+        imageUrl={banners[0].image_url}
+        videoUrl={banners[0].video_url}
+        posterUrl={banners[0].poster_url}
+        alt={banners[0].title || 'Banner E-XANH'}
+        prioritize
+      />
     )
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', overflow: 'hidden', borderRadius: 'inherit' }}>
+    <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
       {banners.map((banner, index) => (
         <div
           key={banner.id || index}
           style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
+            inset: 0,
             width: '100%',
             height: '100%',
             opacity: index === currentIndex ? 1 : 0,
