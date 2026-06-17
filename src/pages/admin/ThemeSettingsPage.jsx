@@ -19,7 +19,7 @@ import {
   validateImageFile,
   validateVideoFile,
 } from '../../utils/fileValidation'
-import { generateVideoPosterFile } from '../../utils/videoPoster'
+import { generateFallbackPosterFile, generateVideoPosterFile } from '../../utils/videoPoster'
 import '../../styles/admin.css'
 import '../../styles/admin-settings.css'
 
@@ -33,6 +33,7 @@ function createInitialBannerDraft() {
     videoName: '',
     videoPreview: '',
     videoStatus: '',
+    videoStatusTone: 'info',
     isPreparingVideo: false,
     posterFile: null,
     posterName: '',
@@ -253,6 +254,7 @@ function ThemeSettingsPage() {
         videoName: file.name,
         videoPreview: nextPreview,
         videoStatus: `Đã chọn video ${file.name}. Đang tạo ảnh chờ tự động...`,
+        videoStatusTone: 'info',
         isPreparingVideo: true,
         posterFile: null,
         posterName: '',
@@ -273,19 +275,40 @@ function ThemeSettingsPage() {
           posterName: generatedPosterFile.name,
           posterPreview,
           videoStatus: `Đã chọn video ${file.name}. Poster được tạo tự động, bạn có thể lưu ngay.`,
+          videoStatusTone: 'success',
           isPreparingVideo: false,
         }
       })
     } catch (error) {
-      updateDraft(pageKey, (draft) => ({
-        ...draft,
-        posterFile: null,
-        posterName: '',
-        posterPreview: '',
-        videoStatus: `Đã chọn video ${file.name} nhưng chưa tạo được poster tự động.`,
-        isPreparingVideo: false,
-      }))
-      showMessage(error.message || 'Không thể tạo poster tự động từ video này.', true)
+      try {
+        const fallbackPosterFile = await generateFallbackPosterFile(file.name)
+        const fallbackPreview = URL.createObjectURL(fallbackPosterFile)
+
+        updateDraft(pageKey, (draft) => {
+          revokePreviewUrl(draft.posterPreview)
+
+          return {
+            ...draft,
+            posterFile: fallbackPosterFile,
+            posterName: fallbackPosterFile.name,
+            posterPreview: fallbackPreview,
+            videoStatus: `Không đọc được frame đầu của ${file.name}. Hệ thống đã dùng poster mặc định để bạn vẫn có thể lưu banner video.`,
+            videoStatusTone: 'warning',
+            isPreparingVideo: false,
+          }
+        })
+      } catch (fallbackError) {
+        updateDraft(pageKey, (draft) => ({
+          ...draft,
+          posterFile: null,
+          posterName: '',
+          posterPreview: '',
+          videoStatus: `Đã chọn video ${file.name} nhưng chưa tạo được poster tự động.`,
+          videoStatusTone: 'error',
+          isPreparingVideo: false,
+        }))
+        showMessage(fallbackError.message || error.message || 'Không thể chuẩn bị poster cho video này.', true)
+      }
     }
   }
 
@@ -496,7 +519,11 @@ function ThemeSettingsPage() {
         <div className="banner-upload-card__status-list">
           {draft.videoName ? <span className="page-badge page-badge--soft">Đã chọn video: {draft.videoName}</span> : null}
           {draft.posterName ? <span className="page-badge page-badge--soft">Poster tự tạo: {draft.posterName}</span> : null}
-          {draft.videoStatus ? <span className="banner-upload-card__hint">{draft.videoStatus}</span> : null}
+          {draft.videoStatus ? (
+            <span className={`banner-upload-card__notice banner-upload-card__notice--${draft.videoStatusTone || 'info'}`}>
+              {draft.videoStatus}
+            </span>
+          ) : null}
         </div>
 
         <div className="banner-upload-card__actions">

@@ -25,6 +25,69 @@ function buildPosterFileName(file) {
   return `${baseName}-poster.webp`
 }
 
+function createCanvasPoster({
+  width = 1280,
+  height = 720,
+  title = 'E-XANH',
+  subtitle = 'Banner video',
+  outputType = 'image/webp',
+  quality = 0.82,
+  fileName = `video-${Date.now()}-poster.webp`,
+}) {
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+
+  const context = canvas.getContext('2d')
+  if (!context) {
+    throw new Error('Trình duyệt không hỗ trợ Canvas để tạo poster.')
+  }
+
+  const gradient = context.createLinearGradient(0, 0, width, height)
+  gradient.addColorStop(0, '#eaf59d')
+  gradient.addColorStop(0.55, '#80b155')
+  gradient.addColorStop(1, '#336a29')
+  context.fillStyle = gradient
+  context.fillRect(0, 0, width, height)
+
+  context.fillStyle = 'rgba(255, 255, 255, 0.16)'
+  context.beginPath()
+  context.arc(width * 0.16, height * 0.18, width * 0.11, 0, Math.PI * 2)
+  context.fill()
+
+  context.beginPath()
+  context.arc(width * 0.86, height * 0.78, width * 0.18, 0, Math.PI * 2)
+  context.fill()
+
+  context.fillStyle = 'rgba(255, 255, 255, 0.96)'
+  context.font = '700 72px Arial'
+  context.fillText(title, 84, height - 170)
+
+  context.fillStyle = 'rgba(255, 255, 255, 0.88)'
+  context.font = '400 34px Arial'
+  context.fillText(subtitle, 84, height - 110)
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (result) => {
+        if (!result) {
+          reject(new Error('Không thể tạo poster mặc định.'))
+          return
+        }
+
+        resolve(
+          new File([result], fileName, {
+            type: outputType,
+            lastModified: Date.now(),
+          }),
+        )
+      },
+      outputType,
+      quality,
+    )
+  })
+}
+
 export async function generateVideoPosterFile(
   file,
   {
@@ -94,4 +157,12 @@ export async function generateVideoPosterFile(
   } finally {
     URL.revokeObjectURL(objectUrl)
   }
+}
+
+export async function generateFallbackPosterFile(fileName = 'banner-video') {
+  return createCanvasPoster({
+    title: 'E-XANH',
+    subtitle: 'Poster fallback cho banner video',
+    fileName: `${fileName.replace(/\.[^.]+$/, '') || 'banner-video'}-fallback-poster.webp`,
+  })
 }

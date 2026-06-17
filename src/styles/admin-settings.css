@@ -1234,6 +1234,36 @@
   line-height: 1.55;
 }
 
+.banner-upload-card__notice {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.banner-upload-card__notice--info {
+  color: #315622;
+  background: rgba(193, 217, 92, 0.16);
+}
+
+.banner-upload-card__notice--success {
+  color: #2a5f28;
+  background: rgba(177, 222, 124, 0.24);
+}
+
+.banner-upload-card__notice--warning {
+  color: #8a5e2a;
+  background: rgba(239, 196, 123, 0.18);
+}
+
+.banner-upload-card__notice--error {
+  color: #8b2f2f;
+  background: rgba(214, 96, 96, 0.16);
+}
+
 .banner-upload-card__preview {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
