@@ -54,6 +54,7 @@ function ThemeSettingsPage() {
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [bannerMap, setBannerMap] = useState({})
+  const [sectionFeedback, setSectionFeedback] = useState({})
   const [cropPageKey, setCropPageKey] = useState('')
   const [cropSource, setCropSource] = useState('')
   const [cropFileName, setCropFileName] = useState('')
@@ -112,6 +113,20 @@ function ThemeSettingsPage() {
     }, 5000)
   }
 
+  function setInlineFeedback(pageKey, message = '', tone = 'info') {
+    if (!pageKey) return
+
+    setSectionFeedback((current) => ({
+      ...current,
+      [pageKey]: message
+        ? {
+            message,
+            tone,
+          }
+        : null,
+    }))
+  }
+
   function updateDraft(pageKey, updater) {
     setBannerDrafts((current) => {
       const previousDraft = current[pageKey] || createInitialBannerDraft()
@@ -156,6 +171,7 @@ function ThemeSettingsPage() {
         },
       }
     })
+    setInlineFeedback(pageKey, '')
   }
 
   function handleImageFileChange(event, pageKey) {
@@ -171,12 +187,14 @@ function ThemeSettingsPage() {
 
     if (!validation.valid) {
       showMessage(validation.error, true)
+      setInlineFeedback(pageKey, validation.error, 'error')
       return
     }
 
     updateDraft(pageKey, {
       imageStatus: `Đã chọn ảnh ${file.name}. Hãy cắt ảnh theo tỉ lệ 16:9 rồi lưu.`,
     })
+    setInlineFeedback(pageKey, 'Ảnh đã được chọn. Tiếp theo hãy cắt ảnh và lưu để đưa lên đầu banner của trang này.', 'info')
 
     const reader = new FileReader()
     reader.onload = () => {
@@ -192,6 +210,7 @@ function ThemeSettingsPage() {
 
     setUploading(true)
     setActiveUpload({ pageKey: cropPageKey, kind: 'image' })
+    setInlineFeedback(cropPageKey, 'Đang upload ảnh banner và đưa ảnh mới lên đầu danh sách...', 'info')
 
     try {
       const { publicUrl, error: uploadError } = await uploadBannerImage(croppedBlob, {
@@ -203,12 +222,26 @@ function ThemeSettingsPage() {
       }
 
       const nextList = bannerMap[cropPageKey] || []
+      const shiftedBanners = nextList
+        .map((banner, index) => ({ ...banner, nextSortOrder: index + 1 }))
+        .filter((banner) => (banner.sort_order ?? 0) !== banner.nextSortOrder)
+
+      if (shiftedBanners.length > 0) {
+        const shiftResults = await Promise.all(
+          shiftedBanners.map((banner) => updateBanner(banner.id, { sort_order: banner.nextSortOrder })),
+        )
+        const shiftError = shiftResults.find((result) => result.error)?.error
+        if (shiftError) {
+          throw new Error(shiftError.message || 'Không thể sắp xếp lại banner hiện có.')
+        }
+      }
+
       const { error: dbError } = await addBanner({
         page_key: cropPageKey,
         image_url: publicUrl,
         title: cropFileName || `${cropPageKey}-hero-image`,
         is_active: true,
-        sort_order: nextList.length,
+        sort_order: 0,
       })
 
       if (dbError) {
@@ -216,6 +249,7 @@ function ThemeSettingsPage() {
       }
 
       showMessage(`Đã thêm ảnh banner cho ${getHeroPageLabel(cropPageKey)}.`)
+      setInlineFeedback(cropPageKey, 'Đã lưu ảnh banner thành công. Ảnh mới đang được ưu tiên hiển thị đầu tiên.', 'success')
       setCropSource('')
       setCropPageKey('')
       setCropFileName('')
@@ -223,6 +257,7 @@ function ThemeSettingsPage() {
       await loadBanners()
     } catch (error) {
       showMessage(error.message, true)
+      setInlineFeedback(cropPageKey, error.message || 'Không thể lưu banner ảnh.', 'error')
     } finally {
       setUploading(false)
       setActiveUpload({ pageKey: '', kind: '' })
@@ -238,6 +273,7 @@ function ThemeSettingsPage() {
     const validation = validateVideoFile(file)
     if (!validation.valid) {
       showMessage(validation.error, true)
+      setInlineFeedback(pageKey, validation.error, 'error')
       return
     }
 
@@ -259,8 +295,9 @@ function ThemeSettingsPage() {
         posterFile: null,
         posterName: '',
         posterPreview: '',
-      }
-    })
+        }
+      })
+      setInlineFeedback(pageKey, 'Video đã được chọn. Hệ thống đang chuẩn bị poster fallback để bạn có thể lưu an toàn.', 'info')
 
     try {
       const generatedPosterFile = await generateVideoPosterFile(file)
@@ -279,6 +316,7 @@ function ThemeSettingsPage() {
           isPreparingVideo: false,
         }
       })
+      setInlineFeedback(pageKey, 'Poster đã tạo xong. Bạn có thể bấm lưu banner video ngay bây giờ.', 'success')
     } catch (error) {
       try {
         const fallbackPosterFile = await generateFallbackPosterFile(file.name)
@@ -297,6 +335,7 @@ function ThemeSettingsPage() {
             isPreparingVideo: false,
           }
         })
+        setInlineFeedback(pageKey, 'Video đã sẵn sàng lưu với poster fallback mặc định.', 'warning')
       } catch (fallbackError) {
         updateDraft(pageKey, (draft) => ({
           ...draft,
@@ -308,6 +347,7 @@ function ThemeSettingsPage() {
           isPreparingVideo: false,
         }))
         showMessage(fallbackError.message || error.message || 'Không thể chuẩn bị poster cho video này.', true)
+        setInlineFeedback(pageKey, fallbackError.message || error.message || 'Không thể chuẩn bị poster cho video này.', 'error')
       }
     }
   }
@@ -317,21 +357,25 @@ function ThemeSettingsPage() {
 
     if (!draft.videoFile) {
       showMessage('Vui lòng chọn video MP4 hoặc WebM trước khi lưu.', true)
+      setInlineFeedback(pageKey, 'Vui lòng chọn video MP4 hoặc WebM trước khi lưu.', 'error')
       return
     }
 
     if (draft.isPreparingVideo) {
       showMessage('Hệ thống đang chuẩn bị video. Vui lòng đợi thêm một chút rồi lưu.', true)
+      setInlineFeedback(pageKey, 'Hệ thống đang chuẩn bị video. Vui lòng đợi thêm một chút rồi lưu.', 'warning')
       return
     }
 
     if (!draft.posterFile) {
       showMessage('Chưa thể tạo ảnh chờ tự động cho video này. Hãy chọn lại video khác hoặc file nhẹ hơn.', true)
+      setInlineFeedback(pageKey, 'Chưa thể tạo ảnh chờ tự động cho video này. Hãy chọn lại video khác hoặc file nhẹ hơn.', 'error')
       return
     }
 
     setUploading(true)
     setActiveUpload({ pageKey, kind: 'video' })
+    setInlineFeedback(pageKey, 'Đang upload video banner...', 'info')
 
     const uploadedUrls = []
 
@@ -344,6 +388,7 @@ function ThemeSettingsPage() {
         throw new Error(videoError.message || 'Không thể upload video banner.')
       }
       uploadedUrls.push(videoUrl)
+      setInlineFeedback(pageKey, 'Video đã upload xong. Đang upload poster fallback...', 'info')
 
       const { publicUrl: posterUrl, error: posterError } = await uploadBannerImage(draft.posterFile, {
         folder: 'posters',
@@ -353,8 +398,23 @@ function ThemeSettingsPage() {
         throw new Error(posterError.message || 'Không thể upload poster cho video.')
       }
       uploadedUrls.push(posterUrl)
+      setInlineFeedback(pageKey, 'Poster đã upload xong. Đang lưu cấu hình banner vào hệ thống...', 'info')
 
       const nextList = bannerMap[pageKey] || []
+      const shiftedBanners = nextList
+        .map((banner, index) => ({ ...banner, nextSortOrder: index + 1 }))
+        .filter((banner) => (banner.sort_order ?? 0) !== banner.nextSortOrder)
+
+      if (shiftedBanners.length > 0) {
+        const shiftResults = await Promise.all(
+          shiftedBanners.map((banner) => updateBanner(banner.id, { sort_order: banner.nextSortOrder })),
+        )
+        const shiftError = shiftResults.find((result) => result.error)?.error
+        if (shiftError) {
+          throw new Error(shiftError.message || 'Không thể sắp xếp lại banner hiện có.')
+        }
+      }
+
       const { error: dbError } = await addBanner({
         page_key: pageKey,
         media_type: 'video',
@@ -363,7 +423,7 @@ function ThemeSettingsPage() {
         poster_url: posterUrl,
         title: draft.videoName || `${pageKey}-hero-video`,
         is_active: true,
-        sort_order: nextList.length,
+        sort_order: 0,
       })
 
       if (dbError) {
@@ -371,6 +431,7 @@ function ThemeSettingsPage() {
       }
 
       showMessage(`Đã thêm video banner cho ${getHeroPageLabel(pageKey)}.`)
+      setInlineFeedback(pageKey, 'Đã lưu banner video thành công. Banner mới đang được ưu tiên hiển thị đầu tiên.', 'success')
       resetDraft(pageKey)
       await loadBanners()
     } catch (error) {
@@ -378,6 +439,7 @@ function ThemeSettingsPage() {
         await removeBannerStorageFiles(uploadedUrls)
       }
       showMessage(error.message, true)
+      setInlineFeedback(pageKey, error.message || 'Không thể lưu banner video.', 'error')
     } finally {
       setUploading(false)
       setActiveUpload({ pageKey: '', kind: '' })
@@ -544,6 +606,7 @@ function ThemeSettingsPage() {
   function renderBannerSection(pageKey) {
     const banners = bannerMap[pageKey] || []
     const draft = bannerDrafts[pageKey] || createInitialBannerDraft()
+    const inlineFeedback = sectionFeedback[pageKey]
 
     return (
       <section key={pageKey} className="admin-section banner-section">
@@ -579,6 +642,12 @@ function ThemeSettingsPage() {
           {draft.mediaType === 'image'
             ? renderImageUploader(pageKey, draft)
             : renderVideoUploader(pageKey, draft)}
+
+          {inlineFeedback?.message ? (
+            <div className={`banner-upload-card__notice banner-upload-card__notice--${inlineFeedback.tone || 'info'}`}>
+              {inlineFeedback.message}
+            </div>
+          ) : null}
         </article>
 
         {loading ? (
@@ -614,7 +683,7 @@ function ThemeSettingsPage() {
                       {banner.is_active ? 'Đang hoạt động' : 'Đã ẩn'}
                     </span>
                   </div>
-                  <span className="banner-card__order">Thứ tự #{(banner.sort_order ?? index) + 1}</span>
+                  <span className="banner-card__order">Thứ tự #{index + 1}</span>
                 </div>
 
                 <div className="banner-card__actions">
