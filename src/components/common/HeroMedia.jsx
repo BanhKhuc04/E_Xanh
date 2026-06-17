@@ -80,8 +80,7 @@ function HeroMedia({
     Boolean(videoUrl) &&
     allowVideoPlayback &&
     !hasVideoError &&
-    !prefersReducedMotion &&
-    !isCompactViewport
+    !prefersReducedMotion
 
   const rootClassName = ['hero-media', className].filter(Boolean).join(' ')
 

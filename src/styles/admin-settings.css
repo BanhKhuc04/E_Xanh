@@ -1310,9 +1310,15 @@
   animation: pulse 1.5s infinite ease-in-out;
 }
 
+.banner-card__preview {
+  border-radius: 18px;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
 .banner-card__preview .hero-media__surface {
   min-height: 0;
-  border-radius: 22px;
+  border-radius: inherit;
 }
 
 .banner-card__meta {

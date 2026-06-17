@@ -638,6 +638,7 @@ function ThemeSettingsPage() {
               <video
                 src={draft.videoPreview}
                 poster={draft.posterPreview || undefined}
+                autoPlay
                 controls
                 muted
                 loop
