@@ -1,4 +1,4 @@
-function waitForEvent(target, eventName, errorName, timeoutMs = 12000) {
+function waitForEvent(target, eventName, errorName, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
     let timeoutId = null
 
@@ -118,6 +118,7 @@ export async function generateVideoPosterFile(
   video.muted = true
   video.playsInline = true
   video.src = objectUrl
+  video.load()
 
   try {
     await waitForEvent(video, 'loadeddata', 'Không thể đọc dữ liệu video để tạo poster.')
@@ -177,12 +178,24 @@ export async function inspectVideoFilePlayback(file) {
     }
   }
 
+  console.log('[DEBUG] Inspecting video:', {
+    name: file.name,
+    type: file.type,
+    size: file.size,
+    canPlayMp4: document.createElement('video').canPlayType('video/mp4')
+  })
+
   const objectUrl = URL.createObjectURL(file)
   const video = document.createElement('video')
   video.preload = 'metadata'
   video.muted = true
   video.playsInline = true
   video.src = objectUrl
+  video.load()
+
+  video.addEventListener('error', () => {
+    console.log('[DEBUG] Video error event:', video.error)
+  })
 
   try {
     await waitForEvent(
@@ -191,19 +204,18 @@ export async function inspectVideoFilePlayback(file) {
       'Video này có thể đang dùng codec chưa hỗ trợ trên web. Hãy xuất lại bằng MP4 H.264/AVC, tắt HEVC/H.265/HDR.',
     )
 
+    console.log('[DEBUG] Metadata loaded:', {
+      duration: video.duration,
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight
+    })
+
     if (!video.videoWidth || !video.videoHeight) {
       return {
         playable: false,
         reason: 'Video không có khung hình hợp lệ để phát trên trình duyệt.',
       }
     }
-
-    await waitForEvent(
-      video,
-      'canplay',
-      'Video này có thể đang dùng codec chưa hỗ trợ trên web. Hãy xuất lại bằng MP4 H.264/AVC, tắt HEVC/H.265/HDR.',
-      8000,
-    )
 
     return {
       playable: true,
@@ -212,6 +224,7 @@ export async function inspectVideoFilePlayback(file) {
       duration: Number.isFinite(video.duration) ? video.duration : 0,
     }
   } catch (error) {
+    console.error('[DEBUG] Inspect error:', error)
     return {
       playable: false,
       reason: error.message || 'Video chưa tương thích để phát trên trình duyệt.',

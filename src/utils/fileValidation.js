@@ -75,21 +75,24 @@ export function validateVideoFile(file, options = {}) {
     return { valid: false, error: emptyMessage }
   }
 
-  if (!allowedTypes.includes(file.type)) {
-    return {
-      valid: false,
-      error:
-        invalidTypeMessage ||
-        `Chỉ chấp nhận video ${formatAllowedTypesLabel(allowedTypes)}.`,
-    }
-  }
-
   if (file.size > maxSize) {
     return {
       valid: false,
       error:
         sizeMessage ||
         `Video không được vượt quá ${Math.round(maxSize / (1024 * 1024))}MB.`,
+    }
+  }
+
+  const ext = file.name?.split('.').pop()?.toLowerCase()
+  const isFallbackAllowed = ['mp4', 'webm'].includes(ext)
+
+  if (!allowedTypes.includes(file.type) && !isFallbackAllowed) {
+    return {
+      valid: false,
+      error:
+        invalidTypeMessage ||
+        `Chỉ chấp nhận video ${formatAllowedTypesLabel(allowedTypes)}.`,
     }
   }
 
