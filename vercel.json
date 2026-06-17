@@ -57,6 +57,19 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.exanh.online"
+        }
+      ],
+      "destination": "https://exanh.online/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!cdn-cgi/|api/|.*\\.).*)",
