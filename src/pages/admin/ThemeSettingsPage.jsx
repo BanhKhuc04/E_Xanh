@@ -19,6 +19,7 @@ import {
   validateImageFile,
   validateVideoFile,
 } from '../../utils/fileValidation'
+import { generateVideoPosterFile } from '../../utils/videoPoster'
 import '../../styles/admin.css'
 import '../../styles/admin-settings.css'
 
@@ -31,6 +32,8 @@ function createInitialBannerDraft() {
     videoFile: null,
     videoName: '',
     videoPreview: '',
+    videoStatus: '',
+    isPreparingVideo: false,
     posterFile: null,
     posterName: '',
     posterPreview: '',
@@ -225,7 +228,7 @@ function ThemeSettingsPage() {
     }
   }
 
-  function handleVideoChange(event, pageKey) {
+  async function handleVideoChange(event, pageKey) {
     const file = event.target.files?.[0]
     event.target.value = ''
 
@@ -241,6 +244,7 @@ function ThemeSettingsPage() {
 
     updateDraft(pageKey, (draft) => {
       revokePreviewUrl(draft.videoPreview)
+      revokePreviewUrl(draft.posterPreview)
 
       return {
         ...draft,
@@ -248,38 +252,41 @@ function ThemeSettingsPage() {
         videoFile: file,
         videoName: file.name,
         videoPreview: nextPreview,
+        videoStatus: `Đã chọn video ${file.name}. Đang tạo ảnh chờ tự động...`,
+        isPreparingVideo: true,
+        posterFile: null,
+        posterName: '',
+        posterPreview: '',
       }
     })
-  }
 
-  function handlePosterChange(event, pageKey) {
-    const file = event.target.files?.[0]
-    event.target.value = ''
+    try {
+      const generatedPosterFile = await generateVideoPosterFile(file)
+      const posterPreview = URL.createObjectURL(generatedPosterFile)
 
-    if (!file) return
+      updateDraft(pageKey, (draft) => {
+        revokePreviewUrl(draft.posterPreview)
 
-    const validation = validateImageFile(file, {
-      allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
-      invalidTypeMessage: 'Poster chỉ chấp nhận JPG, JPEG, PNG hoặc WebP.',
-    })
-    if (!validation.valid) {
-      showMessage(validation.error, true)
-      return
-    }
-
-    const nextPreview = URL.createObjectURL(file)
-
-    updateDraft(pageKey, (draft) => {
-      revokePreviewUrl(draft.posterPreview)
-
-      return {
+        return {
+          ...draft,
+          posterFile: generatedPosterFile,
+          posterName: generatedPosterFile.name,
+          posterPreview,
+          videoStatus: `Đã chọn video ${file.name}. Poster được tạo tự động, bạn có thể lưu ngay.`,
+          isPreparingVideo: false,
+        }
+      })
+    } catch (error) {
+      updateDraft(pageKey, (draft) => ({
         ...draft,
-        mediaType: 'video',
-        posterFile: file,
-        posterName: file.name,
-        posterPreview: nextPreview,
-      }
-    })
+        posterFile: null,
+        posterName: '',
+        posterPreview: '',
+        videoStatus: `Đã chọn video ${file.name} nhưng chưa tạo được poster tự động.`,
+        isPreparingVideo: false,
+      }))
+      showMessage(error.message || 'Không thể tạo poster tự động từ video này.', true)
+    }
   }
 
   async function handleCreateVideoBanner(pageKey) {
@@ -290,8 +297,13 @@ function ThemeSettingsPage() {
       return
     }
 
+    if (draft.isPreparingVideo) {
+      showMessage('Hệ thống đang chuẩn bị video. Vui lòng đợi thêm một chút rồi lưu.', true)
+      return
+    }
+
     if (!draft.posterFile) {
-      showMessage('Vui lòng chọn poster image cho video để luôn có fallback an toàn.', true)
+      showMessage('Chưa thể tạo ảnh chờ tự động cho video này. Hãy chọn lại video khác hoặc file nhẹ hơn.', true)
       return
     }
 
@@ -444,77 +456,58 @@ function ThemeSettingsPage() {
 
     return (
       <div className="banner-upload-card__body banner-upload-card__body--video">
-        <div className="banner-upload-card__field-grid">
-          <div className="banner-upload-card__field">
-            <strong>Video banner</strong>
-            <p>Chỉ chấp nhận MP4 hoặc WebM, tối đa {VIDEO_LIMIT_MB}MB. Khuyến nghị dưới 5MB để load nhanh hơn.</p>
-            <label className="btn btn--secondary" style={{ cursor: 'pointer' }}>
-              <Video size={18} />
-              <span>{draft.videoName ? 'Đổi video' : 'Chọn video'}</span>
-              <input
-                type="file"
-                accept="video/mp4,video/webm"
-                onChange={(event) => handleVideoChange(event, pageKey)}
-                disabled={uploading}
-                hidden
-              />
-            </label>
-          </div>
-
-          <div className="banner-upload-card__field">
-            <strong>Poster image</strong>
-            <p>Poster là ảnh chờ và ảnh fallback khi video lỗi hoặc khi truy cập bằng mobile/reduced-motion.</p>
-            <label className="btn btn--secondary" style={{ cursor: 'pointer' }}>
-              <ImageIcon size={18} />
-              <span>{draft.posterName ? 'Đổi poster' : 'Chọn poster'}</span>
-              <input
-                type="file"
-                accept="image/png, image/jpeg, image/webp"
-                onChange={(event) => handlePosterChange(event, pageKey)}
-                disabled={uploading}
-                hidden
-              />
-            </label>
-          </div>
+        <div className="banner-upload-card__field">
+          <strong>Video banner</strong>
+          <p>Chỉ chấp nhận MP4 hoặc WebM, tối đa {VIDEO_LIMIT_MB}MB. Khuyến nghị dưới 5MB để load nhanh hơn. Poster sẽ được tạo tự động từ video.</p>
+          <label className="btn btn--secondary" style={{ cursor: 'pointer' }}>
+            <Video size={18} />
+            <span>{draft.videoName ? 'Đổi video' : 'Chọn video'}</span>
+            <input
+              type="file"
+              accept="video/mp4,video/webm"
+              onChange={(event) => handleVideoChange(event, pageKey)}
+              disabled={uploading}
+              hidden
+            />
+          </label>
         </div>
 
-        {(draft.videoPreview || draft.posterPreview) ? (
+        {draft.videoPreview ? (
           <div className="banner-upload-card__preview">
             <div className="banner-upload-card__preview-media">
-              {draft.videoPreview ? (
-                <video
-                  src={draft.videoPreview}
-                  poster={draft.posterPreview || undefined}
-                  controls
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                />
-              ) : (
-                <img src={draft.posterPreview} alt="Poster preview" />
-              )}
+              <video
+                src={draft.videoPreview}
+                poster={draft.posterPreview || undefined}
+                controls
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
             </div>
 
             <div className="banner-upload-card__preview-copy">
               <strong>Xem trước banner video</strong>
-              <p>Video sẽ autoplay dạng trang trí ở desktop, còn mobile và reduced-motion sẽ ưu tiên poster.</p>
+              <p>Video sẽ autoplay dạng trang trí ở desktop. Mobile, reduced-motion và trường hợp video lỗi sẽ dùng poster tự tạo để fallback.</p>
             </div>
           </div>
         ) : null}
 
         <div className="banner-upload-card__status-list">
           {draft.videoName ? <span className="page-badge page-badge--soft">Đã chọn video: {draft.videoName}</span> : null}
-          {draft.posterName ? <span className="page-badge page-badge--soft">Đã chọn poster: {draft.posterName}</span> : null}
-          {!draft.posterName ? (
-            <span className="banner-upload-card__hint">Poster là bắt buộc để banner không bị trắng khi video chậm hoặc lỗi.</span>
-          ) : null}
+          {draft.posterName ? <span className="page-badge page-badge--soft">Poster tự tạo: {draft.posterName}</span> : null}
+          {draft.videoStatus ? <span className="banner-upload-card__hint">{draft.videoStatus}</span> : null}
         </div>
 
         <div className="banner-upload-card__actions">
-          <button type="button" className="btn btn--primary" onClick={() => handleCreateVideoBanner(pageKey)} disabled={uploading}>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => handleCreateVideoBanner(pageKey)}
+            disabled={uploading || draft.isPreparingVideo || !draft.videoFile}
+          >
             <Plus size={18} />
-            {isCurrentUpload ? 'Đang lưu video...' : '+ Lưu banner video'}
+            {isCurrentUpload ? 'Đang lưu video...' : draft.isPreparingVideo ? 'Đang chuẩn bị video...' : '+ Lưu banner video'}
           </button>
         </div>
       </div>
