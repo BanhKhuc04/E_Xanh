@@ -1,4 +1,4 @@
-export const MARKDOWN_IMAGE_LIMIT = 3
+export const MARKDOWN_IMAGE_LIMIT = 5
 
 const MARKDOWN_IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)\s]+)\)/g
 

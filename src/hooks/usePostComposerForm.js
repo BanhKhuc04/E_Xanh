@@ -76,6 +76,10 @@ function validatePostForm(form) {
     errors.description = `Mô tả ngắn nên gói gọn trong ${DESCRIPTION_MAX_LENGTH} ký tự.`
   }
 
+  if (imageCount > MARKDOWN_IMAGE_LIMIT) {
+    errors.content = `Mỗi bài viết chỉ được thêm tối đa ${MARKDOWN_IMAGE_LIMIT} ảnh minh họa.`
+  }
+
   if (!trimmedContent && imageCount === 0) {
     errors.content = 'Hãy viết nội dung bài chia sẻ trước khi gửi duyệt.'
   } else if (trimmedContent.length > 0 && trimmedContent.length < CONTENT_MIN_LENGTH && imageCount === 0) {

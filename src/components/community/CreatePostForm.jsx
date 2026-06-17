@@ -28,7 +28,7 @@ function CreatePostForm({
     contentMin: 80,
     contentMax: 4000,
     tagsMax: 5,
-    contentImageMax: 3,
+    contentImageMax: 5,
   },
   compact = false,
   showActions = true,
@@ -299,6 +299,7 @@ function CreatePostForm({
             isUploadingImage={isUploadingInlineImage}
             maxLength={limits.contentMax}
             minLength={limits.contentMin}
+            maxImageCount={limits.contentImageMax}
             error={fieldErrors.content}
             describedBy={fieldErrors.content ? 'post-content-error' : 'post-content-help'}
           />

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowDown,
   ArrowUp,
@@ -69,24 +69,52 @@ function PostContentEditor({
   isUploadingImage = false,
   maxLength = 4000,
   minLength = 80,
+  maxImageCount = 5,
   error,
   describedBy,
 }) {
   const textareaRefs = useRef({})
   const localBlocks = useMemo(() => normalizeEditorBlocks(blocks, value), [blocks, value])
+  const [editorNotice, setEditorNotice] = useState('')
 
   const plainText = useMemo(() => extractPlainTextFromBlocks(localBlocks, value), [localBlocks, value])
   const wordCount = useMemo(() => countWords(plainText), [plainText])
   const imageCount = useMemo(() => countImageBlocks(localBlocks), [localBlocks])
+
+  useEffect(() => {
+    if (!editorNotice) return undefined
+
+    const timeoutId = window.setTimeout(() => {
+      setEditorNotice('')
+    }, 2400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [editorNotice])
 
   function updateBlocks(nextBlocks) {
     onChangeBlocks?.(nextBlocks)
     onChange?.(extractPlainTextFromBlocks(nextBlocks))
   }
 
+  function showNotice(message) {
+    setEditorNotice(message)
+  }
+
   function handleAddBlock(type) {
+    if (type === 'image' && imageCount >= maxImageCount) {
+      showNotice(`Bạn đã dùng đủ ${maxImageCount}/${maxImageCount} ảnh cho bài viết này.`)
+      return
+    }
+
     const nextBlock = type === 'image' ? createImageBlock() : createTextBlock()
     updateBlocks([...localBlocks, nextBlock])
+    showNotice(
+      type === 'image'
+        ? `Đã thêm hình ảnh ${Math.min(imageCount + 1, maxImageCount)}/${maxImageCount}.`
+        : 'Đã thêm 1 khung văn bản mới.',
+    )
   }
 
   function handleRemoveBlock(index) {
@@ -183,6 +211,7 @@ function PostContentEditor({
         url,
         alt: file.name || '',
       })
+      showNotice(`Đã tải ảnh lên thành công ${Math.min(imageCount + 1, maxImageCount)}/${maxImageCount}.`)
     } catch {
       // Lỗi đã được xử lý ở hook phía trên.
     }
@@ -348,17 +377,27 @@ function PostContentEditor({
             <Type size={16} />
             <span>+ Văn bản</span>
           </button>
-          <button type="button" className="block-editor__primary-action block-editor__primary-action--image" onClick={() => handleAddBlock('image')}>
+          <button
+            type="button"
+            className={`block-editor__primary-action block-editor__primary-action--image${imageCount >= maxImageCount ? ' is-limit' : ''}`}
+            onClick={() => handleAddBlock('image')}
+          >
             <ImagePlus size={16} />
             <span>+ Hình ảnh</span>
           </button>
         </div>
       </div>
 
+      {editorNotice ? (
+        <div className="block-editor__notice" role="status" aria-live="polite">
+          {editorNotice}
+        </div>
+      ) : null}
+
       <div className="block-editor__summary">
         <span>{wordCount} từ</span>
         <span>{plainText.length}/{maxLength} ký tự</span>
-        <span>{imageCount} ảnh</span>
+        <span>{imageCount}/{maxImageCount} ảnh</span>
         <span>Khuyến nghị {minLength}+ ký tự</span>
       </div>
 

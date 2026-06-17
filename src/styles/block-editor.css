@@ -67,6 +67,22 @@
   background: rgba(234, 245, 157, 0.42);
 }
 
+.block-editor__primary-action.is-limit {
+  border-color: rgba(214, 162, 74, 0.28);
+  background: rgba(255, 245, 220, 0.96);
+  color: #8a5a0b;
+}
+
+.block-editor__notice {
+  padding: 10px 14px;
+  border: 1px solid rgba(128, 177, 85, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: rgba(51, 106, 41, 0.84);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .block-editor__summary {
   display: flex;
   flex-wrap: wrap;
