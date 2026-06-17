@@ -35,6 +35,8 @@ function createInitialBannerDraft() {
     imageStatus: '',
     videoFile: null,
     videoName: '',
+    videoSize: 0,
+    videoDuration: 0,
     videoPreview: '',
     videoStatus: '',
     videoStatusTone: 'info',
@@ -268,6 +270,40 @@ function ThemeSettingsPage() {
     }
   }
 
+  function handleManualPosterChange(event, pageKey) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) return
+
+    const validation = validateImageFile(file, {
+      allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
+      invalidTypeMessage: 'Chỉ chấp nhận ảnh JPG, JPEG, PNG hoặc WebP làm poster.',
+    })
+
+    if (!validation.valid) {
+      showMessage(validation.error, true)
+      setInlineFeedback(pageKey, validation.error, 'error')
+      return
+    }
+
+    const nextPreview = URL.createObjectURL(file)
+
+    updateDraft(pageKey, (draft) => {
+      revokePreviewUrl(draft.posterPreview)
+
+      return {
+        ...draft,
+        posterFile: file,
+        posterName: file.name,
+        posterPreview: nextPreview,
+        videoStatus: draft.videoFile ? 'Đã upload poster thủ công. Bạn có thể lưu banner video ngay.' : 'Đã chọn poster. Vui lòng chọn thêm video.',
+        videoStatusTone: 'success',
+      }
+    })
+    setInlineFeedback(pageKey, 'Đã thay đổi ảnh poster thủ công thành công.', 'success')
+  }
+
   async function handleVideoChange(event, pageKey) {
     const file = event.target.files?.[0]
     event.target.value = ''
@@ -292,6 +328,8 @@ function ThemeSettingsPage() {
         mediaType: 'video',
         videoFile: file,
         videoName: file.name,
+        videoSize: file.size,
+        videoDuration: 0,
         videoPreview: nextPreview,
         videoStatus: `Đã chọn video ${file.name}. Đang tạo ảnh chờ tự động...`,
         videoStatusTone: 'info',
@@ -345,6 +383,7 @@ function ThemeSettingsPage() {
           posterFile: generatedPosterFile,
           posterName: generatedPosterFile.name,
           posterPreview,
+          videoDuration: playbackInspection.duration || 0,
           videoStatus: `Đã chọn video ${file.name}. Poster được tạo tự động, bạn có thể lưu ngay.`,
           videoStatusTone: 'success',
           isPreparingVideo: false,
@@ -364,7 +403,8 @@ function ThemeSettingsPage() {
             posterFile: fallbackPosterFile,
             posterName: fallbackPosterFile.name,
             posterPreview: fallbackPreview,
-            videoStatus: `Không đọc được frame đầu của ${file.name}. Hệ thống đã dùng poster mặc định để bạn vẫn có thể lưu banner video.`,
+            videoDuration: playbackInspection.duration || 0,
+            videoStatus: `Không đọc được frame đầu của ${file.name}. Hệ thống đã dùng poster mặc định. Bạn có thể chọn upload poster thủ công bên dưới.`,
             videoStatusTone: 'warning',
             isPreparingVideo: false,
           }
@@ -376,7 +416,8 @@ function ThemeSettingsPage() {
           posterFile: null,
           posterName: '',
           posterPreview: '',
-          videoStatus: `Đã chọn video ${file.name} nhưng chưa tạo được poster tự động.`,
+          videoDuration: playbackInspection?.duration || 0,
+          videoStatus: `Đã chọn video ${file.name} nhưng chưa tạo được poster tự động. Vui lòng upload poster thủ công.`,
           videoStatusTone: 'error',
           isPreparingVideo: false,
         }))
@@ -608,13 +649,17 @@ function ThemeSettingsPage() {
             <div className="banner-upload-card__preview-copy">
               <strong>Xem trước banner video</strong>
               <p>Video sẽ autoplay dạng trang trí ở desktop. Mobile, reduced-motion và trường hợp video lỗi sẽ dùng poster tự tạo để fallback.</p>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+                Dung lượng: {(draft.videoSize / (1024 * 1024)).toFixed(2)} MB
+                {draft.videoDuration ? ` • Độ dài: ${Math.round(draft.videoDuration)}s` : ''}
+              </div>
             </div>
           </div>
         ) : null}
 
         <div className="banner-upload-card__status-list">
           {draft.videoName ? <span className="page-badge page-badge--soft">Đã chọn video: {draft.videoName}</span> : null}
-          {draft.posterName ? <span className="page-badge page-badge--soft">Poster tự tạo: {draft.posterName}</span> : null}
+          {draft.posterName ? <span className="page-badge page-badge--soft">{draft.posterName.includes('fallback') || draft.videoStatusTone === 'warning' ? 'Poster dự phòng: ' : 'Poster: '}{draft.posterName}</span> : null}
           {draft.videoStatus ? (
             <span className={`banner-upload-card__notice banner-upload-card__notice--${draft.videoStatusTone || 'info'}`}>
               {draft.videoStatus}
@@ -622,16 +667,30 @@ function ThemeSettingsPage() {
           ) : null}
         </div>
 
-        <div className="banner-upload-card__actions">
+        <div className="banner-upload-card__actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn btn--primary"
             onClick={() => handleCreateVideoBanner(pageKey)}
-            disabled={uploading || draft.isPreparingVideo || !draft.videoFile}
+            disabled={uploading || draft.isPreparingVideo || !draft.videoFile || draft.videoStatusTone === 'error'}
           >
             <Plus size={18} />
             {isCurrentUpload ? 'Đang lưu video...' : draft.isPreparingVideo ? 'Đang chuẩn bị video...' : '+ Lưu banner video'}
           </button>
+
+          {(draft.videoFile || draft.posterFile) && (
+            <label className="btn btn--secondary" style={{ cursor: 'pointer' }}>
+              <ImageIcon size={18} />
+              <span>Thay poster thủ công</span>
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={(event) => handleManualPosterChange(event, pageKey)}
+                disabled={uploading}
+                hidden
+              />
+            </label>
+          )}
         </div>
       </div>
     )

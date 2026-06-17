@@ -188,7 +188,7 @@ export async function inspectVideoFilePlayback(file) {
     await waitForEvent(
       video,
       'loadedmetadata',
-      'Không thể đọc metadata video. Có thể codec của file chưa tương thích với trình duyệt.',
+      'Video này có thể đang dùng codec chưa hỗ trợ trên web. Hãy xuất lại bằng MP4 H.264/AVC, tắt HEVC/H.265/HDR.',
     )
 
     if (!video.videoWidth || !video.videoHeight) {
@@ -201,7 +201,7 @@ export async function inspectVideoFilePlayback(file) {
     await waitForEvent(
       video,
       'canplay',
-      'Trình duyệt không giải mã được video này. Hãy xuất lại dưới dạng MP4 H.264 hoặc WebM VP9.',
+      'Video này có thể đang dùng codec chưa hỗ trợ trên web. Hãy xuất lại bằng MP4 H.264/AVC, tắt HEVC/H.265/HDR.',
       8000,
     )
 
