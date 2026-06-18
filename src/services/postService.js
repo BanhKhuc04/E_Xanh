@@ -1,5 +1,7 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
+import { logAdminAction } from './adminLogService'
+import { createNotificationForUser } from './notificationService'
 import { normalizeAvatarUrl } from '../utils/avatar'
 import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
 import {
@@ -357,7 +359,7 @@ export async function getCommunityPosts() {
     .from('posts')
     .select('*')
     .eq('status', 'approved')
-    .eq('type', 'community')
+    .in('type', ['community', 'qa', 'review'])
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
 
@@ -602,6 +604,47 @@ export async function updatePostStatus(postId, status, adminNote = null) {
 
   if (!error && (!data || data.length === 0)) {
     return { data: null, error: new Error('Không tìm thấy bài viết hoặc bạn không có quyền cập nhật.') }
+  }
+
+  if (data && data.length > 0) {
+    const post = data[0]
+    if (post && post.author_id) {
+      let title = ''
+      let message = ''
+      let notifType = 'post_status'
+      
+      if (status === 'approved') {
+        title = 'Bài viết đã được duyệt'
+        message = 'Bài viết của bạn đã được duyệt và hiển thị công khai.'
+        notifType = 'post_approved'
+      } else if (status === 'rejected') {
+        title = 'Bài viết bị từ chối'
+        message = adminNote ? `Bài viết của bạn chưa được duyệt. Lý do: ${adminNote}` : 'Bài viết của bạn chưa được duyệt. Vui lòng kiểm tra lại nội dung.'
+        notifType = 'post_rejected'
+      } else if (status === 'blocked') {
+        title = 'Bài viết bị khóa'
+        message = 'Bài viết của bạn đã bị khóa do vi phạm quy định.'
+        notifType = 'post_blocked'
+      }
+      
+      if (title) {
+        await createNotificationForUser(post.author_id, {
+          title,
+          message,
+          type: notifType,
+          actionUrl: `/cong-dong/post/${post.slug}`,
+          relatedType: 'post',
+          relatedId: postId
+        })
+      }
+
+      await logAdminAction({
+        action: `update_post_status_${status}`,
+        targetType: 'post',
+        targetId: postId,
+        metadata: { new_status: status, admin_note: adminNote }
+      })
+    }
   }
 
   return { data, error }

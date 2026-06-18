@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { getAdminStats } from './analyticsService'
 import { logError, logWarn } from '../utils/logger'
+import { getCurrentSession, getCurrentUserProfile } from './authService'
 
 export const DEFAULT_PLATFORM_SETTINGS = {
   site_name: 'E-XANH',
@@ -30,6 +31,22 @@ function buildError(message, source = null) {
   return { message, source }
 }
 
+function isMissingRelationError(error) {
+  const message = String(error?.message || '').toLowerCase()
+  return error?.code === '42P01' || error?.code === 'PGRST205' || message.includes('does not exist')
+}
+
+function isPermissionError(error) {
+  const message = String(error?.message || '').toLowerCase()
+  return (
+    message.includes('permission') ||
+    message.includes('row-level security') ||
+    message.includes('policy') ||
+    message.includes('not authorized') ||
+    message.includes('forbidden')
+  )
+}
+
 function encodeSettingValue(value) {
   return value === undefined ? null : value
 }
@@ -45,22 +62,44 @@ async function isTableAvailable(tableName) {
   }
 
   const { error } = await supabase.from(tableName).select('*').limit(1)
-  if (error) {
-    const lowerMessage = String(error.message || '').toLowerCase()
-    if (
-      error.code === '42P01' ||
-      lowerMessage.includes('does not exist') ||
-      lowerMessage.includes('policy') ||
-      lowerMessage.includes('permission') ||
-      lowerMessage.includes('rls')
-    ) {
-      TABLE_CACHE[tableName] = false
-      return false
-    }
+  if (isMissingRelationError(error)) {
+    TABLE_CACHE[tableName] = false
+    return false
+  }
+
+  if (error && !isPermissionError(error)) {
+    logWarn(`[Settings] Probe bảng ${tableName} trả lỗi`, error)
   }
 
   TABLE_CACHE[tableName] = true
   return true
+}
+
+async function getAuthenticatedStaffProfile() {
+  const session = await getCurrentSession()
+  if (!session?.user?.id) {
+    return {
+      profile: null,
+      error: buildError('Không tìm thấy phiên đăng nhập staff hiện tại.'),
+    }
+  }
+
+  const profile = await getCurrentUserProfile(session.user.id)
+  if (!profile) {
+    return {
+      profile: null,
+      error: buildError('Không thể xác thực hồ sơ staff hiện tại từ bảng profiles.'),
+    }
+  }
+
+  if (!['admin', 'moderator'].includes(profile.role) || profile.status !== 'active') {
+    return {
+      profile: null,
+      error: buildError('Tài khoản hiện tại không có quyền staff hợp lệ để ghi admin action log.'),
+    }
+  }
+
+  return { profile, error: null }
 }
 
 async function resolveSettingsTable() {
@@ -79,8 +118,14 @@ async function writeAuditLog(payload) {
     return { skipped: true }
   }
 
+  const { profile, error: profileError } = await getAuthenticatedStaffProfile()
+  if (profileError) {
+    logWarn('[Settings] Không thể xác thực staff trước khi ghi audit log', profileError)
+    return { skipped: true, error: profileError }
+  }
+
   const newPayload = {
-    admin_id: payload.admin_id,
+    admin_id: profile.id,
     action: payload.action,
     target_type: 'system_settings',
     target_id: payload.target_user_id || 'system',

@@ -52,18 +52,18 @@ function CommunitySidebar({
       {popularCommunityPosts.length > 0 ? (
         <section className="community-sidebar-panel__card">
           <h2>Bài viết được yêu thích</h2>
-          <div className="community-sidebar-panel__popular">
+          <ul className="community-sidebar-panel__popular">
             {popularCommunityPosts.map((post) => (
-              <article key={post.id}>
+              <li key={post.id}>
                 <strong>
                   <Link to={`/cong-dong/${post.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                     {post.title}
                   </Link>
                 </strong>
                 <span>{post.likes} thích · {post.commentsCount || post.comments || 0} bình luận</span>
-              </article>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       ) : null}
 

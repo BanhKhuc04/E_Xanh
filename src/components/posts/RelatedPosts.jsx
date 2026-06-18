@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import heroImage from '../../assets/hero.png'
+import PostImage from '../common/PostImage'
 
 function RelatedPosts({ title, posts, compact = false }) {
   return (
@@ -8,11 +9,11 @@ function RelatedPosts({ title, posts, compact = false }) {
       <div className="related-posts__list">
         {posts.map((post) => (
           <Link key={post.id} to={`/meo-tiet-kiem/${post.slug || post.id}`} className="related-posts__item">
-            <img 
-              src={post.image || heroImage} 
-              alt={post.title} 
-              style={{ objectFit: 'cover' }}
-              onError={(e) => { e.target.src = heroImage }}
+            <PostImage
+              src={post.image || heroImage}
+              alt={post.title}
+              variant="thumbnail"
+              aspect="1:1"
             />
             <div>
               <h3>{post.title}</h3>

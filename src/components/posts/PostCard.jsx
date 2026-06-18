@@ -49,7 +49,7 @@ function PostCard({ post }) {
   return (
     <article className="post-card-ui" data-testid="tip-card">
       <div className="post-card-ui__media">
-        <PostImage src={post.image} alt={`${post.title} - mẹo tiết kiệm điện`} variant="card" />
+        <PostImage src={post.image} alt={`${post.title} - mẹo tiết kiệm điện`} variant="card" aspect="16:9" />
         <span className="post-card-ui__category">{post.category}</span>
         <button 
           type="button" 

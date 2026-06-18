@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import PageHero from '../../components/common/PageHero'
 import SavedPostCard from '../../components/posts/SavedPostCard'
@@ -32,7 +32,6 @@ function sortSavedPosts(items, sortValue) {
 }
 
 function SavedPostsPage() {
-  const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('Tất cả')
   const [sortValue, setSortValue] = useState('Mới lưu nhất')

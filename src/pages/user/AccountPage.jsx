@@ -7,7 +7,6 @@ import MyPostsList from '../../components/account/MyPostsList'
 import RecentSavedPosts from '../../components/account/RecentSavedPosts'
 import RecentComments from '../../components/account/RecentComments'
 import AccountInfoCard from '../../components/account/AccountInfoCard'
-import { savedPosts } from '../../data/mock/posts'
 import {
   getCurrentSession,
   getCurrentUserProfile,
@@ -15,55 +14,6 @@ import {
   signOut,
 } from '../../services/authService'
 import '../../styles/account.css'
-
-const profileStats = [
-  { label: 'Bài đã đăng', value: 8 },
-  { label: 'Bài đã lưu', value: 12 },
-  { label: 'Bình luận', value: 24 },
-  { label: 'Lần kiểm tra điện', value: 5 },
-]
-
-const myPosts = [
-  {
-    title: '5 cách dùng điều hòa tiết kiệm điện mùa nóng',
-    status: 'Đã duyệt',
-    likes: 124,
-    comments: 28,
-  },
-  {
-    title: 'Có nên rút sạc laptop khi pin đầy?',
-    status: 'Chờ duyệt',
-    likes: 0,
-    comments: 0,
-  },
-  {
-    title: 'Checklist 30 giây trước khi rời phòng',
-    status: 'Đã duyệt',
-    likes: 302,
-    comments: 45,
-  },
-]
-
-const recentComments = [
-  {
-    id: 'account-comment-1',
-    content: 'Bài viết rất hữu ích, tôi đã áp dụng cách này và thấy tháng rồi giảm được 50k tiền điện.',
-    postTitle: 'Cách làm sạch lưới lọc điều hòa tại nhà',
-    time: '2 giờ trước',
-  },
-  {
-    id: 'account-comment-2',
-    content: 'Cho mình hỏi mua bóng LED loại nào thì tốt cho mắt mà vẫn tiết kiệm vậy ạ?',
-    postTitle: 'So sánh bóng đèn LED và huỳnh quang',
-    time: 'Hôm qua',
-  },
-  {
-    id: 'account-comment-3',
-    content: 'Cảm ơn bạn đã chia sẻ tips hay!',
-    postTitle: 'Mẹo sắp xếp tủ lạnh giúp giảm 20% điện năng',
-    time: '2 ngày trước',
-  },
-]
 
 function getAvatar(name, email, avatarUrl) {
   if (avatarUrl) return avatarUrl

@@ -119,8 +119,10 @@
 }
 
 .auth-carousel-placeholder {
+  position: relative;
   width: 100%;
-  height: clamp(260px, 26vh, 300px);
+  height: clamp(280px, 32vw, 420px);
+  aspect-ratio: 16 / 9;
   margin-top: 16px;
   overflow: hidden;
   border-radius: 24px;
@@ -140,15 +142,34 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  aspect-ratio: auto;
   border-radius: inherit;
-  min-height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  box-shadow: none;
 }
 
-/* Ensure the carousel wrapper fills the placeholder instead of using a fixed 16:9 ratio */
-.auth-carousel-placeholder > div {
+.auth-carousel-placeholder .hero-media,
+.auth-carousel-placeholder .hero-media__picture {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+
+.auth-carousel-placeholder > div,
+.auth-carousel-placeholder .banner-carousel,
+.auth-carousel-placeholder .banner-carousel > div {
   width: 100% !important;
   height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
   aspect-ratio: auto !important;
+}
+
+.auth-carousel-placeholder .hero-media__picture,
+.auth-carousel-placeholder .hero-media__surface {
+  overflow: hidden;
 }
 
 .auth-card {
@@ -439,6 +460,7 @@
 
   .auth-carousel-placeholder {
     margin-top: 24px;
+    height: clamp(320px, 28vw, 460px);
   }
 
   .auth-visual__main {
@@ -470,8 +492,8 @@
   }
 
   .auth-carousel-placeholder {
-    height: 240px;
     margin-top: 16px;
+    height: clamp(260px, 30vw, 360px);
   }
 }
 
@@ -498,6 +520,10 @@
     width: 42px;
     height: 42px;
   }
+
+  .auth-carousel-placeholder {
+    height: clamp(220px, 52vw, 340px);
+  }
 }
 
 @media (max-width: 640px) {
@@ -517,6 +543,10 @@
 
   .auth-recovery-state--loading {
     grid-template-columns: 1fr;
+  }
+
+  .auth-carousel-placeholder {
+    height: clamp(200px, 58vw, 280px);
   }
 }
 

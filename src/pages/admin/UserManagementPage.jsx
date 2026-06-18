@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import AdminUserStats from '../../components/admin/users/AdminUserStats'
 import AdminUserFilter from '../../components/admin/users/AdminUserFilter'
@@ -55,13 +55,20 @@ function UserManagementPage() {
   const [accessDenied, setAccessDenied] = useState(false)
   const [actionBusy, setActionBusy] = useState(false)
   const [dialog, setDialog] = useState(emptyDialog())
+  const toastTimeoutRef = useRef(null)
 
   const canManageUsers = currentUserData?.role === 'admin'
 
   const showToast = useCallback((message, tone = 'success') => {
     setToast({ message, tone })
-    window.clearTimeout(showToast.timeoutId)
-    showToast.timeoutId = window.setTimeout(() => setToast(null), 3200)
+    window.clearTimeout(toastTimeoutRef.current)
+    toastTimeoutRef.current = window.setTimeout(() => setToast(null), 3200)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(toastTimeoutRef.current)
+    }
   }, [])
 
   const fetchUsers = useCallback(async () => {

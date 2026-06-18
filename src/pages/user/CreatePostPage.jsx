@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import CreatePostForm from '../../components/community/CreatePostForm'
-import CreatePostSidebar from '../../components/community/CreatePostSidebar'
-import PostPreviewModal from '../../components/community/PostPreviewModal'
-import PageHero from '../../components/common/PageHero'
+import PostLivePreview from '../../components/community/PostLivePreview'
 import { usePostComposerForm } from '../../hooks/usePostComposerForm'
 import '../../styles/create-post.css'
 
@@ -36,20 +34,17 @@ function CreatePostPage() {
   return (
     <>
       <div className="create-post-page">
-        <PageHero
-          pageKey="community"
-          badge="Fallback route"
-          title="Đăng bài chia sẻ"
-          description="Trang này vẫn được giữ để không phá link cũ, nhưng dùng cùng composer UI như modal trong cộng đồng."
-          fallbackImage="/images/fallback-green.jpg"
-          imageAlt="Minh họa người dùng đang viết bài chia sẻ sống xanh"
-        />
+        <section className="create-post-page__intro">
+          <div className="create-post-page__intro-copy">
+            <span className="create-post-page__badge">Không gian soạn bài</span>
+            <h1>Viết bài chia sẻ rõ ràng, dễ đọc và dễ duyệt hơn</h1>
+            <p>Bài viết sẽ được gửi ở trạng thái chờ duyệt. Nháp được tự động lưu trong lúc bạn soạn.</p>
+          </div>
 
-        <section className="create-post-page__alert">
-          <strong>Quy trình duyệt bài</strong>
-          <p>
-            Bài viết của bạn sẽ được gửi ở trạng thái Chờ duyệt. Admin sẽ kiểm tra nội dung trước khi hiển thị công khai.
-          </p>
+          <div className="create-post-page__intro-note">
+            <strong>Quy trình duyệt bài</strong>
+            <p>Admin sẽ kiểm tra nội dung trước khi hiển thị công khai trên cộng đồng E-XANH.</p>
+          </div>
         </section>
 
         <div className="create-post-page__layout">
@@ -62,32 +57,24 @@ function CreatePostPage() {
             onChange={composer.handleChange}
             onCoverChange={composer.handleCoverChange}
             onRemoveCover={composer.removeCover}
-            onSaveDraft={composer.handleSaveDraft}
             onClearDraft={composer.clearDraft}
-            onPreview={composer.handlePreview}
             onSubmit={composer.handleSubmit}
             onInsertInlineImage={composer.handleInlineImageUpload}
             isSubmitting={composer.isSubmitting}
             isUploadingInlineImage={composer.isUploadingInlineImage}
+            cropState={composer.cropState}
+            onCropApply={composer.handleCropApply}
+            onCropClose={composer.handleCropClose}
             draftMeta={composer.draftMeta}
             cooldownRemaining={composer.cooldownRemaining}
             limits={composer.limits}
           />
 
-          <CreatePostSidebar
-            form={composer.form}
-            previewHighlight={composer.previewHighlight}
-            previewAuthor={composer.profile?.name || composer.user?.email?.split('@')[0] || 'Bạn'}
-          />
+          <aside className="create-post-page__preview-column">
+            <PostLivePreview form={composer.form} author={composer.profile || composer.user} />
+          </aside>
         </div>
       </div>
-
-      <PostPreviewModal
-        isOpen={composer.previewHighlight}
-        form={composer.form}
-        onClose={composer.closePreview}
-        authorName={composer.profile?.name || composer.user?.email?.split('@')[0]}
-      />
     </>
   )
 }

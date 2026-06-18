@@ -46,7 +46,9 @@ jsFiles.forEach(file => {
           else if (fs.existsSync(resolvedPath + '/index.jsx')) resolvedPath += '/index.jsx';
         }
         importedFiles.add(resolvedPath);
-      } catch(e){}
+      } catch {
+        // Ignore unresolved local imports while scanning.
+      }
     }
   }
   
@@ -65,7 +67,9 @@ jsFiles.forEach(file => {
           else if (fs.existsSync(resolvedPath + '/index.jsx')) resolvedPath += '/index.jsx';
         }
         importedFiles.add(resolvedPath);
-      } catch(e){}
+      } catch {
+        // Ignore unresolved dynamic imports while scanning.
+      }
     }
   }
 });

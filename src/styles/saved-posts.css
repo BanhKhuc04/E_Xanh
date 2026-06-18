@@ -290,10 +290,8 @@
   align-items: center;
 }
 
-.saved-sidebar__recent-item img {
+.saved-sidebar__recent-item .post-image {
   width: 80px;
-  height: 80px;
-  object-fit: cover;
   border-radius: 14px;
 }
 

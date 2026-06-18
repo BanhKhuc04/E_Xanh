@@ -50,7 +50,7 @@ export async function getAdminStats(range = '30 ngày qua') {
       result.pendingPosts = data.filter(p => p.status === 'pending').length
       result.rejectedHiddenPosts = data.filter(p => ['rejected', 'hidden', 'blocked'].includes(p.status)).length
     }
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   // Users
   try {
@@ -61,7 +61,7 @@ export async function getAdminStats(range = '30 ngày qua') {
       result.lockedUsers = data.filter(u => ['locked', 'blocked'].includes(u.status)).length
       result.deletedUsers = data.filter(u => u.status === 'deleted').length
     }
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   // Saved Posts
   try {
@@ -69,7 +69,7 @@ export async function getAdminStats(range = '30 ngày qua') {
     if (startDate) query = query.gte('created_at', startDate)
     const { count } = await query
     if (count !== null) result.totalSavedPosts = count
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   // Comments
   try {
@@ -80,13 +80,13 @@ export async function getAdminStats(range = '30 ngày qua') {
       result.totalComments = data.length
       result.hiddenSpamComments = data.filter(c => ['hidden', 'spam', 'deleted'].includes(c.status)).length
     }
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   // Devices
   try {
     const { count } = await supabase.from('devices').select('*', { count: 'exact', head: true })
     if (count !== null) result.totalDevices = count
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   // Electricity checks
   try {
@@ -94,7 +94,7 @@ export async function getAdminStats(range = '30 ngày qua') {
     if (startDate) query = query.gte('checked_at', startDate)
     const { count } = await query
     if (count !== null) result.totalElectricityChecks = count
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   try {
     const { data } = await supabase
@@ -111,7 +111,7 @@ export async function getAdminStats(range = '30 ngày qua') {
       .limit(5)
 
     result.recentPosts = data ?? []
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   try {
     const { data } = await supabase
@@ -128,7 +128,7 @@ export async function getAdminStats(range = '30 ngày qua') {
       .limit(8)
 
     result.pendingPostsList = data ?? []
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
 
   return result
 }
@@ -169,7 +169,7 @@ export async function getTrendData(table, dateField, range = '30 ngày qua') {
       label: new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
       count,
     }))
-  } catch (e) {
+  } catch {
     return []
   }
 }
@@ -250,7 +250,7 @@ export async function getContentTypeBreakdown(range = '30 ngày qua') {
       { label: 'Review thiết bị', raw: counts.review, value: toPercent(counts.review), color: '#4F8428' },
       { label: 'Hỏi đáp', raw: counts.qa, value: toPercent(counts.qa), color: '#EAF59D' },
     ]
-  } catch (error) {
+  } catch {
     return []
   }
 }
@@ -267,7 +267,7 @@ export async function getTopSavedPosts(limit = 5) {
       title: item.title || 'Bài viết chưa đặt tiêu đề',
       saves: item.saved_count || 0,
     }))
-  } catch (error) {
+  } catch {
     return []
   }
 }
@@ -292,7 +292,7 @@ export async function getTopDevices(limit = 5) {
         count,
         icon: ['⚡', '💻', '💡', '🧊', '🧺'][index] || '⚙️',
       }))
-  } catch (error) {
+  } catch {
     return []
   }
 }

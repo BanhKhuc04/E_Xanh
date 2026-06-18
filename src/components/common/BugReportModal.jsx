@@ -29,8 +29,16 @@ function BugReportModal({
 
   useEffect(() => {
     if (open) {
-      setActiveTab(initialTab)
+      const timerId = window.setTimeout(() => {
+        setActiveTab(initialTab)
+      }, 0)
+
+      return () => {
+        window.clearTimeout(timerId)
+      }
     }
+
+    return undefined
   }, [initialTab, open])
 
   useEffect(() => {
@@ -43,12 +51,12 @@ function BugReportModal({
   const currentPageUrl = useMemo(() => {
     if (typeof window === 'undefined') return ''
     return window.location.href
-  }, [open])
+  }, [])
 
   const currentUserAgent = useMemo(() => {
     if (typeof navigator === 'undefined') return ''
     return navigator.userAgent
-  }, [open])
+  }, [])
 
   if (!open || !notice) return null
 

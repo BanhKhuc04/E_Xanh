@@ -1,3 +1,5 @@
+import PostImage from '../common/PostImage'
+
 function CreatePostSidebar({ form, previewHighlight, previewAuthor = 'Nguyễn Văn A', compact = false }) {
   const previewType = form.type || 'Mẹo tiết kiệm'
   const previewTitle = form.title || 'Tiêu đề bài viết của bạn sẽ hiển thị tại đây.'
@@ -29,7 +31,7 @@ function CreatePostSidebar({ form, previewHighlight, previewAuthor = 'Nguyễn V
         <div className="create-post-sidebar__preview">
           <div className="create-post-sidebar__preview-cover" style={{ padding: form.coverPreview ? '0' : undefined, overflow: 'hidden' }}>
             {form.coverPreview ? (
-              <img src={form.coverPreview} alt="Preview" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }} />
+              <PostImage src={form.coverPreview} alt="Preview" variant="preview" loading="eager" />
             ) : (
               <>
                 <span>Ảnh bìa</span>

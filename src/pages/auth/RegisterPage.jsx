@@ -102,7 +102,7 @@ function RegisterPage() {
 
     setIsSubmitting(true)
 
-    const { data, error } = await signUpWithEmail({
+    const { error } = await signUpWithEmail({
       name: form.name.trim(),
       email: form.email.trim(),
       password: form.password,
@@ -206,7 +206,7 @@ function RegisterPage() {
                     const { supabase } = await import('../../lib/supabase')
                     await supabase.auth.resend({ type: 'signup', email: form.email })
                     alert('Đã gửi lại email xác nhận!')
-                  } catch (e) {
+                  } catch {
                     alert('Lỗi gửi lại email. Vui lòng thử lại sau.')
                   }
                 }}

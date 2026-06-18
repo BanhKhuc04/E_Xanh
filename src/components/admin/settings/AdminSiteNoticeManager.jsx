@@ -92,7 +92,13 @@ function AdminSiteNoticeManager() {
   }, [editingId])
 
   useEffect(() => {
-    loadNotices()
+    const timerId = window.setTimeout(() => {
+      void loadNotices()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [loadNotices])
 
   const previewNotice = useMemo(() => {
@@ -145,7 +151,7 @@ function AdminSiteNoticeManager() {
     setErrorMsg('')
     setSuccessMsg('')
 
-    let guideSections = []
+    let guideSections
 
     try {
       guideSections = parseGuideSectionsText(form.guide_sections_text)

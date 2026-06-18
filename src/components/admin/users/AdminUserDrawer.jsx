@@ -17,7 +17,13 @@ function AdminUserDrawer({
   const [isSavingNote, setIsSavingNote] = useState(false)
 
   useEffect(() => {
-    setAdminNote(user?.adminNote ?? '')
+    const timerId = window.setTimeout(() => {
+      setAdminNote(user?.adminNote ?? '')
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [user])
 
   if (!user) return null

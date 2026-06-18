@@ -65,7 +65,13 @@ function AdminAnnouncementManager() {
   }, [])
 
   useEffect(() => {
-    loadAnnouncements()
+    const timerId = window.setTimeout(() => {
+      void loadAnnouncements()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [loadAnnouncements])
 
   const previewVisibility = useMemo(

@@ -19,7 +19,7 @@ function SavedPostCard({ post, onUnsave }) {
   return (
     <article className="saved-post-card">
       <div className="saved-post-card__media">
-        <PostImage src={imageSource} alt={`Ảnh bài viết ${post.title}`} variant="card" />
+        <PostImage src={imageSource} alt={`Ảnh bài viết ${post.title}`} variant="card" aspect="16:9" />
         <span className="saved-post-card__tag">{post.savedCategoryLabel || post.category}</span>
         <button 
           type="button" 

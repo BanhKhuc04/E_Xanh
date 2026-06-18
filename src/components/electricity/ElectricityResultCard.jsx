@@ -2,7 +2,7 @@ import { formatCurrency, formatKwh } from '../../data/electricity'
 
 function ElectricityResultCard({ summary }) {
   return (
-    <section id="ket-qua-dien" className="electricity-result-card">
+    <section className="electricity-result-card">
       <span className="electricity-result-card__eyebrow">Tiền điện dự kiến</span>
       <div className="electricity-result-card__price">{formatCurrency(summary.estimatedCost)}</div>
       <p>Dựa trên đơn giá điện sinh hoạt tạm tính 2.400đ/kWh.</p>

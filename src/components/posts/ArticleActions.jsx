@@ -9,7 +9,7 @@ function ArticleActions({ post, onToggleLike, onToggleSave, onReport, onScrollTo
         className={`article-actions__button${post.isLiked ? ' is-accent' : ''}`}
         onClick={onToggleLike}
       >
-        <Heart size={18} strokeWidth={2.1} />
+        <Heart size={18} strokeWidth={2.1} fill={post.isLiked ? "currentColor" : "none"} />
         <span>{post.isLiked ? 'Đã thích' : 'Thích'}</span>
       </button>
       <button type="button" className="article-actions__button" onClick={onScrollToComments}>
@@ -21,7 +21,7 @@ function ArticleActions({ post, onToggleLike, onToggleSave, onReport, onScrollTo
         className={`article-actions__button${post.isSaved ? ' is-accent' : ''}`}
         onClick={onToggleSave}
       >
-        <Bookmark size={18} strokeWidth={2.1} />
+        <Bookmark size={18} strokeWidth={2.1} fill={post.isSaved ? "currentColor" : "none"} />
         <span>{post.isSaved ? 'Đã lưu' : 'Lưu bài'}</span>
       </button>
       <button type="button" className="article-actions__button" onClick={onShare}>

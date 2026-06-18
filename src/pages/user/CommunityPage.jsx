@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
@@ -22,34 +22,100 @@ const communityFilters = [
   'Đã lưu nhiều',
 ]
 
+const COMMUNITY_TOPIC_LABELS = {
+  qa: 'Hỏi đáp',
+  community: 'Kinh nghiệm',
+  review: 'Review thiết bị',
+}
+
+const COMMUNITY_CATEGORY_LABELS = {
+  qa: 'Giải đáp',
+  community: 'Chia sẻ',
+  review: 'Đánh giá',
+}
+
 function sortCommunityPosts(posts, activeFilter) {
   const items = [...posts]
 
+  const sortByNewest = (first, second) =>
+    new Date(second.publishedAt || second.createdAt || second.time) -
+    new Date(first.publishedAt || first.createdAt || first.time)
+
+  const sortByInteraction = (first, second) => second.interactionScore - first.interactionScore
+  const sortBySaved = (first, second) => second.savedCount - first.savedCount
+
   if (activeFilter === 'Mới nhất') {
-    return items.sort((first, second) => new Date(second.publishedAt || second.time) - new Date(first.publishedAt || first.time))
+    return items.sort(sortByNewest)
   }
 
   if (activeFilter === 'Nhiều tương tác') {
-    return items.sort(
-      (first, second) =>
-        second.likes + second.commentsCount + second.shares -
-        (first.likes + first.commentsCount + first.shares),
-    )
+    return items.sort((first, second) => sortByInteraction(first, second) || sortByNewest(first, second))
   }
 
   if (activeFilter === 'Hỏi đáp' || activeFilter === 'Kinh nghiệm') {
-    return items.filter((post) => post.topic === activeFilter)
+    return items
+      .filter((post) => post.topic === activeFilter)
+      .sort(sortByNewest)
   }
 
   if (activeFilter === 'Đã lưu nhiều') {
-    return items.sort((first, second) => second.savedCount - first.savedCount)
+    return items.sort((first, second) => sortBySaved(first, second) || sortByInteraction(first, second) || sortByNewest(first, second))
   }
 
-  return items
+  return items.sort(sortByNewest)
+}
+
+function getEmptyStateContent(activeFilter) {
+  if (activeFilter === 'Hỏi đáp') {
+    return {
+      title: 'Chưa có bài hỏi đáp nào',
+      message: 'Khi thành viên đặt câu hỏi mới, nội dung sẽ xuất hiện ở đây để mọi người cùng hỗ trợ.',
+      actionLabel: 'Đặt câu hỏi đầu tiên',
+      defaultType: 'qa',
+      actionKind: 'compose',
+    }
+  }
+
+  if (activeFilter === 'Kinh nghiệm') {
+    return {
+      title: 'Chưa có bài chia sẻ kinh nghiệm nào',
+      message: 'Hãy mở đầu bằng một mẹo thực tế để cộng đồng có thêm cảm hứng sống xanh mỗi ngày.',
+      actionLabel: 'Viết bài kinh nghiệm',
+      defaultType: 'community',
+      actionKind: 'compose',
+    }
+  }
+
+  if (activeFilter === 'Đã lưu nhiều') {
+    return {
+      title: 'Chưa có bài nào được lưu nhiều',
+      message: 'Khi người dùng bắt đầu lưu lại các bài viết hữu ích, danh sách nổi bật sẽ hiện ở đây.',
+      actionLabel: 'Xem tất cả bài viết',
+      defaultType: 'community',
+      actionKind: 'reset-filter',
+    }
+  }
+
+  if (activeFilter === 'Nhiều tương tác') {
+    return {
+      title: 'Chưa có bài nào có tương tác nổi bật',
+      message: 'Những bài viết được thích, bình luận và lưu nhiều sẽ được ưu tiên hiển thị tại đây.',
+      actionLabel: 'Xem tất cả bài viết',
+      defaultType: 'community',
+      actionKind: 'reset-filter',
+    }
+  }
+
+  return {
+    title: 'Cộng đồng hiện chưa có bài viết nào',
+    message: 'Hãy là người đầu tiên chia sẻ bí quyết sống xanh của bạn với mọi người nhé!',
+    actionLabel: 'Viết bài chia sẻ đầu tiên',
+    defaultType: 'community',
+    actionKind: 'compose',
+  }
 }
 
 function CommunityPage() {
-  const navigate = useNavigate()
   const { openComposer } = usePostComposer()
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
@@ -136,21 +202,23 @@ function CommunityPage() {
 
             return {
               id: p.id,
+              type: p.type,
               author: authorName,
               authorId: visibility === 'private' && p.author_id !== userId ? null : p.author_id,
               avatar: avatar,
               time: new Date(p.published_at || p.created_at).toLocaleDateString('vi-VN'),
+              createdAt: p.created_at,
               publishedAt: p.published_at || p.created_at,
               role: p.profiles?.role === 'admin' ? 'Quản trị viên' : (p.profiles?.role === 'moderator' ? 'Điều hành viên' : null),
-              topic: p.type === 'qa' ? 'Hỏi đáp' : (p.type === 'community' ? 'Kinh nghiệm' : 'Mẹo tiết kiệm'),
-              category: 'Chia sẻ',
+              topic: COMMUNITY_TOPIC_LABELS[p.type] || 'Cộng đồng',
+              category: COMMUNITY_CATEGORY_LABELS[p.type] || 'Chia sẻ',
               title: p.title,
               excerpt: p.description || (p.content ? `${p.content.substring(0, 150)}...` : 'Chia sẻ mới từ cộng đồng E-XANH.'),
               image: p.image_url,
               likes: p.likes_count || 0,
               commentsCount: p.comments_count || 0,
               savedCount: p.saved_count || 0,
-              shares: 0,
+              interactionScore: (p.likes_count || 0) + (p.comments_count || 0) + (p.saved_count || 0),
               isLiked: !!likedMap[p.id],
               isSaved: !!savedMap[p.id]
             }
@@ -196,6 +264,7 @@ function CommunityPage() {
 
   const visiblePosts = filteredPosts.slice(0, visibleCount)
   const hasMorePosts = filteredPosts.length > visibleCount
+  const emptyState = getEmptyStateContent(activeFilter)
 
   function handleFilterChange(filter) {
     setActiveFilter(filter)
@@ -374,6 +443,7 @@ function CommunityPage() {
             filters={communityFilters}
             activeFilter={activeFilter}
             onChange={handleFilterChange}
+            totalPosts={filteredPosts.length}
           />
 
           <section id="cong-dong-feed" className="community-page__posts">
@@ -397,15 +467,22 @@ function CommunityPage() {
             ) : (
               <EmptyState 
                 icon="💬"
-                title="Cộng đồng hiện chưa có bài viết nào"
-                message="Hãy là người đầu tiên chia sẻ bí quyết sống xanh của bạn với mọi người nhé!"
+                title={emptyState.title}
+                message={emptyState.message}
                 action={
                   <button
                     type="button"
                     className="btn btn--primary"
-                    onClick={() => openComposer({ defaultType: 'community' })}
+                    onClick={() => {
+                      if (emptyState.actionKind === 'reset-filter') {
+                        handleFilterChange('Tất cả')
+                        return
+                      }
+
+                      openComposer({ defaultType: emptyState.defaultType })
+                    }}
                   >
-                    Viết bài chia sẻ đầu tiên
+                    {emptyState.actionLabel}
                   </button>
                 }
               />

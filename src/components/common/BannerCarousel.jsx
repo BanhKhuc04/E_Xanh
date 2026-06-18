@@ -30,7 +30,7 @@ function BannerCarousel({ banners, interval = 5000 }) {
   }
 
   return (
-    <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+    <div className="banner-carousel" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
       {banners.map((banner, index) => (
         <div
           key={banner.id || index}

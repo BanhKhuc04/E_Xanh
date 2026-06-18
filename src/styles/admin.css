@@ -178,9 +178,16 @@
 
 .admin-topbar__dropdown-header {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-topbar__dropdown-header-top {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
 }
 
 .admin-topbar__dropdown-header strong {
@@ -196,14 +203,22 @@
 }
 
 .admin-topbar__dropdown-header button {
-  padding: 0;
-  border: 0;
+  padding: 6px 14px;
+  border: 1px solid rgba(79, 132, 40, 0.2);
+  border-radius: 999px;
   color: var(--color-primary-600);
-  background: transparent;
+  background: rgba(234, 245, 157, 0.36);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-topbar__dropdown-header button:hover:not(:disabled) {
+  background: rgba(193, 217, 92, 0.42);
+  border-color: rgba(79, 132, 40, 0.34);
 }
 
 .admin-topbar__dropdown-body,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   createPost,
   checkRecentPostRateLimit,
@@ -8,6 +8,7 @@ import { getCurrentSession, getCurrentUserProfile } from '../services/authServic
 import { getUserSafeError } from '../utils/logger'
 import { countMarkdownImages, MARKDOWN_IMAGE_LIMIT } from '../utils/markdown'
 import { countImageBlocks, createTextBlock, extractPlainTextFromBlocks } from '../utils/postBlocks'
+import { DEFAULT_POST_IMAGE_ASPECT } from '../utils/postImageRatios'
 
 const DRAFT_STORAGE_KEY = 'exanh_draft_post'
 const POST_COOLDOWN_MS = 30 * 1000
@@ -18,6 +19,9 @@ const CONTENT_MIN_LENGTH = 80
 const CONTENT_MAX_LENGTH = 4000
 const TAGS_MAX_COUNT = 5
 const TAGS_SEPARATOR = ','
+const MAX_POST_IMAGE_SIZE = 5 * 1024 * 1024
+const POST_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+const AUTOSAVE_DEBOUNCE_MS = 1500
 
 function buildInitialForm(defaultType = '') {
   return {
@@ -32,6 +36,49 @@ function buildInitialForm(defaultType = '') {
     content_blocks: [createTextBlock()],
     tags: '',
   }
+}
+
+function validateSelectedPostImage(file, { kind = 'cover' } = {}) {
+  if (!file) {
+    return 'Không tìm thấy file ảnh để xử lý.'
+  }
+
+  if (file.size > MAX_POST_IMAGE_SIZE) {
+    return kind === 'inline'
+      ? 'Ảnh trong nội dung không được vượt quá 5MB.'
+      : 'Ảnh bìa đang vượt quá 5MB. Hãy chọn file nhẹ hơn để tải lên nhanh hơn.'
+  }
+
+  if (!POST_IMAGE_TYPES.includes(file.type)) {
+    return kind === 'inline'
+      ? 'Ảnh trong nội dung chỉ nhận JPG, PNG hoặc WEBP.'
+      : 'Ảnh bìa chỉ nhận JPG, PNG hoặc WEBP.'
+  }
+
+  return ''
+}
+
+function buildDraftPayload(form) {
+  return {
+    title: form.title,
+    type: form.type,
+    category: form.category,
+    description: form.description,
+    content: form.content,
+    content_blocks: form.content_blocks,
+    tags: form.tags,
+  }
+}
+
+function hasDraftPayloadContent(payload) {
+  return [
+    payload.title,
+    payload.type,
+    payload.category,
+    payload.description,
+    extractPlainTextFromBlocks(payload.content_blocks, payload.content),
+    payload.tags,
+  ].some((item) => String(item || '').trim().length > 0)
 }
 
 function readDraft() {
@@ -76,6 +123,14 @@ function validatePostForm(form) {
     errors.description = `Mô tả ngắn nên gói gọn trong ${DESCRIPTION_MAX_LENGTH} ký tự.`
   }
 
+  if (!form.type.trim()) {
+    errors.type = 'Hãy chọn loại bài viết để hệ thống gợi ý đúng ngữ cảnh hiển thị.'
+  }
+
+  if (!form.category.trim()) {
+    errors.category = 'Hãy chọn danh mục phù hợp để người đọc dễ tìm thấy bài viết hơn.'
+  }
+
   if (imageCount > MARKDOWN_IMAGE_LIMIT) {
     errors.content = `Mỗi bài viết chỉ được thêm tối đa ${MARKDOWN_IMAGE_LIMIT} ảnh minh họa.`
   }
@@ -95,11 +150,135 @@ function validatePostForm(form) {
   return { errors }
 }
 
+function formatSavedTime(dateValue) {
+  if (!dateValue) return ''
+
+  return new Date(dateValue).toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function getPrioritizedChecklist(form, validationErrors) {
+  const title = form.title.trim()
+  const category = form.category.trim()
+  const plainContent = extractPlainTextFromBlocks(form.content_blocks, form.content).trim()
+  const imageCount = countImageBlocks(form.content_blocks)
+  const checklist = []
+
+  if (!title) {
+    checklist.push('Bạn chưa điền tiêu đề bài viết.')
+  } else if (validationErrors.title) {
+    checklist.push(validationErrors.title)
+  }
+
+  if (!category) {
+    checklist.push('Bạn chưa chọn danh mục.')
+  } else if (validationErrors.category) {
+    checklist.push(validationErrors.category)
+  }
+
+  if (!plainContent && imageCount === 0) {
+    checklist.push('Bạn chưa nhập nội dung bài viết.')
+  } else if (validationErrors.content) {
+    checklist.push(validationErrors.content)
+  }
+
+  if (!form.coverPreview && !form.coverFile && checklist.length < 2) {
+    checklist.push('Bạn nên thêm ảnh bìa để bài viết nổi bật và dễ thu hút hơn.')
+  }
+
+  if (checklist.length < 2 && validationErrors.type) {
+    checklist.push(validationErrors.type)
+  }
+
+  if (checklist.length < 2 && validationErrors.tags) {
+    checklist.push(validationErrors.tags)
+  }
+
+  return checklist.slice(0, 2)
+}
+
+function getComposerStatus({
+  form,
+  validationErrors,
+  isAutosaving,
+  autosaveFailed,
+  lastSavedAt,
+  isSubmitting,
+  submitState,
+  submitError,
+  isFormReady,
+}) {
+  const checklist = getPrioritizedChecklist(form, validationErrors)
+  const savedAtLabel = formatSavedTime(lastSavedAt)
+
+  if (isSubmitting) {
+    return {
+      tone: 'submitting',
+      badge: 'Đang gửi',
+      title: 'Trạng thái bài viết',
+      message: 'Đang gửi bài viết lên hệ thống...',
+    }
+  }
+
+  if (submitState === 'success') {
+    return {
+      tone: 'success',
+      badge: 'Thành công',
+      title: 'Trạng thái bài viết',
+      message: 'Đã gửi bài thành công, đang chờ quản trị viên duyệt.',
+    }
+  }
+
+  if (submitState === 'error') {
+    return {
+      tone: 'error',
+      badge: 'Lỗi',
+      title: 'Trạng thái bài viết',
+      message: submitError || 'Gửi bài thất bại. Vui lòng thử lại.',
+    }
+  }
+
+  if (isAutosaving) {
+    return {
+      tone: 'saving',
+      badge: 'Đang lưu',
+      title: 'Trạng thái bài viết',
+      message: 'Đang tự động lưu nháp...',
+    }
+  }
+
+  if (!isFormReady) {
+    return {
+      tone: autosaveFailed ? 'error' : 'warning',
+      badge: autosaveFailed ? 'Cần kiểm tra' : 'Thiếu thông tin',
+      title: 'Trạng thái bài viết',
+      message: autosaveFailed
+        ? 'Không thể tự động lưu nháp lúc này. Bạn nên kiểm tra lại trước khi gửi.'
+        : 'Bài viết chưa đủ điều kiện để gửi duyệt.',
+      checklist,
+      meta: savedAtLabel ? `Nháp gần nhất đã lưu lúc ${savedAtLabel}.` : '',
+    }
+  }
+
+  return {
+    tone: 'ready',
+    badge: 'Sẵn sàng gửi',
+    title: 'Trạng thái bài viết',
+    message: 'Bài viết đã sẵn sàng để gửi duyệt.',
+    meta: savedAtLabel ? `Đã tự động lưu lúc ${savedAtLabel}.` : '',
+  }
+}
+
 export function usePostComposerForm({
   defaultType = '',
   onSuccess,
 }) {
   const currentPreviewUrlRef = useRef('')
+  const lastSavedDraftRef = useRef('')
+  const cropResolveRef = useRef(null)
+  const cropRejectRef = useRef(null)
   const [initialDraft] = useState(() => readDraft())
   const [form, setForm] = useState(() => {
     const draft = initialDraft
@@ -123,11 +302,12 @@ export function usePostComposerForm({
   const [infoMessage, setInfoMessage] = useState(
     initialDraft ? 'Đã tự động khôi phục bản nháp chưa gửi của bạn.' : '',
   )
-  const [draftMeta, setDraftMeta] = useState(
-    initialDraft ? 'Đã khôi phục bản nháp trước đó.' : 'Nháp sẽ tự động lưu sau vài giây.'
-  )
+  const [draftMeta, setDraftMeta] = useState(initialDraft ? 'Đã khôi phục bản nháp trước đó.' : 'Chưa có thay đổi')
+  const [lastSavedAt, setLastSavedAt] = useState(null)
   const [previewHighlight, setPreviewHighlight] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitState, setSubmitState] = useState('idle')
+  const [submitError, setSubmitError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
   const [authLoading, setAuthLoading] = useState(true)
   const [user, setUser] = useState(null)
@@ -135,6 +315,48 @@ export function usePostComposerForm({
   const [cooldownUntil, setCooldownUntil] = useState(0)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const [isUploadingInlineImage, setIsUploadingInlineImage] = useState(false)
+  const [cropState, setCropState] = useState({
+    isOpen: false,
+    image: '',
+    file: null,
+    aspectKey: DEFAULT_POST_IMAGE_ASPECT,
+    title: 'Cắt ảnh',
+    confirmLabel: 'Áp dụng',
+    mode: 'cover',
+  })
+  const validation = useMemo(() => validatePostForm(form), [form])
+  const isAutosaving = draftMeta === 'Đang lưu...'
+  const autosaveFailed = draftMeta === 'Không thể tự lưu nháp lúc này.'
+  const isFormReady = Object.keys(validation.errors).length === 0
+  const composerStatus = useMemo(
+    () =>
+      getComposerStatus({
+        form,
+        validationErrors: validation.errors,
+        isAutosaving,
+        autosaveFailed,
+        lastSavedAt,
+        isSubmitting,
+        submitState,
+        submitError,
+        isFormReady,
+      }),
+    [
+      autosaveFailed,
+      form,
+      isAutosaving,
+      isFormReady,
+      isSubmitting,
+      lastSavedAt,
+      submitError,
+      submitState,
+      validation.errors,
+    ],
+  )
+
+  useEffect(() => {
+    lastSavedDraftRef.current = initialDraft ? JSON.stringify(initialDraft) : ''
+  }, [initialDraft])
 
   useEffect(() => {
     let isMounted = true
@@ -194,6 +416,12 @@ export function usePostComposerForm({
     }
   }, [])
 
+  useEffect(() => () => {
+    if (cropState.image) {
+      URL.revokeObjectURL(cropState.image)
+    }
+  }, [cropState.image])
+
   useEffect(() => {
     if (!cooldownUntil || cooldownUntil <= Date.now()) {
       return undefined
@@ -214,33 +442,28 @@ export function usePostComposerForm({
   }, [cooldownUntil])
 
   useEffect(() => {
-    const hasDraftContent = [
-      form.title,
-      form.description,
-      extractPlainTextFromBlocks(form.content_blocks, form.content),
-      form.tags,
-    ].some((item) => String(item || '').trim().length > 0)
+    const draftPayload = buildDraftPayload(form)
+    const nextSnapshot = JSON.stringify(draftPayload)
+    const hasDraftContent = hasDraftPayloadContent(draftPayload)
 
-    if (!hasDraftContent || isSubmitting) {
+    if (isSubmitting) {
+      return undefined
+    }
+
+    if (!hasDraftContent) return undefined
+
+    if (nextSnapshot === lastSavedDraftRef.current) {
       return undefined
     }
 
     const timeoutId = window.setTimeout(() => {
       try {
-        localStorage.setItem(
-          DRAFT_STORAGE_KEY,
-          JSON.stringify({
-            title: form.title,
-            type: form.type,
-            category: form.category,
-            description: form.description,
-            content: form.content,
-            content_blocks: form.content_blocks,
-            tags: form.tags,
-          })
-        )
+        localStorage.setItem(DRAFT_STORAGE_KEY, nextSnapshot)
+        lastSavedDraftRef.current = nextSnapshot
+        const savedAt = Date.now()
+        setLastSavedAt(savedAt)
         setDraftMeta(
-          `Tự động lưu lúc ${new Date().toLocaleTimeString('vi-VN', {
+          `Đã tự động lưu lúc ${new Date(savedAt).toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
           })}`
@@ -248,7 +471,7 @@ export function usePostComposerForm({
       } catch {
         setDraftMeta('Không thể tự lưu nháp lúc này.')
       }
-    }, 4000)
+    }, AUTOSAVE_DEBOUNCE_MS)
 
     return () => {
       window.clearTimeout(timeoutId)
@@ -259,27 +482,14 @@ export function usePostComposerForm({
     const handleBeforeUnload = () => {
       if (isSubmitting) return
       
-      const hasDraftContent = [
-        form.title,
-        form.description,
-        extractPlainTextFromBlocks(form.content_blocks, form.content),
-        form.tags,
-      ].some((item) => String(item || '').trim().length > 0)
+      const draftPayload = buildDraftPayload(form)
+      const hasDraftContent = hasDraftPayloadContent(draftPayload)
       
       if (hasDraftContent) {
         try {
-          localStorage.setItem(
-            DRAFT_STORAGE_KEY,
-            JSON.stringify({
-              title: form.title,
-              type: form.type,
-              category: form.category,
-              description: form.description,
-              content: form.content,
-              content_blocks: form.content_blocks,
-              tags: form.tags,
-            })
-          )
+          const nextSnapshot = JSON.stringify(draftPayload)
+          localStorage.setItem(DRAFT_STORAGE_KEY, nextSnapshot)
+          lastSavedDraftRef.current = nextSnapshot
         } catch {
           // ignore error on unload
         }
@@ -308,7 +518,11 @@ export function usePostComposerForm({
     }
     setPreviewHighlight(false)
     setFieldErrors({})
-    setDraftMeta('Nháp sẽ tự động lưu sau vài giây.')
+    setLastSavedAt(null)
+    setSubmitState('idle')
+    setSubmitError('')
+    lastSavedDraftRef.current = ''
+    setDraftMeta('Chưa có thay đổi')
   }
 
   function handleChange(field, value) {
@@ -321,10 +535,18 @@ export function usePostComposerForm({
             ? value.slice(0, CONTENT_MAX_LENGTH)
             : value
 
-    setForm((current) => ({
-      ...current,
-      [field]: normalizedValue,
-    }))
+    setForm((current) => {
+      const nextForm = {
+        ...current,
+        [field]: normalizedValue,
+      }
+      const nextDraftPayload = buildDraftPayload(nextForm)
+      setDraftMeta(hasDraftPayloadContent(nextDraftPayload) ? 'Đang lưu...' : 'Chưa có thay đổi')
+      return nextForm
+    })
+
+    setSubmitState('idle')
+    setSubmitError('')
 
     setFieldErrors((current) => {
       if (!current[field]) return current
@@ -334,48 +556,110 @@ export function usePostComposerForm({
     })
   }
 
-  function handleCoverChange(event) {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      setFieldErrors((current) => ({
-        ...current,
-        coverFile: 'Ảnh bìa đang vượt quá 5MB. Hãy chọn file nhẹ hơn để tải lên nhanh hơn.',
-      }))
-      return
-    }
-
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
-    if (!validTypes.includes(file.type)) {
-      setFieldErrors((current) => ({
-        ...current,
-        coverFile: 'Ảnh bìa chỉ nhận JPG, PNG hoặc WEBP.',
-      }))
-      return
-    }
-
-    const previewUrl = URL.createObjectURL(file)
-
-    setForm((current) => {
-      if (current.coverPreview) {
-        URL.revokeObjectURL(current.coverPreview)
+  function closeCropModal() {
+    setCropState((current) => {
+      if (current.image) {
+        URL.revokeObjectURL(current.image)
       }
 
       return {
-        ...current,
-        coverName: file.name,
-        coverFile: file,
-        coverPreview: previewUrl,
+        isOpen: false,
+        image: '',
+        file: null,
+        aspectKey: DEFAULT_POST_IMAGE_ASPECT,
+        title: 'Cắt ảnh',
+        confirmLabel: 'Áp dụng',
+        mode: 'cover',
       }
     })
+  }
 
-    setFieldErrors((current) => {
-      if (!current.coverFile) return current
-      const nextErrors = { ...current }
-      delete nextErrors.coverFile
-      return nextErrors
+  function rejectPendingCrop(message = 'Đã hủy chọn ảnh.') {
+    const reject = cropRejectRef.current
+    cropResolveRef.current = null
+    cropRejectRef.current = null
+    if (reject) {
+      reject(new Error(message))
+    }
+  }
+
+  function openCropModalForFile(file, options = {}) {
+    return new Promise((resolve, reject) => {
+      const previewUrl = URL.createObjectURL(file)
+
+      cropResolveRef.current = resolve
+      cropRejectRef.current = reject
+      setCropState({
+        isOpen: true,
+        image: previewUrl,
+        file,
+        aspectKey: options.aspectKey || DEFAULT_POST_IMAGE_ASPECT,
+        title: options.title || 'Cắt ảnh bài viết',
+        confirmLabel: options.confirmLabel || 'Áp dụng',
+        mode: options.mode || 'cover',
+      })
     })
+  }
+
+  async function handleCropApply({ file, aspectKey }) {
+    const resolve = cropResolveRef.current
+    cropResolveRef.current = null
+    cropRejectRef.current = null
+    closeCropModal()
+    await resolve?.({ file, aspectKey })
+  }
+
+  function handleCropClose() {
+    closeCropModal()
+    rejectPendingCrop()
+  }
+
+  async function handleCoverChange(event) {
+    const file = event.target.files?.[0]
+    if (event?.target) {
+      event.target.value = ''
+    }
+    if (!file) return
+
+    const validationMessage = validateSelectedPostImage(file, { kind: 'cover' })
+    if (validationMessage) {
+      setFieldErrors((current) => ({
+        ...current,
+        coverFile: validationMessage,
+      }))
+      return
+    }
+
+    try {
+      const cropped = await openCropModalForFile(file, {
+        mode: 'cover',
+        title: 'Cắt ảnh bìa bài viết',
+        aspectKey: DEFAULT_POST_IMAGE_ASPECT,
+      })
+      const previewUrl = URL.createObjectURL(cropped.file)
+
+      setForm((current) => {
+        if (current.coverPreview) {
+          URL.revokeObjectURL(current.coverPreview)
+        }
+
+        return {
+          ...current,
+          coverName: cropped.file.name,
+          coverFile: cropped.file,
+          coverPreview: previewUrl,
+        }
+      })
+
+      setFieldErrors((current) => {
+        if (!current.coverFile) return current
+        const nextErrors = { ...current }
+        delete nextErrors.coverFile
+        return nextErrors
+      })
+    } catch {
+      // Người dùng đóng modal crop thì không cần báo lỗi.
+    }
   }
 
   function removeCover() {
@@ -400,23 +684,29 @@ export function usePostComposerForm({
     })
   }
 
-  function handleSaveDraft() {
+  function handleSaveDraft(options = {}) {
+    const { silent = false, label = 'Đã tự động lưu' } = options
     setSuccessMessage('')
 
     try {
-      const draftToSave = {
-        title: form.title,
-        type: form.type,
-        category: form.category,
-        description: form.description,
-        content: form.content,
-        content_blocks: form.content_blocks,
-        tags: form.tags,
+      const draftToSave = buildDraftPayload(form)
+      if (!hasDraftPayloadContent(draftToSave)) {
+        localStorage.removeItem(DRAFT_STORAGE_KEY)
+        lastSavedDraftRef.current = ''
+        setDraftMeta('Chưa có thay đổi')
+        return
       }
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftToSave))
-      setInfoMessage('Đã lưu nháp')
+
+      const nextSnapshot = JSON.stringify(draftToSave)
+      localStorage.setItem(DRAFT_STORAGE_KEY, nextSnapshot)
+      lastSavedDraftRef.current = nextSnapshot
+      const savedAt = Date.now()
+      setLastSavedAt(savedAt)
+      if (!silent) {
+        setInfoMessage('Đã lưu nháp')
+      }
       setDraftMeta(
-        `Lưu nháp thủ công lúc ${new Date().toLocaleTimeString('vi-VN', {
+        `${label} lúc ${new Date(savedAt).toLocaleTimeString('vi-VN', {
           hour: '2-digit',
           minute: '2-digit',
         })}`
@@ -428,6 +718,7 @@ export function usePostComposerForm({
 
   function clearDraft() {
     localStorage.removeItem(DRAFT_STORAGE_KEY)
+    lastSavedDraftRef.current = ''
     resetForm(defaultType)
     setInfoMessage('Đã xóa bản nháp cũ. Bạn có thể bắt đầu lại từ đầu.')
   }
@@ -462,15 +753,36 @@ export function usePostComposerForm({
       throw error
     }
 
+    const validationMessage = validateSelectedPostImage(file, { kind: 'inline' })
+    if (validationMessage) {
+      setFieldErrors((current) => ({
+        ...current,
+        content: validationMessage,
+      }))
+      throw new Error(validationMessage)
+    }
+
+    const cropped = await openCropModalForFile(file, {
+      mode: 'inline',
+      title: 'Cắt ảnh chèn trong bài viết',
+      aspectKey: DEFAULT_POST_IMAGE_ASPECT,
+      confirmLabel: 'Cắt và tải ảnh',
+    })
+    const croppedFile = cropped.file
+    const inlineAspectKey = cropped.aspectKey || DEFAULT_POST_IMAGE_ASPECT
+
     setIsUploadingInlineImage(true)
 
     try {
-      const { publicUrl, error } = await uploadPostInlineImage(file, user.id)
+      const { publicUrl, error } = await uploadPostInlineImage(croppedFile, user.id)
       if (error) {
         throw error
       }
 
-      return publicUrl
+      return {
+        url: publicUrl,
+        aspectKey: inlineAspectKey,
+      }
     } catch (error) {
       const safeMessage = getUserSafeError(error, 'Không thể tải ảnh vào nội dung bài viết lúc này.')
       setErrorMessage(safeMessage)
@@ -490,6 +802,8 @@ export function usePostComposerForm({
     setPreviewHighlight(false)
     setErrorMessage('')
     setSuccessMessage('')
+    setSubmitState('idle')
+    setSubmitError('')
     setFieldErrors({})
 
     if (isSubmitting) {
@@ -497,12 +811,18 @@ export function usePostComposerForm({
     }
 
     if (cooldownRemaining > 0) {
-      setErrorMessage(`Bạn đăng hơi nhanh rồi. Vui lòng thử lại sau ít phút để tránh spam.`)
+      const message = 'Bạn đăng hơi nhanh rồi. Vui lòng thử lại sau ít phút để tránh spam.'
+      setErrorMessage(message)
+      setSubmitState('error')
+      setSubmitError(message)
       return { data: null, error: new Error('Cooldown active') }
     }
 
     if (!user) {
-      setErrorMessage('Vui lòng đăng nhập để đăng bài.')
+      const message = 'Vui lòng đăng nhập để đăng bài.'
+      setErrorMessage(message)
+      setSubmitState('error')
+      setSubmitError(message)
       return { data: null, error: new Error('Not authenticated') }
     }
 
@@ -516,16 +836,23 @@ export function usePostComposerForm({
 
     const rateLimit = await checkRecentPostRateLimit(user.id)
     if (rateLimit.error) {
-      setErrorMessage('Không thể kiểm tra tần suất đăng bài lúc này. Bạn thử lại sau ít phút nhé.')
+      const message = 'Không thể kiểm tra tần suất đăng bài lúc này. Bạn thử lại sau ít phút nhé.'
+      setErrorMessage(message)
+      setSubmitState('error')
+      setSubmitError(message)
       return { data: null, error: rateLimit.error }
     }
 
     if (!rateLimit.allowed) {
-      setErrorMessage('Bạn đăng hơi nhanh rồi. Vui lòng thử lại sau ít phút để tránh spam.')
+      const message = 'Bạn đăng hơi nhanh rồi. Vui lòng thử lại sau ít phút để tránh spam.'
+      setErrorMessage(message)
+      setSubmitState('error')
+      setSubmitError(message)
       return { data: null, error: new Error('Rate limit exceeded') }
     }
 
     setIsSubmitting(true)
+    setSubmitState('submitting')
     const blocksContent = extractPlainTextFromBlocks(form.content_blocks, form.content)
 
     const result = await createPost({
@@ -538,7 +865,10 @@ export function usePostComposerForm({
     })
 
     if (result.error) {
-      setErrorMessage(`Lỗi đăng bài: ${getUserSafeError(result.error, 'Hiện chưa thể gửi bài. Bạn thử lại sau ít phút nhé.')}`)
+      const safeMessage = getUserSafeError(result.error, 'Hiện chưa thể gửi bài. Bạn thử lại sau ít phút nhé.')
+      setErrorMessage(`Lỗi đăng bài: ${safeMessage}`)
+      setSubmitState('error')
+      setSubmitError(safeMessage)
       setIsSubmitting(false)
       return result
     }
@@ -550,6 +880,8 @@ export function usePostComposerForm({
     localStorage.removeItem(DRAFT_STORAGE_KEY)
     resetForm(defaultType, { preserveFeedback: true })
     setSuccessMessage('Bài viết đã được gửi thành công và đang chờ duyệt!')
+    setSubmitState('success')
+    setSubmitError('')
     setIsSubmitting(false)
 
     if (onSuccess) {
@@ -576,7 +908,14 @@ export function usePostComposerForm({
     profile,
     cooldownRemaining,
     draftMeta,
+    lastSavedAt,
+    submitState,
+    submitError,
+    isAutosaving,
+    isFormReady,
+    composerStatus,
     isUploadingInlineImage,
+    cropState,
     limits: {
       titleMax: TITLE_MAX_LENGTH,
       descriptionMax: DESCRIPTION_MAX_LENGTH,
@@ -593,6 +932,8 @@ export function usePostComposerForm({
     handlePreview,
     closePreview,
     handleInlineImageUpload,
+    handleCropApply,
+    handleCropClose,
     handleSubmit,
     resetForm,
   }

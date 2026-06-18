@@ -1,80 +1,120 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ImageOff, Leaf } from 'lucide-react'
 import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
+import {
+  DEFAULT_POST_IMAGE_ASPECT,
+  detectPostImageAspectKey,
+  getPostImageAspectPreset,
+  normalizePostImageAspectKey,
+} from '../../utils/postImageRatios'
+
+const VARIANT_DEFAULT_ASPECT = {
+  card: DEFAULT_POST_IMAGE_ASPECT,
+  detail: DEFAULT_POST_IMAGE_ASPECT,
+  thumbnail: DEFAULT_POST_IMAGE_ASPECT,
+  preview: DEFAULT_POST_IMAGE_ASPECT,
+  compact: '1:1',
+  inline: DEFAULT_POST_IMAGE_ASPECT,
+}
+
+function resolveWidth(variant, width) {
+  if (width) return width
+  if (variant === 'detail') return 1200
+  if (variant === 'thumbnail') return 520
+  if (variant === 'compact') return 420
+  return IMAGE_TRANSFORM_WIDTHS.postCard
+}
+
+function buildClassName(parts) {
+  return parts.filter(Boolean).join(' ')
+}
 
 function PostImage({
   src,
   alt,
   variant = 'card',
   className = '',
-  width = IMAGE_TRANSFORM_WIDTHS.postCard,
-  height = 450,
+  width,
+  height,
+  aspect,
+  loading = 'lazy',
+  priority = false,
+  objectPosition = 'center',
 }) {
+  const fallbackAspect = normalizePostImageAspectKey(aspect || VARIANT_DEFAULT_ASPECT[variant] || DEFAULT_POST_IMAGE_ASPECT)
   const [hasError, setHasError] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [resolvedAspect, setResolvedAspect] = useState(fallbackAspect)
+  const resolvedWidth = resolveWidth(variant, width)
+  const resolvedHeight = useMemo(() => {
+    if (height) return height
+    const preset = getPostImageAspectPreset(fallbackAspect)
+    return Math.round(resolvedWidth / preset.aspect)
+  }, [fallbackAspect, height, resolvedWidth])
 
   useEffect(() => {
-    setHasError(false)
-    setIsLoaded(false)
-  }, [src])
+    const timerId = window.setTimeout(() => {
+      setHasError(false)
+      setIsLoaded(false)
+      setResolvedAspect(fallbackAspect)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
+  }, [fallbackAspect, src])
 
   const imageSrc = useMemo(() => {
     if (!src || hasError) return ''
-    return getImageUrl(src, width)
-  }, [hasError, src, width])
+    return getImageUrl(src, resolvedWidth)
+  }, [hasError, resolvedWidth, src])
 
-  const rootClassName = ['post-image', `post-image--${variant}`, className]
-    .filter(Boolean)
-    .join(' ')
+  const aspectClass = `post-image--${getPostImageAspectPreset(resolvedAspect).ratioClass}`
+  const rootClassName = buildClassName([
+    'post-image',
+    'post-image-frame',
+    `post-image--${variant}`,
+    aspectClass,
+    className,
+  ])
 
   return (
     <div className={rootClassName}>
-      {imageSrc && !hasError && (
+      {imageSrc && !hasError ? (
         <img
           src={imageSrc}
           alt={alt}
-          width={width}
-          height={height}
-          loading="lazy"
-          onLoad={() => setIsLoaded(true)}
+          width={resolvedWidth}
+          height={resolvedHeight}
+          loading={priority ? 'eager' : loading}
+          fetchPriority={priority ? 'high' : undefined}
+          decoding="async"
+          className="post-image__img"
+          onLoad={(event) => {
+            setIsLoaded(true)
+            if (!aspect) {
+              setResolvedAspect(
+                detectPostImageAspectKey(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight),
+              )
+            }
+          }}
           onError={() => setHasError(true)}
-          style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.3s ease', display: 'block', position: 'relative', zIndex: 1 }}
+          style={{ opacity: isLoaded ? 1 : 0, objectPosition }}
         />
-      )}
+      ) : null}
 
-      {!isLoaded && !hasError && imageSrc && (
-        <div
-          className="post-image__skeleton"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(135deg, rgba(234, 245, 157, 0.44), rgba(193, 217, 92, 0.16))',
-            zIndex: 0,
-          }}
-        />
-      )}
+      {!isLoaded && !hasError && imageSrc ? <div className="post-image__skeleton" /> : null}
 
-      {(!imageSrc || hasError) && (
-        <div
-          className="post-image__fallback"
-          style={{
-            display: 'grid',
-            placeItems: 'center',
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, rgba(234, 245, 157, 0.54), rgba(193, 217, 92, 0.2))',
-            position: 'absolute',
-            inset: 0,
-          }}
-        >
-          <div style={{ display: 'grid', gap: '10px', justifyItems: 'center', textAlign: 'center', color: '#31533a', padding: '20px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(255, 255, 255, 0.7)', boxShadow: '0 10px 24px rgba(79, 132, 40, 0.12)' }}>
-              {hasError ? <ImageOff size={28} strokeWidth={2.1} /> : <Leaf size={28} strokeWidth={2.1} />}
+      {(!imageSrc || hasError) ? (
+        <div className="post-image__fallback">
+          <div className="post-image__fallback-inner">
+            <span className="post-image__fallback-icon">
+              {hasError ? <ImageOff size={26} strokeWidth={2.1} /> : <Leaf size={26} strokeWidth={2.1} />}
             </span>
             <span>E-XANH</span>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

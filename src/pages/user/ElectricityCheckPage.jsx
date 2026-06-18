@@ -12,10 +12,8 @@ import { pageHeroContent } from '../../data/pageHeroes'
 import {
   calculateDeviceKwh,
   deviceOptions,
-
   electricitySampleDevices,
   formatKwh,
-  getDefaultPowerByName,
   getDeviceTone,
   heroHighlights,
   savingSuggestions,
@@ -120,13 +118,10 @@ function ElectricityCheckPage() {
     async function fetchRecentHistories() {
       const { getCurrentSession } = await import('../../services/authService')
       const session = await getCurrentSession()
-      let h = []
-      if (session?.user) {
-        h = getElectricityHistories(session.user.id)
-      } else {
-        h = getElectricityHistories('guest')
-      }
-      setRecentHistories(h.slice(0, 3))
+      const nextHistories = session?.user
+        ? getElectricityHistories(session.user.id)
+        : getElectricityHistories('guest')
+      setRecentHistories(nextHistories.slice(0, 3))
     }
     fetchRecentHistories()
   }, [feedbackMessage])

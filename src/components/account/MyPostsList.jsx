@@ -1,6 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom'
 import PostImage from '../common/PostImage'
 import './MyPostsList.css'
+import { resolvePostImageSource } from '../../utils/postMedia'
 
 function formatDate(dateString) {
   if (!dateString) return ''
@@ -30,6 +31,25 @@ function getStatusClass(status) {
   if (status === 'Đã duyệt' || status === 'approved') return 'is-approved'
   if (status === 'rejected') return 'is-rejected'
   return 'is-pending'
+}
+
+function getPostTypeLabel(type) {
+  switch (type) {
+    case 'community': return 'Cộng đồng'
+    case 'qa': return 'Hỏi đáp'
+    case 'review': return 'Review thiết bị'
+    case 'tip': return 'Mẹo tiết kiệm'
+    default: return 'Bài viết'
+  }
+}
+
+function getPostSummary(post) {
+  const rawText = post.excerpt || post.description || post.content || ''
+  const compact = String(rawText).replace(/\s+/g, ' ').trim()
+  if (!compact) {
+    return 'Bài viết chia sẻ kinh nghiệm và góc nhìn thực tế cùng cộng đồng E-XANH.'
+  }
+  return compact.length > 160 ? `${compact.slice(0, 157)}...` : compact
 }
 
 /* ─── Skeleton Loading ─────────────────────────────────────────────────────── */
@@ -83,13 +103,16 @@ function EmptyState({ isPublicView }) {
 /* ─── Public Post Card ─────────────────────────────────────────────────────── */
 function PublicCard({ post, onView }) {
   const dateStr = formatDate(post.created_at)
+  const summary = getPostSummary(post)
+  const typeLabel = getPostTypeLabel(post.type)
 
   return (
     <article className="public-post-card">
       <div className="public-post-card__content">
         <div className="public-post-card__top">
+          <span className="public-post-card__type">{typeLabel}</span>
           <h3>{post.title}</h3>
-          {post.excerpt && <p className="public-post-card__excerpt">{post.excerpt}</p>}
+          <p className="public-post-card__excerpt">{summary}</p>
         </div>
         <div className="public-post-card__meta">
           <span>
@@ -115,11 +138,10 @@ function PublicCard({ post, onView }) {
       </div>
       <div className="public-post-card__thumbnail" onClick={() => onView(post)}>
         <PostImage
-          src={post.image_url || post.image}
+          src={resolvePostImageSource(post)}
           alt={post.title}
-          width={400}
-          height={280}
           variant="thumbnail"
+          aspect="16:9"
         />
       </div>
     </article>
@@ -133,12 +155,17 @@ function PrivateCard({ post, onView }) {
   const statusClass = getStatusClass(post.status)
   const rejectionCount = post.rejection_count || 1
   const canResubmit = post.status === 'rejected' && rejectionCount < 3
+  const summary = getPostSummary(post)
+  const typeLabel = getPostTypeLabel(post.type)
 
   return (
     <article className="private-post-card">
       <div className="private-post-card__content">
         <div className="private-post-card__header">
-          <h3>{post.title}</h3>
+          <div className="private-post-card__headline">
+            <span className="private-post-card__type">{typeLabel}</span>
+            <h3>{post.title}</h3>
+          </div>
           <div className="private-post-card__status-area">
             <span className={`private-post-card__status ${statusClass}`}>
               {statusLabel}
@@ -163,6 +190,8 @@ function PrivateCard({ post, onView }) {
           </div>
         )}
 
+        <p className="private-post-card__excerpt">{summary}</p>
+
         <div className="private-post-card__meta">
           <span>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -183,11 +212,10 @@ function PrivateCard({ post, onView }) {
 
       <div className="private-post-card__thumbnail" onClick={() => onView(post)}>
         <PostImage
-          src={post.image_url || post.image}
+          src={resolvePostImageSource(post)}
           alt={post.title}
-          width={300}
-          height={220}
           variant="thumbnail"
+          aspect="16:9"
         />
       </div>
 

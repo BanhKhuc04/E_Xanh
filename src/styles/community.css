@@ -201,6 +201,9 @@ body {
 }
 
 .community-filter-bar__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex: 0 0 auto;
   padding: 12px 18px;
   border: 1px solid rgba(79, 132, 40, 0.12);
@@ -208,12 +211,38 @@ body {
   color: rgba(23, 55, 21, 0.78);
   background: rgba(255, 255, 255, 0.9);
   font-weight: 600;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.community-filter-bar__chip:hover {
+  border-color: rgba(79, 132, 40, 0.22);
+  background: #fff;
+  transform: translateY(-1px);
 }
 
 .community-filter-bar__chip.is-active {
   color: #fff;
   background: var(--color-primary-500);
+  border-color: rgba(47, 125, 50, 0.2);
   box-shadow: 0 10px 20px rgba(79, 132, 40, 0.14);
+}
+
+.community-filter-bar__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .community-page__posts {
@@ -254,7 +283,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
   min-height: 0;
 }
 
@@ -270,15 +299,18 @@ body {
 .community-post-card__right {
   position: relative;
   width: 100%;
+  align-self: start;
+  aspect-ratio: 16 / 9;
   border-radius: 20px;
   overflow: hidden;
   background: #eef7d8;
-  display: flex;
+  display: block;
 }
 
 .community-card__media {
   position: relative;
   width: 100%;
+  height: auto;
   aspect-ratio: 16 / 9;
   border-radius: 18px;
   overflow: hidden;
@@ -290,22 +322,20 @@ body {
   width: 100%;
   height: 100%;
   text-decoration: none;
+  overflow: hidden;
 }
 
 .community-post-card__image {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 0.4s ease;
 }
 
-.community-post-card__right:hover .community-post-card__image {
+.community-post-card__right:hover .community-post-card__image .post-image__img {
   transform: scale(1.03);
 }
 
-/* ── Pill "Chia sẻ" — overlay góc phải cột ảnh ── */
+/* ── Pill lưu liên kết — overlay góc phải cột ảnh ── */
 .community-post-card__share-pill {
   text-decoration: none;
 }
@@ -463,7 +493,8 @@ body {
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
   color: #12351f;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -554,6 +585,11 @@ body {
 
 .community-post-card__author {
   gap: 12px;
+}
+
+.community-post-card__avatar-link {
+  display: inline-flex;
+  flex: 0 0 auto;
 }
 
 .community-sidebar-panel__member-body {
@@ -839,6 +875,9 @@ body {
 .community-sidebar-panel__popular {
   display: grid;
   gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .sidebar-title {
@@ -854,6 +893,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .active-member {
@@ -981,7 +1023,7 @@ body {
   line-height: 1.7;
 }
 
-.community-sidebar-panel__popular article {
+.community-sidebar-panel__popular li {
   display: grid;
   gap: 6px;
 }

@@ -32,9 +32,9 @@ function ActiveMembersPanel({
       ) : null}
 
       {!loading && !error && members.length > 0 ? (
-        <div className="active-members-list">
+        <ul className="active-members-list">
           {members.map((member, index) => (
-            <article className="active-member" key={member.id}>
+            <li className="active-member" key={member.id}>
               <div className="active-member__rank">{index + 1}</div>
 
               <ActiveMemberAvatar
@@ -56,9 +56,9 @@ function ActiveMembersPanel({
                   {member.postCount} bài viết
                 </div>
               </div>
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
     </section>
   )

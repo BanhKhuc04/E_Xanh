@@ -10,6 +10,7 @@ import {
 import ActiveMembersPanel from '../community/ActiveMembersPanel'
 import { usePostComposer } from '../community/PostComposerContext'
 import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
+import PostImage from '../common/PostImage'
 
 /* ── Tính thời gian tương đối ── */
 function getTimeAgo(dateString) {
@@ -135,22 +136,14 @@ function CommunityPreview() {
                 const prefs = post.profiles?.user_preferences || {}
                 const visibility = prefs.profile_visibility || 'public'
                 
-                let authorName = 'Thành viên E-XANH'
-                let avatarUrl = null
-                
                 const getRealName = () => {
                   if (post.profiles?.name) return post.profiles.name
                   if (post.profiles?.display_name) return post.profiles.display_name
                   return 'Thành viên E-XANH'
                 }
 
-                if (visibility === 'public') {
-                  authorName = getRealName()
-                  avatarUrl = post.profiles?.avatar_url || null
-                } else {
-                  authorName = 'Thành viên E-XANH'
-                  avatarUrl = null
-                }
+                const authorName = visibility === 'public' ? getRealName() : 'Thành viên E-XANH'
+                const avatarUrl = visibility === 'public' ? post.profiles?.avatar_url || null : null
 
                 const hasImage = post.image_url?.startsWith('http')
 
@@ -224,11 +217,12 @@ function CommunityPreview() {
                           aria-hidden="true"
                         >
                           {hasImage ? (
-                            <img
+                            <PostImage
                               src={post.image_url}
                               alt={post.title || 'Ảnh bài viết'}
                               className="community-preview__post-image"
-                              loading="lazy"
+                              variant="thumbnail"
+                              aspect="16:9"
                             />
                           ) : (
                             <ImagePlaceholder />

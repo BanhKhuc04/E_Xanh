@@ -1,8 +1,9 @@
 import { buildRenderableFallbackBlocks, getImageCaption } from '../../utils/postBlocks'
+import PostImage from '../common/PostImage'
 
 function renderInlineText(text = '', keyPrefix) {
   const nodes = []
-  const pattern = /(\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\(([^)\s]+)\))/g
+  const pattern = /(\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\(([^)\s]+)\))/g
   let lastIndex = 0
   let match
 
@@ -12,19 +13,25 @@ function renderInlineText(text = '', keyPrefix) {
     }
 
     if (match[2]) {
-      nodes.push(<strong key={`${keyPrefix}-bold-${match.index}`}>{match[2]}</strong>)
+      nodes.push(
+        <strong key={`${keyPrefix}-bolditalic-${match.index}`}>
+          <em>{match[2]}</em>
+        </strong>,
+      )
     } else if (match[3]) {
-      nodes.push(<em key={`${keyPrefix}-italic-${match.index}`}>{match[3]}</em>)
-    } else if (match[4] && match[5]) {
+      nodes.push(<strong key={`${keyPrefix}-bold-${match.index}`}>{match[3]}</strong>)
+    } else if (match[4]) {
+      nodes.push(<em key={`${keyPrefix}-italic-${match.index}`}>{match[4]}</em>)
+    } else if (match[5] && match[6]) {
       nodes.push(
         <a
           key={`${keyPrefix}-link-${match.index}`}
-          href={match[5]}
+          href={match[6]}
           target="_blank"
           rel="noopener noreferrer"
           className="post-blocks__anchor"
         >
-          {match[4]}
+          {match[5]}
         </a>,
       )
     }
@@ -191,7 +198,13 @@ function renderLegacyBlock(block) {
       return (
         <figure key={block.id} className="post-blocks__figure">
           <div className="post-blocks__image-frame">
-            <img src={block.url} alt={caption || 'Ảnh minh họa'} className="post-blocks__image" loading="lazy" />
+            <PostImage
+              src={block.url}
+              alt={caption || 'Ảnh minh họa'}
+              className="post-blocks__image"
+              variant="inline"
+              aspect={block.aspect}
+            />
           </div>
           {caption ? <figcaption>{caption}</figcaption> : null}
         </figure>
@@ -227,11 +240,12 @@ function PostBlockRenderer({ blocks, fallbackContent, variant = 'detail' }) {
           return (
             <figure key={block.id || `image-${index}`} className="post-blocks__figure">
               <div className="post-blocks__image-frame">
-                <img
+                <PostImage
                   src={block.url}
                   alt={caption || 'Ảnh minh họa'}
                   className="post-blocks__image"
-                  loading="lazy"
+                  variant="inline"
+                  aspect={block.aspect}
                 />
               </div>
               {caption ? <figcaption>{caption}</figcaption> : null}

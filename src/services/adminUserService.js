@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { logError, logWarn } from '../utils/logger'
+import { logAdminAction } from './adminLogService'
+import { createNotificationForUser } from './notificationService'
 
 export const BLOCKED_USER_STATUSES = ['locked', 'blocked']
 const PROFILE_SELECT_FULL =
@@ -18,6 +20,24 @@ function buildServiceError(message, sourceError = null) {
     source: sourceError,
   }
 }
+
+function isMissingRelationError(error) {
+  const message = String(error?.message || '').toLowerCase()
+  return error?.code === '42P01' || error?.code === 'PGRST205' || message.includes('does not exist')
+}
+
+function isPermissionError(error) {
+  const message = String(error?.message || '').toLowerCase()
+  return (
+    message.includes('permission') ||
+    message.includes('row-level security') ||
+    message.includes('policy') ||
+    message.includes('not authorized') ||
+    message.includes('forbidden')
+  )
+}
+
+
 
 function isProfileSchemaMismatch(error) {
   const message = String(error?.message || '').toLowerCase()
@@ -258,24 +278,21 @@ async function checkTableAvailability(tableName) {
   }
 
   const { error } = await supabase.from(tableName).select('*').limit(1)
-  if (error) {
-    const lowerMessage = String(error.message || '').toLowerCase()
-    const isMissingTable = error.code === '42P01' || lowerMessage.includes('does not exist')
-    const isPolicyIssue =
-      lowerMessage.includes('permission') ||
-      lowerMessage.includes('policy') ||
-      lowerMessage.includes('rls')
+  if (isMissingRelationError(error)) {
+    logWarn(`[AdminUsers] ${tableName} chưa sẵn sàng`, error)
+    OPTIONAL_TABLES[tableName] = false
+    return false
+  }
 
-    if (isMissingTable || isPolicyIssue) {
-      logWarn(`[AdminUsers] ${tableName} chưa sẵn sàng`, error)
-      OPTIONAL_TABLES[tableName] = false
-      return false
-    }
+  if (error && !isPermissionError(error)) {
+    logWarn(`[AdminUsers] Không thể kiểm tra ${tableName} bằng probe select`, error)
   }
 
   OPTIONAL_TABLES[tableName] = true
   return true
 }
+
+
 
 async function getProfileById(userId) {
   const missingSupabase = ensureSupabase()
@@ -310,59 +327,19 @@ async function getAdminCount() {
 }
 
 async function createUserNotification(payload) {
-  const isAvailable = await checkTableAvailability('notifications')
-  if (!isAvailable) {
-    return {
-      data: null,
-      skipped: true,
-      warning: 'Bảng notifications chưa được tạo hoặc RLS chưa được apply.',
-    }
-  }
-
-  const { data, error } = await supabase
-    .from('notifications')
-    .insert(payload)
-    .select()
-    .single()
-
-  if (error) {
-    logWarn('[AdminUsers] Lỗi ghi notification', error)
-    return {
-      data: null,
-      skipped: true,
-      warning: 'Không thể ghi notification. Hãy kiểm tra RLS của bảng notifications.',
-    }
-  }
-
-  return { data, skipped: false, warning: null }
+  const { user_id, ...restPayload } = payload
+  const result = await createNotificationForUser(user_id, restPayload)
+  return { data: result.data, skipped: false, warning: result.error ? result.error.message : null }
 }
 
 async function createAuditLog(payload) {
-  const isAvailable = await checkTableAvailability('admin_action_logs')
-  if (!isAvailable) {
-    return {
-      data: null,
-      skipped: true,
-      warning: 'Bảng admin_action_logs chưa được tạo hoặc RLS chưa được apply.',
-    }
-  }
-
-  const { data, error } = await supabase
-    .from('admin_action_logs')
-    .insert(payload)
-    .select()
-    .single()
-
-  if (error) {
-    logWarn('[AdminUsers] Lỗi ghi audit log', error)
-    return {
-      data: null,
-      skipped: true,
-      warning: 'Không thể ghi admin action log. Hãy kiểm tra RLS của bảng admin_action_logs.',
-    }
-  }
-
-  return { data, skipped: false, warning: null }
+  const result = await logAdminAction({
+    action: payload.action,
+    targetType: payload.target_type,
+    targetId: payload.target_id,
+    metadata: payload.metadata,
+  })
+  return { data: result.data, skipped: false, warning: result.error ? result.error.message : null }
 }
 
 function getPrivilegeError(actor, target) {

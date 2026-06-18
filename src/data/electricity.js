@@ -79,8 +79,33 @@ export function formatHistoryDate(value) {
     return ''
   }
 
-  if (value.includes('/')) {
+  if (typeof value !== 'string') {
+    const parsedDate = new Date(value)
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return parsedDate.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    }
+    return String(value)
+  }
+
+  if (value.includes('/') && !value.includes('T')) {
     return value
+  }
+
+  const parsedDate = new Date(value)
+  if (!Number.isNaN(parsedDate.getTime())) {
+    return parsedDate.toLocaleString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
   const [year, month, day] = value.split('-')

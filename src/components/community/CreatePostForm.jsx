@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import PostContentEditor from './PostContentEditor'
 import CustomSelect from '../common/CustomSelect'
+import ImageCropModal from '../common/ImageCropModal'
+import PostImage from '../common/PostImage'
 import '../../styles/create-post.css'
 import { countWords, extractPlainTextFromBlocks } from '../../utils/postBlocks'
 
@@ -12,14 +14,15 @@ function CreatePostForm({
   fieldErrors = {},
   onChange,
   onCoverChange,
-  onSaveDraft,
   onClearDraft,
-  onPreview,
   onSubmit,
   onRemoveCover,
   onInsertInlineImage,
   isSubmitting,
   isUploadingInlineImage = false,
+  cropState,
+  onCropApply,
+  onCropClose,
   draftMeta = '',
   cooldownRemaining = 0,
   limits = {
@@ -50,6 +53,10 @@ function CreatePostForm({
     [form.content, form.content_blocks],
   )
   const wordCount = useMemo(() => countWords(plainContent), [plainContent])
+  const imageCount = useMemo(
+    () => (Array.isArray(form.content_blocks) ? form.content_blocks.filter((block) => block?.type === 'image' && block.url).length : 0),
+    [form.content_blocks],
+  )
 
   function handleDragOver(event) {
     event.preventDefault()
@@ -82,7 +89,8 @@ function CreatePostForm({
   }
 
   return (
-    <div className={`create-post-form post-modal-form${compact ? ' create-post-form--compact' : ''}`}>
+    <>
+      <div className={`create-post-form post-modal-form${compact ? ' create-post-form--compact' : ''}`}>
       <div className="create-post-form__messages">
         {errorMessage ? <div className="create-post-form__message create-post-form__message--error">{errorMessage}</div> : null}
         {successMessage ? (
@@ -92,20 +100,10 @@ function CreatePostForm({
       </div>
 
       <div className="create-post-form__utility">
-        <span className="create-post-form__draft-meta">{draftMeta || 'Nháp sẽ tự động lưu sau vài giây.'}</span>
+        <span className="create-post-form__draft-meta">{draftMeta || 'Chưa có thay đổi'}</span>
         <div className="create-post-form__utility-meta">
-          <span>{wordCount} từ</span>
           <span>{plainContent.length}/{limits.contentMax} ký tự</span>
-          {onClearDraft ? (
-            <button
-              type="button"
-              className="create-post-form__clear-draft"
-              onClick={onClearDraft}
-              disabled={isSubmitting}
-            >
-              Xóa nháp
-            </button>
-          ) : null}
+          <span>{wordCount} từ</span>
         </div>
       </div>
 
@@ -145,7 +143,13 @@ function CreatePostForm({
         >
           {form.coverPreview ? (
             <>
-              <img src={form.coverPreview} alt="Preview" className="create-post-form__cover-preview" />
+              <PostImage
+                src={form.coverPreview}
+                alt="Preview ảnh bìa"
+                className="create-post-form__cover-preview"
+                variant="preview"
+                loading="eager"
+              />
               {onRemoveCover ? (
                 <button
                   type="button"
@@ -163,7 +167,7 @@ function CreatePostForm({
           ) : (
             <div className="create-post-form__upload-copy">
               <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
-              <small>Ảnh cover rộng sẽ hiển thị đẹp hơn ở cả feed và trang chi tiết.</small>
+              <small>Ảnh sẽ được crop theo 1 trong 3 tỉ lệ: 16:9, 1:1 hoặc 3:4 trước khi tải lên.</small>
               <button
                 type="button"
                 className="btn btn--secondary create-post-form__upload-trigger"
@@ -280,11 +284,11 @@ function CreatePostForm({
       <div className="create-post-form__field post-form-group">
         <div className="post-form-group__header post-form-group__header--content">
           <label htmlFor="post-content">
-            <span>Nội dung bài viết</span>
+            <span>Nội dung</span>
           </label>
           <div className="post-form-group__content-stats">
             <span className="post-form-group__counter">{plainContent.length}/{limits.contentMax} ký tự</span>
-            <span className="post-form-group__counter">{wordCount} từ</span>
+            <span className="post-form-group__counter">{imageCount}/{limits.contentImageMax} ảnh</span>
           </div>
         </div>
 
@@ -306,7 +310,7 @@ function CreatePostForm({
         </div>
 
         <p id="post-content-help" className="post-form-group__help">
-          Khuyến nghị từ {limits.contentMin} ký tự để bài viết đủ rõ ràng. Bạn có thể chèn tối đa {limits.contentImageMax} ảnh minh họa vào nội dung.
+          Tối thiểu {limits.contentMin} ký tự. Tối đa {limits.contentImageMax} ảnh trong nội dung.
         </p>
         {fieldErrors.content ? <p id="post-content-error" className="post-form-group__error">{fieldErrors.content}</p> : null}
       </div>
@@ -333,24 +337,30 @@ function CreatePostForm({
       </div>
 
       {showActions ? (
-        <div className="create-post-form__actions">
-          <button type="button" className="btn create-post-form__draft" onClick={onSaveDraft} disabled={isSubmitting}>
-            Lưu nháp
-          </button>
+        <div className="create-post-form__actions" role="group" aria-label="Hành động đăng bài">
           {onClearDraft ? (
-            <button type="button" className="btn btn--ghost" onClick={onClearDraft} disabled={isSubmitting}>
+            <button type="button" className="btn btn--ghost create-post-form__secondary-action" onClick={onClearDraft} disabled={isSubmitting}>
               Xóa nháp
             </button>
           ) : null}
-          <button type="button" className="btn btn--secondary" onClick={onPreview} disabled={isSubmitting}>
-            Xem trước
-          </button>
-          <button type="button" className="btn btn--primary" onClick={onSubmit} disabled={isSubmitting || cooldownRemaining > 0}>
+          <button type="button" className="btn btn--primary create-post-form__primary-action" onClick={onSubmit} disabled={isSubmitting || cooldownRemaining > 0}>
             {isSubmitting ? 'Đang gửi...' : 'Gửi bài chờ duyệt'}
           </button>
         </div>
       ) : null}
-    </div>
+      </div>
+      <ImageCropModal
+        key={`${cropState?.image || 'closed'}-${cropState?.aspectKey || '16:9'}`}
+        isOpen={cropState?.isOpen}
+        image={cropState?.image}
+        defaultAspectKey={cropState?.aspectKey}
+        title={cropState?.title}
+        confirmLabel={cropState?.confirmLabel}
+        originalFileName={cropState?.file?.name}
+        onApply={onCropApply}
+        onClose={onCropClose}
+      />
+    </>
   )
 }
 

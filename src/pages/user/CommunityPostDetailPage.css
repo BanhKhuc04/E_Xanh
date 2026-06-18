@@ -95,10 +95,6 @@
   margin: 24px 0;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
-  border-radius: 20px;
-  position: relative;
-  min-height: 200px;
 }
 
 @media (max-width: 768px) {
@@ -107,17 +103,10 @@
   }
 }
 
-.community-detail__image img,
-.post-image--detail img {
+.community-detail__image {
   width: 100%;
-  height: auto !important;
-  max-height: 680px;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  margin: auto;
+  max-height: min(70vh, 560px);
   border-radius: 20px;
-  background: #f7f8ef;
 }
 
 .community-detail__content {

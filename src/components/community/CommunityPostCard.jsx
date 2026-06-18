@@ -1,14 +1,48 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  Bookmark,
-  Heart,
-  MessageCircle,
-  Share2,
-  UserRound,
-} from 'lucide-react'
+import { Bookmark, Heart, Link2, MessageCircle, UserRound } from 'lucide-react'
 import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
 import InlineCommentSection from './InlineCommentSection'
+import PostImage from '../common/PostImage'
+
+const COMMUNITY_IMAGE_FALLBACK = '/og-image-v2.png'
+
+function copyTextUsingExecCommand(text) {
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.setAttribute('readonly', '')
+  textArea.style.position = 'fixed'
+  textArea.style.opacity = '0'
+  textArea.style.pointerEvents = 'none'
+  document.body.appendChild(textArea)
+  textArea.select()
+
+  try {
+    return document.execCommand('copy')
+  } catch {
+    return false
+  } finally {
+    document.body.removeChild(textArea)
+  }
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await Promise.race([
+        navigator.clipboard.writeText(text),
+        new Promise((_, reject) => {
+          window.setTimeout(() => reject(new Error('clipboard-timeout')), 400)
+        }),
+      ])
+      return true
+    } catch {
+      return copyTextUsingExecCommand(text)
+    }
+  }
+
+  return copyTextUsingExecCommand(text)
+}
 
 /* ── Placeholder khi bài không có ảnh ── */
 function ImagePlaceholder() {
@@ -83,6 +117,7 @@ function CommunityPostCard({
 }) {
   const [toast, setToast] = useState('')
   const shareRef = useRef(null)
+  const toastTimeoutRef = useRef(null)
   const navigate = useNavigate()
 
   // Đảm bảo không hiển thị "Ẩn danh" khi có authorId
@@ -111,19 +146,29 @@ function CommunityPostCard({
   }, [isShareActive, onToggleShare])
 
   const showToast = (msg) => {
+    window.clearTimeout(toastTimeoutRef.current)
     setToast(msg)
-    setTimeout(() => setToast(''), 2800)
+    toastTimeoutRef.current = window.setTimeout(() => setToast(''), 6000)
   }
 
-  const handleShare = async (e) => {
+  useEffect(() => () => {
+    window.clearTimeout(toastTimeoutRef.current)
+  }, [])
+
+  const handleSaveLink = async (e) => {
+    e.preventDefault()
     e.stopPropagation()
+    const shareUrl = `${window.location.origin}/cong-dong/${post.id}`
+
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/cong-dong/${post.id}`)
-      showToast('Đã sao chép liên kết bài viết')
+      const copied = await copyTextToClipboard(shareUrl)
+      showToast(copied ? 'Đã lưu liên kết' : 'Không thể lưu liên kết')
     } catch {
-      showToast('Không sao chép được liên kết')
+      showToast('Không thể lưu liên kết')
     }
   }
+
+  const authorProfilePath = post.authorId ? `/nguoi-dung/${post.authorId}` : ''
 
   return (
     <article
@@ -142,17 +187,27 @@ function CommunityPostCard({
           {/* Header: avatar + tên + ngày */}
           <div className="community-post-card__header">
             <div className="community-post-card__author">
-              <Link to={`/nguoi-dung/${post.authorId}`} onClick={(e) => e.stopPropagation()} className="community-post-card__avatar-link">
-                <AuthorAvatar src={post.avatar} name={authorName} />
-              </Link>
-              <div className="community-post-card__author-info">
-                <Link
-                  to={`/nguoi-dung/${post.authorId}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="community-post-card__author-name"
-                >
-                  {authorName}
+              {authorProfilePath ? (
+                <Link to={authorProfilePath} onClick={(e) => e.stopPropagation()} className="community-post-card__avatar-link">
+                  <AuthorAvatar src={post.avatar} name={authorName} />
                 </Link>
+              ) : (
+                <span className="community-post-card__avatar-link" aria-label={authorName}>
+                  <AuthorAvatar src={post.avatar} name={authorName} />
+                </span>
+              )}
+              <div className="community-post-card__author-info">
+                {authorProfilePath ? (
+                  <Link
+                    to={authorProfilePath}
+                    onClick={(e) => e.stopPropagation()}
+                    className="community-post-card__author-name"
+                  >
+                    {authorName}
+                  </Link>
+                ) : (
+                  <span className="community-post-card__author-name">{authorName}</span>
+                )}
                 <span className="community-post-card__date">
                   {post.time}{post.role ? ` · ${post.role}` : ''}
                 </span>
@@ -216,7 +271,7 @@ function CommunityPostCard({
                   className={`post-action-btn${post.isLiked ? ' is-active is-liked' : ''}`}
                   onClick={(e) => { e.stopPropagation(); onToggleLike(post.id) }}
                 >
-                  <Heart size={18} strokeWidth={2.2} />
+                  <Heart size={18} strokeWidth={2.2} fill={post.isLiked ? "currentColor" : "none"} />
                   <span>Thích</span>
                 </button>
 
@@ -234,7 +289,7 @@ function CommunityPostCard({
                   className={`post-action-btn${post.isSaved ? ' is-active' : ''}`}
                   onClick={(e) => { e.stopPropagation(); onToggleSave(post.id) }}
                 >
-                  <Bookmark size={18} strokeWidth={2.2} />
+                  <Bookmark size={18} strokeWidth={2.2} fill={post.isSaved ? "currentColor" : "none"} />
                   <span>Lưu bài</span>
                 </button>
               </div>
@@ -244,35 +299,34 @@ function CommunityPostCard({
 
         {/* ── Cột phải: ảnh + pill Chia sẻ ── */}
         <div className="community-post-card__right community-card__media" ref={shareRef}>
-          <Link
-            to={`/cong-dong/${post.id}`}
-            onClick={(e) => e.stopPropagation()}
+          <div
             className="community-post-card__image-wrap"
-            tabIndex={-1}
-            aria-hidden="true"
           >
             {hasImage ? (
-              <img
-                src={post.image}
+              <PostImage
+                src={post.image || COMMUNITY_IMAGE_FALLBACK}
                 alt={post.title}
                 className="community-post-card__image"
-                loading="lazy"
+                variant="thumbnail"
+                aspect="16:9"
+                loading="eager"
+                priority
               />
             ) : (
               <ImagePlaceholder />
             )}
-          </Link>
+          </div>
 
-          {/* Pill "Chia sẻ" — góc trên phải */}
+          {/* Pill lưu liên kết — góc trên phải */}
           {(!post.status || post.status === 'approved') && (
             <button
               type="button"
               className="share-pill community-post-card__share-pill"
-              onClick={handleShare}
-              title="Sao chép liên kết"
+              onClick={handleSaveLink}
+              title="Lưu liên kết bài viết"
             >
-              <Share2 size={16} strokeWidth={2.2} />
-              <span>Chia sẻ</span>
+              <Link2 size={16} strokeWidth={2.2} />
+              <span>Lưu liên kết</span>
             </button>
           )}
         </div>
@@ -296,7 +350,7 @@ function CommunityPostCard({
 
       {/* Toast */}
       {toast && (
-        <div className="ui-toast" role="status">
+        <div className="ui-toast toast" role="status" aria-live="polite">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
           </svg>

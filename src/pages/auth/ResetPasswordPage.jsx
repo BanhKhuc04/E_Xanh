@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BannerCarousel from '../../components/common/BannerCarousel'
@@ -40,6 +40,7 @@ function ResetPasswordPage() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+  const [context] = useState(() => getPasswordResetContext())
 
   const [form, setForm] = useState({
     password: '',
@@ -58,10 +59,10 @@ function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [resetEmail, setResetEmail] = useState('')
-  const [redirectTarget, setRedirectTarget] = useState('/dang-nhap')
-
-  const context = useMemo(() => getPasswordResetContext(), [])
+  const [resetEmail, setResetEmail] = useState(() => context?.email || '')
+  const [redirectTarget, setRedirectTarget] = useState(() =>
+    context?.source === 'settings' ? '/tai-khoan/cai-dat' : '/dang-nhap',
+  )
 
   useEffect(() => {
     async function load() {
@@ -94,9 +95,6 @@ function ResetPasswordPage() {
 
   useEffect(() => {
     let isMounted = true
-
-    setRedirectTarget(context?.source === 'settings' ? '/tai-khoan/cai-dat' : '/dang-nhap')
-    setResetEmail(context?.email || '')
 
     const markRecoveryReady = (session) => {
       if (!isMounted || !session?.user) return

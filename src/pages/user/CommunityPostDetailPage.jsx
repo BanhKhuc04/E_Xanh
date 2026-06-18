@@ -8,6 +8,28 @@ import { getCurrentSession, getCurrentUserProfile } from '../../services/authSer
 import InlineCommentSection from '../../components/community/InlineCommentSection'
 import './CommunityPostDetailPage.css'
 
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return true
+  }
+
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.setAttribute('readonly', '')
+  textArea.style.position = 'fixed'
+  textArea.style.opacity = '0'
+  textArea.style.pointerEvents = 'none'
+  document.body.appendChild(textArea)
+  textArea.select()
+
+  try {
+    return document.execCommand('copy')
+  } finally {
+    document.body.removeChild(textArea)
+  }
+}
+
 // SVG Icons
 const HeartIcon = ({ isLiked }) => (
   <svg viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
@@ -135,10 +157,10 @@ function CommunityPostDetailPage() {
     }
     
     const shareUrl = `${window.location.origin}/cong-dong/${post.id}`
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      showToast('Đã sao chép liên kết bài viết.')
+    copyTextToClipboard(shareUrl).then((copied) => {
+      showToast(copied ? 'Đã sao chép liên kết' : 'Không thể sao chép liên kết')
     }).catch(() => {
-      prompt('Vui lòng copy liên kết bên dưới:', shareUrl)
+      showToast('Không thể sao chép liên kết')
     })
   }
 
@@ -343,7 +365,7 @@ function CommunityPostDetailPage() {
       </div>
 
       {toastMsg && (
-        <div className="ui-toast">
+        <div className="ui-toast toast" role="status" aria-live="polite">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
           {toastMsg}
         </div>

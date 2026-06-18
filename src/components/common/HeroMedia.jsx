@@ -35,7 +35,13 @@ function HeroMedia({
   const [hasVideoError, setHasVideoError] = useState(false)
 
   useEffect(() => {
-    setHasVideoError(false)
+    const timerId = window.setTimeout(() => {
+      setHasVideoError(false)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [imageUrl, mediaType, posterUrl, videoUrl, fallbackImage])
 
   useEffect(() => {
@@ -80,7 +86,8 @@ function HeroMedia({
     Boolean(videoUrl) &&
     allowVideoPlayback &&
     !hasVideoError &&
-    !prefersReducedMotion
+    !prefersReducedMotion &&
+    !isCompactViewport
 
   const rootClassName = ['hero-media', className].filter(Boolean).join(' ')
 

@@ -101,7 +101,13 @@ function ThemeSettingsPage() {
   }, [pageKeys])
 
   useEffect(() => {
-    loadBanners()
+    const timerId = window.setTimeout(() => {
+      void loadBanners()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [loadBanners])
 
   function showMessage(message, isError = false) {
@@ -341,8 +347,10 @@ function ThemeSettingsPage() {
       })
       setInlineFeedback(pageKey, 'Video đã được chọn. Hệ thống đang kiểm tra khả năng phát và chuẩn bị poster tự động.', 'info')
 
+    let playbackInspection = null
+
     try {
-      const playbackInspection = await inspectVideoFilePlayback(file)
+      playbackInspection = await inspectVideoFilePlayback(file)
       if (!playbackInspection.playable) {
         updateDraft(pageKey, (draft) => {
           revokePreviewUrl(draft.videoPreview)

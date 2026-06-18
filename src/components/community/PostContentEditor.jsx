@@ -38,6 +38,23 @@ function withWrappedSelection(value, start, end, prefix, suffix, fallbackText = 
   return { nextValue, selectionStart, selectionEnd }
 }
 
+function toggleWrappedSelection(value, start, end, prefix, suffix, fallbackText = '') {
+  const selectedText = value.slice(start, end)
+  const beforeSelection = value.slice(Math.max(0, start - prefix.length), start)
+  const afterSelection = value.slice(end, end + suffix.length)
+
+  if (selectedText && beforeSelection === prefix && afterSelection === suffix) {
+    const nextValue = `${value.slice(0, start - prefix.length)}${selectedText}${value.slice(end + suffix.length)}`
+    return {
+      nextValue,
+      selectionStart: start - prefix.length,
+      selectionEnd: end - prefix.length,
+    }
+  }
+
+  return withWrappedSelection(value, start, end, prefix, suffix, fallbackText)
+}
+
 function withLinePrefix(value, start, end, prefix) {
   const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1
   const lineEndIndex = value.indexOf('\n', end)
@@ -172,11 +189,11 @@ function PostContentEditor({
     let result = null
 
     if (format === 'bold') {
-      result = withWrappedSelection(value, start, end, '**', '**', 'chữ đậm')
+      result = toggleWrappedSelection(value, start, end, '**', '**', 'chữ đậm')
     }
 
     if (format === 'italic') {
-      result = withWrappedSelection(value, start, end, '*', '*', 'chữ nghiêng')
+      result = toggleWrappedSelection(value, start, end, '*', '*', 'chữ nghiêng')
     }
 
     if (format === 'heading') {
@@ -204,12 +221,14 @@ function PostContentEditor({
     if (!file) return
 
     try {
-      const url = await onInsertImage?.(file)
-      if (!url) return
+      const result = await onInsertImage?.(file)
+      const uploadUrl = typeof result === 'string' ? result : result?.url
+      if (!uploadUrl) return
 
       handleChangeBlock(index, {
-        url,
+        url: uploadUrl,
         alt: file.name || '',
+        aspect: typeof result === 'string' ? undefined : result?.aspectKey,
       })
       showNotice(`Đã tải ảnh lên thành công ${Math.min(imageCount + 1, maxImageCount)}/${maxImageCount}.`)
     } catch {
@@ -226,7 +245,7 @@ function PostContentEditor({
         <div className="block-editor-card__top">
           <div className="block-editor-card__title">
             <Type size={16} />
-            <span>Văn bản</span>
+            <span>Đoạn văn</span>
           </div>
 
           <div className="block-editor-card__actions">
@@ -243,23 +262,23 @@ function PostContentEditor({
         </div>
 
         <div className="block-editor-card__toolbar" role="toolbar" aria-label="Công cụ định dạng văn bản">
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'bold')}>
+          <button type="button" title="Đậm" aria-label="Đậm" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'bold')}>
             <Bold size={15} />
             <span>Đậm</span>
           </button>
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'italic')}>
+          <button type="button" title="Nghiêng" aria-label="Nghiêng" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'italic')}>
             <Italic size={15} />
             <span>Nghiêng</span>
           </button>
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'heading')}>
+          <button type="button" title="Tiêu đề" aria-label="Tiêu đề" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'heading')}>
             <Heading3 size={15} />
-            <span>Tiêu đề nhỏ</span>
+            <span>Tiêu đề</span>
           </button>
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'list')}>
+          <button type="button" title="Danh sách" aria-label="Danh sách" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'list')}>
             <List size={15} />
             <span>Danh sách</span>
           </button>
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'link')}>
+          <button type="button" title="Liên kết" aria-label="Liên kết" onMouseDown={(event) => event.preventDefault()} onClick={() => handleFormatText(index, 'link')}>
             <Link2 size={15} />
             <span>Liên kết</span>
           </button>
@@ -273,7 +292,7 @@ function PostContentEditor({
           placeholder="Viết nội dung bài viết của bạn tại đây..."
           value={textValue}
           onChange={(event) => handleChangeBlock(index, { content: event.target.value })}
-          rows={7}
+          rows={10}
         />
 
         <div className="block-editor-card__meta">
@@ -292,7 +311,7 @@ function PostContentEditor({
         <div className="block-editor-card__top">
           <div className="block-editor-card__title">
             <ImagePlus size={16} />
-            <span>Hình ảnh</span>
+            <span>Ảnh minh họa</span>
           </div>
 
           <div className="block-editor-card__actions">
@@ -355,8 +374,10 @@ function PostContentEditor({
 
             <label htmlFor={`image-upload-${block.id}`} className="block-editor-image-upload__trigger">
               <ImagePlus size={18} />
-              <span>{isUploadingImage ? 'Đang tải ảnh lên...' : 'Thêm hình ảnh'}</span>
-              <small>Ảnh sẽ được hiển thị theo khung gọn, bo góc và dễ xem trên mobile.</small>
+              <div className="block-editor-image-upload__copy">
+                <span>{isUploadingImage ? 'Đang tải ảnh lên...' : 'Thêm hình ảnh'}</span>
+                <small>Ảnh sẽ được hiển thị theo khung gọn, bo góc và dễ xem trên mobile.</small>
+              </div>
             </label>
           </div>
         )}
@@ -367,15 +388,10 @@ function PostContentEditor({
   return (
     <div className={`post-content-editor block-editor ${error ? 'has-error' : ''}`} id={id} aria-describedby={describedBy}>
       <div className="block-editor__header">
-        <div className="block-editor__header-copy">
-          <h3>Nội dung bài viết</h3>
-          <p>Thêm văn bản hoặc hình ảnh để tạo bài viết rõ ràng, dễ đọc.</p>
-        </div>
-
         <div className="block-editor__header-actions">
           <button type="button" className="block-editor__primary-action" onClick={() => handleAddBlock('text')}>
             <Type size={16} />
-            <span>+ Văn bản</span>
+            <span>Thêm đoạn</span>
           </button>
           <button
             type="button"
@@ -383,7 +399,7 @@ function PostContentEditor({
             onClick={() => handleAddBlock('image')}
           >
             <ImagePlus size={16} />
-            <span>+ Hình ảnh</span>
+            <span>Thêm ảnh</span>
           </button>
         </div>
       </div>
@@ -395,10 +411,10 @@ function PostContentEditor({
       ) : null}
 
       <div className="block-editor__summary">
-        <span>{wordCount} từ</span>
         <span>{plainText.length}/{maxLength} ký tự</span>
         <span>{imageCount}/{maxImageCount} ảnh</span>
-        <span>Khuyến nghị {minLength}+ ký tự</span>
+        <span>{wordCount} từ</span>
+        <span>Tối thiểu {minLength} ký tự</span>
       </div>
 
       {localBlocks.length === 0 ? (

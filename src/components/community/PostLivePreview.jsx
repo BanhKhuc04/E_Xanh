@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import PostBlockRenderer from './PostBlockRenderer'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
 import { extractPlainTextFromBlocks } from '../../utils/postBlocks'
+import PostImage from '../common/PostImage'
 
 const PREVIEW_MODE_STORAGE_KEY = 'e-xanh-composer-preview-mode'
 
@@ -26,7 +27,6 @@ function parseTags(tags = '') {
 
 function PostLivePreview({ form, author }) {
   const [viewMode, setViewMode] = useState(readDefaultPreviewMode)
-  const [failedCoverUrl, setFailedCoverUrl] = useState('')
 
   const authorName = author?.name || author?.email?.split('@')[0] || 'Người dùng E-Xanh'
   const authorAvatar = author?.avatar_url || ''
@@ -65,7 +65,7 @@ function PostLivePreview({ form, author }) {
     <div className={`post-live-preview post-live-preview--${viewMode}`}>
       <div className="post-live-preview__workspace-header">
         <div>
-          <span className="post-live-preview__eyebrow">Live Preview</span>
+          <span className="post-live-preview__eyebrow">Xem trước</span>
           <h3>Bài viết sẽ hiển thị như thế nào</h3>
         </div>
 
@@ -90,12 +90,13 @@ function PostLivePreview({ form, author }) {
       <div className="post-live-preview__scroll">
         <article className={`post-live-preview__card post-live-preview__card--${viewMode}`}>
           <div className="post-live-preview__cover">
-            {coverUrl && failedCoverUrl !== coverUrl ? (
-              <img
+            {coverUrl ? (
+              <PostImage
                 src={coverUrl}
                 alt="Preview cover"
                 className="post-live-preview__cover-image"
-                onError={() => setFailedCoverUrl(coverUrl)}
+                variant="preview"
+                loading="eager"
               />
             ) : (
               <div className="post-live-preview__cover-fallback">

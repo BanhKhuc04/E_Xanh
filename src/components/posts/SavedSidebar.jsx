@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import PostImage from '../common/PostImage'
 
 function SavedSidebar({ folders, recentlyRead }) {
   return (
@@ -25,7 +26,7 @@ function SavedSidebar({ folders, recentlyRead }) {
           <div className="saved-sidebar__recent-list">
             {recentlyRead.map((post) => (
               <Link key={post.id} to={`/meo-tiet-kiem/${post.slug}`} className="saved-sidebar__recent-item">
-                <img src={post.image} alt={post.title} />
+                <PostImage src={post.image} alt={post.title} variant="thumbnail" aspect="1:1" />
                 <div>
                   <h3>{post.title}</h3>
                   <p>{post.recentReadAt}</p>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getSystemNotificationCapabilityAudit,
   getSystemNotificationHistory,
@@ -83,6 +83,8 @@ const SEVERITY_OPTIONS = [
   { value: 'critical', label: 'Khẩn cấp', description: 'Mức ưu tiên cao nhất, chỉ dùng khi thật sự cần.' },
 ]
 
+const EMPTY_PREVIEW = { recipients: [], count: 0 }
+
 function getOptionMeta(options, value, fallbackLabel = value) {
   return options.find((option) => option.value === value) || { value, label: fallbackLabel, description: '', recommendedSeverity: 'info' }
 }
@@ -122,7 +124,7 @@ function SystemNotificationPage() {
   const [history, setHistory] = useState([])
   const [historyLoading, setHistoryLoading] = useState(true)
   const [historyError, setHistoryError] = useState('')
-  const [preview, setPreview] = useState({ recipients: [], count: 0 })
+  const [preview, setPreview] = useState(EMPTY_PREVIEW)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -130,11 +132,12 @@ function SystemNotificationPage() {
   const [toast, setToast] = useState(null)
   const [selectedHistory, setSelectedHistory] = useState(null)
   const [capabilityAudit, setCapabilityAudit] = useState(null)
+  const toastTimeoutRef = useRef(null)
 
   const showToast = useCallback((message, tone = 'success') => {
     setToast({ message, tone })
-    window.clearTimeout(showToast.timeoutId)
-    showToast.timeoutId = window.setTimeout(() => setToast(null), 3200)
+    window.clearTimeout(toastTimeoutRef.current)
+    toastTimeoutRef.current = window.setTimeout(() => setToast(null), 3200)
   }, [])
 
   const loadHistory = useCallback(async () => {
@@ -158,8 +161,14 @@ function SystemNotificationPage() {
   }, [])
 
   useEffect(() => {
-    loadHistory()
-    loadCapabilityAudit()
+    const timerId = window.setTimeout(() => {
+      void loadHistory()
+      void loadCapabilityAudit()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [loadHistory, loadCapabilityAudit])
 
   useEffect(() => {
@@ -188,15 +197,10 @@ function SystemNotificationPage() {
       setPreviewLoading(false)
     }
 
-    if (form.targetType === 'specific_user' && !form.targetValue.trim()) {
-      setPreview({ recipients: [], count: 0 })
-      setPreviewError('')
-      return undefined
-    }
-
-    if (form.targetType === 'role' && !form.targetValue) {
-      setPreview({ recipients: [], count: 0 })
-      setPreviewError('')
+    if (
+      (form.targetType === 'specific_user' && !form.targetValue.trim()) ||
+      (form.targetType === 'role' && !form.targetValue)
+    ) {
       return undefined
     }
 
@@ -206,6 +210,12 @@ function SystemNotificationPage() {
       cancelled = true
     }
   }, [form.targetType, form.targetValue])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(toastTimeoutRef.current)
+    }
+  }, [])
 
   const previewRecipients = useMemo(
     () => (preview.recipients || []).slice(0, 4),
@@ -219,12 +229,25 @@ function SystemNotificationPage() {
     () => getOptionMeta(SEVERITY_OPTIONS, form.severity, 'Thông tin'),
     [form.severity],
   )
+  const isPreviewTargetReady = useMemo(() => {
+    if (form.targetType === 'specific_user') {
+      return Boolean(form.targetValue.trim())
+    }
+
+    if (form.targetType === 'role') {
+      return Boolean(form.targetValue)
+    }
+
+    return true
+  }, [form.targetType, form.targetValue])
+  const effectivePreview = isPreviewTargetReady ? preview : EMPTY_PREVIEW
+  const effectivePreviewError = isPreviewTargetReady ? previewError : ''
 
   const canSubmit = Boolean(
     form.title.trim() &&
     form.message.trim() &&
-    preview.count > 0 &&
-    !previewError &&
+    effectivePreview.count > 0 &&
+    !effectivePreviewError &&
     !submitting,
   )
 
@@ -253,12 +276,12 @@ function SystemNotificationPage() {
       return
     }
 
-    if (preview.count <= 0) {
+    if (effectivePreview.count <= 0) {
       showToast('Không có người nhận hợp lệ để gửi thông báo.', 'error')
       return
     }
 
-    if (!window.confirm(`Bạn sắp gửi thông báo này tới ${preview.count} người dùng.`)) {
+    if (!window.confirm(`Bạn sắp gửi thông báo này tới ${effectivePreview.count} người dùng.`)) {
       return
     }
 
@@ -279,7 +302,7 @@ function SystemNotificationPage() {
     } else {
       showToast(`Đã gửi thông báo tới ${data.recipientCount} người dùng.`)
       setForm(INITIAL_FORM)
-      setPreview({ recipients: [], count: 0 })
+      setPreview(EMPTY_PREVIEW)
       await loadHistory()
       await loadCapabilityAudit()
     }
@@ -333,7 +356,9 @@ function SystemNotificationPage() {
               <p className="st-card__helper">Chọn đúng đối tượng nhận, nhập nội dung và kiểm tra preview trước khi gửi.</p>
             </div>
             <span className="notification-count-pill">
-              {previewLoading ? 'Đang tính người nhận...' : `${preview.count || 0} người nhận`}
+              {previewLoading && isPreviewTargetReady
+                ? 'Đang tính người nhận...'
+                : `${effectivePreview.count || 0} người nhận`}
             </span>
           </div>
 
@@ -456,7 +481,7 @@ function SystemNotificationPage() {
               </label>
             </div>
 
-            {previewError ? <div className="admin-alert admin-alert--error">{previewError}</div> : null}
+            {effectivePreviewError ? <div className="admin-alert admin-alert--error">{effectivePreviewError}</div> : null}
 
             <div className="notification-preview-panel">
               <div className="notification-preview-panel__header">
@@ -489,9 +514,9 @@ function SystemNotificationPage() {
 
               <div className="notification-preview-audience">
                 <strong>Người nhận dự kiến</strong>
-                {previewLoading ? (
+                {previewLoading && isPreviewTargetReady ? (
                   <p>Đang kiểm tra người nhận thật từ Supabase...</p>
-                ) : preview.count === 0 ? (
+                ) : effectivePreview.count === 0 ? (
                   <p>Chưa xác định được người nhận hợp lệ.</p>
                 ) : (
                   <div className="notification-preview-audience__chips">
@@ -501,9 +526,9 @@ function SystemNotificationPage() {
                         {recipient.email ? ` • ${recipient.email}` : ''}
                       </span>
                     ))}
-                    {preview.count > previewRecipients.length ? (
+                    {effectivePreview.count > previewRecipients.length ? (
                       <span className="notification-recipient-chip notification-recipient-chip--muted">
-                        +{preview.count - previewRecipients.length} người nữa
+                        +{effectivePreview.count - previewRecipients.length} người nữa
                       </span>
                     ) : null}
                   </div>
@@ -548,7 +573,7 @@ function SystemNotificationPage() {
               </div>
               <div>
                 <span>Người nhận hợp lệ</span>
-                <strong>{preview.count || 0}</strong>
+                <strong>{effectivePreview.count || 0}</strong>
               </div>
             </div>
           </section>

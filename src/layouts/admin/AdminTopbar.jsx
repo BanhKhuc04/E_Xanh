@@ -201,7 +201,7 @@ function AdminTopbar() {
     }
 
     if (notification?.action_url) {
-      window.location.href = notification.action_url
+      window.location.assign(notification.action_url)
     }
   }
 
@@ -251,13 +251,20 @@ function AdminTopbar() {
           {showBellMenu ? (
             <div className="admin-topbar__dropdown">
               <div className="admin-topbar__dropdown-header">
-                <div>
+                <div className="admin-topbar__dropdown-header-top">
                   <strong>Chuông thông báo</strong>
-                  <p>Thông báo nội bộ gửi tới tài khoản quản trị hiện tại.</p>
+                  {notificationsSupported ? (
+                    <button 
+                      type="button" 
+                      onClick={handleMarkAllRead}
+                      disabled={unreadCount === 0}
+                      style={{ opacity: unreadCount === 0 ? 0.4 : 1, cursor: unreadCount === 0 ? 'not-allowed' : 'pointer' }}
+                    >
+                      Đánh dấu đã đọc
+                    </button>
+                  ) : null}
                 </div>
-                {notificationsSupported && unreadCount > 0 ? (
-                  <button type="button" onClick={handleMarkAllRead}>Đánh dấu tất cả đã đọc</button>
-                ) : null}
+                <p>Thông báo nội bộ gửi tới tài khoản quản trị hiện tại.</p>
               </div>
 
               <div className="admin-topbar__dropdown-body">

@@ -1,4 +1,3 @@
-const ELECTRICITY_HISTORY_KEY = 'eXanhElectricityHistory'
 const RECALCULATE_DEVICES_KEY = 'eXanhRecalculateDevices'
 const SCROLL_TO_RESULT_KEY = 'eXanhScrollToResult'
 

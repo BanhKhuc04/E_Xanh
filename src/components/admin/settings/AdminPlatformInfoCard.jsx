@@ -4,7 +4,13 @@ function AdminPlatformInfoCard({ initial, onSave }) {
   const [form, setForm] = useState(initial)
 
   useEffect(() => {
-    setForm(initial)
+    const timerId = window.setTimeout(() => {
+      setForm(initial)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [initial])
 
   const handleChange = (field, value) => {

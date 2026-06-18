@@ -1,8 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import {
-  commentStatusMap,
-} from '../../data/mock/adminComments'
 import AdminCommentStats from '../../components/admin/comments/AdminCommentStats'
 import AdminCommentFilter from '../../components/admin/comments/AdminCommentFilter'
 import AdminCommentBulkAction from '../../components/admin/comments/AdminCommentBulkAction'
@@ -63,7 +60,13 @@ function CommentManagementPage() {
   }, [])
 
   useEffect(() => {
-    loadComments()
+    const timerId = window.setTimeout(() => {
+      void loadComments()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [loadComments])
 
   const showToast = useCallback((message, tone = 'success') => {

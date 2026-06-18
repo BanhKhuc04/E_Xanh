@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { supabase } from '../../lib/supabase'
 import { getCurrentSession } from '../../services/authService'
@@ -13,8 +13,6 @@ import '../../styles/profile-cover.css'
 
 function PublicProfilePage() {
   const { userId } = useParams()
-  const navigate = useNavigate()
-  
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [posts, setPosts] = useState([])

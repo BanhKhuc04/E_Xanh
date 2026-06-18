@@ -44,7 +44,13 @@ function AdminBugReportManager() {
   }, [])
 
   useEffect(() => {
-    loadReports()
+    const timerId = window.setTimeout(() => {
+      void loadReports()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [loadReports])
 
   const summary = useMemo(() => {

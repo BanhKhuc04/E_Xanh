@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminAppearanceSettingsCard from '../../components/admin/settings/AdminAppearanceSettingsCard'
 import AdminBackupCard from '../../components/admin/settings/AdminBackupCard'
 import AdminContentSettingsCard from '../../components/admin/settings/AdminContentSettingsCard'
@@ -132,11 +132,12 @@ function SettingsPage() {
   const [currentUserId, setCurrentUserId] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isDownloadingBackup, setIsDownloadingBackup] = useState(false)
+  const toastTimeoutRef = useRef(null)
 
   const showToast = useCallback((message, tone = 'success') => {
     setToast({ message, tone })
-    window.clearTimeout(showToast.timeoutId)
-    showToast.timeoutId = window.setTimeout(() => setToast(null), 3000)
+    window.clearTimeout(toastTimeoutRef.current)
+    toastTimeoutRef.current = window.setTimeout(() => setToast(null), 3000)
   }, [])
 
   const refreshSidebarData = useCallback(async () => {
@@ -149,6 +150,12 @@ function SettingsPage() {
     setSystemStatus(healthResult.data ?? [])
     setBackups(backupsResult.data ?? [])
     setStatsSnapshot(statsResult)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(toastTimeoutRef.current)
+    }
   }, [])
 
   useEffect(() => {
@@ -172,7 +179,6 @@ function SettingsPage() {
           })
           setSecurity((current) => ({
             ...current,
-            autoLogout: Number(settings.auto_logout_admin_minutes || 30) > 0,
             loginHistory: [
               {
                 time: new Date(profile.updated_at || profile.created_at).toLocaleString('vi-VN'),

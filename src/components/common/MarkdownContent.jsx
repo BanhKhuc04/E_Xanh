@@ -3,7 +3,7 @@ import { isRenderableMarkdownImageUrl } from '../../utils/markdown'
 
 function renderInlineTokens(text, keyPrefix) {
   const tokens = []
-  const pattern = /(\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g
+  const pattern = /(\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g
   let lastIndex = 0
   let match
   let index = 0
@@ -25,11 +25,17 @@ function renderInlineTokens(text, keyPrefix) {
         </a>
       )
     } else if (match[4]) {
-      tokens.push(<strong key={`${keyPrefix}-strong-${index}`}>{match[4]}</strong>)
+      tokens.push(
+        <strong key={`${keyPrefix}-strongem-${index}`}>
+          <em>{match[4]}</em>
+        </strong>,
+      )
     } else if (match[5]) {
-      tokens.push(<em key={`${keyPrefix}-em-${index}`}>{match[5]}</em>)
+      tokens.push(<strong key={`${keyPrefix}-strong-${index}`}>{match[5]}</strong>)
     } else if (match[6]) {
-      tokens.push(<code key={`${keyPrefix}-code-${index}`}>{match[6]}</code>)
+      tokens.push(<em key={`${keyPrefix}-em-${index}`}>{match[6]}</em>)
+    } else if (match[7]) {
+      tokens.push(<code key={`${keyPrefix}-code-${index}`}>{match[7]}</code>)
     }
 
     lastIndex = pattern.lastIndex

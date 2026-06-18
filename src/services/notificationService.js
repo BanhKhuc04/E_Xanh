@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 import { getCurrentSession } from './authService'
 import { getCurrentProfile, normalizeUserPreferences } from './profileService'
 import { logError, logWarn } from '../utils/logger'
+import { isStaff } from '../utils/permissions'
 
 const TABLES = {
   modernNotifications: 'notifications',
@@ -188,7 +189,24 @@ async function requireStaffSession() {
     }
   }
 
-  return { session, error: null }
+  const profileResult = await getCurrentProfile()
+  if (profileResult.error || !profileResult.data) {
+    return {
+      session: null,
+      profile: null,
+      error: buildError('Không thể xác thực hồ sơ staff hiện tại từ bảng profiles.', profileResult.error),
+    }
+  }
+
+  if (!isStaff(profileResult.data) || profileResult.data.status !== 'active') {
+    return {
+      session: null,
+      profile: null,
+      error: buildError('Chỉ admin hoặc moderator đang hoạt động mới được gửi thông báo hệ thống.'),
+    }
+  }
+
+  return { session, profile: profileResult.data, error: null }
 }
 
 function isUuidLike(value) {
@@ -369,7 +387,7 @@ export async function getMyNotifications({ limit = 8 } = {}) {
   return {
     data: {
       items: filteredItems,
-      unreadCount: filteredItems.filter((item) => !item.is_read).length,
+      unreadCount: unreadResult?.count || 0,
       supported: true,
       backend,
     },
@@ -455,7 +473,7 @@ export async function sendBulkSystemNotification({
   severity = 'info',
   actionUrl = '',
 } = {}) {
-  const { session, error: sessionError } = await requireStaffSession()
+  const { profile, error: sessionError } = await requireStaffSession()
   if (sessionError) {
     return { data: null, error: sessionError }
   }
@@ -497,7 +515,7 @@ export async function sendBulkSystemNotification({
     target_type: targetType,
     target_value: targetValue?.trim() ? { value: targetValue.trim() } : null,
     recipient_count: recipients.length,
-    created_by: session.user.id,
+    created_by: profile.id,
     created_at: createdAt,
   }
 
@@ -520,7 +538,7 @@ export async function sendBulkSystemNotification({
     related_type: 'system_batch',
     related_id: batchId,
     batch_id: batchId,
-    created_by: session.user.id,
+    created_by: profile.id,
     created_at: createdAt,
   }))
 
@@ -614,7 +632,7 @@ export async function getSystemNotificationHistory() {
 }
 
 export async function revokeSystemNotificationBatch(batchId) {
-  const { session, error: sessionError } = await requireStaffSession()
+  const { profile, error: sessionError } = await requireStaffSession()
   if (sessionError) {
     return { error: sessionError }
   }
@@ -635,7 +653,7 @@ export async function revokeSystemNotificationBatch(batchId) {
     .from(TABLES.batches)
     .update({
       revoked_at: revokedAt,
-      revoked_by: session.user.id,
+      revoked_by: profile.id,
     })
     .eq('id', batchId)
     .is('revoked_at', null)
@@ -649,7 +667,7 @@ export async function revokeSystemNotificationBatch(batchId) {
     .from(TABLES.modernNotifications)
     .update({
       revoked_at: revokedAt,
-      revoked_by: session.user.id,
+      revoked_by: profile.id,
     })
     .eq('batch_id', batchId)
     .is('revoked_at', null)
@@ -664,6 +682,84 @@ export async function revokeSystemNotificationBatch(batchId) {
 
 export function clearNotificationCapabilityCache() {
   AVAILABILITY_CACHE.clear()
+}
+
+export async function getUnreadCount() {
+  if (!supabase) return { count: 0, error: buildError('Supabase chưa cấu hình') }
+  const backend = await getNotificationBackend()
+  if (!backend) return { count: 0, error: null }
+  
+  let query = supabase.from(backend).select('id', { count: 'exact', head: true }).eq('is_read', false)
+  if (backend === TABLES.modernNotifications) query = query.is('revoked_at', null)
+  
+  const { count, error } = await query
+  return { count: count || 0, error }
+}
+
+export async function createNotification(payload) {
+  if (!supabase) return { data: null, error: buildError('Supabase chưa cấu hình') }
+  const backend = await getNotificationBackend()
+  if (!backend) return { data: null, error: null }
+
+  const session = await getCurrentSession()
+  const createdBy = session?.user?.id || null
+
+  const row = {
+    user_id: payload.user_id || payload.userId,
+    title: payload.title,
+    message: payload.message || payload.content || '',
+    type: normalizeNotificationType(payload.type || 'system'),
+    severity: normalizeSeverity(payload.severity || 'info'),
+    action_url: payload.actionUrl || payload.action_url || payload.link || null,
+    related_type: payload.relatedType || payload.related_type || null,
+    related_id: payload.relatedId || payload.related_id || null,
+    created_by: createdBy
+  }
+
+  const { data, error } = await supabase.from(backend).insert(row).select().single()
+  return { data, error }
+}
+
+export async function createNotificationForUser(userId, payload) {
+  return createNotification({ ...payload, user_id: userId })
+}
+
+export async function createBulkNotifications(userIds, payload) {
+  if (!supabase || !userIds?.length) return { data: null, error: buildError('Invalid input') }
+  const backend = await getNotificationBackend()
+  if (!backend) return { data: null, error: null }
+
+  const session = await getCurrentSession()
+  const createdBy = session?.user?.id || null
+
+  const rows = userIds.map(userId => ({
+    user_id: userId,
+    title: payload.title,
+    message: payload.message || payload.content || '',
+    type: normalizeNotificationType(payload.type || 'system'),
+    severity: normalizeSeverity(payload.severity || 'info'),
+    action_url: payload.actionUrl || payload.action_url || payload.link || null,
+    related_type: payload.relatedType || payload.related_type || null,
+    related_id: payload.relatedId || payload.related_id || null,
+    created_by: createdBy
+  }))
+
+  const { data, error } = await supabase.from(backend).insert(rows)
+  return { data, error }
+}
+
+export async function notifyAdmins(payload) {
+  if (!supabase) return { data: null, error: buildError('Supabase chưa cấu hình') }
+  
+  const { data: admins, error: adminError } = await supabase
+    .from('profiles')
+    .select('id')
+    .in('role', ['admin', 'moderator'])
+    .eq('status', 'active')
+
+  if (adminError || !admins?.length) return { data: null, error: adminError }
+  
+  return createBulkNotifications(admins.map(a => a.id), payload)
 }
 
 export { TABLES as NOTIFICATION_TABLES, buildError as buildNotificationError, normalizeSeverity, normalizeNotificationType, normalizeLegacyType }

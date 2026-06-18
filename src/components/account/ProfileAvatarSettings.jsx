@@ -21,7 +21,13 @@ function ProfileAvatarSettings({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   useEffect(() => {
-    setAvatarUrl(currentAvatarUrl || '')
+    const timerId = window.setTimeout(() => {
+      setAvatarUrl(currentAvatarUrl || '')
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [currentAvatarUrl])
 
   const previewUrl = useMemo(() => {

@@ -2,9 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchWebsiteAnnouncements } from '../../services/announcementService'
 import { logError, logWarn } from '../../utils/logger'
 
-const DISMISS_PREFIX = 'exanh_announcement_dismissed_'
-
-function isAnnouncementDismissed(id, updatedAt) {
+function isAnnouncementDismissed() {
   // Yêu cầu: Luôn hiển thị lại thông báo khi F5, không lưu trạng thái đã đóng vào localStorage nữa
   return false
 }
@@ -118,7 +116,10 @@ function AnnouncementBar() {
   if (displayType === 'popup') {
     return (
       <div className="announcement-popup-overlay" role="dialog" aria-modal="true" aria-label={visibleAnnouncement.title || 'Thông báo website'}>
-        <section className={['announcement-bar', 'announcement-bar--popup-card', typeClassName].filter(Boolean).join(' ')}>
+        <section
+          className={['announcement-bar', 'announcement-bar--popup-card', typeClassName].filter(Boolean).join(' ')}
+          aria-label={visibleAnnouncement.title || 'Thông báo website'}
+        >
           <div className="announcement-bar__content">
             {visibleAnnouncement.title ? (
               <strong className="announcement-bar__title">{visibleAnnouncement.title}</strong>
@@ -148,7 +149,10 @@ function AnnouncementBar() {
   }
 
   return (
-    <section className={['announcement-bar', typeClassName, displayClassName].filter(Boolean).join(' ')}>
+    <section
+      className={['announcement-bar', typeClassName, displayClassName].filter(Boolean).join(' ')}
+      aria-label={visibleAnnouncement.title || 'Thông báo website'}
+    >
       <div className="shell shell--wide announcement-bar__inner">
         {displayType === 'marquee' ? (
           <div className="announcement-bar__marquee" aria-label={visibleAnnouncement.title || 'Thông báo website'}>

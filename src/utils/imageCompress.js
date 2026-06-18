@@ -63,7 +63,7 @@ function detectWebpSupport() {
   try {
     const canvas = getCanvas()
     cachedWebpSupport = canvas.toDataURL(WEBP_MIME_TYPE).startsWith(`data:${WEBP_MIME_TYPE}`)
-  } catch (error) {
+  } catch {
     cachedWebpSupport = false
   }
 

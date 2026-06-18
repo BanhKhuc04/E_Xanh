@@ -406,10 +406,8 @@
   align-items: start;
 }
 
-.related-posts__item img {
+.related-posts__item .post-image {
   width: 88px;
-  height: 88px;
-  object-fit: cover;
   border-radius: 14px;
 }
 

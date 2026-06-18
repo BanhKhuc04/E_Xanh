@@ -110,7 +110,7 @@ function UserNavbar() {
       }
       window.removeEventListener('profileUpdated', handleProfileUpdate)
     }
-  }, [])
+  }, [navigate])
 
   useEffect(() => {
     let timerId
@@ -283,15 +283,20 @@ function UserNavbar() {
                 {isNotificationOpen ? (
                   <div className="user-navbar__notification-dropdown" role="menu" aria-label="Thông báo hệ thống">
                     <div className="user-navbar__notification-header">
-                      <div>
+                      <div className="user-navbar__notification-header-top">
                         <strong>Thông báo</strong>
-                        <p>Thông báo quản trị và cập nhật hệ thống dành cho tài khoản của bạn.</p>
+                        {notificationsSupported ? (
+                          <button 
+                            type="button" 
+                            onClick={handleMarkAllRead}
+                            disabled={unreadCount === 0}
+                            style={{ opacity: unreadCount === 0 ? 0.4 : 1, cursor: unreadCount === 0 ? 'not-allowed' : 'pointer' }}
+                          >
+                            Đánh dấu đã đọc
+                          </button>
+                        ) : null}
                       </div>
-                      {notificationsSupported && unreadCount > 0 ? (
-                        <button type="button" onClick={handleMarkAllRead}>
-                          Đánh dấu tất cả đã đọc
-                        </button>
-                      ) : null}
+                      <p>Thông báo quản trị và cập nhật hệ thống dành cho tài khoản của bạn.</p>
                     </div>
 
                     {isLoadingNotifications ? (

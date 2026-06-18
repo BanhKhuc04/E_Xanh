@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Bookmark, MessageCircle, UserRound } from 'lucide-react'
-import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
 import PostAuthorAvatar from '../posts/PostAuthorAvatar'
 import heroImage from '../../assets/hero.png'
+import PostImage from '../common/PostImage'
 
 function FeaturedPosts() {
   const [posts, setPosts] = useState([])
@@ -91,16 +91,11 @@ function FeaturedPosts() {
                 onClick={() => handlePostClick(post)}
               >
                 <div className="home-post-card__media">
-                  <img
-                    src={post.image_url ? getImageUrl(post.image_url, IMAGE_TRANSFORM_WIDTHS.postCard) : DEFAULT_IMAGE}
+                  <PostImage
+                    src={post.image_url || DEFAULT_IMAGE}
                     alt={`${post.title} - mẹo tiết kiệm điện`}
-                    width="600"
-                    height="400"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.target.onerror = null
-                      e.target.src = DEFAULT_IMAGE
-                    }}
+                    variant="card"
+                    aspect="16:9"
                   />
                   <span className="home-post-card__tag">{getTypeLabel(post.type)}</span>
                   <button 

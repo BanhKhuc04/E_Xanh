@@ -15,7 +15,13 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
   const fileInputRef = useRef(null)
 
   useEffect(() => {
-    setCoverUrl(currentCoverUrl || '')
+    const timerId = window.setTimeout(() => {
+      setCoverUrl(currentCoverUrl || '')
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timerId)
+    }
   }, [currentCoverUrl])
 
   const displayUrl = previewUrl || coverUrl
@@ -76,7 +82,7 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
         if (onCoverUpdated) onCoverUpdated(publicUrl)
         window.dispatchEvent(new Event('profileUpdated'))
       }
-    } catch (err) {
+    } catch {
       setMessage({ text: 'Đã có lỗi xảy ra.', type: 'error' })
     } finally {
       setLoading(false)
@@ -110,7 +116,7 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
         if (onCoverUpdated) onCoverUpdated(null)
         window.dispatchEvent(new Event('profileUpdated'))
       }
-    } catch (err) {
+    } catch {
       setMessage({ text: 'Đã có lỗi xảy ra.', type: 'error' })
     } finally {
       setLoading(false)

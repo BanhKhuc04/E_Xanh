@@ -1,5 +1,6 @@
 import PostBlockRenderer from './PostBlockRenderer'
 import { extractPlainTextFromBlocks } from '../../utils/postBlocks'
+import PostImage from '../common/PostImage'
 
 function PostPreviewModal({
   isOpen,
@@ -44,7 +45,7 @@ function PostPreviewModal({
 
             {form.coverPreview && (
               <div style={{ marginBottom: '32px' }}>
-                <img src={form.coverPreview} alt="Cover" style={{ width: '100%', borderRadius: '12px', maxHeight: '400px', objectFit: 'cover' }} />
+                <PostImage src={form.coverPreview} alt="Cover" variant="detail" loading="eager" />
               </div>
             )}
 
