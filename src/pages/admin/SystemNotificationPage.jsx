@@ -6,6 +6,8 @@ import {
   revokeSystemNotification,
   sendSystemNotification,
 } from '../../services/adminNotificationService'
+import AdminBugReportManager from '../../components/admin/settings/AdminBugReportManager'
+import AdminSiteNoticeManager from '../../components/admin/settings/AdminSiteNoticeManager'
 import '../../styles/admin-settings.css'
 
 const INITIAL_FORM = {
@@ -319,6 +321,9 @@ function SystemNotificationPage() {
           {` notifications: ${capabilityAudit.modernNotifications ? 'OK' : 'thiếu'} • notification_batches: ${capabilityAudit.batches ? 'OK' : 'thiếu'}`}
         </div>
       ) : null}
+
+      <AdminSiteNoticeManager />
+      <AdminBugReportManager />
 
       <div className="notification-center-grid">
         <section className="st-card notification-compose-card">

@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router-dom'
 import AnnouncementBar from '../../components/common/AnnouncementBar'
+import SiteNoticeCenter from '../../components/common/SiteNoticeCenter'
 import UserFooter from './UserFooter'
 import UserNavbar from './UserNavbar'
 import { PostComposerProvider } from '../../components/community/PostComposerContext'
-import FloatingBugReport from '../../components/common/FloatingBugReport'
 
 function UserLayout() {
   return (
@@ -15,7 +15,7 @@ function UserLayout() {
           <Outlet />
         </main>
         <UserFooter />
-        <FloatingBugReport />
+        <SiteNoticeCenter />
       </div>
     </PostComposerProvider>
   )

@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import ScrollToTop from '../components/common/ScrollToTop'
-import DevelopmentNotice from '../components/common/DevelopmentNotice'
 import RouteErrorBoundary from '../components/common/RouteErrorBoundary'
 import AdminRoute from '../app/guards/AdminRoute'
 import UserRoute from '../app/guards/UserRoute'
@@ -71,7 +70,6 @@ const router = createBrowserRouter([
     element: (
       <>
         <ScrollToTop />
-        <DevelopmentNotice />
         <Outlet />
       </>
     ),
