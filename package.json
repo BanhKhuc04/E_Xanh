@@ -8,14 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "verify:community-sidebar": "node scripts/verify-community-sidebar.mjs",
-    "test:qa": "playwright test",
-    "test:qa:ui": "playwright test --ui",
-    "test:qa:headed": "playwright test --headed",
-    "test:qa:report": "playwright show-report",
-    "test:qa:summary": "node scripts/qa-report.mjs",
-    "test:qa:lighthouse": "lhci autorun",
-    "test:qa:full": "npm run test:qa && npm run test:qa:summary && npm run test:qa:lighthouse"
+    "verify:community-sidebar": "node scripts/verify-community-sidebar.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.3",
@@ -35,6 +28,7 @@
     "react-router-dom": "^6.30.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.9.2",
     "@types/react": "^19.2.14",
@@ -49,9 +43,6 @@
     "sharp": "^0.35.1",
     "terser": "^5.48.0",
     "vite": "^8.0.12",
-    "vite-plugin-sitemap": "^0.8.2",
-    "@playwright/test": "^1.57.0",
-    "@axe-core/playwright": "^4.11.0",
-    "@lhci/cli": "^0.15.1"
+    "vite-plugin-sitemap": "^0.8.2"
   }
 }
