@@ -1,0 +1,11 @@
+.github/
+tests/
+docs/
+
+playwright-report/
+test-results/
+blob-report/
+
+*.zip
+.env.qa.example
+lighthouserc.cjs
