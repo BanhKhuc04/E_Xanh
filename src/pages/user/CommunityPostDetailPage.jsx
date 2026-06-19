@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import PostBlockRenderer from '../../components/community/PostBlockRenderer'
-import PostImage from '../../components/common/PostImage'
+import OptimizedImage from '../../components/common/OptimizedImage'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 import InlineCommentSection from '../../components/community/InlineCommentSection'
@@ -108,7 +108,10 @@ function CommunityPostDetailPage() {
             category: 'Chia sẻ',
             title: data.title,
             excerpt: data.description || (data.content ? `${data.content.substring(0, 150)}...` : 'Chia sẻ từ cộng đồng E-XANH.'),
-            image: data.image_url,
+            image: data.cover_detail_url || data.cover_url || data.image_url,
+            cover_detail_url: data.cover_detail_url,
+            cover_card_url: data.cover_card_url,
+            cover_thumb_url: data.cover_thumb_url,
             content: data.content || '',
             content_blocks: data.content_blocks || [],
             likes: data.likes_count || 0,
@@ -306,7 +309,19 @@ function CommunityPostDetailPage() {
 
               {post.image && (
                 <div className="community-detail__image-wrapper">
-                  <PostImage src={post.image} alt={post.title} variant="detail" className="community-detail__image" />
+                  <OptimizedImage 
+                    src={post.image} 
+                    variants={{
+                      detail: post.cover_detail_url,
+                      card: post.cover_card_url,
+                      thumb: post.cover_thumb_url
+                    }}
+                    alt={post.title} 
+                    className="community-detail__image" 
+                    ratio="auto"
+                    loading="eager"
+                    fetchPriority="high"
+                  />
                 </div>
               )}
 

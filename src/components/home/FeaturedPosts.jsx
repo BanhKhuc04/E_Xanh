@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Bookmark, MessageCircle, UserRound } from 'lucide-react'
 import PostAuthorAvatar from '../posts/PostAuthorAvatar'
 import heroImage from '../../assets/hero.png'
-import PostImage from '../common/PostImage'
+import OptimizedImage from '../common/OptimizedImage'
 
 function FeaturedPosts() {
   const [posts, setPosts] = useState([])
@@ -91,11 +91,14 @@ function FeaturedPosts() {
                 onClick={() => handlePostClick(post)}
               >
                 <div className="home-post-card__media">
-                  <PostImage
-                    src={post.image_url || DEFAULT_IMAGE}
+                  <OptimizedImage
+                    src={post.cover_card_url || post.cover_url || post.image_url || DEFAULT_IMAGE}
+                    variants={{
+                      card: post.cover_card_url,
+                      thumb: post.cover_thumb_url
+                    }}
                     alt={`${post.title} - mẹo tiết kiệm điện`}
-                    variant="card"
-                    aspect="16:9"
+                    ratio="16/9"
                   />
                   <span className="home-post-card__tag">{getTypeLabel(post.type)}</span>
                   <button 

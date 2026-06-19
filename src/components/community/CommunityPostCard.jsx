@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Bookmark, Heart, Link2, MessageCircle, UserRound } from 'lucide-react'
 import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
 import InlineCommentSection from './InlineCommentSection'
-import PostImage from '../common/PostImage'
+import OptimizedImage from '../common/OptimizedImage'
 
 const COMMUNITY_IMAGE_FALLBACK = '/og-image-v2.png'
 
@@ -122,7 +122,8 @@ function CommunityPostCard({
 
   // Đảm bảo không hiển thị "Ẩn danh" khi có authorId
   const authorName = post.author || (post.authorId ? 'Thành viên E-XANH' : 'Ẩn danh')
-  const hasImage = isValidImageUrl(post.image)
+  const imageUrl = post.cover_card_url || post.cover_url || post.image_url || post.image
+  const hasImage = isValidImageUrl(imageUrl)
 
   const handleCardClick = (e) => {
     if (
@@ -303,14 +304,17 @@ function CommunityPostCard({
             className="community-post-card__image-wrap"
           >
             {hasImage ? (
-              <PostImage
-                src={post.image || COMMUNITY_IMAGE_FALLBACK}
+              <OptimizedImage
+                src={imageUrl || COMMUNITY_IMAGE_FALLBACK}
+                variants={{
+                  card: post.cover_card_url,
+                  thumb: post.cover_thumb_url
+                }}
                 alt={post.title}
                 className="community-post-card__image"
-                variant="thumbnail"
-                aspect="16:9"
+                ratio="16/9"
                 loading="eager"
-                priority
+                fetchPriority="high"
               />
             ) : (
               <ImagePlaceholder />

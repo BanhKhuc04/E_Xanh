@@ -34,36 +34,7 @@ const COMMUNITY_CATEGORY_LABELS = {
   review: 'Đánh giá',
 }
 
-function sortCommunityPosts(posts, activeFilter) {
-  const items = [...posts]
-
-  const sortByNewest = (first, second) =>
-    new Date(second.publishedAt || second.createdAt || second.time) -
-    new Date(first.publishedAt || first.createdAt || first.time)
-
-  const sortByInteraction = (first, second) => second.interactionScore - first.interactionScore
-  const sortBySaved = (first, second) => second.savedCount - first.savedCount
-
-  if (activeFilter === 'Mới nhất') {
-    return items.sort(sortByNewest)
-  }
-
-  if (activeFilter === 'Nhiều tương tác') {
-    return items.sort((first, second) => sortByInteraction(first, second) || sortByNewest(first, second))
-  }
-
-  if (activeFilter === 'Hỏi đáp' || activeFilter === 'Kinh nghiệm') {
-    return items
-      .filter((post) => post.topic === activeFilter)
-      .sort(sortByNewest)
-  }
-
-  if (activeFilter === 'Đã lưu nhiều') {
-    return items.sort((first, second) => sortBySaved(first, second) || sortByInteraction(first, second) || sortByNewest(first, second))
-  }
-
-  return items.sort(sortByNewest)
-}
+// Removed local sortCommunityPosts as we will sort on server side
 
 function getEmptyStateContent(activeFilter) {
   if (activeFilter === 'Hỏi đáp') {
@@ -122,8 +93,12 @@ function CommunityPage() {
   const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
   const [activeFilter, setActiveFilter] = useState('Tất cả')
   const [posts, setPosts] = useState([])
-  const [visibleCount, setVisibleCount] = useState(3)
+  const [page, setPage] = useState(1)
+  const [hasMorePosts, setHasMorePosts] = useState(false)
+  const limit = 10
+  const [totalPosts, setTotalPosts] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [toast, setToast] = useState('')
   const [activeMembers, setActiveMembers] = useState([])
   const [activeMembersLoading, setActiveMembersLoading] = useState(true)
@@ -135,27 +110,34 @@ function CommunityPage() {
 
   useEffect(() => {
     async function loadData() {
-      // Load user
-      let userId = null
-      try {
-        const { getCurrentSession, getCurrentUserProfile } = await import('../../services/authService')
-        const session = await getCurrentSession()
-        if (session?.user) {
-          userId = session.user.id
-          const profile = await getCurrentUserProfile(session.user.id)
-          setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null })
+      if (page === 1) setIsLoading(true)
+      else setIsLoadingMore(true)
+
+      let userId = currentUser?.id
+      if (!userId && page === 1) {
+        try {
+          const { getCurrentSession, getCurrentUserProfile } = await import('../../services/authService')
+          const session = await getCurrentSession()
+          if (session?.user) {
+            userId = session.user.id
+            const profile = await getCurrentUserProfile(session.user.id)
+            setCurrentUser(profile || { id: session.user.id, name: 'Người dùng', avatar_url: null })
+          }
+        } catch (e) {
+          console.warn('Cannot fetch user for community page:', e)
         }
-      } catch (e) {
-        console.warn('Cannot fetch user for community page:', e)
       }
 
-      // Load posts
       try {
         const { getCommunityPosts, getTopActiveMembers } = await import('../../services/postService')
-        const [{ data, error }, activeMembersResult] = await Promise.all([
-          getCommunityPosts(),
-          getTopActiveMembers(5),
-        ])
+        
+        const promises = [getCommunityPosts(page, limit, activeFilter)]
+        if (page === 1) {
+          promises.push(getTopActiveMembers(5))
+        }
+
+        const [postsResult, activeMembersResult] = await Promise.all(promises)
+        const { data, count, error } = postsResult
         
         if (!error && data) {
           let likedMap = {}
@@ -177,13 +159,10 @@ function CommunityPage() {
             let authorName = 'Thành viên E-XANH'
             let avatar = null
             
-            // Logic lấy tên: name -> display_name -> email prefix (nếu chính chủ) -> Thành viên E-XANH
             const getRealName = () => {
               if (p.profiles?.name) return p.profiles.name
               if (p.profiles?.display_name) return p.profiles.display_name
               if (userId && p.author_id === userId) {
-                 // Không có email trong profiles public thông thường trừ khi session
-                 // Ở đây ta không có email user khác nên chỉ dùng "Thành viên E-XANH"
                  return 'Thành viên E-XANH'
               }
               return 'Thành viên E-XANH'
@@ -215,6 +194,9 @@ function CommunityPage() {
               title: p.title,
               excerpt: p.description || (p.content ? `${p.content.substring(0, 150)}...` : 'Chia sẻ mới từ cộng đồng E-XANH.'),
               image: p.image_url,
+              cover_card_url: p.cover_card_url,
+              cover_thumb_url: p.cover_thumb_url,
+              cover_url: p.cover_url,
               likes: p.likes_count || 0,
               commentsCount: p.comments_count || 0,
               savedCount: p.saved_count || 0,
@@ -223,27 +205,38 @@ function CommunityPage() {
               isSaved: !!savedMap[p.id]
             }
           })
-          setPosts(formattedPosts)
+
+          if (page === 1) {
+            setPosts(formattedPosts)
+            setTotalPosts(count || formattedPosts.length)
+          } else {
+            setPosts(prev => [...prev, ...formattedPosts])
+          }
+          
+          setHasMorePosts(formattedPosts.length === limit)
         }
 
-        if (activeMembersResult?.error) {
-          console.error('[CommunityPage] active members error:', activeMembersResult.error)
-          setActiveMembersError('Không thể tải thành viên tích cực.')
-          setActiveMembers([])
-        } else {
-          setActiveMembers(activeMembersResult?.data || [])
-          setActiveMembersError('')
+        if (page === 1 && activeMembersResult) {
+          if (activeMembersResult.error) {
+            console.error('[CommunityPage] active members error:', activeMembersResult.error)
+            setActiveMembersError('Không thể tải thành viên tích cực.')
+            setActiveMembers([])
+          } else {
+            setActiveMembers(activeMembersResult.data || [])
+            setActiveMembersError('')
+          }
+          setActiveMembersLoading(false)
         }
       } catch (e) {
         console.error('Error fetching community posts:', e)
-        setActiveMembersError('Không thể tải thành viên tích cực.')
+        if (page === 1) setActiveMembersError('Không thể tải thành viên tích cực.')
       } finally {
         setIsLoading(false)
-        setActiveMembersLoading(false)
+        setIsLoadingMore(false)
       }
     }
     loadData()
-  }, [])
+  }, [page, activeFilter])
 
   useEffect(() => {
     function handleComposerSuccess(event) {
@@ -257,18 +250,11 @@ function CommunityPage() {
     }
   }, [])
 
-  const filteredPosts = useMemo(
-    () => sortCommunityPosts(posts, activeFilter),
-    [activeFilter, posts],
-  )
-
-  const visiblePosts = filteredPosts.slice(0, visibleCount)
-  const hasMorePosts = filteredPosts.length > visibleCount
   const emptyState = getEmptyStateContent(activeFilter)
 
   function handleFilterChange(filter) {
     setActiveFilter(filter)
-    setVisibleCount(3)
+    setPage(1)
   }
 
   const showToastMsg = (msg) => {
@@ -443,14 +429,14 @@ function CommunityPage() {
             filters={communityFilters}
             activeFilter={activeFilter}
             onChange={handleFilterChange}
-            totalPosts={filteredPosts.length}
+            totalPosts={totalPosts}
           />
 
           <section id="cong-dong-feed" className="community-page__posts">
             {isLoading ? (
               <SectionSkeleton count={3} height="200px" />
-            ) : visiblePosts.length > 0 ? (
-              visiblePosts.map((post) => (
+            ) : posts.length > 0 ? (
+              posts.map((post) => (
                 <CommunityPostCard
                   key={post.id}
                   post={post}
@@ -494,9 +480,10 @@ function CommunityPage() {
               <button
                 type="button"
                 className="btn btn--primary"
-                onClick={() => setVisibleCount((current) => current + 2)}
+                onClick={() => setPage((current) => current + 1)}
+                disabled={isLoadingMore}
               >
-                Xem thêm bài viết
+                {isLoadingMore ? 'Đang tải...' : 'Xem thêm bài viết'}
               </button>
             </div>
           ) : null}

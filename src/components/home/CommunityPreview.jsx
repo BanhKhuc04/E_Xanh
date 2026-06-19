@@ -10,7 +10,7 @@ import {
 import ActiveMembersPanel from '../community/ActiveMembersPanel'
 import { usePostComposer } from '../community/PostComposerContext'
 import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
-import PostImage from '../common/PostImage'
+import OptimizedImage from '../common/OptimizedImage'
 
 /* ── Tính thời gian tương đối ── */
 function getTimeAgo(dateString) {
@@ -145,7 +145,8 @@ function CommunityPreview() {
                 const authorName = visibility === 'public' ? getRealName() : 'Thành viên E-XANH'
                 const avatarUrl = visibility === 'public' ? post.profiles?.avatar_url || null : null
 
-                const hasImage = post.image_url?.startsWith('http')
+                const imageUrl = post.cover_card_url || post.cover_url || post.image_url
+                const hasImage = !!imageUrl
 
                 return (
                   <article key={post.id} className="community-preview__post community-card">
@@ -217,12 +218,15 @@ function CommunityPreview() {
                           aria-hidden="true"
                         >
                           {hasImage ? (
-                            <PostImage
-                              src={post.image_url}
+                            <OptimizedImage
+                              src={imageUrl}
+                              variants={{
+                                card: post.cover_card_url,
+                                thumb: post.cover_thumb_url
+                              }}
                               alt={post.title || 'Ảnh bài viết'}
                               className="community-preview__post-image"
-                              variant="thumbnail"
-                              aspect="16:9"
+                              ratio="16/9"
                             />
                           ) : (
                             <ImagePlaceholder />

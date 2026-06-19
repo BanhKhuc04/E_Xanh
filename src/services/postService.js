@@ -298,21 +298,35 @@ export async function getPostById(id) {
   return { data, error: null }
 }
 
-export async function getCommunityPosts() {
-  const { data, error } = await supabase
+export async function getCommunityPosts(page = 1, limit = 10, filter = 'Tất cả') {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
     .from('posts')
-    .select('*')
+    .select('id, title, description, slug, type, author_id, status, created_at, published_at, likes_count, comments_count, saved_count, image_url, cover_url, cover_thumb_url, cover_card_url, cover_detail_url', { count: 'exact' })
     .eq('status', 'approved')
-    .in('type', ['community', 'qa', 'review'])
-    .order('published_at', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false })
+
+  if (filter === 'Hỏi đáp') query = query.eq('type', 'qa');
+  else if (filter === 'Kinh nghiệm') query = query.eq('type', 'community');
+  else query = query.in('type', ['community', 'qa', 'review']);
+
+  if (filter === 'Đã lưu nhiều') {
+    query = query.order('saved_count', { ascending: false }).order('published_at', { ascending: false, nullsFirst: false });
+  } else if (filter === 'Nhiều tương tác') {
+    query = query.order('likes_count', { ascending: false }).order('published_at', { ascending: false, nullsFirst: false });
+  } else {
+    query = query.order('published_at', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+  }
+
+  const { data, count, error } = await query.range(from, to);
 
   if (error || !data) {
-    return { data, error }
+    return { data, count: 0, error }
   }
 
   const hydratedPosts = await attachPublicProfilesToPosts(data)
-  return { data: hydratedPosts, error: null }
+  return { data: hydratedPosts, count, error: null }
 }
 
 export async function getRecentCommunityPosts(limitCount = 2) {

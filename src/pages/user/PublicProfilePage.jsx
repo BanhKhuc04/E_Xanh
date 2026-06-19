@@ -7,6 +7,7 @@ import { followUser, unfollowUser, isFollowing, getFollowStats } from '../../ser
 import { getPublicPostsByUser } from '../../services/postService'
 import { DEFAULT_USER_PREFERENCES, normalizeUserPreferences } from '../../services/profileService'
 import { getInitials } from '../../utils/avatar'
+import OptimizedImage from '../../components/common/OptimizedImage'
 import MyPostsList from '../../components/account/MyPostsList'
 import '../../styles/public-profile.css'
 import '../../styles/profile-cover.css'
@@ -213,7 +214,7 @@ function PublicProfilePage() {
         <div className="public-profile-header">
           <div className="public-profile-cover">
             {profile.cover_url && (
-              <img src={profile.cover_url} alt={`Ảnh bìa của ${displayName}`} />
+              <OptimizedImage src={profile.cover_url} alt={`Ảnh bìa của ${displayName}`} ratio="auto" />
             )}
           </div>
           

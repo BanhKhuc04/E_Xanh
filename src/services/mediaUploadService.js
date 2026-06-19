@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { createSafeFileName } from '../utils/fileValidation'
 import { optimizeImage, generateImageVariants } from '../utils/media/imageOptimizer'
+import { validateImage } from '../utils/media/imageValidation'
 import { validateVideo, generateVideoPoster } from '../utils/media/videoOptimizer'
 import { MEDIA_VALIDATION } from '../utils/media/mediaConfig'
 import { logError } from '../utils/logger'
@@ -11,7 +12,7 @@ async function uploadFileToSupabase(file, bucket, filePath) {
     .upload(filePath, file, {
       cacheControl: '31536000',
       upsert: false,
-      contentType: file.type,
+      contentType: file.type || 'image/webp',
     })
 
   if (uploadError) {
@@ -27,32 +28,40 @@ async function uploadFileToSupabase(file, bucket, filePath) {
 
 export async function uploadOptimizedImage({
   file,
-  bucket = 'posts',
-  folder = 'images',
-  preset = 'postDetail',
-  variants = false,
+  bucket = 'post-images', // defaulting to post-images for Phase 3
+  folder = 'posts',
+  preset = 'post', // use 'post', 'banner', or 'avatar'
+  variants = true,
   userId = 'anonymous',
+  postId = 'new'
 }) {
   try {
     // 1. Validation
-    if (!MEDIA_VALIDATION.IMAGE.ALLOWED_TYPES.includes(file.type)) {
-      return { error: new Error('Định dạng ảnh không được hỗ trợ.') }
-    }
-    if (file.size > MEDIA_VALIDATION.IMAGE.MAX_SIZE_MB * 1024 * 1024) {
-      return { error: new Error(`File quá lớn. Vui lòng chọn file dưới ${MEDIA_VALIDATION.IMAGE.MAX_SIZE_MB}MB.`) }
+    const validation = validateImage(file)
+    if (!validation.isValid) {
+      return { error: new Error(validation.error) }
     }
 
-    // 2. Generate multiple variants if requested
+    // 2. Generate variants
     if (variants) {
-      const results = await generateImageVariants(file)
-      
+      const results = await generateImageVariants(file, preset)
       const uploadedUrls = {}
       let finalMetadata = null
 
+      const timestamp = Date.now();
+
       for (const [key, variantData] of Object.entries(results)) {
-        const safeName = createSafeFileName(variantData.file, `${key}-${userId}`)
-        const path = `${folder}/${userId}/${safeName}`
-        
+        // e.g. post-images/posts/{postId}/thumb-{timestamp}.webp
+        // or avatars/{userId}/avatar-{timestamp}.webp
+        let path = '';
+        if (preset === 'avatar') {
+          path = `${userId}/${key}-${timestamp}.webp`;
+        } else if (preset === 'banner') {
+          path = `${postId}/${key}-${timestamp}.webp`;
+        } else {
+          path = `${folder}/${postId}/${key}-${timestamp}.webp`;
+        }
+
         const { publicUrl, error } = await uploadFileToSupabase(variantData.file, bucket, path)
         if (error) {
           logError(`Lỗi upload variant ${key}`, error)
@@ -60,7 +69,7 @@ export async function uploadOptimizedImage({
         }
         
         uploadedUrls[`${key}Url`] = publicUrl
-        if (key === preset || !finalMetadata) {
+        if (!finalMetadata || key === 'detail' || key === 'banner' || key === 'avatar') {
           finalMetadata = variantData
         }
       }
@@ -71,14 +80,16 @@ export async function uploadOptimizedImage({
 
       return {
         ...uploadedUrls,
-        metadata: finalMetadata,
+        width: finalMetadata?.width,
+        height: finalMetadata?.height,
+        aspectRatio: finalMetadata?.aspectRatio
       }
     }
 
-    // 3. Single optimization
-    const optimized = await optimizeImage(file, preset)
-    const safeName = createSafeFileName(optimized.file, `${preset}-${userId}`)
-    const path = `${folder}/${userId}/${safeName}`
+    // Single optimization fallback
+    const optimized = await optimizeImage(file, 1440) // detail size
+    const timestamp = Date.now();
+    const path = `${folder}/${postId}/single-${timestamp}.webp`
 
     const { publicUrl, error } = await uploadFileToSupabase(optimized.file, bucket, path)
     if (error) {
@@ -88,7 +99,9 @@ export async function uploadOptimizedImage({
     return {
       publicUrl,
       path,
-      metadata: optimized,
+      width: optimized.width,
+      height: optimized.height,
+      aspectRatio: optimized.aspectRatio
     }
 
   } catch (error) {

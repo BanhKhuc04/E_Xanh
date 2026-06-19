@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
+import OptimizedImage from '../common/OptimizedImage'
 import '../../styles/profile-cover.css'
 
 function ProfileHeader({ user, onLogout }) {
@@ -7,7 +8,7 @@ function ProfileHeader({ user, onLogout }) {
     <>
       <div className="profile-cover-section">
         {user.cover_url ? (
-          <img src={user.cover_url} alt="Cover" className="profile-cover-img" />
+          <OptimizedImage src={user.cover_url} alt="Cover" className="profile-cover-img" ratio="auto" />
         ) : (
           <div className="profile-cover-img"></div>
         )}

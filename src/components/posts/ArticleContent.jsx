@@ -1,4 +1,4 @@
-import PostImage from '../common/PostImage'
+import OptimizedImage from '../common/OptimizedImage'
 import MarkdownContent from '../common/MarkdownContent'
 import PostBlockRenderer from '../community/PostBlockRenderer'
 
@@ -9,7 +9,18 @@ function ArticleContent({ post }) {
     <section className="article-content">
       {post.image ? (
         <figure className="article-content__cover" style={{ margin: 0 }}>
-          <PostImage src={post.image} alt={post.title} variant="detail" aspect="16:9" />
+          <OptimizedImage
+            src={post.image}
+            variants={{
+              detail: post.cover_detail_url,
+              card: post.cover_card_url,
+              thumb: post.cover_thumb_url
+            }}
+            alt={post.title}
+            ratio="16/9"
+            loading="eager"
+            fetchPriority="high"
+          />
         </figure>
       ) : null}
 
