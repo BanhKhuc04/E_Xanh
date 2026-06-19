@@ -1,4 +1,4 @@
-const FALLBACK_ILLUSTRATION = '/images/fallback-green.jpg'
+const FALLBACK_ILLUSTRATION = '/og-image-v2.png'
 
 export function resolvePostImageSource(post = {}) {
   return (

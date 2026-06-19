@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import AnnouncementBar from '../../components/common/AnnouncementBar'
-import SiteNoticeCenter from '../../components/common/SiteNoticeCenter'
+import SupportCenter from '../../components/common/SupportCenter'
 import UserFooter from './UserFooter'
 import UserNavbar from './UserNavbar'
 import { PostComposerProvider } from '../../components/community/PostComposerContext'
@@ -15,7 +15,7 @@ function UserLayout() {
           <Outlet />
         </main>
         <UserFooter />
-        <SiteNoticeCenter />
+        <SupportCenter />
       </div>
     </PostComposerProvider>
   )

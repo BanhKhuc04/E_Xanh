@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#E8F5E9" />
+  <!-- Simple decorative element -->
+  <circle cx="150" cy="150" r="300" fill="#C8E6C9" opacity="0.5" />
+  <circle cx="1130" cy="570" r="250" fill="#A5D6A7" opacity="0.3" />
+  
+  <text x="640" y="320" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="bold" fill="#2E7D32" text-anchor="middle">
+    Thay bóng đèn LED
+  </text>
+  <text x="640" y="410" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="bold" fill="#2E7D32" text-anchor="middle">
+    có đáng không?
+  </text>
+  
+  <!-- Category Tag -->
+  <rect x="520" y="180" width="240" height="50" rx="25" fill="#4CAF50" />
+  <text x="640" y="215" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">
+    MẸO TIẾT KIỆM
+  </text>
+  
+  <!-- Branding -->
+  <text x="640" y="650" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="32" font-weight="bold" fill="#388E3C" text-anchor="middle" letter-spacing="4">
+    E-XANH
+  </text>
+</svg>

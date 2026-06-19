@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+    <rect width="800" height="450" rx="16" fill="#F1F8E9" />
+    <circle cx="400" cy="225" r="180" fill="#DCEDC8" opacity="0.6" />
+    <path d="M 250 350 L 550 350 L 400 100 Z" fill="#AED581" opacity="0.4" />
+    <rect x="300" y="200" width="200" height="150" rx="10" fill="#81C784" opacity="0.8" />
+    <circle cx="400" cy="275" r="40" fill="#4CAF50" />
+    <text x="400" y="410" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="bold" fill="#388E3C" text-anchor="middle">
+      Hình minh họa: Rút sạc khi không dùng có thật sự tiết kiệm điện?
+    </text>
+    <!-- Simple top-left branding -->
+    <rect x="30" y="30" width="120" height="40" rx="20" fill="#4CAF50" />
+    <text x="90" y="56" font-family="sans-serif" font-size="16" font-weight="bold" fill="#FFF" text-anchor="middle">E-XANH</text>
+  </svg>

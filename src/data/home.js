@@ -89,7 +89,7 @@ export const homeFeaturedPosts = [
     likes: '124',
     imageAlt: 'Điều hòa và không gian phòng xanh mát',
     image:
-      '/images/fallback-green.jpg',
+      '/og-image-v2.png',
   },
   {
     category: 'Thiết bị bếp',
@@ -100,7 +100,7 @@ export const homeFeaturedPosts = [
     likes: '89',
     imageAlt: 'Tủ lạnh tiết kiệm điện trong căn bếp xanh',
     image:
-      '/images/fallback-green.jpg',
+      '/og-image-v2.png',
   },
   {
     category: 'Góc trọ sinh viên',
@@ -111,7 +111,7 @@ export const homeFeaturedPosts = [
     likes: '215',
     imageAlt: 'Phòng trọ sinh viên với góc học tập tiết kiệm điện',
     image:
-      '/images/fallback-green.jpg',
+      '/og-image-v2.png',
   },
 ]
 

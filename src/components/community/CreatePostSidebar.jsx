@@ -31,7 +31,7 @@ function CreatePostSidebar({ form, previewHighlight, previewAuthor = 'Nguyễn V
         <div className="create-post-sidebar__preview">
           <div className="create-post-sidebar__preview-cover" style={{ padding: form.coverPreview ? '0' : undefined, overflow: 'hidden' }}>
             {form.coverPreview ? (
-              <PostImage src={form.coverPreview} alt="Preview" variant="preview" loading="eager" />
+              <PostImage src={form.coverPreview} alt="Preview" variant="preview" aspect="16:9" loading="eager" />
             ) : (
               <>
                 <span>Ảnh bìa</span>

@@ -282,3 +282,212 @@ select:focus-visible {
   outline-offset: 3px;
 }
 
+/* ─── Media Optimization & aspect ratio ──────────────────────────────────── */
+.media-ratio {
+  position: relative;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.media-ratio::before {
+  content: "";
+  display: block;
+}
+
+.media-ratio--16-9::before {
+  padding-top: 56.25%;
+}
+
+.media-ratio--4-3::before {
+  padding-top: 75%;
+}
+
+.community-layout,
+.community-feed,
+.community-sidebar,
+.post-card,
+.community-post-card,
+.tip-card,
+.admin-layout,
+.admin-main {
+  min-width: 0;
+}
+
+.post-title,
+.post-content,
+.comment-content,
+.community-post-card__title,
+.community-post-card__excerpt,
+.tip-card__title,
+.tip-card__excerpt {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ─── Image utilities — chống CLS ────────────────────────────────────────── */
+.hero-img,
+.banner-img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+}
+
+.post-img,
+.community-img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+}
+
+.avatar-img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Đảm bảo ảnh không overflow container */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    gap: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    gap: 24px;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .shell,
+  .shell--wide {
+    width: min(calc(100% - 20px), var(--container-width));
+  }
+
+  .page-badge {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ─── Accessibility: Focus styles ────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #27500a;
+  outline-offset: 3px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #27500a;
+  outline-offset: 3px;
+}
+
+/* ─── Media Optimization & aspect ratio ──────────────────────────────────── */
+.media-ratio {
+  position: relative;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.media-ratio::before {
+  content: "";
+  display: block;
+}
+
+.media-ratio--16-9::before {
+  padding-top: 56.25%;
+}
+
+.media-ratio--4-3::before {
+  padding-top: 75%;
+}
+
+.media-ratio--1-1::before {
+  padding-top: 100%;
+}
+
+.media-ratio > img,
+.media-ratio > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ─── EXANH MEDIA FRAME ──────────────────────────────────────────────────── */
+.exanh-media-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #eef6df;
+  line-height: 0;
+}
+
+.exanh-media-frame--card {
+  aspect-ratio: 16 / 9;
+}
+
+.exanh-media-frame--detail {
+  aspect-ratio: 16 / 9;
+}
+
+.exanh-media-frame--thumbnail {
+  aspect-ratio: 4 / 3;
+}
+
+.exanh-media-frame--compact {
+  aspect-ratio: 1 / 1;
+}
+
+.exanh-media-frame--inline {
+  /* Let intrinsic height of image dictate aspect if inline without forced aspect */
+}
+
+.exanh-media-frame img,
+.exanh-media-frame picture,
+.exanh-media-frame source {
+  border: 0;
+}
+
+.exanh-media-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 0;
+  transition: transform 0.3s ease;
+}
+
+.exanh-media-frame--loaded {
+  background: transparent;
+}
+
+.exanh-media-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #eef6df, #f8ffe8, #eef6df);
+  opacity: 1;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.exanh-media-frame--loaded::before {
+  opacity: 0;
+}

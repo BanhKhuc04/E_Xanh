@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Eye, RefreshCw, Sparkles } from 'lucide-react'
-import SiteNoticeModal from '../../common/SiteNoticeModal'
+import SupportModal from '../../common/SupportModal'
 import {
   createSiteNotice,
   getAllSiteNotices,
@@ -323,10 +323,6 @@ function AdminSiteNoticeManager() {
                 <span>Bật popup notice cho public</span>
               </label>
               <label className="announcement-manager__toggle">
-                <input type="checkbox" checked={form.show_on_first_visit} onChange={(event) => handleFieldChange('show_on_first_visit', event.target.checked)} />
-                <span>Hiện popup lớn ở lần đầu thấy version này</span>
-              </label>
-              <label className="announcement-manager__toggle">
                 <input type="checkbox" checked={form.show_bug_button} onChange={(event) => handleFieldChange('show_bug_button', event.target.checked)} />
                 <span>Giữ nút nổi “Báo lỗi” ngoài website</span>
               </label>
@@ -374,12 +370,11 @@ function AdminSiteNoticeManager() {
         </div>
       </section>
 
-      <SiteNoticeModal
+      <SupportModal
         open={previewOpen}
         notice={previewNotice}
         onClose={() => setPreviewOpen(false)}
-        onAcknowledge={() => setPreviewOpen(false)}
-        onReport={() => setPreviewOpen(false)}
+        onMarkSeen={() => setPreviewOpen(false)}
       />
     </>
   )

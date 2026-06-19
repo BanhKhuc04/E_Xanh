@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Bookmark, Clock3, Heart, MessageCircle } from 'lucide-react'
-import PostImage from '../common/PostImage'
+import { Bookmark, Clock3, Heart, MessageCircle } from 'lucide-react'
+import SmartImage from '../media/SmartImage'
 import PostAuthorAvatar from './PostAuthorAvatar'
-import './PostCard.css'
 
 function PostCard({ post }) {
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const authorHref = post.authorId ? `/nguoi-dung/${post.authorId}` : null
+  const postUrl = `/meo-tiet-kiem/${post.slug || post.id}`
 
   useEffect(() => {
     async function checkSaved() {
@@ -24,7 +24,8 @@ function PostCard({ post }) {
   }, [post?.id])
 
   async function handleToggleSave(e) {
-    e.preventDefault() // prevent navigating if it's inside a link or just clicking button
+    e.preventDefault() 
+    e.stopPropagation() // prevent navigating via overlay link
     if (isSaving) return
     if (!post?.id || String(post.id).length < 30) {
       alert('Chức năng lưu bài chỉ hỗ trợ bài viết thật trên hệ thống.')
@@ -47,71 +48,70 @@ function PostCard({ post }) {
   }
 
   return (
-    <article className="post-card-ui" data-testid="tip-card">
-      <div className="post-card-ui__media">
-        <PostImage src={post.image} alt={`${post.title} - mẹo tiết kiệm điện`} variant="card" aspect="16:9" />
-        <span className="post-card-ui__category">{post.category}</span>
+    <article className="tips-post-card" data-testid="tip-card">
+      <Link to={postUrl} className="tips-post-card__overlay-link" aria-label={`Đọc chi tiết: ${post.title}`} />
+      
+      <div className="tips-post-card__media">
+        <SmartImage src={post.image} alt={`${post.title} - mẹo tiết kiệm điện`} ratio="16/9" priority={false} />
+        <span className="tips-post-card__badge">{post.category}</span>
         <button 
           type="button" 
-          className="post-card-ui__save-button" 
+          className="tips-post-card__save-btn" 
           aria-label={`Lưu bài ${post.title}`}
           onClick={handleToggleSave}
           style={{ opacity: isSaved ? 1 : undefined, background: isSaved ? '#4f8428' : undefined, color: isSaved ? '#fff' : undefined }}
         >
           <Bookmark size={16} strokeWidth={2.1} />
-          <span>{isSaved ? 'Đã lưu' : 'Lưu'}</span>
         </button>
       </div>
 
-      <div className="post-card-ui__body">
-        <h3>{post.title}</h3>
-        <p>{post.description || 'Khám phá mẹo tiết kiệm điện thực tế, gần gũi và dễ áp dụng trong sinh hoạt hằng ngày.'}</p>
+      <div className="tips-post-card__body">
+        <h3 className="tips-post-card__title">{post.title}</h3>
+        <p className="tips-post-card__desc">{post.description || 'Khám phá mẹo tiết kiệm điện thực tế, gần gũi và dễ áp dụng trong sinh hoạt hằng ngày.'}</p>
 
-        <div className="post-card-ui__meta">
-          <div className="post-card-ui__author">
-            <Link
-              to={authorHref || '#'}
-              className={`post-card-ui__author-link${authorHref ? '' : ' is-disabled'}`}
-              onClick={(e) => {
-                if (!authorHref) e.preventDefault()
-              }}
-              aria-disabled={authorHref ? undefined : 'true'}
-            >
-              <PostAuthorAvatar
-                src={post.authorAvatar}
-                name={post.author}
-                size="md"
-              />
-              <div className="post-card-ui__author-copy">
-                <strong>{post.author}</strong>
-                <span>
-                  <Clock3 size={13} strokeWidth={2} />
-                  {post.date} · {post.readTime}
-                </span>
-              </div>
-            </Link>
-          </div>
+        <div className="tips-post-card__footer">
+          <Link
+            to={authorHref || '#'}
+            className="tips-post-card__author"
+            onClick={(e) => {
+              if (!authorHref) {
+                e.preventDefault()
+                e.stopPropagation()
+              } else {
+                e.stopPropagation()
+              }
+            }}
+          >
+            <PostAuthorAvatar
+              src={post.authorAvatar}
+              name={post.author}
+              size="sm"
+              className="tips-post-card__avatar"
+            />
+            <div className="tips-post-card__author-info">
+              <span className="tips-post-card__author-name">{post.author}</span>
+              <span className="tips-post-card__author-time">
+                <Clock3 size={12} strokeWidth={2.5} style={{marginRight: '3px', verticalAlign: '-1px'}} />
+                {post.date} · {post.readTime}
+              </span>
+            </div>
+          </Link>
 
-          <div className="post-card-ui__stats">
-            <span>
-              <Heart size={14} strokeWidth={2.1} />
-              {post.likes} lượt thích
+          <div className="tips-post-card__stats">
+            <span className="tips-post-card__stat">
+              <Heart size={16} strokeWidth={2} />
+              {post.likes}
             </span>
-            <span>
-              <MessageCircle size={14} strokeWidth={2.1} />
-              {post.comments} bình luận
+            <span className="tips-post-card__stat">
+              <MessageCircle size={16} strokeWidth={2} />
+              {post.comments}
             </span>
-            <span>
-              <Bookmark size={14} strokeWidth={2.1} />
-              {post.savedCount} lượt lưu
+            <span className="tips-post-card__stat">
+              <Bookmark size={16} strokeWidth={2} />
+              {post.savedCount}
             </span>
           </div>
         </div>
-
-        <Link className="post-card-ui__link" to={`/meo-tiet-kiem/${post.slug || post.id}`} data-testid="tip-card-link">
-          <span>Đọc tiếp</span>
-          <ArrowRight size={16} strokeWidth={2.2} />
-        </Link>
       </div>
     </article>
   )

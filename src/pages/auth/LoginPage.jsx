@@ -4,8 +4,10 @@ import { Turnstile } from '@marsidev/react-turnstile'
 import { Helmet } from 'react-helmet-async'
 import { EMAIL_PATTERN, signInWithEmail, ensureActiveProfileSession } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
-import BannerCarousel from '../../components/common/BannerCarousel'
-import BrandLogo from '../../components/common/BrandLogo'
+import AuthLayout from '../../components/auth/AuthLayout'
+import AuthHero from '../../components/auth/AuthHero'
+import AuthModeSwitch from '../../components/auth/AuthModeSwitch'
+import AuthGoogleButton from '../../components/auth/AuthGoogleButton'
 import '../../styles/auth.css'
 
 function LoginPage() {
@@ -121,7 +123,6 @@ function LoginPage() {
     }, 700)
   }
 
-
   return (
     <>
       <Helmet>
@@ -131,70 +132,39 @@ function LoginPage() {
         <meta name="robots" content="noindex,nofollow" />
       </Helmet>
 
-      <div className="auth-page">
-        <div className="auth-layout">
-          <section className="auth-visual">
-            <div className="auth-visual__main">
-              <div className="auth-visual__top">
-                <div className="auth-visual__brand" style={{ marginBottom: '8px' }}>
-                  <BrandLogo to="/" size="auth" />
-                </div>
-                <span className="auth-visual__chip">Cộng đồng sống xanh</span>
-              </div>
-
-              <div className="auth-visual__content">
-                <h1>
-                  Tham gia E-XANH<br />
-                  để sống xanh hơn<br />
-                  mỗi ngày
-                </h1>
-                <p>
-                  Một tài khoản E-XANH giúp bạn lưu bài viết, tham gia cộng đồng và theo dõi thói quen sử dụng điện cá nhân.
-                </p>
-                <div className="auth-visual__inline-features">
-                   <span>Lưu bài viết</span>
-                   <span className="dot">•</span>
-                   <span>Bình luận</span>
-                   <span className="dot">•</span>
-                   <span>Theo dõi điện năng</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="auth-carousel-placeholder" style={{ padding: 0, overflow: 'hidden' }}>
-              {banners.length > 0 ? (
-                <BannerCarousel banners={banners} />
-              ) : (
-                <span style={{ display: 'grid', placeItems: 'center', height: '100%' }}>Ảnh minh họa đang cập nhật</span>
-              )}
-            </div>
-          </section>
-
-          <section className="auth-card">
-            <div className="auth-card__header">
+      <AuthLayout
+        hero={(
+          <AuthHero
+            badge="Cộng đồng sống xanh"
+            title={<>Tham gia E-XANH để sống xanh hơn mỗi ngày</>}
+            description="Một tài khoản E-XANH giúp bạn lưu bài viết, tham gia cộng đồng và theo dõi thói quen sử dụng điện cá nhân một cách gọn gàng, sáng rõ và dễ quay lại."
+            highlights={['Lưu bài viết', 'Bình luận & chia sẻ', 'Theo dõi điện năng']}
+            banners={banners}
+          />
+        )}
+        form={(
+          <section className="auth-form-panel auth-card">
+            <div className="auth-form-panel__header auth-card__header">
               <h2>Chào mừng trở lại</h2>
               <p>Đăng nhập để tiếp tục hành trình sống xanh cùng E-XANH.</p>
             </div>
 
-            <div className="auth-card__switcher">
-              <span className="is-active">Đăng nhập</span>
-              <Link to="/dang-ky">Đăng ký</Link>
-            </div>
+            <AuthModeSwitch active="login" />
 
             {errorMessage ? <div className="auth-card__message auth-card__message--error" role="alert" data-testid="login-error">{errorMessage}</div> : null}
-            {successMessage ? (
-              <div className="auth-card__message auth-card__message--success">{successMessage}</div>
-            ) : null}
+            {successMessage ? <div className="auth-card__message auth-card__message--success">{successMessage}</div> : null}
 
             <form className="auth-form" onSubmit={handleSubmit} noValidate>
               <label htmlFor="login-email">
                 <span>Email</span>
                 <input
                   id="login-email"
+                  className="auth-input"
                   type="email"
                   value={form.email}
                   onChange={(event) => handleChange('email', event.target.value)}
                   placeholder="Nhập email của bạn"
+                  autoComplete="email"
                 />
               </label>
 
@@ -202,10 +172,12 @@ function LoginPage() {
                 <span>Mật khẩu</span>
                 <input
                   id="login-password"
+                  className="auth-input"
                   type="password"
                   value={form.password}
                   onChange={(event) => handleChange('password', event.target.value)}
                   placeholder="Nhập mật khẩu"
+                  autoComplete="current-password"
                 />
               </label>
 
@@ -225,8 +197,8 @@ function LoginPage() {
                 </Link>
               </div>
 
-              {!isCaptchaDisabled && (
-                <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
+              {!isCaptchaDisabled ? (
+                <div className="auth-form__captcha">
                   <Turnstile
                     siteKey={turnstileSiteKey || '1x00000000000000000000AA'}
                     onSuccess={(token) => {
@@ -238,10 +210,9 @@ function LoginPage() {
                     options={{ theme: 'light' }}
                   />
                 </div>
-              )}
-              {/* TODO: Gửi turnstileToken lên backend/Supabase Edge Function để verify an toàn hơn */}
+              ) : null}
 
-              <button type="submit" className="btn btn--primary auth-form__submit" disabled={isSubmitting}>
+              <button type="submit" className="btn btn--primary auth-form__submit auth-submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
             </form>
@@ -250,35 +221,26 @@ function LoginPage() {
               Chưa có tài khoản? <Link to="/dang-ky">Tạo tài khoản ngay</Link>
             </p>
 
-            <div className="auth-card__divider"></div>
+            <div className="auth-card__divider" />
 
-            <div className="auth-card__socials" style={{ gridTemplateColumns: '1fr' }}>
-              <button
-                type="button"
+            <div className="auth-card__socials auth-card__socials--single">
+              <AuthGoogleButton
                 onClick={async () => {
                   const { signInWithGoogle } = await import('../../services/authService')
                   signInWithGoogle()
                 }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', cursor: 'pointer', fontSize: '1rem', color: '#444' }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Tiếp tục với Google
-              </button>
+              />
             </div>
-            <div className="auth-note">
+
+            <div className="auth-security-note auth-note">
               <strong>Bảo mật thông tin</strong>
               <p>
                 Khách chưa đăng nhập vẫn có thể xem bài viết và tính tiền điện. Đăng nhập giúp bạn lưu lại dữ liệu cá nhân hóa.
               </p>
             </div>
           </section>
-        </div>
-      </div>
+        )}
+      />
     </>
   )
 }

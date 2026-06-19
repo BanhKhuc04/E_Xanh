@@ -1,13 +1,9 @@
 import { supabase } from '../lib/supabase'
 import {
   ALLOWED_PROFILE_IMAGE_TYPES,
-  createSafeFileName,
   validateImageFile,
 } from '../utils/fileValidation'
-import {
-  compressImageToWebp,
-  isCompressibleImageType,
-} from '../utils/imageCompress'
+import { uploadOptimizedImage } from './mediaUploadService'
 import { logError } from '../utils/logger'
 
 export const DEFAULT_USER_PREFERENCES = {
@@ -165,16 +161,6 @@ export async function updateProfilePreferences(preferences = {}) {
 }
 
 export async function uploadAvatarImage(file) {
-  const validation = validateImageFile(file, {
-    allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
-    invalidTypeMessage: 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.',
-    sizeMessage: 'Ảnh đại diện không được vượt quá 5MB.',
-  })
-
-  if (!validation.valid) {
-    return { publicUrl: null, error: new Error(validation.error) }
-  }
-
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError || !sessionData?.session?.user?.id) {
     return {
@@ -183,58 +169,23 @@ export async function uploadAvatarImage(file) {
     }
   }
 
-  let uploadFile = file
+  const result = await uploadOptimizedImage({
+    file,
+    bucket: 'profile-avatars',
+    folder: 'avatars',
+    preset: 'avatar',
+    variants: false,
+    userId: sessionData.session.user.id,
+  })
 
-  if (isCompressibleImageType(file)) {
-    try {
-      uploadFile = await compressImageToWebp(file, {
-        maxWidth: 400,
-        maxHeight: 400,
-        quality: 0.75,
-        maxBytes: 80 * 1024,
-        minQuality: 0.55,
-      })
-    } catch (error) {
-      logError('Avatar compression failed, using original avatar image.', error)
-    }
+  if (result.error) {
+    return { publicUrl: null, error: result.error }
   }
 
-  const fileName = createSafeFileName(uploadFile, 'avatar')
-  const filePath = `avatars/${sessionData.session.user.id}/${fileName}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('profile-avatars')
-    .upload(filePath, uploadFile, {
-      cacheControl: '31536000',
-      upsert: true,
-      contentType: uploadFile.type || file.type,
-    })
-
-  if (uploadError) {
-    return {
-      publicUrl: null,
-      error: new Error(uploadError.message || 'Upload ảnh đại diện thất bại.'),
-    }
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('profile-avatars')
-    .getPublicUrl(filePath)
-
-  return { publicUrl: publicUrlData.publicUrl, error: null }
+  return { publicUrl: result.publicUrl, error: null }
 }
 
 export async function uploadProfileCover(file) {
-  const validation = validateImageFile(file, {
-    allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
-    invalidTypeMessage: 'Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.',
-    sizeMessage: 'Ảnh bìa không được vượt quá 5MB.',
-  })
-
-  if (!validation.valid) {
-    return { publicUrl: null, error: new Error(validation.error) }
-  }
-
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError || !sessionData?.session?.user?.id) {
     return {
@@ -243,43 +194,18 @@ export async function uploadProfileCover(file) {
     }
   }
 
-  let uploadFile = file
+  const result = await uploadOptimizedImage({
+    file,
+    bucket: 'profile-covers',
+    folder: 'covers',
+    preset: 'postDetail', 
+    variants: false,
+    userId: sessionData.session.user.id,
+  })
 
-  if (isCompressibleImageType(file)) {
-    try {
-      uploadFile = await compressImageToWebp(file, {
-        maxWidth: 1200,
-        maxHeight: 600,
-        quality: 0.8,
-        maxBytes: 300 * 1024,
-        minQuality: 0.6,
-      })
-    } catch (error) {
-      logError('Cover compression failed, using original cover image.', error)
-    }
+  if (result.error) {
+    return { publicUrl: null, error: result.error }
   }
 
-  const fileName = createSafeFileName(uploadFile, 'cover')
-  const filePath = `covers/${sessionData.session.user.id}/${fileName}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('profile-covers')
-    .upload(filePath, uploadFile, {
-      cacheControl: '31536000',
-      upsert: true,
-      contentType: uploadFile.type || file.type,
-    })
-
-  if (uploadError) {
-    return {
-      publicUrl: null,
-      error: new Error(uploadError.message || 'Upload ảnh bìa thất bại.'),
-    }
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('profile-covers')
-    .getPublicUrl(filePath)
-
-  return { publicUrl: publicUrlData.publicUrl, error: null }
+  return { publicUrl: result.publicUrl, error: null }
 }

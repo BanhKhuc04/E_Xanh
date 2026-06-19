@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { Bookmark, Lightbulb, PenSquare, ArrowRight, Wind, Laptop, PlugZap, Leaf, Box, Search } from 'lucide-react'
+import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
 import PageLoader from '../../components/common/PageLoader'
 import EmptyState from '../../components/common/EmptyState'
+import PageHero from '../../components/common/PageHero'
+import RelatedPostsSection from '../../components/posts/RelatedPostsSection'
 import { getCategories, getTipPosts } from '../../services/postService'
 import heroImage from '../../assets/hero.png'
 import '../../styles/tips.css'
@@ -26,16 +28,7 @@ const postSortOptions = [
   'Phù hợp nhất'
 ]
 
-function getTopicIcon(topicName) {
-  switch (topicName) {
-    case 'Điều hòa': return <Wind size={18} />
-    case 'Laptop': return <Laptop size={18} />
-    case 'Thiết bị điện': return <PlugZap size={18} />
-    case 'Thói quen': return <Leaf size={18} />
-    case 'Tủ lạnh': return <Box size={18} />
-    default: return <Lightbulb size={18} />
-  }
-}
+const POSTS_PER_PAGE = 6
 
 function sortPosts(list, sortValue, searchValue) {
   const next = [...list]
@@ -69,8 +62,23 @@ function TipsPage() {
   const [categories, setCategories] = useState(PREDEFINED_CATEGORIES)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
   const location = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${location.pathname}`
+
+  // If query params are present for category (e.g., from PostDetailPage)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const cat = params.get('category')
+    if (cat && categories.includes(cat)) {
+      setSelectedCategory(cat)
+    }
+  }, [location.search, categories])
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchValue, selectedCategory, sortValue])
 
   useEffect(() => {
     let isMounted = true
@@ -104,21 +112,21 @@ function TipsPage() {
               id: post.id || post.slug || `tip-${index}`,
               title: post.title || 'Bài viết',
               slug: post.slug || '',
+              type: post.type,
               author: post.profiles?.name || 'Thành viên E-XANH',
               authorId: post.author_id,
               authorAvatar: post.profiles?.avatar_url || '',
               category: post.categories?.name || 'Mẹo tiết kiệm',
               status: 'published',
               image: post.image_url || heroImage,
-              description: post.description || '',
+              description: post.description || 'Chưa có mô tả ngắn.',
               content: post.content || '',
               likes: post.likes_count || 0,
               comments: post.comments_count || 0,
               savedCount: post.saved_count || 0,
-              views: post.views_count || Math.floor(Math.random() * 100),
+              views: post.views_count || 0,
               readTime: post.read_time || '3 phút',
               date: post.created_at ? new Date(post.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-              commentItems: [],
             }))
             setDbPosts(mapped)
           }
@@ -140,7 +148,7 @@ function TipsPage() {
     loadData()
 
     return () => { isMounted = false }
-  }, [location.key])
+  }, []) // Remove location.key from dependency array to prevent double fetching
 
   const visiblePosts = sortPosts(
     dbPosts.filter((post) => {
@@ -159,54 +167,31 @@ function TipsPage() {
     searchValue
   )
 
-  const dynamicSavedHighlights = useMemo(() => {
-    return [...dbPosts].sort((a, b) => b.savedCount - a.savedCount).slice(0, 3)
-  }, [dbPosts])
+  const totalPages = Math.ceil(visiblePosts.length / POSTS_PER_PAGE)
+  const paginatedPosts = visiblePosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
+  )
 
-  const featuredTopicsWithCounts = useMemo(() => {
-    const counts = {}
-    dbPosts.forEach(post => {
-      if (post.category) {
-        counts[post.category] = (counts[post.category] || 0) + 1
-      }
-    })
-    
-    let topTopics = PREDEFINED_CATEGORIES.filter(c => c !== 'Tất cả').map(name => ({
-      name,
-      count: counts[name] || 0
-    }))
-    
-    topTopics.sort((a, b) => b.count - a.count)
-    return topTopics.slice(0, 6)
-  }, [dbPosts])
+  const suggestedPosts = dbPosts.slice(0, 3) // Latest 3 posts
 
-  const dynamicTodaySuggestion = useMemo(() => {
-    if (dbPosts.length === 0) return {
-      title: 'Tắt thiết bị khi không sử dụng',
-      content: 'Rút sạc, tắt đèn và TV khi rời phòng để giảm điện năng tiêu thụ không cần thiết.',
-      tag: 'Thói quen',
-      slug: ''
+  const handleClearFilter = () => {
+    setSelectedCategory('Tất cả')
+    setSearchValue('')
+  }
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage)
+    const listElement = document.getElementById('tips-list')
+    if (listElement) {
+      const y = listElement.getBoundingClientRect().top + window.scrollY - 100
+      window.scrollTo({ top: y, behavior: 'smooth' })
     }
-    const daySeed = new Date().toISOString().slice(0, 10)
-    const suggestionIndex = Array.from(daySeed).reduce(
-      (total, char) => total + char.charCodeAt(0),
-      0,
-    ) % dbPosts.length
-    const randomPost = dbPosts[suggestionIndex]
-    
-    return {
-      title: randomPost.title,
-      content: randomPost.description || 'Khám phá mẹo hữu ích này để giúp bạn tiết kiệm năng lượng và chi phí mỗi ngày.',
-      tag: randomPost.category,
-      slug: randomPost.slug || randomPost.id
-    }
-  }, [dbPosts])
+  }
 
   if (isLoading) {
     return <PageLoader message="Đang tải dữ liệu mẹo tiết kiệm..." />
   }
-
-  const totalSaves = dbPosts.reduce((acc, p) => acc + p.savedCount, 0)
 
   return (
     <>
@@ -228,128 +213,58 @@ function TipsPage() {
       </Helmet>
       
       <div className="tips-page">
-        <section className="tips-hero-compact">
-          <div className="tips-hero-compact__content">
-            <h1>Mẹo tiết kiệm điện</h1>
-            <p>Khám phá các cách sử dụng điện thông minh, tiết kiệm chi phí và sống xanh hơn mỗi ngày.</p>
-            <div className="tips-hero-compact__stats">
-              <div className="tips-stat-item">
-                <strong>{dbPosts.length}</strong>
-                <span>Mẹo hữu ích</span>
-              </div>
-              <div className="tips-stat-divider" />
-              <div className="tips-stat-item">
-                <strong>{categories.length - 1}</strong>
-                <span>Chủ đề</span>
-              </div>
-              <div className="tips-stat-divider" />
-              <div className="tips-stat-item">
-                <strong>{totalSaves}</strong>
-                <span>Bài được lưu</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <PostFilterBar
-          searchValue={searchValue}
-          selectedCategory={selectedCategory}
-          sortValue={sortValue}
-          categories={categories}
-          sortOptions={postSortOptions}
-          onSearchChange={setSearchValue}
-          onCategoryChange={setSelectedCategory}
-          onSortChange={setSortValue}
+        <PageHero
+          pageKey="tips"
+          className="tips-page-hero"
+          badge="Mẹo tiết kiệm điện"
+          title="Cùng nhau tiết kiệm điện mỗi ngày"
+          description="Khám phá những mẹo sử dụng điện thông minh, giảm chi phí và xây dựng lối sống xanh hơn."
+          fallbackImage={heroImage}
+          actions={
+            <>
+              <Link to="/dang-bai" className="btn btn--primary">
+                Đăng bài chia sẻ
+              </Link>
+              <a href="#tips-list" className="btn btn--secondary" onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('tips-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}>
+                Khám phá ngay
+              </a>
+            </>
+          }
         />
 
-        <div className="tips-explore-grid">
-          <div className="tips-explore-card tips-card--suggestion">
-            <div className="tips-card__header-icon">
-              <Lightbulb size={24} strokeWidth={2} />
-            </div>
-            <div className="tips-card__content">
-              <div className="tips-card__meta">
-                <span className="tips-card__tag">{dynamicTodaySuggestion.tag}</span>
-                <span className="tips-card__label">Gợi ý hôm nay</span>
-              </div>
-              <h3>{dynamicTodaySuggestion.title}</h3>
-              <p>{dynamicTodaySuggestion.content}</p>
-              {dynamicTodaySuggestion.slug ? (
-                <Link to={`/meo-tiet-kiem/${dynamicTodaySuggestion.slug}`} className="tips-btn-outline">
-                  Xem mẹo <ArrowRight size={16} />
-                </Link>
-              ) : (
-                <button className="tips-btn-outline" disabled>
-                  Đang cập nhật <ArrowRight size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="tips-explore-card tips-card--cta">
-            <div className="tips-card__cta-icon">
-              <PenSquare size={28} strokeWidth={2} />
-            </div>
-            <div className="tips-card__cta-text">
-              <h3>Bạn có mẹo tiết kiệm điện?</h3>
-              <p>Chia sẻ kinh nghiệm của bạn để lan tỏa lối sống xanh đến cộng đồng.</p>
-            </div>
-            <Link to="/dang-bai" className="tips-btn-primary">
-              Đăng bài chia sẻ
-            </Link>
-          </div>
-
-          <div className="tips-explore-card tips-card--topics">
-            <h3>Chủ đề nổi bật</h3>
-            <div className="tips-topic-grid">
-              {featuredTopicsWithCounts.map((topic) => (
-                <button
-                  key={topic.name}
-                  className={`tips-topic-card-mini ${selectedCategory === topic.name ? 'is-active' : ''}`}
-                  onClick={() => setSelectedCategory(topic.name)}
-                >
-                  <span className="topic-icon">{getTopicIcon(topic.name)}</span>
-                  <div className="topic-info">
-                    <span className="topic-name">{topic.name}</span>
-                    <span className="topic-count">{topic.count} bài</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="tips-explore-card tips-card--saved">
-            <h3>Bài viết được lưu nhiều</h3>
-            <div className="tips-saved-list-new">
-              {dynamicSavedHighlights.length > 0 ? (
-                dynamicSavedHighlights.map((post, index) => (
-                  <Link key={post.id} to={`/meo-tiet-kiem/${post.slug}`} className="tips-saved-item-new">
-                    <div className={`saved-rank saved-rank--${index + 1}`}>{index + 1}</div>
-                    <div className="saved-details">
-                      <h4>{post.title}</h4>
-                      <span><Bookmark size={12} style={{ display: 'inline', marginRight: '4px' }}/> {post.savedCount} lượt lưu</span>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="tips-empty-saved">
-                  <Bookmark size={32} strokeWidth={1.5} />
-                  <p>Chưa có nhiều dữ liệu lưu. Các bài được yêu thích sẽ xuất hiện tại đây.</p>
-                </div>
-              )}
-            </div>
-          </div>
+        <div id="tips-list">
+          <PostFilterBar
+            searchValue={searchValue}
+            selectedCategory={selectedCategory}
+            sortValue={sortValue}
+            categories={categories}
+            sortOptions={postSortOptions}
+            onSearchChange={setSearchValue}
+            onCategoryChange={setSelectedCategory}
+            onSortChange={setSortValue}
+          />
         </div>
 
         <div className="tips-layout__content">
           <div className="tips-results-bar">
             <div>
-              <strong>{visiblePosts.length}</strong>
-              <span> mẹo đang hiển thị</span>
+              <strong>{visiblePosts.length}</strong> bài viết
+              {selectedCategory !== 'Tất cả' && (
+                <span> trong chủ đề <span className="highlight-category">"{selectedCategory}"</span></span>
+              )}
+              {searchValue && (
+                <span> cho từ khóa <span className="highlight-category">"{searchValue}"</span></span>
+              )}
             </div>
-            <p>
-              Kho bài viết được sắp theo dạng thư viện để bạn dễ duyệt nhanh nhiều mẹo hơn.
-            </p>
+            
+            {(selectedCategory !== 'Tất cả' || searchValue) && (
+              <button className="tips-clear-filter" onClick={handleClearFilter}>
+                Bỏ lọc <X size={14} />
+              </button>
+            )}
           </div>
 
           {errorMsg ? (
@@ -361,21 +276,65 @@ function TipsPage() {
           ) : null}
 
           {!errorMsg && visiblePosts.length > 0 ? (
-            <div className="tips-post-grid">
-              {visiblePosts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
+            <>
+              <div className="tips-posts-grid">
+                {paginatedPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="tips-pagination">
+                  <button 
+                    className="tips-pagination__btn" 
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft size={16} /> Trước
+                  </button>
+                  
+                  <div className="tips-pagination__numbers">
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                      <button
+                        key={i}
+                        className={`tips-pagination__number ${currentPage === i + 1 ? 'is-active' : ''}`}
+                        onClick={() => handlePageChange(i + 1)}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button 
+                    className="tips-pagination__btn" 
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </>
           ) : null}
 
           {!errorMsg && visiblePosts.length === 0 ? (
-            <EmptyState 
-              icon={<Search size={32} />}
-              title="Không tìm thấy kết quả phù hợp"
-              message="Hãy thử đổi từ khóa tìm kiếm hoặc chọn lại bộ lọc chủ đề. Các mẹo mới sẽ sớm được cập nhật."
-            />
+            <div className="tips-empty-posts">
+              <Search size={40} strokeWidth={1.5} color="#888" />
+              <h3>Không tìm thấy bài viết</h3>
+              <p>Chưa có nhiều mẹo trong chủ đề này. Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+              <button onClick={handleClearFilter} className="tips-btn-primary">
+                Hiển thị tất cả
+              </button>
+            </div>
           ) : null}
         </div>
+
+        {/* Suggested Section */}
+        {suggestedPosts.length > 0 && (
+          <div className="tips-suggested-section" style={{ marginTop: '40px' }}>
+            <RelatedPostsSection title="Có thể bạn quan tâm" posts={suggestedPosts} compact={true} />
+          </div>
+        )}
       </div>
     </>
   )

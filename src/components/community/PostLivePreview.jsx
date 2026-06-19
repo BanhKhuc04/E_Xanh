@@ -96,6 +96,7 @@ function PostLivePreview({ form, author }) {
                 alt="Preview cover"
                 className="post-live-preview__cover-image"
                 variant="preview"
+                aspect="16:9"
                 loading="eager"
               />
             ) : (

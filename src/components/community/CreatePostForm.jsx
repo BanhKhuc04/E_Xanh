@@ -5,6 +5,9 @@ import ImageCropModal from '../common/ImageCropModal'
 import PostImage from '../common/PostImage'
 import '../../styles/create-post.css'
 import { countWords, extractPlainTextFromBlocks } from '../../utils/postBlocks'
+import { getPostImageAspectPreset } from '../../utils/postImageRatios'
+
+const COVER_ASPECT_PRESET = getPostImageAspectPreset('16:9')
 
 function CreatePostForm({
   form,
@@ -148,6 +151,7 @@ function CreatePostForm({
                 alt="Preview ảnh bìa"
                 className="create-post-form__cover-preview"
                 variant="preview"
+                aspect="16:9"
                 loading="eager"
               />
               {onRemoveCover ? (
@@ -167,7 +171,7 @@ function CreatePostForm({
           ) : (
             <div className="create-post-form__upload-copy">
               <strong>Kéo thả ảnh vào đây hoặc chọn ảnh từ máy</strong>
-              <small>Ảnh sẽ được crop theo 1 trong 3 tỉ lệ: 16:9, 1:1 hoặc 3:4 trước khi tải lên.</small>
+              <small>Ảnh bìa sẽ được cắt cố định theo tỉ lệ 16:9 trước khi tải lên.</small>
               <button
                 type="button"
                 className="btn btn--secondary create-post-form__upload-trigger"
@@ -353,6 +357,7 @@ function CreatePostForm({
         key={`${cropState?.image || 'closed'}-${cropState?.aspectKey || '16:9'}`}
         isOpen={cropState?.isOpen}
         image={cropState?.image}
+        aspectOptions={cropState?.mode === 'cover' ? [COVER_ASPECT_PRESET] : undefined}
         defaultAspectKey={cropState?.aspectKey}
         title={cropState?.title}
         confirmLabel={cropState?.confirmLabel}

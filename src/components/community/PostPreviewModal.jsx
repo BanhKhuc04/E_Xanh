@@ -45,7 +45,7 @@ function PostPreviewModal({
 
             {form.coverPreview && (
               <div style={{ marginBottom: '32px' }}>
-                <PostImage src={form.coverPreview} alt="Cover" variant="detail" loading="eager" />
+                <PostImage src={form.coverPreview} alt="Cover" variant="detail" aspect="16:9" loading="eager" />
               </div>
             )}
 

@@ -8,6 +8,7 @@ import CommentSection from '../../components/posts/CommentSection'
 import PostAuthorAvatar from '../../components/posts/PostAuthorAvatar'
 import PostCard from '../../components/posts/PostCard'
 import RelatedPosts from '../../components/posts/RelatedPosts'
+import AuthorSidebarCard from '../../components/posts/AuthorSidebarCard'
 import { getPostBySlug, getApprovedPosts } from '../../services/postService'
 import '../../styles/post-detail.css'
 
@@ -111,6 +112,31 @@ function PostDetailPage() {
               date: new Date(p.created_at).toISOString().split('T')[0],
             }))
           setRelatedPosts(related)
+
+          // Calculate author stats
+          const authorPosts = allPosts.filter(p => p.author_id === data.author_id)
+          const totalLikes = authorPosts.reduce((acc, p) => acc + (p.likes_count || 0), 0)
+          const totalSaves = authorPosts.reduce((acc, p) => acc + (p.saved_count || 0), 0)
+          
+          let isCurrentUser = false
+          try {
+            const { getCurrentSession } = await import('../../services/authService')
+            const session = await getCurrentSession()
+            if (session?.user && session.user.id === data.author_id) {
+              isCurrentUser = true
+            }
+          } catch(e) {}
+          
+          setPost(current => ({
+            ...current,
+            authorRole: data.profiles?.role || 'user',
+            authorStats: {
+              posts: authorPosts.length,
+              likes: totalLikes,
+              saves: totalSaves
+            },
+            isCurrentUser
+          }))
         }
       } else {
         setPost(null)
@@ -340,25 +366,18 @@ function PostDetailPage() {
         </article>
 
         <aside className="post-detail-sidebar">
-          <section className="post-side-card post-side-card--author">
-            <PostAuthorAvatar
-              src={post.authorAvatar}
-              name={post.author}
-              size="lg"
-              className="post-side-card__author-avatar"
-            />
-            <h3>{post.author}</h3>
-            <p>{post.authorBio}</p>
-            <button 
-              type="button" 
-              className={`btn ${post.isFollowing ? 'btn--secondary' : 'btn--primary'} post-side-card__follow-btn`}
-              onClick={handleToggleFollow}
-              disabled={actionLoading}
-              style={{ opacity: actionLoading ? 0.7 : 1 }}
-            >
-              {post.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
-            </button>
-          </section>
+          <AuthorSidebarCard
+            authorId={post.author_id}
+            authorName={post.author}
+            authorAvatar={post.authorAvatar}
+            authorBio={post.authorBio}
+            authorRole={post.authorRole}
+            stats={post.authorStats}
+            isFollowing={post.isFollowing}
+            onToggleFollow={handleToggleFollow}
+            actionLoading={actionLoading}
+            isCurrentUser={post.isCurrentUser}
+          />
 
           {sidebarRelated.length > 0 ? (
             <RelatedPosts title="Bài viết liên quan" posts={sidebarRelated} compact />

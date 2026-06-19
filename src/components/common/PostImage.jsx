@@ -69,12 +69,10 @@ function PostImage({
     return getImageUrl(src, resolvedWidth)
   }, [hasError, resolvedWidth, src])
 
-  const aspectClass = `post-image--${getPostImageAspectPreset(resolvedAspect).ratioClass}`
   const rootClassName = buildClassName([
-    'post-image',
-    'post-image-frame',
-    `post-image--${variant}`,
-    aspectClass,
+    'exanh-media-frame',
+    `exanh-media-frame--${variant}`,
+    isLoaded ? 'exanh-media-frame--loaded' : '',
     className,
   ])
 
@@ -89,7 +87,6 @@ function PostImage({
           loading={priority ? 'eager' : loading}
           fetchPriority={priority ? 'high' : undefined}
           decoding="async"
-          className="post-image__img"
           onLoad={(event) => {
             setIsLoaded(true)
             if (!aspect) {
@@ -99,11 +96,9 @@ function PostImage({
             }
           }}
           onError={() => setHasError(true)}
-          style={{ opacity: isLoaded ? 1 : 0, objectPosition }}
+          style={{ objectPosition }}
         />
       ) : null}
-
-      {!isLoaded && !hasError && imageSrc ? <div className="post-image__skeleton" /> : null}
 
       {(!imageSrc || hasError) ? (
         <div className="post-image__fallback">

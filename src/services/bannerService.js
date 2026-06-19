@@ -6,10 +6,7 @@ import {
   createSafeFileName,
   ALLOWED_PROFILE_IMAGE_TYPES,
 } from '../utils/fileValidation'
-import {
-  compressImageToWebp,
-  isCompressibleImageType,
-} from '../utils/imageCompress'
+import { uploadOptimizedImage, uploadOptimizedVideo } from './mediaUploadService'
 
 function getBannerFilePathFromUrl(fileUrl) {
   if (!fileUrl || !fileUrl.includes('website-banners/')) {
@@ -147,51 +144,35 @@ export async function fetchFirstActiveBanner(pageKey) {
 }
 
 export async function uploadBannerImage(file, options = {}) {
-  const validation = validateImageFile(file, {
-    allowedTypes: ALLOWED_PROFILE_IMAGE_TYPES,
-    invalidTypeMessage: 'Chỉ chấp nhận ảnh JPG, JPEG, PNG hoặc WebP.',
-    ...options.validation,
-  })
-  if (!validation.valid) {
-    return { error: { message: validation.error } }
-  }
-
-  let uploadFile = file
-
-  if (isCompressibleImageType(file)) {
-    try {
-      uploadFile = await compressImageToWebp(file, {
-        maxWidth: 1200,
-        maxHeight: 1200,
-        quality: 0.76,
-        maxBytes: 300 * 1024,
-        minQuality: 0.6,
-      })
-    } catch (error) {
-      logError('Banner compression failed, using original banner image.', error)
-    }
-  }
-
-  return uploadBannerAsset(uploadFile, {
+  const result = await uploadOptimizedImage({
+    file,
+    bucket: 'website-banners',
     folder: options.folder || 'images',
-    kindLabel: 'ảnh',
-    prefix: options.prefix || 'banner',
-    contentType: uploadFile.type || file.type,
+    preset: 'bannerHero',
+    variants: false,
+    userId: 'admin',
   })
+
+  if (result.error) {
+    return { error: result.error }
+  }
+
+  return { publicUrl: result.publicUrl, filePath: result.path }
 }
 
 export async function uploadBannerVideo(file, options = {}) {
-  const validation = validateVideoFile(file, options.validation)
-  if (!validation.valid) {
-    return { error: { message: validation.error } }
+  const result = await uploadOptimizedVideo({
+    file,
+    bucket: 'website-banners',
+    folder: options.folder || 'videos',
+    userId: 'admin',
+  })
+
+  if (result.error) {
+    return { error: result.error }
   }
 
-  return uploadBannerAsset(file, {
-    folder: options.folder || 'videos',
-    kindLabel: 'video',
-    prefix: options.prefix || 'banner-video',
-    contentType: file.type,
-  })
+  return { publicUrl: result.publicUrl, filePath: result.path }
 }
 
 export async function addBanner(bannerData) {

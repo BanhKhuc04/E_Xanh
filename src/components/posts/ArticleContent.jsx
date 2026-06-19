@@ -9,7 +9,7 @@ function ArticleContent({ post }) {
     <section className="article-content">
       {post.image ? (
         <figure className="article-content__cover" style={{ margin: 0 }}>
-          <PostImage src={post.image} alt={post.title} variant="detail" />
+          <PostImage src={post.image} alt={post.title} variant="detail" aspect="16:9" />
         </figure>
       ) : null}
 

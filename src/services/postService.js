@@ -4,10 +4,7 @@ import { logAdminAction } from './adminLogService'
 import { createNotificationForUser } from './notificationService'
 import { normalizeAvatarUrl } from '../utils/avatar'
 import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
-import {
-  compressImageToWebp,
-  isCompressibleImageType,
-} from '../utils/imageCompress'
+import { uploadOptimizedImage } from './mediaUploadService'
 import { extractPlainTextFromBlocks } from '../utils/postBlocks'
 
 function generateSlug(title) {
@@ -60,95 +57,42 @@ export async function checkRecentPostRateLimit(userId) {
 }
 
 export async function uploadPostImage(file, userId) {
-  const validation = validateImageFile(file)
-  if (!validation.valid) {
-    return { publicUrl: null, error: new Error(validation.error) }
+  const result = await uploadOptimizedImage({
+    file,
+    bucket: 'post-images',
+    folder: `posts`,
+    preset: 'postDetail',
+    variants: true,
+    userId,
+  })
+
+  if (result.error) {
+    return { publicUrl: null, error: result.error }
   }
 
-  let uploadFile = file
-
-  if (isCompressibleImageType(file)) {
-    try {
-      uploadFile = await compressImageToWebp(file, {
-        maxWidth: 1200,
-        maxHeight: 1200,
-        quality: 0.75,
-        maxBytes: 500 * 1024,
-        minQuality: 0.6,
-      })
-    } catch (error) {
-      logError('Image compression failed, using original post image.', error)
-    }
-  }
-
-  const safeFileName = createSafeFileName(uploadFile, 'post')
-  const path = `posts/${userId}/${safeFileName}`
-
-  const { error } = await supabase.storage
-    .from('post-images')
-    .upload(path, uploadFile, {
-      cacheControl: '31536000',
-      contentType: uploadFile.type || file.type,
-      upsert: false,
-    })
-
-  if (error) {
-    return { publicUrl: null, error }
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('post-images')
-    .getPublicUrl(path)
-
-  return { publicUrl: publicUrlData.publicUrl, error: null }
+  // The database only has one column `image_url` or `cover_url`, so we return the best one
+  // but if the component wants thumbnail, it should access it if we stored it as JSON, 
+  // but for now we just return the detailUrl or publicUrl to avoid breaking old schema.
+  const bestUrl = result.postDetailUrl || result.postCardUrl || result.publicUrl
+  
+  return { publicUrl: bestUrl, error: null }
 }
 
 export async function uploadPostInlineImage(file, userId) {
-  const validation = validateImageFile(file, {
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    invalidTypeMessage: 'Ảnh trong nội dung chỉ nhận JPG, PNG hoặc WEBP.',
-    sizeMessage: 'Ảnh trong nội dung không được vượt quá 5MB.',
+  const result = await uploadOptimizedImage({
+    file,
+    bucket: 'post-images',
+    folder: `posts/${userId}/inline`,
+    preset: 'postDetail',
+    variants: false,
+    userId,
   })
-  if (!validation.valid) {
-    return { publicUrl: null, error: new Error(validation.error) }
+
+  if (result.error) {
+    return { publicUrl: null, error: result.error }
   }
 
-  let uploadFile = file
-
-  if (isCompressibleImageType(file)) {
-    try {
-      uploadFile = await compressImageToWebp(file, {
-        maxWidth: 1200,
-        maxHeight: 1200,
-        quality: 0.75,
-        maxBytes: 500 * 1024,
-        minQuality: 0.6,
-      })
-    } catch (error) {
-      logError('Inline image compression failed, using original image.', error)
-    }
-  }
-
-  const safeFileName = createSafeFileName(uploadFile, 'post-inline')
-  const path = `posts/${userId}/inline/${safeFileName}`
-
-  const { error } = await supabase.storage
-    .from('post-images')
-    .upload(path, uploadFile, {
-      cacheControl: '31536000',
-      contentType: uploadFile.type || file.type,
-      upsert: false,
-    })
-
-  if (error) {
-    return { publicUrl: null, error }
-  }
-
-  const { data } = supabase.storage
-    .from('post-images')
-    .getPublicUrl(path)
-
-  return { publicUrl: data.publicUrl, error: null }
+  return { publicUrl: result.publicUrl, error: null }
 }
 
 export async function createPost(postData) {

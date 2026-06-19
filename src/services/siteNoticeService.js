@@ -153,10 +153,6 @@ function normalizeSiteNoticePayload(payload = {}) {
   }
 }
 
-export function getNoticeSeenStorageKey(version) {
-  return `exanh_notice_seen_${normalizeText(version, 'v1.0')}`
-}
-
 export function getDefaultGuideSections() {
   return DEFAULT_GUIDE_SECTIONS
 }

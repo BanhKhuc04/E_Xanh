@@ -144,7 +144,7 @@ body {
 }
 
 .community-composer__prompt {
-  min-height: 54px;
+  height: 52px;
   display: flex;
   align-items: center;
   width: 100%;
@@ -163,6 +163,7 @@ body {
 
 .community-composer__button {
   white-space: nowrap;
+  height: 52px;
 }
 
 .community-composer__actions {
