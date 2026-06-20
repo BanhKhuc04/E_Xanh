@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import AvatarLightbox from '../../components/common/AvatarLightbox'
+import UserAvatar from '../../components/common/UserAvatar'
 import { supabase } from '../../lib/supabase'
 import { getCurrentSession } from '../../services/authService'
 import { followUser, unfollowUser, isFollowing, getFollowStats } from '../../services/followService'
 import { getPublicPostsByUser } from '../../services/postService'
 import { DEFAULT_USER_PREFERENCES, normalizeUserPreferences } from '../../services/profileService'
-import { getInitials } from '../../utils/avatar'
 import OptimizedImage from '../../components/common/OptimizedImage'
 import MyPostsList from '../../components/account/MyPostsList'
 import '../../styles/public-profile.css'
@@ -26,6 +27,7 @@ function PublicProfilePage() {
   const [isFollowLoading, setIsFollowLoading] = useState(false)
   
   const [activeTab, setActiveTab] = useState('posts')
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -220,13 +222,15 @@ function PublicProfilePage() {
           
           <div className="public-profile-info">
             <div className="public-profile-avatar-wrapper">
-              <div className="public-profile-avatar">
-                {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt={`Avatar của ${displayName}`} />
-                ) : (
-                  <span>{getInitials(displayName)}</span>
-                )}
-              </div>
+              <UserAvatar
+                src={profile.avatar_url}
+                name={displayName}
+                size="profile"
+                withFrame={false}
+                clickable
+                className="public-profile-avatar"
+                onClick={() => setIsAvatarOpen(true)}
+              />
               
               <div className="public-profile-actions">
                 {isSelf ? (
@@ -234,8 +238,7 @@ function PublicProfilePage() {
                     Chỉnh sửa hồ sơ
                   </Link>
                 ) : (
-                  <button 
-                    className={`btn ${followingStatus ? 'btn--secondary' : 'btn--primary'}`}
+                  <button
                     onClick={handleFollowToggle}
                     disabled={isFollowLoading}
                   >
@@ -325,6 +328,13 @@ function PublicProfilePage() {
           )}
         </div>
       </div>
+
+      <AvatarLightbox
+        open={isAvatarOpen}
+        onClose={() => setIsAvatarOpen(false)}
+        src={profile.avatar_url}
+        name={displayName}
+      />
     </>
   )
 }

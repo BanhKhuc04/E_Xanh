@@ -7,6 +7,16 @@ import {
   validateImageFile,
 } from '../../utils/fileValidation'
 
+const AVATAR_ASPECT_OPTIONS = [
+  {
+    key: '1:1',
+    label: 'Vuông',
+    aspect: 1,
+    width: 400,
+    height: 400,
+  },
+]
+
 function ProfileAvatarSettings({
   currentAvatarUrl,
   displayName,
@@ -66,12 +76,17 @@ function ProfileAvatarSettings({
   }
 
   async function handleCropApply(croppedBlob) {
-    const croppedFile = new File([croppedBlob], 'avatar-cropped.jpeg', {
-      type: 'image/jpeg',
-    })
-    setPendingAvatarFile(croppedFile)
-    setCropSource('')
-    setMessage({ text: 'Ảnh đại diện đã sẵn sàng để lưu.', type: 'success' })
+    try {
+      const croppedFile = new File([croppedBlob], 'avatar-cropped.jpeg', {
+        type: 'image/jpeg',
+      })
+      setPendingAvatarFile(croppedFile)
+      setCropSource('')
+      setMessage({ text: 'Ảnh đại diện đã sẵn sàng để lưu.', type: 'success' })
+    } catch (err) {
+      console.error('[ProfileAvatarSettings] Crop error:', err)
+      setMessage({ text: 'Lỗi xử lý ảnh, vui lòng thử lại.', type: 'error' })
+    }
   }
 
   function handleCancelPending() {
@@ -85,26 +100,34 @@ function ProfileAvatarSettings({
     setLoading(true)
     setMessage({ text: '', type: '' })
 
-    const { publicUrl, error: uploadError } = await uploadAvatarImage(pendingAvatarFile)
-    if (uploadError) {
-      setMessage({ text: uploadError.message || 'Không thể tải ảnh đại diện lên.', type: 'error' })
-      setLoading(false)
-      return
-    }
+    try {
+      const { publicUrl, error: uploadError } = await uploadAvatarImage(pendingAvatarFile)
+      if (uploadError) {
+        console.error('[ProfileAvatarSettings] Upload error:', uploadError)
+        setMessage({ text: uploadError.message || 'Không thể tải ảnh đại diện lên.', type: 'error' })
+        setLoading(false)
+        return
+      }
 
-    const { error: updateError } = await updateProfile({ avatar_url: publicUrl })
-    if (updateError) {
-      setMessage({ text: updateError.message || 'Không thể cập nhật ảnh đại diện.', type: 'error' })
-      setLoading(false)
-      return
-    }
+      const { error: updateError } = await updateProfile({ avatar_url: publicUrl })
+      if (updateError) {
+        console.error('[ProfileAvatarSettings] Update profile error:', updateError)
+        setMessage({ text: updateError.message || 'Không thể cập nhật ảnh đại diện.', type: 'error' })
+        setLoading(false)
+        return
+      }
 
-    setAvatarUrl(publicUrl)
-    setPendingAvatarFile(null)
-    setMessage({ text: 'Ảnh đại diện đã được cập nhật.', type: 'success' })
-    onAvatarUpdated?.(publicUrl)
-    window.dispatchEvent(new Event('profileUpdated'))
-    setLoading(false)
+      setAvatarUrl(publicUrl)
+      setPendingAvatarFile(null)
+      setMessage({ text: 'Ảnh đại diện đã được cập nhật.', type: 'success' })
+      onAvatarUpdated?.(publicUrl)
+      window.dispatchEvent(new Event('profileUpdated'))
+    } catch (err) {
+      console.error('[ProfileAvatarSettings] Unexpected save error:', err)
+      setMessage({ text: 'Đã xảy ra lỗi không mong đợi, vui lòng thử lại.', type: 'error' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function handleRemoveAvatar() {
@@ -113,19 +136,26 @@ function ProfileAvatarSettings({
     setLoading(true)
     setMessage({ text: '', type: '' })
 
-    const { error } = await updateProfile({ avatar_url: null })
-    if (error) {
-      setMessage({ text: error.message || 'Không thể xóa ảnh đại diện.', type: 'error' })
-      setLoading(false)
-      return
-    }
+    try {
+      const { error } = await updateProfile({ avatar_url: null })
+      if (error) {
+        console.error('[ProfileAvatarSettings] Remove avatar error:', error)
+        setMessage({ text: error.message || 'Không thể xóa ảnh đại diện.', type: 'error' })
+        setLoading(false)
+        return
+      }
 
-    setAvatarUrl('')
-    setPendingAvatarFile(null)
-    setMessage({ text: 'Đã xóa ảnh đại diện.', type: 'success' })
-    onAvatarUpdated?.('')
-    window.dispatchEvent(new Event('profileUpdated'))
-    setLoading(false)
+      setAvatarUrl('')
+      setPendingAvatarFile(null)
+      setMessage({ text: 'Đã xóa ảnh đại diện.', type: 'success' })
+      onAvatarUpdated?.('')
+      window.dispatchEvent(new Event('profileUpdated'))
+    } catch (err) {
+      console.error('[ProfileAvatarSettings] Unexpected remove error:', err)
+      setMessage({ text: 'Đã xảy ra lỗi không mong đợi.', type: 'error' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -172,7 +202,8 @@ function ProfileAvatarSettings({
         isOpen={Boolean(cropSource)}
         image={cropSource}
         title="Cắt ảnh đại diện"
-        aspect={1}
+        aspectOptions={AVATAR_ASPECT_OPTIONS}
+        defaultAspectKey="1:1"
         cropShape="round"
         confirmLabel="Dùng ảnh này"
         onClose={() => setCropSource('')}
