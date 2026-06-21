@@ -286,19 +286,30 @@ function CommunityPostDetailPage() {
                 </div>
               )}
 
-              <div className="community-detail__header">
-                <Link to={`/nguoi-dung/${post.authorId}`} className="community-detail__avatar-link">
-                  <UserAvatar src={post.avatar} name={post.author} size="lg" className="community-detail__avatar" withFrame={false} />
-                </Link>
-                <div className="community-detail__meta">
-                  <h3>
-                    <Link to={`/nguoi-dung/${post.authorId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                      {post.author}
-                    </Link>
-                    {post.role !== 'Thành viên' && <span className="community-detail__role">{post.role}</span>}
-                  </h3>
-                  <p>{post.time}</p>
+              <div className="community-detail__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <Link to={`/nguoi-dung/${post.authorId}`} className="community-detail__avatar-link">
+                    <UserAvatar src={post.avatar} name={post.author} size="lg" className="community-detail__avatar" withFrame={false} />
+                  </Link>
+                  <div className="community-detail__meta">
+                    <h3>
+                      <Link to={`/nguoi-dung/${post.authorId}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                        {post.author}
+                      </Link>
+                      {post.role !== 'Thành viên' && <span className="community-detail__role">{post.role}</span>}
+                    </h3>
+                    <p>{post.time}</p>
+                  </div>
                 </div>
+                {currentUser?.id === post.authorId && (
+                  <Link 
+                    to={`/sua-bai/${post.id}`} 
+                    className="btn btn--secondary"
+                    style={{ padding: '6px 12px', fontSize: '14px', whiteSpace: 'nowrap' }}
+                  >
+                    Chỉnh sửa bài viết
+                  </Link>
+                )}
               </div>
 
               <div className="community-detail__tags">

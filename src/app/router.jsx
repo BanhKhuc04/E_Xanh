@@ -21,6 +21,7 @@ const PostDetailPage = lazy(() => import('../pages/user/PostDetailPage'))
 const CommunityPage = lazy(() => import('../pages/user/CommunityPage'))
 const CommunityPostDetailPage = lazy(() => import('../pages/user/CommunityPostDetailPage'))
 const CreatePostPage = lazy(() => import('../pages/user/CreatePostPage'))
+const EditPostPage = lazy(() => import('../pages/user/EditPostPage'))
 const AccountPage = lazy(() => import('../pages/user/AccountPage'))
 const AboutPage = lazy(() => import('../pages/user/AboutPage'))
 const TermsPage = lazy(() => import('../pages/user/TermsPage'))
@@ -101,6 +102,10 @@ const router = createBrowserRouter([
           {
             path: 'dang-bai',
             element: <Suspense fallback={<PageFallback />}><CreatePostPage /></Suspense>,
+          },
+          {
+            path: 'sua-bai/:id',
+            element: <Suspense fallback={<PageFallback />}><EditPostPage /></Suspense>,
           },
           {
             path: 'dang-nhap',

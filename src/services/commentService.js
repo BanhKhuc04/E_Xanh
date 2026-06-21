@@ -103,6 +103,9 @@ export async function createComment(postId, content) {
     return { data: null, error }
   }
 
+  // Cập nhật số lượng bình luận
+  await supabase.rpc('increment_comments_count', { row_id: postId })
+
   const { data: profile } = await supabase
     .from('public_profiles')
     .select('name, avatar_url')

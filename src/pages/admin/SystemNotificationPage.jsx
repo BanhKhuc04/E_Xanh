@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import AdminBugReportManager from '../../components/admin/settings/AdminBugReportManager'
-import AdminSiteNoticeManager from '../../components/admin/settings/AdminSiteNoticeManager'
 import AdminNotificationComposer from '../../components/admin/notifications/AdminNotificationComposer'
 import AdminNotificationSidebar from '../../components/admin/notifications/AdminNotificationSidebar'
 import AdminNotificationHistory from '../../components/admin/notifications/AdminNotificationHistory'
@@ -70,7 +69,6 @@ function SystemNotificationPage() {
         </div>
       ) : null}
 
-      <AdminSiteNoticeManager />
       <AdminBugReportManager />
 
       <div className="notification-center-grid">

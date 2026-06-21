@@ -9,7 +9,18 @@ function ArticleHeader({ post }) {
 
   return (
     <header className="article-header">
-      <span className="article-header__tag">{post.category}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <span className="article-header__tag">{post.category}</span>
+        {post.isCurrentUser && (
+          <Link 
+            to={`/sua-bai/${post.id}`} 
+            className="btn btn--secondary"
+            style={{ padding: '6px 12px', fontSize: '14px', whiteSpace: 'nowrap' }}
+          >
+            Chỉnh sửa bài viết
+          </Link>
+        )}
+      </div>
       <h1>{post.title}</h1>
       <p>{post.description}</p>
 

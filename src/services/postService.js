@@ -266,10 +266,10 @@ export async function getTipPosts({ page = 1, limit = 10, category = '', search 
   const from = (page - 1) * limit
   const to = from + limit - 1
 
-  let selectStr = '*, categories:category_id (id, name, slug)'
+  let selectStr = '*, categories:category_id (id, name, slug), profiles:author_id(name, avatar_url, role)'
   
   if (category && category !== 'Tất cả') {
-    selectStr = '*, categories!inner (id, name, slug)'
+    selectStr = '*, categories!inner (id, name, slug), profiles:author_id(name, avatar_url, role)'
   }
 
   let query = supabase
@@ -365,7 +365,7 @@ export async function getCommunityPosts(page = 1, limit = 10, filter = 'Tất c�
 
   let query = supabase
     .from('posts')
-    .select('id, title, description, slug, type, author_id, status, created_at, published_at, likes_count, comments_count, saved_count, image_url, cover_url, cover_thumb_url, cover_card_url, cover_detail_url', { count: 'exact' })
+    .select('id, title, description, slug, type, author_id, status, created_at, published_at, likes_count, comments_count, saved_count, image_url, cover_thumb_url, cover_card_url, cover_detail_url, profiles:author_id(name, avatar_url, role, user_preferences)', { count: 'exact' })
     .eq('status', 'approved')
 
   if (filter === 'Hỏi đáp') query = query.eq('type', 'qa');
