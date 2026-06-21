@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import SEO from '../../components/SEO'
-import { supabase } from '../../lib/supabase'
+import { submitContactForm } from '../../services/contactService'
 import '../../styles/static-pages.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -62,13 +62,12 @@ function ContactPage() {
     setIsSubmitting(true)
 
     try {
-      // Thực hiện gửi thật
-      const { error } = await supabase.from('contacts').insert([{
-        name: form.name.trim(),
-        email: form.email.trim(),
+      const { error } = await submitContactForm({
+        name: form.name,
+        email: form.email,
         subject: form.subject,
-        content: form.content.trim()
-      }])
+        message: form.content
+      })
 
       if (error) {
         setErrorMessage('Có lỗi xảy ra khi gửi liên hệ: ' + error.message)

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getActiveSiteNotice } from '../../services/siteNoticeService'
 import SupportModal from './SupportModal'
 import SupportFloatingButton from './SupportFloatingButton'
 
@@ -12,24 +13,27 @@ function SupportCenter() {
   useEffect(() => {
     let cancelled = false
 
-    function loadNotice() {
-      // In a real system we'd check an admin_notices endpoint
-      // Using a local static notice to avoid semantic mismatch with public site notices
-      const staticAdminNotice = {
-        id: 'admin-notice-v1',
-        title: 'Cập nhật khu vực Hỗ trợ',
-        description: 'E-XANH đã cải thiện khu vực báo lỗi và hỗ trợ trực tuyến để phục vụ bạn tốt hơn.',
-        created_at: new Date('2024-01-01').toISOString(),
-        contact_url: '/lien-he',
-        contact_label: 'Liên hệ Hỗ trợ',
-      }
+    async function loadNotice() {
+      const { data } = await getActiveSiteNotice()
+      
+      if (!cancelled && data) {
+        // Map site notice to support modal notice format
+        const dynamicNotice = {
+          id: data.id || 'admin-notice-v1',
+          title: data.title || 'Thông báo mới nhất từ admin',
+          description: data.description || '',
+          created_at: data.updated_at || new Date().toISOString(), // Use updated_at since upsert only updates updated_at
+          contact_url: data.contact_url || '/lien-he',
+          contact_label: data.contact_label || 'Liên hệ Hỗ trợ',
+        }
 
-      if (!cancelled) {
-        setNotice(staticAdminNotice)
+        setNotice(dynamicNotice)
 
         if (typeof window !== 'undefined') {
+          // Use version or updated_at to track unread status if id is same
+          const trackId = `${dynamicNotice.id}-${dynamicNotice.created_at}`
           const lastSeenId = window.localStorage.getItem(LAST_SEEN_KEY)
-          if (lastSeenId !== String(staticAdminNotice.id)) {
+          if (lastSeenId !== trackId) {
             setHasUnreadNotice(true)
           }
         }
@@ -43,9 +47,10 @@ function SupportCenter() {
     }
   }, [])
 
-  function handleMarkSeen(id) {
-    if (typeof window === 'undefined') return
-    window.localStorage.setItem(LAST_SEEN_KEY, String(id))
+  function handleMarkSeen() {
+    if (typeof window === 'undefined' || !notice) return
+    const trackId = `${notice.id}-${notice.created_at}`
+    window.localStorage.setItem(LAST_SEEN_KEY, trackId)
     setHasUnreadNotice(false)
   }
 
