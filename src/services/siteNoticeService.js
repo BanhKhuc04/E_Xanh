@@ -212,7 +212,7 @@ export async function createSiteNotice(payload) {
   const normalizedPayload = normalizeSiteNoticePayload(payload)
   const { data, error } = await supabase
     .from(SITE_NOTICES_TABLE)
-    .insert([normalizedPayload])
+    .upsert([normalizedPayload], { onConflict: 'notice_key' })
     .select('*')
     .single()
 
