@@ -39,66 +39,29 @@ export async function getAdminStats(range = '30 ngày qua') {
     pendingPostsList: [],
   }
 
-  // Posts
   try {
-    const { count: cTotalPosts } = await supabase.from('posts').select('*', { count: 'exact', head: true }).gte('created_at', startDate || '2000-01-01')
-    if (cTotalPosts !== null) result.totalPosts = cTotalPosts
+    const { data: stats, error } = await supabase.rpc('get_admin_dashboard_stats', {
+      start_date: startDate || '2000-01-01'
+    })
 
-    const { count: cApproved } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'approved').gte('created_at', startDate || '2000-01-01')
-    if (cApproved !== null) result.approvedPosts = cApproved
-
-    const { count: cPending } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'pending').gte('created_at', startDate || '2000-01-01')
-    if (cPending !== null) result.pendingPosts = cPending
-
-    const { count: cRejected } = await supabase.from('posts').select('*', { count: 'exact', head: true }).in('status', ['rejected', 'hidden', 'blocked']).gte('created_at', startDate || '2000-01-01')
-    if (cRejected !== null) result.rejectedHiddenPosts = cRejected
-  } catch { /* ignore */ }
-
-  // Users
-  try {
-    const { count: cTotalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', startDate || '2000-01-01')
-    if (cTotalUsers !== null) result.totalUsers = cTotalUsers // always total for the range
-
-    const { count: cActive } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', startDate || '2000-01-01')
-    if (cActive !== null) result.activeUsers = cActive
-
-    const { count: cLocked } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).in('status', ['locked', 'blocked']).gte('created_at', startDate || '2000-01-01')
-    if (cLocked !== null) result.lockedUsers = cLocked
-
-    const { count: cDeleted } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'deleted').gte('created_at', startDate || '2000-01-01')
-    if (cDeleted !== null) result.deletedUsers = cDeleted
-  } catch { /* ignore */ }
-
-  // Saved Posts
-  try {
-    let query = supabase.from('saved_posts').select('*', { count: 'exact', head: true })
-    if (startDate) query = query.gte('created_at', startDate)
-    const { count } = await query
-    if (count !== null) result.totalSavedPosts = count
-  } catch { /* ignore */ }
-
-  // Comments
-  try {
-    const { count: cTotalComments } = await supabase.from('comments').select('*', { count: 'exact', head: true }).gte('created_at', startDate || '2000-01-01')
-    if (cTotalComments !== null) result.totalComments = cTotalComments
-
-    const { count: cHidden } = await supabase.from('comments').select('*', { count: 'exact', head: true }).in('status', ['hidden', 'spam', 'deleted']).gte('created_at', startDate || '2000-01-01')
-    if (cHidden !== null) result.hiddenSpamComments = cHidden
-  } catch { /* ignore */ }
-
-  // Devices
-  try {
-    const { count } = await supabase.from('devices').select('*', { count: 'exact', head: true })
-    if (count !== null) result.totalDevices = count
-  } catch { /* ignore */ }
-
-  // Electricity checks
-  try {
-    let query = supabase.from('electricity_checks').select('*', { count: 'exact', head: true })
-    if (startDate) query = query.gte('checked_at', startDate)
-    const { count } = await query
-    if (count !== null) result.totalElectricityChecks = count
-  } catch { /* ignore */ }
+    if (!error && stats) {
+      Object.assign(result, {
+        totalPosts: stats.totalPosts || 0,
+        approvedPosts: stats.approvedPosts || 0,
+        pendingPosts: stats.pendingPosts || 0,
+        rejectedHiddenPosts: stats.rejectedHiddenPosts || 0,
+        totalUsers: stats.totalUsers || 0,
+        activeUsers: stats.activeUsers || 0,
+        lockedUsers: stats.lockedUsers || 0,
+        deletedUsers: stats.deletedUsers || 0,
+        totalSavedPosts: stats.totalSavedPosts || 0,
+        totalComments: stats.totalComments || 0,
+        hiddenSpamComments: stats.hiddenSpamComments || 0,
+        totalDevices: stats.totalDevices || 0,
+        totalElectricityChecks: stats.totalElectricityChecks || 0,
+      })
+    }
+  } catch { /* ignore error and fall back to 0 */ }
 
   try {
     const { data } = await supabase

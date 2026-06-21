@@ -122,6 +122,14 @@ export function useNotificationComposer(loadHistory, loadCapabilityAudit, showTo
       } else {
         showToast(`Đã cập nhật Popup Version toàn hệ thống thành công.`)
         setForm(INITIAL_FORM)
+        // Kích hoạt event để Popup hiện lên ngay lập tức cho Admin xem trước
+        window.dispatchEvent(new CustomEvent('force-show-version-notice', {
+          detail: {
+            title: form.title,
+            description: form.message,
+            version: form.version || 'v1.0'
+          }
+        }))
       }
       setSubmitting(false)
       return

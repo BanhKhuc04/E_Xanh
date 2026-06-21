@@ -33,8 +33,22 @@ export default function VersionNotice() {
 
     fetchNotice()
 
+    // Lắng nghe sự kiện để admin có thể xem ngay (Preview) mà không cần F5
+    const handleForceShow = (event) => {
+      const data = event.detail
+      if (data) {
+        setNoticeData(data)
+        setIsVisible(true)
+        if (hideTimer) clearTimeout(hideTimer)
+        hideTimer = setTimeout(() => setIsVisible(false), 26000)
+      }
+    }
+
+    window.addEventListener('force-show-version-notice', handleForceShow)
+
     return () => {
       if (hideTimer) clearTimeout(hideTimer)
+      window.removeEventListener('force-show-version-notice', handleForceShow)
     }
   }, [])
 
