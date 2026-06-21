@@ -617,13 +617,8 @@ export async function getPublicPostsByUser(userId, page = 1, limit = 10) {
 export async function updatePostStatus(postId, status, adminNote = null) {
   const updatePayload = { status }
   
-  if (status === 'rejected') {
-    if (adminNote !== null) {
-      updatePayload.rejection_reason = adminNote
-    }
-    const { data: post } = await supabase.from('posts').select('rejection_count').eq('id', postId).single()
-    const currentCount = post?.rejection_count || 0
-    updatePayload.rejection_count = currentCount + 1
+  if (status === 'rejected' && adminNote !== null) {
+    updatePayload.rejection_reason = adminNote
   }
 
   const { data, error } = await supabase

@@ -101,16 +101,15 @@ function AdminPostPreview({ post, onChangeStatus, onEditPost, onDeletePost, curr
               </button>
             )}
             
-            <button
-              type="button"
+            <a
+              href={post.type === 'tip' ? `/meo-tiet-kiem/${post.slug || post.id}` : `/cong-dong/${post.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn btn--secondary"
-              disabled
-              title="Tính năng đang phát triển"
-              aria-disabled="true"
-              title="Tính năng đang phát triển"
+              style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}
             >
               Xem chi tiết
-            </button>
+            </a>
 
             <button
               type="button"

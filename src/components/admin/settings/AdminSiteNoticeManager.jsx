@@ -12,9 +12,9 @@ const INITIAL_NOTICE_FORM = {
   notice_key: 'main',
   version: 'v1.0',
   title: 'Hướng dẫn test & báo lỗi E-XANH',
-  subtitle: 'Vui lòng kiểm tra các vai trò và tính năng quan trọng trước khi đánh giá tổng thể website.',
+  subtitle: '',
   description: 'Nếu gặp lỗi khi test, hãy dùng ngay form báo lỗi để nhóm E-XANH xử lý nhanh hơn.',
-  guide_sections_text: JSON.stringify(getDefaultGuideSections(), null, 2),
+  contact_label: 'Mở form hỗ trợ',
   contact_label: 'Mở form hỗ trợ',
   contact_url: '',
   is_active: true,
@@ -41,7 +41,6 @@ function createFormFromNotice(notice) {
     title: notice.title || '',
     subtitle: notice.subtitle || '',
     description: notice.description || '',
-    guide_sections_text: JSON.stringify(notice.guide_sections || [], null, 2),
     contact_label: notice.contact_label || '',
     contact_url: notice.contact_url || '',
     is_active: Boolean(notice.is_active),
@@ -107,9 +106,8 @@ function AdminSiteNoticeManager() {
         notice_key: form.notice_key.trim() || 'main',
         version: form.version.trim() || 'v1.0',
         title: form.title.trim() || 'Hướng dẫn test & báo lỗi E-XANH',
-        subtitle: form.subtitle.trim(),
+        subtitle: form.subtitle?.trim() || '',
         description: form.description.trim(),
-        guide_sections: parseGuideSectionsText(form.guide_sections_text),
         contact_label: form.contact_label.trim(),
         contact_url: form.contact_url.trim(),
         is_active: form.is_active,
@@ -151,23 +149,13 @@ function AdminSiteNoticeManager() {
     setErrorMsg('')
     setSuccessMsg('')
 
-    let guideSections
-
-    try {
-      guideSections = parseGuideSectionsText(form.guide_sections_text)
-    } catch (error) {
-      setErrorMsg(error.message)
-      setSaving(false)
-      return
-    }
-
     const payload = {
       notice_key: form.notice_key.trim() || 'main',
       version: form.version.trim() || 'v1.0',
       title: form.title.trim(),
-      subtitle: form.subtitle.trim(),
+      subtitle: form.subtitle?.trim() || '',
       description: form.description.trim(),
-      guide_sections: guideSections,
+      guide_sections: [],
       contact_label: form.contact_label.trim(),
       contact_url: form.contact_url.trim(),
       is_active: form.is_active,
@@ -265,16 +253,6 @@ function AdminSiteNoticeManager() {
               </label>
 
               <label className="st-card__field notification-form-grid__full">
-                <span className="st-card__label">Subtitle</span>
-                <input
-                  className="st-card__input"
-                  value={form.subtitle}
-                  onChange={(event) => handleFieldChange('subtitle', event.target.value)}
-                  placeholder="Mô tả ngắn về phiên bản đang test"
-                />
-              </label>
-
-              <label className="st-card__field notification-form-grid__full">
                 <span className="st-card__label">Mô tả</span>
                 <textarea
                   className="st-card__input st-card__textarea"
@@ -302,17 +280,6 @@ function AdminSiteNoticeManager() {
                   value={form.contact_url}
                   onChange={(event) => handleFieldChange('contact_url', event.target.value)}
                   placeholder="https://..."
-                />
-              </label>
-
-              <label className="st-card__field notification-form-grid__full">
-                <span className="st-card__label">Guide sections JSON</span>
-                <textarea
-                  className="st-card__input st-card__textarea site-notice-json-editor"
-                  rows="14"
-                  value={form.guide_sections_text}
-                  onChange={(event) => handleFieldChange('guide_sections_text', event.target.value)}
-                  placeholder='[{"title":"1. Test user","items":["Đăng ký","Đăng nhập"]}]'
                 />
               </label>
             </div>

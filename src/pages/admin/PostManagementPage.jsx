@@ -526,16 +526,50 @@ function PostManagementPage() {
                 />
               </label>
 
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <strong>Link ảnh bìa</strong>
-                <input
-                  type="url"
-                  value={formData.image_url}
-                  onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://..."
-                  style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                />
-              </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <strong>Ảnh bìa</strong>
+                  {formData.image_url && (
+                    <img src={formData.image_url} alt="Cover" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }} />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files[0]
+                      if (!file) return
+                      setFormLoading(true)
+                      try {
+                        const { uploadOptimizedImage } = await import('../../services/mediaUploadService')
+                        const res = await uploadOptimizedImage({ file, bucket: 'post-images' })
+                        if (res.error) {
+                          showToast('Lỗi upload ảnh: ' + res.error.message)
+                        } else {
+                          const originalUrl = res.original || res.publicUrl || ''
+                          setFormData({ 
+                            ...formData, 
+                            image_url: originalUrl,
+                            cover_card_url: res.card || originalUrl,
+                            cover_thumb_url: res.thumb || originalUrl,
+                            cover_detail_url: res.detail || originalUrl
+                          })
+                        }
+                      } catch (err) {
+                        showToast('Lỗi upload ảnh.')
+                      } finally {
+                        setFormLoading(false)
+                      }
+                    }}
+                    style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
+                  <small style={{ color: '#666' }}>Bạn cũng có thể dán link URL nếu không muốn tải lên.</small>
+                  <input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                    placeholder="Hoặc dán URL ảnh bìa vào đây..."
+                    style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  />
+                </label>
 
               <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <strong>Nội dung</strong>
