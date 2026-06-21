@@ -22,7 +22,7 @@ function ImageCropModal({
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
-  const [selectedAspectKey, setSelectedAspectKey] = useState(normalizePostImageAspectKey(defaultAspectKey))
+  const [selectedAspectKey, setSelectedAspectKey] = useState(defaultAspectKey || '16:9')
   const [loading, setLoading] = useState(false)
 
   const normalizedOptions = useMemo(
@@ -30,8 +30,11 @@ function ImageCropModal({
     [aspectOptions],
   )
   const activePreset = useMemo(
-    () => getPostImageAspectPreset(selectedAspectKey),
-    [selectedAspectKey],
+    () => {
+      const found = normalizedOptions.find(opt => opt.key === selectedAspectKey)
+      return found || getPostImageAspectPreset(selectedAspectKey)
+    },
+    [selectedAspectKey, normalizedOptions],
   )
 
   if (!isOpen || !image) return null

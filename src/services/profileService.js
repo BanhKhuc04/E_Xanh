@@ -202,11 +202,12 @@ export async function uploadProfileCover(file) {
 
   const result = await uploadOptimizedImage({
     file,
-    bucket: 'profile-covers',
+    bucket: 'profile-avatars',
     folder: 'covers',
     preset: 'postDetail', 
     variants: false,
     userId: sessionData.session.user.id,
+    postId: sessionData.session.user.id,
   })
 
   if (result.error) {

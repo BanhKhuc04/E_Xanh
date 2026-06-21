@@ -75,12 +75,9 @@ function ProfileAvatarSettings({
     event.target.value = ''
   }
 
-  async function handleCropApply(croppedBlob) {
+  async function handleCropApply({ file }) {
     try {
-      const croppedFile = new File([croppedBlob], 'avatar-cropped.jpeg', {
-        type: 'image/jpeg',
-      })
-      setPendingAvatarFile(croppedFile)
+      setPendingAvatarFile(file)
       setCropSource('')
       setMessage({ text: 'Ảnh đại diện đã sẵn sàng để lưu.', type: 'success' })
     } catch (err) {

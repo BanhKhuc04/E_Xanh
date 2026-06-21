@@ -2,6 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import { uploadProfileCover, updateProfile } from '../../services/profileService'
 import ImageCropModal from '../common/ImageCropModal'
 
+const COVER_ASPECT_OPTIONS = [
+  {
+    key: 'fb-cover',
+    label: 'Ảnh bìa chuẩn',
+    aspect: 1939 / 811,
+    width: 1939,
+    height: 811,
+  },
+]
+
 function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
   const [coverUrl, setCoverUrl] = useState(currentCoverUrl || '')
   const [previewUrl, setPreviewUrl] = useState(null)
@@ -39,11 +49,10 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
     }
   }
 
-  const handleCropApply = (croppedBlob) => {
-    const objectUrl = URL.createObjectURL(croppedBlob)
+  const handleCropApply = ({ file }) => {
+    const objectUrl = URL.createObjectURL(file)
     setPreviewUrl(objectUrl)
     
-    const file = new File([croppedBlob], 'cover_cropped.jpg', { type: 'image/jpeg' })
     setFileToUpload(file)
     setIsCropModalOpen(false)
     setImageToCrop(null)
@@ -138,7 +147,7 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
         ) : (
           <div className="settings-cover-preview__empty">
             <strong>Chưa có ảnh bìa</strong>
-            <span>Thêm ảnh 3:1 hoặc 16:9 để hồ sơ trông nổi bật hơn.</span>
+            <span>Thêm ảnh tỉ lệ ngang để hồ sơ trông nổi bật hơn.</span>
           </div>
         )}
       </div>
@@ -209,7 +218,8 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
         isOpen={isCropModalOpen}
         image={imageToCrop}
         title="Căn chỉnh ảnh bìa"
-        aspect={3}
+        aspectOptions={COVER_ASPECT_OPTIONS}
+        defaultAspectKey="fb-cover"
         cropShape="rect"
         confirmLabel="Áp dụng ảnh bìa"
         onClose={handleCropClose}
