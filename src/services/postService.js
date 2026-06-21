@@ -432,7 +432,7 @@ async function fetchPublicProfilesMap(authorIds = []) {
   }
 
   const { data: profiles, error } = await supabase
-    .from('profiles')
+    .from('public_profiles')
     .select('id, name, avatar_url, bio, cover_url, facebook_url, website_url, user_preferences')
     .in('id', authorIds)
 
