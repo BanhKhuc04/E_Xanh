@@ -188,9 +188,33 @@ function TipsPage() {
     return <PageLoader message="Đang tải dữ liệu mẹo tiết kiệm..." />
   }
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Trang chủ",
+        "item": "https://e-xanh.vercel.app/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Mẹo tiết kiệm điện hiệu quả",
+        "item": "https://e-xanh.vercel.app/meo-tiet-kiem"
+      }
+    ]
+  }
+
   return (
     <>
-      <SEO title="Mẹo tiết kiệm" description="Tổng hợp mẹo tiết kiệm điện dễ áp dụng cho sinh viên, phòng trọ và ký túc xá." url={canonicalUrl} />
+      <SEO 
+        title="Mẹo tiết kiệm điện hiệu quả" 
+        description="Tổng hợp mẹo tiết kiệm điện dễ áp dụng cho sinh viên, phòng trọ và ký túc xá." 
+        url={canonicalUrl} 
+        schema={breadcrumbSchema}
+      />
       
       <div className="tips-page">
         <PageHero

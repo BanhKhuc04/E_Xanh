@@ -103,10 +103,11 @@ function FeaturedPosts() {
                   <span className="home-post-card__tag">{getTypeLabel(post.type)}</span>
                   <button 
                     className="fp-card__save-btn" 
-                    title="Tính năng đang phát triển"
-                    disabled
-                    aria-disabled="true"
-                    style={{ cursor: 'not-allowed', opacity: 0.5 }}
+                    title="Lưu bài viết"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert('Vui lòng vào xem chi tiết bài viết để lưu nhé!');
+                    }}
                   >
                     <Bookmark size={18} strokeWidth={2.1} />
                   </button>

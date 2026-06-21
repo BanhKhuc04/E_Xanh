@@ -5,7 +5,8 @@ export default function SEO({
   description, 
   image = 'https://e-xanh.vercel.app/og-image-v2.png', 
   url = 'https://e-xanh.vercel.app', 
-  noIndex = false 
+  noIndex = false,
+  schema = null
 }) {
   const siteTitle = title ? `${title} | E-XANH` : 'E-XANH - Sử dụng điện thông minh, tiết kiệm điện'
   const siteDescription = description || 'E-XANH là nền tảng giúp sinh viên và người trẻ sử dụng điện thông minh, tiết kiệm chi phí và lan tỏa lối sống xanh. Khám phá mẹo tiết kiệm điện và công cụ kiểm tra tiền điện miễn phí.'
@@ -37,6 +38,13 @@ export default function SEO({
         <meta name="robots" content="noindex,nofollow" />
       ) : (
         <meta name="robots" content="index,follow" />
+      )}
+
+      {/* Structured Data / JSON-LD */}
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
       )}
     </Helmet>
   )

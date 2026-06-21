@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { previewSystemNotificationAudience, sendSystemNotification } from '../../../services/adminNotificationService'
+import { createSiteNotice } from '../../../services/siteNoticeService'
 import { EMPTY_PREVIEW, INITIAL_FORM } from './constants'
 
 export function useNotificationComposer(loadHistory, loadCapabilityAudit, showToast) {
@@ -72,8 +73,7 @@ export function useNotificationComposer(loadHistory, loadCapabilityAudit, showTo
   const canSubmit = Boolean(
     form.title.trim() &&
     form.message.trim() &&
-    effectivePreview.count > 0 &&
-    !effectivePreviewError &&
+    (form.targetType === 'global' ? true : (effectivePreview.count > 0 && !effectivePreviewError)) &&
     !submitting,
   )
 
@@ -99,6 +99,31 @@ export function useNotificationComposer(loadHistory, loadCapabilityAudit, showTo
 
     if (!form.message.trim()) {
       showToast('Nội dung thông báo đang để trống.', 'error')
+      return
+    }
+
+    if (form.targetType === 'global') {
+      if (!window.confirm(`Bạn sắp thay đổi Popup Version toàn hệ thống thành version ${form.version || 'v1.0'}.`)) {
+        return
+      }
+
+      setSubmitting(true)
+      const { error } = await createSiteNotice({
+        notice_key: 'main',
+        version: form.version || 'v1.0',
+        title: form.title,
+        description: form.message,
+        is_active: true,
+        show_bug_button: form.showBugButton !== false,
+      })
+
+      if (error) {
+        showToast(error.message, 'error')
+      } else {
+        showToast(`Đã cập nhật Popup Version toàn hệ thống thành công.`)
+        setForm(INITIAL_FORM)
+      }
+      setSubmitting(false)
       return
     }
 

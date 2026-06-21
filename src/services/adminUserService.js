@@ -414,24 +414,7 @@ export async function getAdminUsers() {
       electricityCountMap[stat.user_id] = parseInt(stat.electricity_check_count, 10) || 0
     })
   } else {
-    // Fallback nếu chưa chạy migration RPC
-    countPromises = userIds.map(async (uid) => {
-      const [
-        { count: pCount },
-        { count: cCount },
-        { count: sCount },
-        { count: eCount }
-      ] = await Promise.all([
-        supabase.from('posts').select('*', { count: 'exact', head: true }).eq('author_id', uid),
-        supabase.from('comments').select('*', { count: 'exact', head: true }).eq('user_id', uid),
-        canReadSavedPosts ? supabase.from('saved_posts').select('*', { count: 'exact', head: true }).eq('user_id', uid) : Promise.resolve({ count: 0 }),
-        supabase.from('electricity_checks').select('*', { count: 'exact', head: true }).eq('user_id', uid)
-      ])
-      postCountMap[uid] = pCount || 0
-      commentCountMap[uid] = cCount || 0
-      saveCountMap[uid] = sCount || 0
-      electricityCountMap[uid] = eCount || 0
-    })
+    logWarn('[AdminUsers] Lỗi gọi RPC get_users_activity_stats:', statsError)
   }
 
   // Fetch giới hạn hoạt động gần đây để không tải quá nhiều dữ liệu

@@ -386,7 +386,7 @@ function CommunityPage() {
 
   return (
     <div className="community-page">
-      <SEO title="Cộng đồng" description="Tham gia cộng đồng E-XANH, nơi sinh viên và người trẻ chia sẻ kinh nghiệm sống xanh, mẹo tiết kiệm điện và lối sống bền vững." url={canonicalUrl} />
+      <SEO title="Cộng đồng sống xanh & Tiết kiệm điện" description="Tham gia cộng đồng E-XANH, nơi sinh viên và người trẻ chia sẻ kinh nghiệm sống xanh, mẹo tiết kiệm điện và lối sống bền vững." url={canonicalUrl} />
       <PageHero
         {...pageHeroContent.community}
         actions={(

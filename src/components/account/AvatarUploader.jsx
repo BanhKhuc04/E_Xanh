@@ -19,7 +19,7 @@ function AvatarUploader({
     <div className="avatar-uploader">
       <div className="avatar-uploader__preview">
         {hasImage ? (
-          <img src={imageUrl} alt={`Ảnh đại diện của ${displayName || 'người dùng'}`} className="avatar-uploader__image" />
+          <img src={imageUrl} alt={`Ảnh đại diện của ${displayName || 'người dùng'}`} className="avatar-uploader__image" loading="lazy" />
         ) : (
           <div className="avatar-uploader__fallback">
             {getInitials(displayName || email || 'EX')}

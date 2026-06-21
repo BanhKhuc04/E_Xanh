@@ -158,7 +158,7 @@ function AdminBugReportManager() {
 
       {!loading && filteredReports.length > 0 ? (
         <div className="st-table-container">
-          <table className="st-table">
+          <table className="st-table bug-reports-table">
             <thead>
               <tr>
                 <th style={{ width: '25%' }}>Lỗi & Mô tả</th>

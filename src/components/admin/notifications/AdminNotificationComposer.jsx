@@ -47,7 +47,7 @@ export default function AdminNotificationComposer({
       </div>
 
       <form className="notification-compose-form" onSubmit={handleSubmit}>
-        <div className="notification-target-grid">
+        <div className="notification-target-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
           {TARGET_OPTIONS.map((option) => (
             <button
               key={option.value}
@@ -91,47 +91,73 @@ export default function AdminNotificationComposer({
             </label>
           ) : null}
 
-          <label className="st-card__field">
-            <span className="st-card__label">Loại thông báo</span>
-            <select
-              className="st-card__input"
-              value={form.notificationType}
-              onChange={(event) => handleFieldChange('notificationType', event.target.value)}
-            >
-              {NOTIFICATION_TYPES.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <span className="notification-field-note">
-              <span className={getNotificationTypeBadgeClass(form.notificationType)}>
-                {selectedNotificationTypeMeta.label}
-              </span>
-              {selectedNotificationTypeMeta.description} Gợi ý mức độ: {getOptionMeta(SEVERITY_OPTIONS, selectedNotificationTypeMeta.recommendedSeverity, selectedNotificationTypeMeta.recommendedSeverity).label}.
-            </span>
-          </label>
+          {form.targetType !== 'global' ? (
+            <>
+              <label className="st-card__field">
+                <span className="st-card__label">Loại thông báo</span>
+                <select
+                  className="st-card__input"
+                  value={form.notificationType}
+                  onChange={(event) => handleFieldChange('notificationType', event.target.value)}
+                >
+                  {NOTIFICATION_TYPES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="notification-field-note">
+                  <span className={getNotificationTypeBadgeClass(form.notificationType)}>
+                    {selectedNotificationTypeMeta.label}
+                  </span>
+                  {selectedNotificationTypeMeta.description} Gợi ý mức độ: {getOptionMeta(SEVERITY_OPTIONS, selectedNotificationTypeMeta.recommendedSeverity, selectedNotificationTypeMeta.recommendedSeverity).label}.
+                </span>
+              </label>
 
-          <label className="st-card__field">
-            <span className="st-card__label">Mức độ</span>
-            <select
-              className="st-card__input"
-              value={form.severity}
-              onChange={(event) => handleFieldChange('severity', event.target.value)}
-            >
-              {SEVERITY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <span className="notification-field-note">
-              <span className={getSeverityBadgeClass(form.severity)}>
-                {selectedSeverityMeta.label}
-              </span>
-              {selectedSeverityMeta.description}
-            </span>
-          </label>
+              <label className="st-card__field">
+                <span className="st-card__label">Mức độ</span>
+                <select
+                  className="st-card__input"
+                  value={form.severity}
+                  onChange={(event) => handleFieldChange('severity', event.target.value)}
+                >
+                  {SEVERITY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="notification-field-note">
+                  <span className={getSeverityBadgeClass(form.severity)}>
+                    {selectedSeverityMeta.label}
+                  </span>
+                  {selectedSeverityMeta.description}
+                </span>
+              </label>
+            </>
+          ) : (
+            <>
+              <label className="st-card__field">
+                <span className="st-card__label">Phiên bản (Version)</span>
+                <input
+                  className="st-card__input"
+                  value={form.version}
+                  onChange={(event) => handleFieldChange('version', event.target.value)}
+                  placeholder="Ví dụ: v2.0 hoặc Mới"
+                />
+              </label>
+              <div className="st-card__field" style={{ justifyContent: 'center' }}>
+                <label className="announcement-manager__toggle">
+                  <input
+                    type="checkbox"
+                    checked={form.showBugButton}
+                    onChange={(event) => handleFieldChange('showBugButton', event.target.checked)}
+                  />
+                  <span>Giữ nút "Báo lỗi" nổi ngoài website</span>
+                </label>
+              </div>
+            </>
+          )}
 
           <label className="st-card__field notification-form-grid__full">
             <span className="st-card__label">Tiêu đề</span>
@@ -183,41 +209,58 @@ export default function AdminNotificationComposer({
             </div>
           </div>
 
-          <article className={`notification-preview-item notification-preview-item--${form.severity}`}>
-            <div className="notification-preview-item__copy">
-              <strong>{form.title.trim() || 'Tiêu đề thông báo sẽ hiển thị ở đây'}</strong>
-              <p>{form.message.trim() || 'Nội dung thông báo sẽ hiển thị ở đây để admin kiểm tra trước khi gửi.'}</p>
-            </div>
-            <div className="notification-preview-item__meta">
-              <span className={getNotificationTypeBadgeClass(form.notificationType)}>
-                {selectedNotificationTypeMeta.label}
-              </span>
-              <span>{form.actionUrl.trim() ? 'Có link chi tiết' : 'Không có link'}</span>
-            </div>
-          </article>
-
-          <div className="notification-preview-audience">
-            <strong>Người nhận dự kiến</strong>
-            {previewLoading && isPreviewTargetReady ? (
-              <p>Đang kiểm tra người nhận thật từ Supabase...</p>
-            ) : effectivePreview.count === 0 ? (
-              <p>Chưa xác định được người nhận hợp lệ.</p>
-            ) : (
-              <div className="notification-preview-audience__chips">
-                {previewRecipients.map((recipient) => (
-                  <span key={recipient.id} className="notification-recipient-chip">
-                    {recipient.name}
-                    {recipient.email ? ` • ${recipient.email}` : ''}
-                  </span>
-                ))}
-                {effectivePreview.count > previewRecipients.length ? (
-                  <span className="notification-recipient-chip notification-recipient-chip--muted">
-                    +{effectivePreview.count - previewRecipients.length} người nữa
-                  </span>
-                ) : null}
+          {form.targetType === 'global' ? (
+            <article className="notification-preview-item notification-preview-item--info">
+              <div className="notification-preview-item__copy">
+                <strong>{form.title.trim() || 'Tiêu đề Popup'}</strong>
+                <p>{form.message.trim() || 'Nội dung thông báo sẽ hiện ở Popup góc màn hình và Trung tâm hỗ trợ.'}</p>
               </div>
-            )}
-          </div>
+              <div className="notification-preview-item__meta">
+                <span className="notification-tone-pill notification-tone-pill--display">
+                  Global Popup ({form.version})
+                </span>
+                <span>Sẽ hiển thị cho tất cả khách truy cập</span>
+              </div>
+            </article>
+          ) : (
+            <>
+              <article className={`notification-preview-item notification-preview-item--${form.severity}`}>
+                <div className="notification-preview-item__copy">
+                  <strong>{form.title.trim() || 'Tiêu đề thông báo sẽ hiển thị ở đây'}</strong>
+                  <p>{form.message.trim() || 'Nội dung thông báo sẽ hiển thị ở đây để admin kiểm tra trước khi gửi.'}</p>
+                </div>
+                <div className="notification-preview-item__meta">
+                  <span className={getNotificationTypeBadgeClass(form.notificationType)}>
+                    {selectedNotificationTypeMeta.label}
+                  </span>
+                  <span>{form.actionUrl.trim() ? 'Có link chi tiết' : 'Không có link'}</span>
+                </div>
+              </article>
+
+              <div className="notification-preview-audience">
+                <strong>Người nhận dự kiến</strong>
+                {previewLoading && isPreviewTargetReady ? (
+                  <p>Đang kiểm tra người nhận thật từ Supabase...</p>
+                ) : effectivePreview.count === 0 ? (
+                  <p>Chưa xác định được người nhận hợp lệ.</p>
+                ) : (
+                  <div className="notification-preview-audience__chips">
+                    {previewRecipients.map((recipient) => (
+                      <span key={recipient.id} className="notification-recipient-chip">
+                        {recipient.name}
+                        {recipient.email ? ` • ${recipient.email}` : ''}
+                      </span>
+                    ))}
+                    {effectivePreview.count > previewRecipients.length ? (
+                      <span className="notification-recipient-chip notification-recipient-chip--muted">
+                        +{effectivePreview.count - previewRecipients.length} người nữa
+                      </span>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="st-card__actions">

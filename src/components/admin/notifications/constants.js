@@ -6,6 +6,8 @@ export const INITIAL_FORM = {
   notificationType: 'system',
   severity: 'info',
   actionUrl: '',
+  version: 'v1.0',
+  showBugButton: true,
 }
 
 export const TARGET_OPTIONS = [
@@ -23,6 +25,11 @@ export const TARGET_OPTIONS = [
     value: 'specific_user',
     label: 'Một người dùng cụ thể',
     description: 'Tra cứu theo email hoặc UUID của người nhận.',
+  },
+  {
+    value: 'global',
+    label: 'Popup toàn hệ thống (Global)',
+    description: 'Bật thông báo nổi hoặc version notice ngoài website.',
   },
 ]
 
@@ -94,6 +101,7 @@ export function getTargetSummary(item) {
   if (item.targetType === 'all_active') return 'Tất cả người dùng active'
   if (item.targetType === 'role') return `Vai trò: ${item.targetValue || 'Chưa chọn'}`
   if (item.targetType === 'specific_user') return `Người dùng: ${item.targetValue || 'Chưa xác định'}`
+  if (item.targetType === 'global') return 'Popup toàn hệ thống (Global)'
   return item.targetType
 }
 

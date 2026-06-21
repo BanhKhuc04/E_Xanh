@@ -340,6 +340,28 @@ function PostDetailPage() {
     }
   }
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": isCommunity ? "DiscussionForumPosting" : "Article",
+    "headline": post.title,
+    "image": post.image || OG_IMAGE,
+    "datePublished": post.created_at,
+    "dateModified": post.updated_at || post.created_at,
+    "author": {
+      "@type": "Person",
+      "name": post.profiles?.name || "Thành viên E-XANH",
+      "url": `https://e-xanh.vercel.app/nguoi-dung/${post.author_id}`
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "E-XANH",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `https://e-xanh.vercel.app/logo.png`
+      }
+    }
+  }
+
   return (
     <div className="post-detail-page">
       <SEO 
@@ -347,6 +369,7 @@ function PostDetailPage() {
           description={post.description || post.content?.substring(0, 160)}
           image={post.image || OG_IMAGE}
           url={canonicalUrl}
+          schema={articleSchema}
         />
       <nav className="post-breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Trang chủ</Link>

@@ -160,7 +160,7 @@ function PublicProfilePage() {
         }
         setToast('Đã bỏ theo dõi')
       } else {
-        setToast(error?.message?.includes('does not exist') ? 'Tính năng đang bảo trì. Vui lòng chạy file SQL.' : 'Lỗi: ' + (error.message || 'Không thể hủy theo dõi'))
+        setToast(error.message || 'Không thể hủy theo dõi')
       }
     } else {
       // Follow
@@ -172,7 +172,7 @@ function PublicProfilePage() {
         }
         setToast('Đã theo dõi')
       } else {
-        setToast(error?.message?.includes('does not exist') ? 'Tính năng đang bảo trì. Vui lòng chạy file SQL.' : 'Lỗi: ' + (error.message || 'Không thể theo dõi'))
+        setToast(error.message || 'Không thể theo dõi')
       }
     }
     
