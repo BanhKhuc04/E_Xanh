@@ -3,11 +3,9 @@
 /* Font loaded via <link> in index.html for better performance */
 
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  color: #27500a;
-  background:
-    radial-gradient(circle at top left, rgba(234, 245, 157, 0.7), transparent 32%),
-    linear-gradient(180deg, #f9fceb 0%, #f4f8e7 100%);
+  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  color: var(--color-text);
+  background: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,15 +19,26 @@
   --color-primary-500: #336a29;
   --color-surface: #ffffff;
   --color-surface-soft: rgba(255, 255, 255, 0.76);
-  --color-background: #f7faef;
+  --color-background: #fbfdf9; /* Cleaner neutral off-white background */
   --color-text: #173715;
   --color-text-muted: rgba(23, 55, 21, 0.74);
+  
   --color-border: rgba(79, 132, 40, 0.16);
-  --shadow-soft: 0 18px 50px rgba(79, 132, 40, 0.12);
-  --shadow-card: 0 10px 28px rgba(79, 132, 40, 0.08);
+  --color-border-hover: rgba(79, 132, 40, 0.28);
+  --color-ring: rgba(79, 132, 40, 0.2);
+
+  --shadow-sm: 0 4px 12px rgba(79, 132, 40, 0.04);
+  --shadow-md: 0 10px 28px rgba(79, 132, 40, 0.08);
+  --shadow-lg: 0 18px 50px rgba(79, 132, 40, 0.12);
+  --shadow-soft: var(--shadow-lg);
+  --shadow-card: var(--shadow-md);
+  
   --radius-lg: 24px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+  
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
   --container-width: 1280px;
 }
 
@@ -94,6 +103,10 @@ button {
 
 .btn:hover {
   transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn--primary {
@@ -302,119 +315,7 @@ select:focus-visible {
   padding-top: 75%;
 }
 
-.community-layout,
-.community-feed,
-.community-sidebar,
-.post-card,
-.community-post-card,
-.tip-card,
-.admin-layout,
-.admin-main {
-  min-width: 0;
-}
 
-.post-title,
-.post-content,
-.comment-content,
-.community-post-card__title,
-.community-post-card__excerpt,
-.tip-card__title,
-.tip-card__excerpt {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-/* ─── Image utilities — chống CLS ────────────────────────────────────────── */
-.hero-img,
-.banner-img {
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  width: 100%;
-  height: auto;
-}
-
-.post-img,
-.community-img {
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  width: 100%;
-  height: auto;
-}
-
-.avatar-img {
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-/* Đảm bảo ảnh không overflow container */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-@media (max-width: 1023px) {
-  .page {
-    gap: 28px;
-  }
-}
-
-@media (max-width: 768px) {
-  .page {
-    gap: 24px;
-  }
-
-  .btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .shell,
-  .shell--wide {
-    width: min(calc(100% - 20px), var(--container-width));
-  }
-
-  .page-badge {
-    padding: 7px 12px;
-    font-size: 0.8rem;
-  }
-}
-
-/* ─── Accessibility: Focus styles ────────────────────────────────────────── */
-*:focus-visible {
-  outline: 2px solid #27500a;
-  outline-offset: 3px;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid #27500a;
-  outline-offset: 3px;
-}
-
-/* ─── Media Optimization & aspect ratio ──────────────────────────────────── */
-.media-ratio {
-  position: relative;
-  overflow: hidden;
-  background: #f8fafc;
-}
-
-.media-ratio::before {
-  content: "";
-  display: block;
-}
-
-.media-ratio--16-9::before {
-  padding-top: 56.25%;
-}
-
-.media-ratio--4-3::before {
-  padding-top: 75%;
-}
 
 .media-ratio--1-1::before {
   padding-top: 100%;

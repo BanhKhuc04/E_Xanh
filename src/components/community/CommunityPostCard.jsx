@@ -313,6 +313,7 @@ function CommunityPostCard({
                 alt={post.title}
                 className="community-post-card__image"
                 ratio="16/9"
+                objectFit="cover"
                 loading="eager"
                 fetchPriority="high"
               />

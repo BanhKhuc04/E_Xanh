@@ -106,6 +106,7 @@ function FeaturedPosts() {
                     title="Tính năng đang phát triển"
                     disabled
                     aria-disabled="true"
+                    style={{ cursor: 'not-allowed', opacity: 0.5 }}
                   >
                     <Bookmark size={18} strokeWidth={2.1} />
                   </button>

@@ -1,11 +1,6 @@
 import { logError } from '../utils/logger'
 import { supabase } from '../lib/supabase'
-import {
-  validateImageFile,
-  validateVideoFile,
-  createSafeFileName,
-  ALLOWED_PROFILE_IMAGE_TYPES,
-} from '../utils/fileValidation'
+
 import { uploadOptimizedImage, uploadOptimizedVideo } from './mediaUploadService'
 
 function getBannerFilePathFromUrl(fileUrl) {
@@ -40,41 +35,7 @@ function normalizeBannerRecords(records) {
   return Array.isArray(records) ? records.map(normalizeBannerRecord) : []
 }
 
-function getUploadErrorMessage(uploadError, kindLabel) {
-  let viMessage = `Upload ${kindLabel} thất bại, vui lòng thử lại.`
-  const msg = uploadError.message?.toLowerCase() || ''
 
-  if (msg.includes('bucket not found') || msg.includes('could not find bucket')) {
-    viMessage = 'Chưa tìm thấy bucket website-banners.'
-  } else if (msg.includes('violates row-level security') || msg.includes('unauthorized') || msg.includes('jwt') || msg.includes('forbidden')) {
-    viMessage = `Bạn không có quyền upload ${kindLabel}.`
-  }
-
-  return { message: viMessage, original: uploadError }
-}
-
-async function uploadBannerAsset(file, { folder, kindLabel, prefix, contentType }) {
-  const safeFileName = createSafeFileName(file, prefix)
-  const filePath = `${folder}/${safeFileName}`
-
-  const { error: uploadError } = await supabase.storage
-    .from('website-banners')
-    .upload(filePath, file, {
-      cacheControl: '31536000',
-      upsert: false,
-      contentType: contentType || file.type,
-    })
-
-  if (uploadError) {
-    return { error: getUploadErrorMessage(uploadError, kindLabel) }
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('website-banners')
-    .getPublicUrl(filePath)
-
-  return { publicUrl: publicUrlData.publicUrl, filePath }
-}
 
 export async function removeBannerStorageFiles(urls = []) {
   const filePaths = Array.from(

@@ -33,6 +33,9 @@ function PostManagementPage() {
   const [toast, setToast] = useState('')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [userRole, setUserRole] = useState(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const pageSize = 20
   const authorFilterId = searchParams.get('authorId') || ''
   const authorFilterName = searchParams.get('authorName') || ''
 
@@ -70,7 +73,16 @@ function PostManagementPage() {
          if (profile) setUserRole(profile.role)
       }
 
-      const { data, error } = await getAllAdminPosts()
+      const { data, count, totalPages: computedTotalPages, error } = await getAllAdminPosts({
+        page,
+        pageSize,
+        status,
+        search,
+        category,
+        dateRange,
+        authorFilterId
+      })
+      
       if (error) {
         console.error('Fetch posts error:', error)
         if (isMounted) {
@@ -96,7 +108,10 @@ function PostManagementPage() {
           likes: post.likes_count || 0,
           comments: post.comments_count || 0,
         }))
-        if (isMounted) setPosts(mapped)
+        if (isMounted) {
+          setPosts(mapped)
+          setTotalPages(computedTotalPages || 1)
+        }
       }
       if (isMounted) setIsLoading(false)
     }
@@ -104,42 +119,9 @@ function PostManagementPage() {
     fetchPostsData()
 
     return () => { isMounted = false }
-  }, [showToast, refreshTrigger])
+  }, [showToast, refreshTrigger, page, search, category, status, dateRange, authorFilterId])
 
-  const filteredPosts = posts.filter((post) => {
-    const matchAuthorId =
-      authorFilterId === '' || post.authorId === authorFilterId
-
-    const matchSearch =
-      search === '' ||
-      post.title.toLowerCase().includes(search.toLowerCase()) ||
-      post.author.toLowerCase().includes(search.toLowerCase())
-
-    const matchCategory =
-      category === 'Tất cả' || post.category === category
-
-    const matchStatus =
-      status === 'Tất cả' || post.status === statusLabelToKey[status]
-
-    let matchDate = true
-    if (dateRange !== 'Tất cả') {
-      const submitted = new Date(post.submittedAt)
-      const now = new Date()
-      if (dateRange === 'Hôm nay') {
-        matchDate = submitted.toDateString() === now.toDateString()
-      } else if (dateRange === '7 ngày qua') {
-        const weekAgo = new Date(now)
-        weekAgo.setDate(weekAgo.getDate() - 7)
-        matchDate = submitted >= weekAgo
-      } else if (dateRange === 'Tháng này') {
-        matchDate =
-          submitted.getMonth() === now.getMonth() &&
-          submitted.getFullYear() === now.getFullYear()
-      }
-    }
-
-    return matchAuthorId && matchSearch && matchCategory && matchStatus && matchDate
-  }).sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
+  // --- Chức năng lọc đã được chuyển xuống Backend DB ---
 
   const handleToggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -148,7 +130,7 @@ function PostManagementPage() {
   }
 
   const handleSelectAll = () => {
-    const allFilteredIds = filteredPosts.map((p) => p.id)
+    const allFilteredIds = posts.map((p) => p.id)
     const allSelected = allFilteredIds.every((id) => selectedIds.includes(id))
     if (allSelected) {
       setSelectedIds((prev) =>
@@ -184,22 +166,38 @@ function PostManagementPage() {
 
   const handleBulkApprove = async () => {
     if (!window.confirm(`Duyệt ${selectedIds.length} bài viết đã chọn?`)) return
-    setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'approved' } : p))
+    let successCount = 0
     for (const id of selectedIds) {
-      await updatePostStatus(id, 'approved')
+      const { error } = await updatePostStatus(id, 'approved')
+      if (!error) successCount++
+    }
+    
+    if (successCount < selectedIds.length) {
+      showToast(`Chỉ duyệt thành công ${successCount}/${selectedIds.length} bài. Vui lòng kiểm tra quyền.`)
+      setRefreshTrigger(prev => prev + 1)
+    } else {
+      setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'approved' } : p))
+      showToast('Đã duyệt các bài viết đã chọn.')
     }
     setSelectedIds([])
-    showToast('Đã duyệt các bài viết đã chọn.')
   }
 
   const handleBulkReject = async () => {
     if (!window.confirm(`Từ chối ${selectedIds.length} bài viết đã chọn?`)) return
-    setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'rejected' } : p))
+    let successCount = 0
     for (const id of selectedIds) {
-      await updatePostStatus(id, 'rejected')
+      const { error } = await updatePostStatus(id, 'rejected')
+      if (!error) successCount++
+    }
+    
+    if (successCount < selectedIds.length) {
+      showToast(`Chỉ từ chối thành công ${successCount}/${selectedIds.length} bài. Vui lòng kiểm tra quyền.`)
+      setRefreshTrigger(prev => prev + 1)
+    } else {
+      setPosts(prev => prev.map(p => selectedIds.includes(p.id) ? { ...p, status: 'rejected' } : p))
+      showToast('Đã từ chối các bài viết đã chọn.')
     }
     setSelectedIds([])
-    showToast('Đã từ chối các bài viết đã chọn.')
   }
 
   const handleReset = () => {
@@ -208,7 +206,13 @@ function PostManagementPage() {
     setStatus('Tất cả')
     setDateRange('Tất cả')
     setSelectedIds([])
+    setPage(1)
   }
+
+  // Effect to reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [search, category, status, dateRange, authorFilterId])
 
   // --- CRUD Handlers ---
   const handleOpenAdd = () => {
@@ -281,12 +285,13 @@ function PostManagementPage() {
   const handleDeletePost = async (id) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa bài viết này không?')) return
     
-    setPosts(prev => prev.filter(p => p.id !== id))
+    // Đợi DB xóa thành công trước, rồi mới xóa trên UI
     const { error } = await deletePost(id)
     if (error) {
       showToast('Lỗi xóa bài (có thể bạn không đủ quyền Admin): ' + error.message)
-      setRefreshTrigger(prev => prev + 1)
+      // Không cần refetch vì UI chưa bị xóa ảo
     } else {
+      setPosts(prev => prev.filter(p => p.id !== id))
       showToast('Đã xóa bài viết.')
       if (activePostId === id) setActivePostId(null)
     }
@@ -410,7 +415,7 @@ function PostManagementPage() {
 
           <section className="ap-page__workspace">
             <AdminPostList
-              posts={filteredPosts}
+              posts={posts}
               selectedIds={selectedIds}
               onToggleSelect={handleToggleSelect}
               onSelectAll={handleSelectAll}
@@ -425,6 +430,28 @@ function PostManagementPage() {
               currentUserRole={userRole}
             />
           </section>
+
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px', padding: '16px 0', borderTop: '1px solid #eee' }}>
+            <button 
+              className="btn btn--ghost" 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ddd' }}
+            >
+              &laquo; Trang trước
+            </button>
+            <span style={{ fontWeight: '600', fontSize: '15px' }}>
+              Trang {page} / {totalPages}
+            </span>
+            <button 
+              className="btn btn--ghost" 
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ddd' }}
+            >
+              Trang sau &raquo;
+            </button>
+          </div>
         </>
       )}
 

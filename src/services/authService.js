@@ -187,18 +187,44 @@ export async function signUpWithEmail({ name, email, password }) {
   // Actually, Supabase might require email confirmation, so session could be null.
   if (!error && data?.user) {
     // We can try to update profile if needed, but the trigger does it.
-    // Let's explicitly do an update just to be safe as requested.
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({ name })
-      .eq('id', data.user.id)
+    await syncUserProfile(data.user)
+  }
+}
+
+export async function syncUserProfile(user) {
+  if (!user) return { error: new Error('User required') }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role, status')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError && profileError.code !== 'PGRST116') {
+    return { error: profileError }
+  }
+
+  if (!profile) {
+    const email = user.email
+    let name = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0]
+    const avatar_url = user.user_metadata?.avatar_url || null
+
+    const { error: insertError } = await supabase.from('profiles').insert({
+      id: user.id,
+      email,
+      name,
+      avatar_url,
+      role: 'user',
+      status: 'active'
+    })
     
-    if (profileError) {
-      console.warn('[E-XANH] Lỗi cập nhật tên profile:', profileError.message)
+    if (insertError) {
+      logError('[E-XANH] Error creating profile:', insertError)
+      return { error: insertError }
     }
   }
 
-  return { data, error }
+  return { error: null }
 }
 
 export async function signInWithEmail({ email, password }) {
@@ -217,9 +243,32 @@ export async function signInWithGoogle() {
   })
 }
 
+export async function logAdminLogin(adminId, success) {
+  try {
+    const userAgent = navigator.userAgent;
+    let ipAddress = 'unknown';
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      ipAddress = data.ip;
+    } catch (e) {
+      // ignore
+    }
+    await supabase.from('admin_login_history').insert({
+      admin_id: adminId,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      success
+    });
+  } catch (err) {
+    console.error('Lỗi ghi log đăng nhập admin:', err);
+  }
+}
+
 export async function signOut() {
   return await supabase.auth.signOut()
 }
+
 
 export async function getCurrentSession() {
   const { data, error } = await supabase.auth.getSession()

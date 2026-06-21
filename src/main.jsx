@@ -19,12 +19,16 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 })
 
+import { AuthProvider } from './contexts/AuthContext'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HelmetProvider>
-      <RouterProvider router={router} />
-      <Analytics />
-      <SpeedInsights />
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <Analytics />
+        <SpeedInsights />
+      </AuthProvider>
     </HelmetProvider>
   </StrictMode>
 )

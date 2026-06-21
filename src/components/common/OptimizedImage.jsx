@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CameraOff } from 'lucide-react';
 import './OptimizedImage.css';
 
@@ -28,13 +28,12 @@ const OptimizedImage = ({
 
   const defaultSrc = variants?.detail || variants?.card || variants?.thumb || src;
 
-  useEffect(() => {
-    if (!defaultSrc) {
-      setStatus('empty');
-    } else {
-      setStatus('loading');
-    }
-  }, [defaultSrc]);
+  const [prevDefaultSrc, setPrevDefaultSrc] = useState(defaultSrc);
+
+  if (defaultSrc !== prevDefaultSrc) {
+    setPrevDefaultSrc(defaultSrc);
+    setStatus(!defaultSrc ? 'empty' : 'loading');
+  }
 
   const generateSrcSet = () => {
     if (!variants) return undefined;

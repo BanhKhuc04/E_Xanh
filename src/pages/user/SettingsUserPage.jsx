@@ -1,20 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
-import {
-  Bell,
-  Globe,
-  KeyRound,
-  Link2,
-  LockKeyhole,
-  LogOut,
-  MonitorSmartphone,
-  ShieldCheck,
-  SquareUserRound,
-  UserRound,
-} from 'lucide-react'
-import ProfileAvatarSettings from '../../components/account/ProfileAvatarSettings'
-import ProfileCoverSettings from '../../components/account/ProfileCoverSettings'
+import SEO from '../../components/SEO'
 import {
   getCurrentAuthUser,
   getCurrentSession,
@@ -30,153 +16,15 @@ import {
 } from '../../services/profileService'
 import '../../styles/account.css'
 
-const PROFILE_BIO_LIMIT = 180
+// Sub-components
+import SettingsSidebar from '../../components/account/settings/SettingsSidebar'
+import AccountSettingsSection from '../../components/account/settings/AccountSettingsSection'
+import SecuritySettingsSection from '../../components/account/settings/SecuritySettingsSection'
+import PrivacySettingsSection from '../../components/account/settings/PrivacySettingsSection'
+import NotificationSettingsSection from '../../components/account/settings/NotificationSettingsSection'
 
-const SECTION_ITEMS = [
-  {
-    id: 'account',
-    label: 'Tài khoản',
-    description: 'Thông tin cá nhân và hình ảnh hồ sơ',
-    icon: UserRound,
-  },
-  {
-    id: 'security',
-    label: 'Bảo mật',
-    description: 'Mật khẩu, phiên đăng nhập và an toàn tài khoản',
-    icon: LockKeyhole,
-  },
-  {
-    id: 'privacy',
-    label: 'Quyền riêng tư',
-    description: 'Kiểm soát hồ sơ công khai và nội dung hiển thị',
-    icon: ShieldCheck,
-  },
-  {
-    id: 'notifications',
-    label: 'Thông báo',
-    description: 'Điều hướng Notification Center nội bộ',
-    icon: Bell,
-  },
-]
-
-const PROFILE_VISIBILITY_OPTIONS = [
-  {
-    value: 'public',
-    label: 'Công khai',
-    description: 'Ai cũng có thể xem trang cá nhân công khai của bạn.',
-  },
-  {
-    value: 'authenticated',
-    label: 'Chỉ người đăng nhập',
-    description: 'Khách phải đăng nhập mới xem được hồ sơ.',
-  },
-  {
-    value: 'private',
-    label: 'Chỉ mình tôi',
-    description: 'Ẩn hồ sơ công khai với mọi người khác.',
-  },
-]
-
-const NOTIFICATION_SWITCHES = [
-  {
-    key: 'notify_system',
-    label: 'Thông báo hệ thống',
-    description: 'Các thông báo quan trọng từ quản trị viên và nền tảng.',
-    enabled: true,
-  },
-  {
-    key: 'notify_post_review',
-    label: 'Thông báo duyệt bài',
-    description: 'Tự động ẩn vì luồng duyệt bài chưa phát thông báo theo tùy chọn cá nhân.',
-    enabled: false,
-  },
-  {
-    key: 'notify_comment_moderation',
-    label: 'Thông báo bình luận',
-    description: 'Nhận cảnh báo khi bình luận bị nhắc nhở hoặc điều tiết.',
-    enabled: true,
-  },
-  {
-    key: 'notify_interactions',
-    label: 'Thông báo tương tác',
-    description: 'Đang chờ backend cho lượt theo dõi, trả lời và tương tác hồ sơ.',
-    enabled: false,
-  },
-]
-
-function getAvatarFallback(name, email) {
-  if (name) {
-    const parts = name.trim().split(/\s+/).filter(Boolean)
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-    if (parts.length > 1) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-  }
-  if (email) return email.split('@')[0].slice(0, 2).toUpperCase()
-  return 'EX'
-}
-
-function formatRoleLabel(role) {
-  if (role === 'admin') return 'Quản trị viên'
-  if (role === 'moderator') return 'Điều phối viên'
-  return 'Thành viên'
-}
-
-function validateFacebookUrl(value) {
-  if (!value.trim()) return ''
-
-  try {
-    const parsed = new URL(value.trim())
-    const allowedHosts = ['facebook.com', 'www.facebook.com', 'fb.com', 'www.fb.com']
-    if (parsed.protocol !== 'https:' || !allowedHosts.includes(parsed.hostname.toLowerCase())) {
-      return 'Liên kết Facebook phải bắt đầu bằng https://facebook.com/... hoặc https://fb.com/...'
-    }
-  } catch {
-    return 'Liên kết Facebook không đúng định dạng URL.'
-  }
-
-  return ''
-}
-
-function validateWebsiteUrl(value) {
-  if (!value.trim()) return ''
-
-  try {
-    const parsed = new URL(value.trim())
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      return 'Liên kết cá nhân phải bắt đầu bằng http:// hoặc https://'
-    }
-  } catch {
-    return 'Liên kết cá nhân không đúng định dạng URL.'
-  }
-
-  return ''
-}
-
-function ToggleRow({
-  label,
-  description,
-  checked,
-  disabled = false,
-  onChange,
-  badge = '',
-}) {
-  return (
-    <button
-      type="button"
-      className={`settings-switch-row${disabled ? ' is-disabled' : ''}`}
-      onClick={onChange}
-      disabled={disabled}
-    >
-      <div className="settings-switch-row__copy">
-        <strong>{label}</strong>
-        <span>{description}</span>
-      </div>
-      <div className="settings-switch-row__meta">
-        {badge ? <span className="settings-badge settings-badge--muted">{badge}</span> : null}
-        <span className={`account-toggle${checked ? ' is-on' : ''}`}></span>
-      </div>
-    </button>
-  )
-}
+import { getAvatarFallback, validateFacebookUrl, validateWebsiteUrl, formatRoleLabel } from '../../components/account/settings/utils'
+import { PROFILE_BIO_LIMIT } from '../../components/account/settings/constants'
 
 function SettingsUserPage() {
   const navigate = useNavigate()
@@ -484,14 +332,7 @@ function SettingsUserPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Cài đặt tài khoản - E-XANH</title>
-        <meta
-          name="description"
-          content="Quản lý thông tin cá nhân, ảnh đại diện, ảnh bìa, bảo mật và quyền riêng tư trên tài khoản E-XANH."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-      </Helmet>
+      <SEO title="Cài đặt tài khoản" noIndex={true} />
 
       <div className="account-page settings-page">
         <div className="account-page__breadcrumb">
@@ -515,7 +356,7 @@ function SettingsUserPage() {
           <div className="settings-hero__snapshot">
             <div className="settings-hero__avatar">
               {currentUser?.avatar_url ? (
-                <img src={currentUser.avatar_url} alt={`Ảnh đại diện của ${currentUser.name}`} />
+                <img src={currentUser.avatar_url} alt={`Ảnh đại diện của ${currentUser.name}`} loading="lazy" />
               ) : (
                 <span>{getAvatarFallback(currentUser?.name, currentUser?.email)}</span>
               )}
@@ -529,61 +370,13 @@ function SettingsUserPage() {
         </section>
 
         <div className="settings-layout">
-          <aside className="settings-sidebar">
-            <div className="settings-sidebar__profile">
-              <div className="settings-sidebar__profile-top">
-                <div className="settings-sidebar__mini-avatar">
-                  {currentUser?.avatar_url ? (
-                    <img src={currentUser.avatar_url} alt={`Avatar của ${currentUser.name}`} />
-                  ) : (
-                    <span>{getAvatarFallback(currentUser?.name, currentUser?.email)}</span>
-                  )}
-                </div>
-                <div>
-                  <strong>{currentUser?.name || 'Thành viên E-XANH'}</strong>
-                  <span>{currentUser?.email}</span>
-                </div>
-              </div>
-
-              <div className="settings-sidebar__meta">
-                <div>
-                  <span>Vai trò</span>
-                  <strong>{formatRoleLabel(currentUser?.role)}</strong>
-                </div>
-                <div>
-                  <span>Tham gia</span>
-                  <strong>{memberSince}</strong>
-                </div>
-              </div>
-            </div>
-
-            <nav className="settings-sidebar__nav" aria-label="Các mục cài đặt">
-              {SECTION_ITEMS.map((item) => {
-                const Icon = item.icon
-                const isActive = activeSection === item.id
-
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`settings-sidebar__nav-item${isActive ? ' is-active' : ''}`}
-                    onClick={() => setActiveSection(item.id)}
-                  >
-                    <Icon size={18} />
-                    <div>
-                      <strong>{item.label}</strong>
-                      <span>{item.description}</span>
-                    </div>
-                  </button>
-                )
-              })}
-            </nav>
-
-            <button type="button" className="settings-sidebar__logout" onClick={handleLogout}>
-              <LogOut size={16} />
-              Đăng xuất tài khoản
-            </button>
-          </aside>
+          <SettingsSidebar
+            currentUser={currentUser}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            handleLogout={handleLogout}
+            memberSince={memberSince}
+          />
 
           <div className="settings-content">
             {schemaNeedsMigration ? (
@@ -597,320 +390,43 @@ function SettingsUserPage() {
             ) : null}
 
             {activeSection === 'account' ? (
-              <>
-                <section className="settings-section-card">
-                  <div className="settings-section-card__header">
-                    <div>
-                      <span className="settings-section-card__eyebrow">Thông tin cá nhân</span>
-                      <h2>Những gì hiển thị công khai trên hồ sơ của bạn</h2>
-                    </div>
-                    <SquareUserRound size={22} />
-                  </div>
-
-                  <form className="settings-form" onSubmit={handleSaveProfile}>
-                    <div className="settings-form__grid">
-                      <label className="settings-field">
-                        <span>Tên hiển thị *</span>
-                        <input
-                          type="text"
-                          value={profileForm.name}
-                          onChange={(event) => handleProfileFieldChange('name', event.target.value)}
-                          placeholder="Nhập tên hiển thị của bạn"
-                        />
-                        {profileErrors.name ? <em>{profileErrors.name}</em> : null}
-                      </label>
-
-                      <label className="settings-field">
-                        <span>Liên kết Facebook</span>
-                        <input
-                          type="url"
-                          value={profileForm.facebook_url}
-                          onChange={(event) => handleProfileFieldChange('facebook_url', event.target.value)}
-                          placeholder="https://facebook.com/ten-ban"
-                        />
-                        {profileErrors.facebook_url ? <em>{profileErrors.facebook_url}</em> : null}
-                      </label>
-
-                      <label className="settings-field settings-field--full">
-                        <span>Tiểu sử</span>
-                        <textarea
-                          value={profileForm.bio}
-                          onChange={(event) => handleProfileFieldChange('bio', event.target.value)}
-                          placeholder="Viết vài dòng ngắn giới thiệu về bạn..."
-                        />
-                        <small>{profileForm.bio.trim().length}/{PROFILE_BIO_LIMIT} ký tự</small>
-                        {profileErrors.bio ? <em>{profileErrors.bio}</em> : null}
-                      </label>
-
-                      <label className="settings-field settings-field--full">
-                        <span>Liên kết cá nhân</span>
-                        <div className="settings-field__with-icon">
-                          <Link2 size={16} />
-                          <input
-                            type="url"
-                            value={profileForm.website_url}
-                            onChange={(event) => handleProfileFieldChange('website_url', event.target.value)}
-                            placeholder="https://portfolio-cua-ban.vn"
-                          />
-                        </div>
-                        {profileErrors.website_url ? <em>{profileErrors.website_url}</em> : null}
-                      </label>
-                    </div>
-
-                    <div className="settings-form__actions">
-                      <button type="submit" className="btn btn--primary" disabled={savingProfile}>
-                        {savingProfile ? 'Đang lưu...' : 'Lưu thông tin cá nhân'}
-                      </button>
-                    </div>
-                  </form>
-                </section>
-
-                <section className="settings-section-card">
-                  <div className="settings-section-card__header">
-                    <div>
-                      <span className="settings-section-card__eyebrow">Ảnh đại diện & ảnh bìa</span>
-                      <h2>Quản lý hình ảnh nhận diện trên hồ sơ</h2>
-                    </div>
-                    <MonitorSmartphone size={22} />
-                  </div>
-
-                  <div className="settings-media-grid">
-                    <ProfileAvatarSettings
-                      currentAvatarUrl={currentUser?.avatar_url || ''}
-                      displayName={currentUser?.name || ''}
-                      email={currentUser?.email || ''}
-                      onAvatarUpdated={(avatarUrl) => {
-                        setCurrentUser((current) => ({
-                          ...current,
-                          avatar_url: avatarUrl || '',
-                        }))
-                      }}
-                    />
-
-                    <ProfileCoverSettings
-                      currentCoverUrl={currentUser?.cover_url || ''}
-                      onCoverUpdated={(coverUrl) => {
-                        setCurrentUser((current) => ({
-                          ...current,
-                          cover_url: coverUrl || '',
-                        }))
-                      }}
-                    />
-                  </div>
-                </section>
-              </>
+              <AccountSettingsSection
+                profileForm={profileForm}
+                profileErrors={profileErrors}
+                handleProfileFieldChange={handleProfileFieldChange}
+                handleSaveProfile={handleSaveProfile}
+                savingProfile={savingProfile}
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
+              />
             ) : null}
 
             {activeSection === 'security' ? (
-              <div className="settings-stack">
-                <section className="settings-section-card">
-                  <div className="settings-section-card__header">
-                    <div>
-                      <span className="settings-section-card__eyebrow">Đổi mật khẩu</span>
-                      <h2>Bảo mật tài khoản</h2>
-                    </div>
-                    <KeyRound size={22} />
-                  </div>
-
-                  <div className="settings-security-card">
-                    <p className="settings-security-card__copy">
-                      Để bảo mật tài khoản, E-XANH sẽ gửi liên kết đặt lại mật khẩu về email của bạn.
-                    </p>
-
-                    <div className="settings-summary-list">
-                      <div>
-                        <span>Email nhận liên kết</span>
-                        <strong>{accountEmail || 'Chưa xác định'}</strong>
-                      </div>
-                    </div>
-
-                    <div className="settings-form__actions">
-                      <button
-                        type="button"
-                        className="btn btn--primary"
-                        disabled={sendingPasswordReset || passwordResetCooldown > 0}
-                        onClick={handleSendPasswordResetEmail}
-                      >
-                        {sendingPasswordReset
-                          ? 'Đang gửi email...'
-                          : passwordResetCooldown > 0
-                            ? `Gửi lại sau ${passwordResetCooldown}s`
-                            : 'Gửi email đổi mật khẩu'}
-                      </button>
-                    </div>
-                  </div>
-                </section>
-
-                <div className="settings-split">
-                  <section className="settings-section-card">
-                    <div className="settings-section-card__header">
-                      <div>
-                        <span className="settings-section-card__eyebrow">Phiên đăng nhập</span>
-                        <h2>Thông tin phiên hiện tại</h2>
-                      </div>
-                      <LockKeyhole size={22} />
-                    </div>
-
-                    <div className="settings-summary-list">
-                      <div>
-                        <span>Email đăng nhập</span>
-                        <strong>{accountEmail || currentUser?.email}</strong>
-                      </div>
-                      <div>
-                        <span>Vai trò</span>
-                        <strong>{formatRoleLabel(currentUser?.role)}</strong>
-                      </div>
-                      <div>
-                        <span>Trạng thái hồ sơ</span>
-                        <strong>{currentUser?.status === 'active' ? 'Đang hoạt động' : currentUser?.status}</strong>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="settings-section-card">
-                    <div className="settings-section-card__header">
-                      <div>
-                        <span className="settings-section-card__eyebrow">Tự động đăng xuất</span>
-                        <h2>Tính năng đang chờ hoàn thiện</h2>
-                      </div>
-                      <Globe size={22} />
-                    </div>
-
-                    <div className="settings-disabled-panel">
-                      <span className="settings-badge settings-badge--muted">Sắp ra mắt</span>
-                      <p>
-                        Hệ thống hiện chưa có luồng tự động đăng xuất cho tài khoản người dùng thường,
-                        nên mục này được khóa để tránh tạo cảm giác đã hoạt động.
-                      </p>
-                    </div>
-                  </section>
-                </div>
-              </div>
+              <SecuritySettingsSection
+                accountEmail={accountEmail}
+                currentUser={currentUser}
+                sendingPasswordReset={sendingPasswordReset}
+                passwordResetCooldown={passwordResetCooldown}
+                handleSendPasswordResetEmail={handleSendPasswordResetEmail}
+              />
             ) : null}
 
             {activeSection === 'privacy' ? (
-              <div className="settings-stack">
-                <section className="settings-section-card">
-                  <div className="settings-section-card__header">
-                    <div>
-                      <span className="settings-section-card__eyebrow">Ai có thể xem hồ sơ</span>
-                      <h2>Điều khiển mức độ hiển thị trang cá nhân</h2>
-                    </div>
-                    <ShieldCheck size={22} />
-                  </div>
-
-                  <div className="settings-radio-group">
-                    {PROFILE_VISIBILITY_OPTIONS.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        className={`settings-radio-card${privacyForm.profile_visibility === option.value ? ' is-active' : ''}`}
-                        onClick={() => setPrivacyForm((current) => ({
-                          ...current,
-                          profile_visibility: option.value,
-                        }))}
-                      >
-                        <strong>{option.label}</strong>
-                        <span>{option.description}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="settings-section-card">
-                  <div className="settings-section-card__header">
-                    <div>
-                      <span className="settings-section-card__eyebrow">Hiển thị công khai</span>
-                      <h2>Chọn nội dung an toàn sẽ hiện trên hồ sơ</h2>
-                    </div>
-                    <Globe size={22} />
-                  </div>
-
-                  <div className="settings-switch-list">
-                    <ToggleRow
-                      label="Hiển thị liên kết Facebook"
-                      description="Chỉ hiện link Facebook trên hồ sơ công khai khi bạn bật mục này."
-                      checked={privacyForm.show_facebook}
-                      onChange={() => setPrivacyForm((current) => ({
-                        ...current,
-                        show_facebook: !current.show_facebook,
-                      }))}
-                    />
-                    <ToggleRow
-                      label="Hiển thị bài viết công khai"
-                      description="Ẩn toàn bộ danh sách bài viết khỏi trang hồ sơ công khai nếu bạn muốn."
-                      checked={privacyForm.show_public_posts}
-                      onChange={() => setPrivacyForm((current) => ({
-                        ...current,
-                        show_public_posts: !current.show_public_posts,
-                      }))}
-                    />
-                    <ToggleRow
-                      label="Cho phép công cụ tìm kiếm lập chỉ mục"
-                      description="Nếu tắt, hồ sơ công khai sẽ trả về thẻ noindex để giảm khả năng bị lập chỉ mục."
-                      checked={privacyForm.allow_search_index}
-                      onChange={() => setPrivacyForm((current) => ({
-                        ...current,
-                        allow_search_index: !current.allow_search_index,
-                      }))}
-                    />
-                  </div>
-
-                  <div className="settings-form__actions">
-                    <button type="button" className="btn btn--primary" onClick={handleSavePrivacy} disabled={savingPrivacy}>
-                      {savingPrivacy ? 'Đang lưu...' : 'Lưu quyền riêng tư'}
-                    </button>
-                  </div>
-                </section>
-              </div>
+              <PrivacySettingsSection
+                privacyForm={privacyForm}
+                setPrivacyForm={setPrivacyForm}
+                handleSavePrivacy={handleSavePrivacy}
+                savingPrivacy={savingPrivacy}
+              />
             ) : null}
 
             {activeSection === 'notifications' ? (
-              <div className="settings-stack">
-                <section className="settings-section-card">
-                  <div className="settings-section-card__header">
-                    <div>
-                      <span className="settings-section-card__eyebrow">Notification Center nội bộ</span>
-                      <h2>Chỉ giữ lại các tùy chọn đã có backend thật</h2>
-                    </div>
-                    <Bell size={22} />
-                  </div>
-
-                  <div className="settings-switch-list">
-                    {NOTIFICATION_SWITCHES.map((item) => (
-                      <ToggleRow
-                        key={item.key}
-                        label={item.label}
-                        description={item.description}
-                        checked={Boolean(notificationForm[item.key])}
-                        disabled={!item.enabled}
-                        badge={item.enabled ? '' : 'Sắp ra mắt'}
-                        onChange={() => {
-                          if (!item.enabled) return
-                          setNotificationForm((current) => ({
-                            ...current,
-                            [item.key]: !current[item.key],
-                          }))
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="settings-callout">
-                    <strong>Những mục bị khóa sẽ không hiển thị toggle giả.</strong>
-                    <span>
-                      Hiện tại E-XANH mới có luồng notification nội bộ ổn định cho hệ thống và điều tiết bình luận.
-                      Các loại khác sẽ chỉ bật khi backend phát thông báo theo tùy chọn cá nhân đã hoàn thiện.
-                    </span>
-                  </div>
-
-                  <div className="settings-form__actions">
-                    <button type="button" className="btn btn--primary" onClick={handleSaveNotifications} disabled={savingNotifications}>
-                      {savingNotifications ? 'Đang lưu...' : 'Lưu cài đặt thông báo'}
-                    </button>
-                  </div>
-                </section>
-              </div>
+              <NotificationSettingsSection
+                notificationForm={notificationForm}
+                setNotificationForm={setNotificationForm}
+                handleSaveNotifications={handleSaveNotifications}
+                savingNotifications={savingNotifications}
+              />
             ) : null}
           </div>
         </div>

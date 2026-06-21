@@ -9,7 +9,7 @@ function NotFoundPage() {
         <span className="page-badge" style={{ marginTop: '16px' }}>404</span>
         <h1>Không tìm thấy trang</h1>
         <p>Đường dẫn bạn mở chưa được khai báo hoặc đang được đổi cấu trúc.</p>
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '24px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center', marginTop: '24px' }}>
           <Link className="btn btn--primary" to="/">
             Về trang chủ
           </Link>

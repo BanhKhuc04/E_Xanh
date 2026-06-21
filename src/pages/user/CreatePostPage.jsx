@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import CreatePostForm from '../../components/community/CreatePostForm'
 import PostLivePreview from '../../components/community/PostLivePreview'
 import { usePostComposerForm } from '../../hooks/usePostComposerForm'
+import PageLoader from '../../components/common/PageLoader'
 import '../../styles/create-post.css'
 
 function CreatePostPage() {
@@ -24,7 +25,13 @@ function CreatePostPage() {
   }, [composer.authLoading, composer.user, location.pathname, navigate])
 
   if (composer.authLoading) {
-    return <div className="create-post-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
+    return (
+      <div className="create-post-page">
+        <div className="shell">
+          <PageLoader />
+        </div>
+      </div>
+    )
   }
 
   if (!composer.user) {

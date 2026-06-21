@@ -1,15 +1,16 @@
 import { Link, useParams, useLocation } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { useEffect, useRef, useState } from 'react'
 import ArticleActions from '../../components/posts/ArticleActions'
 import ArticleContent from '../../components/posts/ArticleContent'
 import ArticleHeader from '../../components/posts/ArticleHeader'
 import CommentSection from '../../components/posts/CommentSection'
-import PostAuthorAvatar from '../../components/posts/PostAuthorAvatar'
 import PostCard from '../../components/posts/PostCard'
 import RelatedPosts from '../../components/posts/RelatedPosts'
 import AuthorSidebarCard from '../../components/posts/AuthorSidebarCard'
-import { getPostBySlug, getApprovedPosts } from '../../services/postService'
+import PromptModal from '../../components/common/PromptModal'
+import { getPostBySlug, getApprovedPosts, getTopCategories } from '../../services/postService'
+import PageLoader from '../../components/common/PageLoader'
 import '../../styles/post-detail.css'
 
 function PostDetailPage() {
@@ -19,8 +20,24 @@ function PostDetailPage() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [relatedPosts, setRelatedPosts] = useState([])
+  const [topCategories, setTopCategories] = useState([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
   const [toast, setToast] = useState('')
+  const [isPromptOpen, setIsPromptOpen] = useState(false)
+  const [promptData, setPromptData] = useState({ title: '', message: '', placeholder: '' })
   const commentsRef = useRef(null)
+
+  useEffect(() => {
+    async function loadCategories() {
+      setLoadingCategories(true)
+      const { data, error } = await getTopCategories(6)
+      if (!error && data) {
+        setTopCategories(data)
+      }
+      setLoadingCategories(false)
+    }
+    loadCategories()
+  }, [])
 
   useEffect(() => {
     async function loadPost() {
@@ -41,7 +58,9 @@ function PostDetailPage() {
           const { getCurrentSession } = await import('../../services/authService')
           const session = await getCurrentSession()
           if (session?.user) {
-            const { isPostLiked, isPostSaved, checkFollowStatus } = await import('../../services/interactionService')
+            const { isPostLiked, isPostSaved } = await import('../../services/interactionService')
+            const { isFollowing: checkFollowStatus } = await import('../../services/followService')
+
             const [likedRes, savedRes, followRes] = await Promise.all([
               isPostLiked(data.id),
               isPostSaved(data.id),
@@ -128,7 +147,9 @@ function PostDetailPage() {
             if (session?.user && session.user.id === data.author_id) {
               isCurrentUser = true
             }
-          } catch(e) {}
+          } catch {
+            // ignore error parsing context
+          }
           
           setPost(current => ({
             ...current,
@@ -150,7 +171,13 @@ function PostDetailPage() {
   }, [slug])
 
   if (loading) {
-    return <div className="post-detail-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
+    return (
+      <div className="post-detail-page">
+        <div className="shell">
+          <PageLoader />
+        </div>
+      </div>
+    )
   }
 
   if (!post) {
@@ -172,7 +199,7 @@ function PostDetailPage() {
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
     if (!session?.user) {
-      alert('Vui lòng đăng nhập để thích bài viết.')
+      showToast('Vui lòng đăng nhập để thích bài viết.')
       return
     }
     
@@ -200,7 +227,7 @@ function PostDetailPage() {
           likes: isCurrentlyLiked ? current.likes + 1 : Math.max(0, current.likes - 1),
         }
       })
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      showToast('Đã xảy ra lỗi, vui lòng thử lại sau.')
     }
   }
 
@@ -208,7 +235,7 @@ function PostDetailPage() {
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
     if (!session?.user) {
-      alert('Vui lòng đăng nhập để lưu bài viết.')
+      showToast('Vui lòng đăng nhập để lưu bài viết.')
       return
     }
 
@@ -236,7 +263,7 @@ function PostDetailPage() {
           savedCount: isCurrentlySaved ? current.savedCount + 1 : Math.max(0, current.savedCount - 1),
         }
       })
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      showToast('Đã xảy ra lỗi, vui lòng thử lại sau.')
     }
   }
 
@@ -245,12 +272,12 @@ function PostDetailPage() {
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
     if (!session?.user) {
-      alert('Vui lòng đăng nhập để theo dõi người dùng này.')
+      showToast('Vui lòng đăng nhập để theo dõi người dùng này.')
       return
     }
     
     if (session.user.id === post.author_id) {
-      alert('Bạn không thể tự theo dõi chính mình.')
+      showToast('Bạn không thể tự theo dõi chính mình.')
       return
     }
 
@@ -267,7 +294,7 @@ function PostDetailPage() {
       }
     })
 
-    const { followUser, unfollowUser } = await import('../../services/interactionService')
+    const { followUser, unfollowUser } = await import('../../services/followService')
     const { error } = isCurrentlyFollowing ? await unfollowUser(post.author_id) : await followUser(post.author_id)
 
     if (error) {
@@ -278,7 +305,7 @@ function PostDetailPage() {
           isFollowing: isCurrentlyFollowing,
         }
       })
-      alert('Đã xảy ra lỗi, vui lòng thử lại sau.')
+      showToast('Đã xảy ra lỗi, vui lòng thử lại sau.')
     }
     setActionLoading(false)
   }
@@ -315,20 +342,12 @@ function PostDetailPage() {
 
   return (
     <div className="post-detail-page">
-      <Helmet>
-        <title>{post.title ? `${post.title} — E-XANH` : 'Chi tiết bài viết — E-XANH'}</title>
-        <meta name="description" content={post.description || `Đọc bài viết "${post.title}" trên E-XANH — nền tảng hỗ trợ sinh viên sử dụng điện thông minh và tiết kiệm điện.`} />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={post.title ? `${post.title} — E-XANH` : 'E-XANH'} />
-        <meta property="og:description" content={post.description || 'Bài viết trên nền tảng E-XANH'} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={post.image || OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-        {post.image && <meta name="twitter:image" content={post.image} />}
-      </Helmet>
+      <SEO 
+          title={post.title}
+          description={post.description || post.content?.substring(0, 160)}
+          image={post.image || OG_IMAGE}
+          url={canonicalUrl}
+        />
       <nav className="post-breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>/</span>
@@ -348,19 +367,12 @@ function PostDetailPage() {
             onScrollToComments={handleScrollToComments}
             onShare={handleShare}
             onReport={async () => {
-              const reason = window.prompt('Nhập lý do báo cáo bài viết này:')
-              if (reason === null) return
-              if (!reason.trim()) {
-                alert('Vui lòng nhập lý do báo cáo.')
-                return
-              }
-              const { createReport } = await import('../../services/reportService')
-              const { error } = await createReport({ postId: post.id, reason: reason.trim() })
-              if (error) {
-                alert(error.message || 'Lỗi gửi báo cáo.')
-              } else {
-                alert('Báo cáo bài viết thành công.')
-              }
+              setPromptData({
+                title: 'Báo cáo bài viết',
+                message: 'Vui lòng cung cấp lý do báo cáo bài viết này để quản trị viên xem xét.',
+                placeholder: 'Ví dụ: Nội dung spam, sai sự thật...'
+              })
+              setIsPromptOpen(true)
             }}
           />
           <div ref={commentsRef}>
@@ -391,10 +403,55 @@ function PostDetailPage() {
             </section>
           )}
 
-          <section className="post-side-card">
-            <h2>Chủ đề nổi bật</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Đang cập nhật...</p>
-          </section>
+
+
+          {loadingCategories ? (
+            <section className="post-side-card">
+              <h2>Chủ đề nổi bật</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div className="skeleton" style={{ height: '36px', borderRadius: '8px' }}></div>
+                <div className="skeleton" style={{ height: '36px', borderRadius: '8px' }}></div>
+                <div className="skeleton" style={{ height: '36px', borderRadius: '8px' }}></div>
+              </div>
+            </section>
+          ) : topCategories.length > 0 ? (
+            <section className="post-side-card">
+              <h2>Chủ đề nổi bật</h2>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {topCategories.map(cat => (
+                  <li key={cat.id}>
+                    <Link 
+                      to={`/meo-tiet-kiem?category=${encodeURIComponent(cat.name)}`} 
+                      style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        color: 'var(--color-text)', 
+                        textDecoration: 'none',
+                        padding: '8px 12px',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: '8px',
+                        transition: 'background 0.2s',
+                        fontSize: '0.95rem'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-hover)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-bg-secondary)'}
+                    >
+                      <span style={{ fontWeight: 500 }}>{cat.name}</span>
+                      <span style={{ 
+                        background: 'var(--color-primary-light)', 
+                        color: 'var(--color-primary)', 
+                        padding: '2px 8px', 
+                        borderRadius: '12px', 
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold'
+                      }}>{cat.count}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <section className="post-side-card post-side-card--cta">
             <h2>Bạn có mẹo hay?</h2>
@@ -424,6 +481,28 @@ function PostDetailPage() {
           {toast}
         </div>
       ) : null}
+
+      <PromptModal
+        isOpen={isPromptOpen}
+        title={promptData.title}
+        message={promptData.message}
+        placeholder={promptData.placeholder}
+        onClose={() => setIsPromptOpen(false)}
+        onSubmit={async (reason) => {
+          setIsPromptOpen(false)
+          if (!reason.trim()) {
+            showToast('Vui lòng nhập lý do báo cáo.')
+            return
+          }
+          const { createReport } = await import('../../services/reportService')
+          const { error } = await createReport({ postId: post.id, reason: reason.trim() })
+          if (error) {
+            showToast(error.message || 'Lỗi gửi báo cáo.')
+          } else {
+            showToast('Báo cáo bài viết thành công.')
+          }
+        }}
+      />
     </div>
   )
 }

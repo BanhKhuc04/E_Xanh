@@ -189,15 +189,7 @@ function buildAvatarFallback(name, email) {
   return source.charAt(0).toUpperCase()
 }
 
-function buildCountMap(rows, key) {
-  return rows.reduce((accumulator, row) => {
-    const rowKey = row?.[key]
-    if (!rowKey) return accumulator
 
-    accumulator[rowKey] = (accumulator[rowKey] ?? 0) + 1
-    return accumulator
-  }, {})
-}
 
 function buildRecentActivityMap({ posts, comments, saves, electricityChecks }) {
   const events = new Map()
@@ -405,31 +397,60 @@ export async function getAdminUsers() {
   const userIds = profiles.map((profile) => profile.id)
   const canReadSavedPosts = await checkTableAvailability('saved_posts')
 
+  const postCountMap = {}
+  const commentCountMap = {}
+  const saveCountMap = {}
+  const electricityCountMap = {}
+
+  // Thực hiện truy vấn count tổng hợp bằng RPC
+  const { data: statsData, error: statsError } = await supabase.rpc('get_users_activity_stats', { uid_array: userIds })
+  let countPromises = []
+  
+  if (statsData && !statsError) {
+    statsData.forEach(stat => {
+      postCountMap[stat.user_id] = parseInt(stat.post_count, 10) || 0
+      commentCountMap[stat.user_id] = parseInt(stat.comment_count, 10) || 0
+      saveCountMap[stat.user_id] = parseInt(stat.saved_post_count, 10) || 0
+      electricityCountMap[stat.user_id] = parseInt(stat.electricity_check_count, 10) || 0
+    })
+  } else {
+    // Fallback nếu chưa chạy migration RPC
+    countPromises = userIds.map(async (uid) => {
+      const [
+        { count: pCount },
+        { count: cCount },
+        { count: sCount },
+        { count: eCount }
+      ] = await Promise.all([
+        supabase.from('posts').select('*', { count: 'exact', head: true }).eq('author_id', uid),
+        supabase.from('comments').select('*', { count: 'exact', head: true }).eq('user_id', uid),
+        canReadSavedPosts ? supabase.from('saved_posts').select('*', { count: 'exact', head: true }).eq('user_id', uid) : Promise.resolve({ count: 0 }),
+        supabase.from('electricity_checks').select('*', { count: 'exact', head: true }).eq('user_id', uid)
+      ])
+      postCountMap[uid] = pCount || 0
+      commentCountMap[uid] = cCount || 0
+      saveCountMap[uid] = sCount || 0
+      electricityCountMap[uid] = eCount || 0
+    })
+  }
+
+  // Fetch giới hạn hoạt động gần đây để không tải quá nhiều dữ liệu
+  const recentPromises = [
+    supabase.from('posts').select('id, author_id, title, created_at, status').in('author_id', userIds).order('created_at', { ascending: false }).limit(200),
+    supabase.from('comments').select('id, user_id, content, created_at, status').in('user_id', userIds).order('created_at', { ascending: false }).limit(200),
+    canReadSavedPosts
+      ? supabase.from('saved_posts').select('user_id, created_at, posts(title)').in('user_id', userIds).order('created_at', { ascending: false }).limit(200)
+      : Promise.resolve({ data: [], error: null }),
+    supabase.from('electricity_checks').select('id, user_id, checked_at').in('user_id', userIds).order('checked_at', { ascending: false }).limit(200)
+  ]
+
+  await Promise.all(countPromises)
   const [
     postsResult,
     commentsResult,
     savedPostsResult,
     electricityChecksResult,
-  ] = await Promise.all([
-    supabase
-      .from('posts')
-      .select('id, author_id, title, created_at, status')
-      .in('author_id', userIds),
-    supabase
-      .from('comments')
-      .select('id, user_id, content, created_at, status')
-      .in('user_id', userIds),
-    canReadSavedPosts
-      ? supabase
-          .from('saved_posts')
-          .select('user_id, created_at, posts(title)')
-          .in('user_id', userIds)
-      : Promise.resolve({ data: [], error: null }),
-    supabase
-      .from('electricity_checks')
-      .select('id, user_id, checked_at')
-      .in('user_id', userIds),
-  ])
+  ] = await Promise.all(recentPromises)
 
   if (postsResult.error) {
     logWarn('[AdminUsers] Lỗi lấy posts count', postsResult.error)
@@ -458,10 +479,6 @@ export async function getAdminUsers() {
   const savedPosts = savedPostsResult.data ?? []
   const electricityChecks = electricityChecksResult.data ?? []
 
-  const postCountMap = buildCountMap(posts, 'author_id')
-  const commentCountMap = buildCountMap(comments, 'user_id')
-  const saveCountMap = buildCountMap(savedPosts, 'user_id')
-  const electricityCountMap = buildCountMap(electricityChecks, 'user_id')
   const recentActivityMap = buildRecentActivityMap({
     posts,
     comments,

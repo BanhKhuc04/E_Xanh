@@ -63,8 +63,8 @@ function PreviewAuthorAvatar({ src, name }) {
       src={normalizedSrc}
       alt={name}
       className="community-post-card__avatar-img"
-      loading="lazy"
       onError={() => setFailed(true)}
+      loading="lazy"
     />
   )
 }
@@ -191,17 +191,17 @@ function CommunityPreview() {
                           </div>
 
                           <div className="post-actions">
-                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
+                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" title="Đi tới bài viết để Thích" style={{ textDecoration: 'none' }}>
                               <Heart size={18} strokeWidth={2.2} />
                               <span>Thích</span>
                             </Link>
 
-                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
+                            <Link to={`/cong-dong/${post.id}#comments`} className="post-action-btn" title="Đi tới bài viết để Bình luận" style={{ textDecoration: 'none' }}>
                               <MessageCircle size={18} strokeWidth={2.2} />
                               <span>Bình luận</span>
                             </Link>
 
-                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" style={{ textDecoration: 'none' }}>
+                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" title="Đi tới bài viết để Lưu bài" style={{ textDecoration: 'none' }}>
                               <Bookmark size={18} strokeWidth={2.2} />
                               <span>Lưu bài</span>
                             </Link>

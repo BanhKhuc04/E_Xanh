@@ -1,0 +1,11 @@
+- `[x]` 1. Vá lỗi N+1 Query (Performance & Rate Limit)
+  - `[x]` Tạo migration function RPC `get_users_activity_stats`
+  - `[x]` Cập nhật `src/services/adminUserService.js` gọi `rpc` thay vì `.map()` Promise.all
+- `[x]` 2. Tích hợp Toast thay cho Alert
+  - `[x]` Sửa `PostCard.jsx`
+- `[x]` 3. Hoàn thiện Giao diện (Xóa Placeholders)
+  - `[x]` Sinh ảnh vector cho Auth pages (`ForgotPasswordPage`, `ResetPasswordPage`)
+  - `[x]` Xóa text lỗi fallback giả trong `ContactPage.jsx`
+- `[x]` 4. Lazy-load Images
+  - `[x]` Quét file JSX chứa `<img`
+  - `[x]` Bổ sung `loading="lazy"` cho ảnh (trừ thẻ nằm trên vùng màn hình đầu tiên)

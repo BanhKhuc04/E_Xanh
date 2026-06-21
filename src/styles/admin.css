@@ -103,13 +103,24 @@
 }
 
 .admin-topbar__search input {
-  padding: 15px 18px 15px 50px;
+  width: 100%;
+  padding: 14px 18px 14px 44px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   color: var(--color-text);
-  background: linear-gradient(180deg, rgba(193, 217, 92, 0.52), rgba(193, 217, 92, 0.34));
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.admin-topbar__search input:focus {
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-ring);
 }
 
 .admin-topbar__search input::placeholder {
-  color: rgba(23, 55, 21, 0.62);
+  color: rgba(23, 55, 21, 0.4);
 }
 
 .admin-topbar__search-icon {
@@ -870,5 +881,19 @@
   .admin-quick-card {
     padding: 18px;
     border-radius: 22px;
+  }
+}
+
+/* Bảng admin responsive/scrollable trên mobile */
+@media (max-width: 768px) {
+  .au-list, .ad-list, .ap-list, .ac-list {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .au-list__header, .au-list__items, 
+  .ad-list__header, .ad-list__items, 
+  .ap-list__header, .ap-list__items, 
+  .ac-list__header, .ac-list__items {
+    min-width: 800px;
   }
 }

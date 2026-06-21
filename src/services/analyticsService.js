@@ -41,26 +41,32 @@ export async function getAdminStats(range = '30 ngày qua') {
 
   // Posts
   try {
-    let query = supabase.from('posts').select('status, created_at')
-    if (startDate) query = query.gte('created_at', startDate)
-    const { data } = await query
-    if (data) {
-      result.totalPosts = data.length
-      result.approvedPosts = data.filter(p => p.status === 'approved').length
-      result.pendingPosts = data.filter(p => p.status === 'pending').length
-      result.rejectedHiddenPosts = data.filter(p => ['rejected', 'hidden', 'blocked'].includes(p.status)).length
-    }
+    const { count: cTotalPosts } = await supabase.from('posts').select('*', { count: 'exact', head: true }).gte('created_at', startDate || '2000-01-01')
+    if (cTotalPosts !== null) result.totalPosts = cTotalPosts
+
+    const { count: cApproved } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'approved').gte('created_at', startDate || '2000-01-01')
+    if (cApproved !== null) result.approvedPosts = cApproved
+
+    const { count: cPending } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'pending').gte('created_at', startDate || '2000-01-01')
+    if (cPending !== null) result.pendingPosts = cPending
+
+    const { count: cRejected } = await supabase.from('posts').select('*', { count: 'exact', head: true }).in('status', ['rejected', 'hidden', 'blocked']).gte('created_at', startDate || '2000-01-01')
+    if (cRejected !== null) result.rejectedHiddenPosts = cRejected
   } catch { /* ignore */ }
 
   // Users
   try {
-    const { data } = await supabase.from('profiles').select('status, created_at')
-    if (data) {
-      result.totalUsers = data.length // always total
-      result.activeUsers = data.filter(u => u.status === 'active').length
-      result.lockedUsers = data.filter(u => ['locked', 'blocked'].includes(u.status)).length
-      result.deletedUsers = data.filter(u => u.status === 'deleted').length
-    }
+    const { count: cTotalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', startDate || '2000-01-01')
+    if (cTotalUsers !== null) result.totalUsers = cTotalUsers // always total for the range
+
+    const { count: cActive } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', startDate || '2000-01-01')
+    if (cActive !== null) result.activeUsers = cActive
+
+    const { count: cLocked } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).in('status', ['locked', 'blocked']).gte('created_at', startDate || '2000-01-01')
+    if (cLocked !== null) result.lockedUsers = cLocked
+
+    const { count: cDeleted } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('status', 'deleted').gte('created_at', startDate || '2000-01-01')
+    if (cDeleted !== null) result.deletedUsers = cDeleted
   } catch { /* ignore */ }
 
   // Saved Posts
@@ -73,13 +79,11 @@ export async function getAdminStats(range = '30 ngày qua') {
 
   // Comments
   try {
-    let query = supabase.from('comments').select('status, created_at')
-    if (startDate) query = query.gte('created_at', startDate)
-    const { data } = await query
-    if (data) {
-      result.totalComments = data.length
-      result.hiddenSpamComments = data.filter(c => ['hidden', 'spam', 'deleted'].includes(c.status)).length
-    }
+    const { count: cTotalComments } = await supabase.from('comments').select('*', { count: 'exact', head: true }).gte('created_at', startDate || '2000-01-01')
+    if (cTotalComments !== null) result.totalComments = cTotalComments
+
+    const { count: cHidden } = await supabase.from('comments').select('*', { count: 'exact', head: true }).in('status', ['hidden', 'spam', 'deleted']).gte('created_at', startDate || '2000-01-01')
+    if (cHidden !== null) result.hiddenSpamComments = cHidden
   } catch { /* ignore */ }
 
   // Devices
@@ -133,113 +137,39 @@ export async function getAdminStats(range = '30 ngày qua') {
   return result
 }
 
-export async function getTrendData(table, dateField, range = '30 ngày qua') {
-  const startDate = getDateRange(range)
+export async function getActivityTrend(range = '30 ngày qua') {
   const days = range === 'Hôm nay' ? 1 : range === '7 ngày qua' ? 7 : 30
-
   try {
-    let query = supabase.from(table).select(dateField)
-    if (startDate) query = query.gte(dateField, startDate)
-    query = query.order(dateField, { ascending: true })
-
-    const { data } = await query
-    if (!data || data.length === 0) return []
-
-    // Group by day
-    const grouped = {}
-    const now = new Date()
-
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(now)
-      d.setDate(d.getDate() - i)
-      const key = d.toISOString().split('T')[0]
-      grouped[key] = 0
-    }
-
-    data.forEach(row => {
-      const date = new Date(row[dateField])
-      const key = date.toISOString().split('T')[0]
-      if (grouped[key] !== undefined) {
-        grouped[key]++
-      }
-    })
-
-    return Object.entries(grouped).map(([date, count]) => ({
-      date,
-      label: new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
-      count,
+    const { data, error } = await supabase.rpc('get_activity_trend', { days_count: days })
+    if (error) throw error
+    return data.sort((a, b) => new Date(a.date) - new Date(b.date)).map(item => ({
+      day: item.label,
+      posts: parseInt(item.posts || 0),
+      comments: parseInt(item.comments || 0),
+      saves: parseInt(item.saves || 0),
+      checks: parseInt(item.checks || 0),
     }))
-  } catch {
+  } catch (err) {
+    console.error('[Analytics] Lỗi khi lấy activity trend bằng RPC:', err)
     return []
   }
-}
-
-export async function getPostTrend(range) {
-  return getTrendData('posts', 'created_at', range)
-}
-
-export async function getUserTrend(range) {
-  return getTrendData('profiles', 'created_at', range)
-}
-
-export async function getCommentTrend(range) {
-  return getTrendData('comments', 'created_at', range)
-}
-
-export async function getSavedPostTrend(range) {
-  return getTrendData('saved_posts', 'created_at', range)
-}
-
-export async function getActivityTrend(range = '30 ngày qua') {
-  const [posts, comments, saves, checks] = await Promise.all([
-    getPostTrend(range),
-    getCommentTrend(range),
-    getSavedPostTrend(range),
-    getTrendData('electricity_checks', 'checked_at', range),
-  ])
-
-  const byDate = new Map()
-  ;[posts, comments, saves, checks].forEach((items, index) => {
-    items.forEach((item) => {
-      const current = byDate.get(item.date) ?? {
-        day: item.label,
-        posts: 0,
-        comments: 0,
-        saves: 0,
-        checks: 0,
-      }
-      if (index === 0) current.posts = item.count
-      if (index === 1) current.comments = item.count
-      if (index === 2) current.saves = item.count
-      if (index === 3) current.checks = item.count
-      byDate.set(item.date, current)
-    })
-  })
-
-  return Array.from(byDate.entries())
-    .sort(([left], [right]) => new Date(left) - new Date(right))
-    .map(([, value]) => value)
 }
 
 export async function getContentTypeBreakdown(range = '30 ngày qua') {
   const startDate = getDateRange(range)
 
   try {
-    let query = supabase.from('posts').select('type, created_at')
-    if (startDate) query = query.gte('created_at', startDate)
-    const { data } = await query
-    const counts = {
-      tip: 0,
-      community: 0,
-      review: 0,
-      qa: 0,
-    }
-
-    ;(data ?? []).forEach((item) => {
-      if (counts[item.type] !== undefined) {
-        counts[item.type] += 1
-      }
+    const types = ['tip', 'community', 'review', 'qa']
+    const counts = { tip: 0, community: 0, review: 0, qa: 0 }
+    const promises = types.map((type) => {
+      let query = supabase.from('posts').select('*', { count: 'exact', head: true }).eq('type', type)
+      if (startDate) query = query.gte('created_at', startDate)
+      return query.then(({ count }) => {
+        counts[type] = count || 0
+      })
     })
+
+    await Promise.all(promises)
 
     const total = Object.values(counts).reduce((sum, value) => sum + value, 0)
     const toPercent = (value) => (total > 0 ? Math.round((value / total) * 100) : 0)
@@ -274,25 +204,15 @@ export async function getTopSavedPosts(limit = 5) {
 
 export async function getTopDevices(limit = 5) {
   try {
-    const { data } = await supabase
-      .from('electricity_check_items')
-      .select('device_name')
-
-    const counts = new Map()
-    ;(data ?? []).forEach((item) => {
-      const name = item.device_name || 'Thiết bị khác'
-      counts.set(name, (counts.get(name) ?? 0) + 1)
-    })
-
-    return Array.from(counts.entries())
-      .sort((left, right) => right[1] - left[1])
-      .slice(0, limit)
-      .map(([name, count], index) => ({
-        name,
-        count,
-        icon: ['⚡', '💻', '💡', '🧊', '🧺'][index] || '⚙️',
-      }))
-  } catch {
+    const { data, error } = await supabase.rpc('get_top_devices', { limit_count: limit })
+    if (error) throw error
+    return (data ?? []).map((item, index) => ({
+      name: item.name,
+      count: parseInt(item.count || 0),
+      icon: ['⚡', '💻', '💡', '🧊', '🧺'][index] || '⚙️',
+    }))
+  } catch (err) {
+    console.error('[Analytics] Lỗi khi lấy top devices bằng RPC:', err)
     return []
   }
 }

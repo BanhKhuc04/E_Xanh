@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
@@ -61,38 +61,48 @@ function TipsPage() {
   const [dbPosts, setDbPosts] = useState([])
   const [categories, setCategories] = useState(PREDEFINED_CATEGORIES)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
+  const [page, setPage] = useState(1)
+  const [hasMorePosts, setHasMorePosts] = useState(false)
   const location = useLocation()
-  const canonicalUrl = `https://e-xanh.vercel.app${location.pathname}`
-
-  // If query params are present for category (e.g., from PostDetailPage)
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const cat = params.get('category')
+  
+  const params = new URLSearchParams(location.search)
+  const cat = params.get('category')
+  const [prevCat, setPrevCat] = useState(cat)
+  if (cat !== prevCat) {
+    setPrevCat(cat)
     if (cat && categories.includes(cat)) {
       setSelectedCategory(cat)
     }
-  }, [location.search, categories])
+  }
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchValue, selectedCategory, sortValue])
+  const [prevFilters, setPrevFilters] = useState({ searchValue, selectedCategory })
+  if (
+    searchValue !== prevFilters.searchValue || 
+    selectedCategory !== prevFilters.selectedCategory
+  ) {
+    setPrevFilters({ searchValue, selectedCategory })
+    setPage(1)
+    setDbPosts([]) // Xóa post cũ khi đổi filter
+  }
+
+  const canonicalUrl = `https://e-xanh.vercel.app${location.pathname}`
 
   useEffect(() => {
     let isMounted = true
 
     async function loadData() {
       if (isMounted) {
-        setIsLoading(true)
+        if (page === 1) setIsLoading(true)
+        else setIsLoadingMore(true)
         setErrorMsg('')
       }
 
       try {
         const [postsRes, catsRes] = await Promise.all([
-          getTipPosts(),
-          getCategories(),
+          getTipPosts({ page, limit: POSTS_PER_PAGE, category: selectedCategory, search: searchValue }),
+          page === 1 ? getCategories() : Promise.resolve({ data: null, error: null }),
         ])
 
         if (postsRes.error) {
@@ -128,7 +138,12 @@ function TipsPage() {
               readTime: post.read_time || '3 phút',
               date: post.created_at ? new Date(post.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             }))
-            setDbPosts(mapped)
+            if (page === 1) {
+              setDbPosts(mapped)
+            } else {
+              setDbPosts(prev => [...prev, ...mapped])
+            }
+            setHasMorePosts(postsRes.hasMore)
           }
         }
       } catch (err) {
@@ -141,6 +156,7 @@ function TipsPage() {
       } finally {
         if (isMounted) {
           setIsLoading(false)
+          setIsLoadingMore(false)
         }
       }
     }
@@ -148,32 +164,11 @@ function TipsPage() {
     loadData()
 
     return () => { isMounted = false }
-  }, []) // Remove location.key from dependency array to prevent double fetching
+  }, [page, selectedCategory, searchValue])
 
-  const visiblePosts = sortPosts(
-    dbPosts.filter((post) => {
-      const matchesCategory =
-        selectedCategory === 'Tất cả' || post.category === selectedCategory
-      const keyword = searchValue.trim().toLowerCase()
-      const matchesSearch =
-        keyword.length === 0 ||
-        post.title.toLowerCase().includes(keyword) ||
-        post.description.toLowerCase().includes(keyword) ||
-        post.category.toLowerCase().includes(keyword)
+  const visiblePosts = sortPosts(dbPosts, sortValue, searchValue)
+  const suggestedPosts = [] // No longer statically suggested here
 
-      return matchesCategory && matchesSearch && post.status === 'published'
-    }),
-    sortValue,
-    searchValue
-  )
-
-  const totalPages = Math.ceil(visiblePosts.length / POSTS_PER_PAGE)
-  const paginatedPosts = visiblePosts.slice(
-    (currentPage - 1) * POSTS_PER_PAGE,
-    currentPage * POSTS_PER_PAGE
-  )
-
-  const suggestedPosts = dbPosts.slice(0, 3) // Latest 3 posts
 
   const handleClearFilter = () => {
     setSelectedCategory('Tất cả')
@@ -195,22 +190,7 @@ function TipsPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Mẹo tiết kiệm - E-XANH</title>
-        <meta
-          name="description"
-          content="Tổng hợp mẹo tiết kiệm điện dễ áp dụng cho sinh viên, phòng trọ và ký túc xá."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Mẹo tiết kiệm điện - E-XANH" />
-        <meta
-          property="og:description"
-          content="Khám phá các mẹo dùng điện thông minh, tiết kiệm chi phí và sống xanh hơn mỗi ngày."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content="https://e-xanh.vercel.app/og-image-v2.png" />
-      </Helmet>
+      <SEO title="Mẹo tiết kiệm" description="Tổng hợp mẹo tiết kiệm điện dễ áp dụng cho sinh viên, phòng trọ và ký túc xá." url={canonicalUrl} />
       
       <div className="tips-page">
         <PageHero
@@ -278,39 +258,19 @@ function TipsPage() {
           {!errorMsg && visiblePosts.length > 0 ? (
             <>
               <div className="tips-posts-grid">
-                {paginatedPosts.map((post) => (
+                {visiblePosts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))}
               </div>
 
-              {totalPages > 1 && (
-                <div className="tips-pagination">
+              {hasMorePosts && (
+                <div className="tips-pagination" style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
                   <button 
-                    className="tips-pagination__btn" 
-                    onClick={() => handlePageChange(currentPage - 1)} 
-                    disabled={currentPage === 1}
+                    className="btn btn--primary" 
+                    onClick={() => setPage(p => p + 1)} 
+                    disabled={isLoadingMore}
                   >
-                    <ChevronLeft size={16} /> Trước
-                  </button>
-                  
-                  <div className="tips-pagination__numbers">
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                      <button
-                        key={i}
-                        className={`tips-pagination__number ${currentPage === i + 1 ? 'is-active' : ''}`}
-                        onClick={() => handlePageChange(i + 1)}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button 
-                    className="tips-pagination__btn" 
-                    onClick={() => handlePageChange(currentPage + 1)} 
-                    disabled={currentPage === totalPages}
-                  >
-                    Sau <ChevronRight size={16} />
+                    {isLoadingMore ? 'Đang tải...' : 'Tải thêm'}
                   </button>
                 </div>
               )}

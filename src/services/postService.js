@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { logAdminAction } from './adminLogService'
 import { createNotificationForUser } from './notificationService'
 import { normalizeAvatarUrl } from '../utils/avatar'
-import { validateImageFile, createSafeFileName } from '../utils/fileValidation'
+
 import { uploadOptimizedImage } from './mediaUploadService'
 import { extractPlainTextFromBlocks } from '../utils/postBlocks'
 
@@ -163,16 +163,76 @@ export async function createPost(postData) {
   return { data, error }
 }
 
-export async function getAllAdminPosts() {
-  const { data, error } = await supabase
+export async function getAllAdminPosts({
+  page = 1,
+  pageSize = 20,
+  status = 'Tất cả',
+  search = '',
+  category = 'Tất cả',
+  dateRange = 'Tất cả',
+  authorFilterId = ''
+} = {}) {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  let query = supabase
     .from('posts')
     .select(`
       *,
       profiles:author_id (name)
-    `)
-    .order('created_at', { ascending: false })
+    `, { count: 'exact' })
 
-  return { data, error }
+  // Map status string to DB enum value
+  const statusLabelToKey = {
+    'Chờ duyệt': 'pending',
+    'Đã duyệt': 'approved',
+    'Bị từ chối': 'rejected',
+    'Đã khóa': 'blocked',
+  }
+  const statusKey = statusLabelToKey[status]
+  if (statusKey) {
+    query = query.eq('status', statusKey)
+  }
+
+  // category maps to type
+  if (category === 'Mẹo tiết kiệm') query = query.eq('type', 'tip')
+  else if (category === 'Cộng đồng') query = query.eq('type', 'community')
+
+  if (authorFilterId) {
+    query = query.eq('author_id', authorFilterId)
+  }
+
+  if (search) {
+    query = query.ilike('title', `%${search}%`)
+  }
+
+  if (dateRange !== 'Tất cả') {
+    const now = new Date()
+    if (dateRange === 'Hôm nay') {
+      const today = new Date(now.setHours(0,0,0,0)).toISOString()
+      query = query.gte('created_at', today)
+    } else if (dateRange === '7 ngày qua') {
+      const weekAgo = new Date(now)
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      query = query.gte('created_at', weekAgo.toISOString())
+    } else if (dateRange === 'Tháng này') {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      query = query.gte('created_at', firstDay)
+    }
+  }
+
+  query = query.order('created_at', { ascending: false }).range(from, to)
+
+  const { data, count, error } = await query
+  
+  return { 
+    data, 
+    count, 
+    page, 
+    pageSize, 
+    totalPages: Math.ceil((count || 0) / pageSize), 
+    error 
+  }
 }
 
 export async function getPendingPosts() {
@@ -181,6 +241,7 @@ export async function getPendingPosts() {
     .select(`*, profiles:author_id (name)`)
     .eq('status', 'pending')
     .order('created_at', { ascending: false })
+    .limit(100)
 
   return { data, error }
 }
@@ -191,6 +252,7 @@ export async function getApprovedPosts() {
     .select('*')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
+    .limit(100)
 
   if (error || !data) {
     return { data, error }
@@ -200,20 +262,77 @@ export async function getApprovedPosts() {
   return { data: hydratedPosts, error: null }
 }
 
-export async function getTipPosts() {
-  const { data, error } = await supabase
+export async function getTipPosts({ page = 1, limit = 10, category = '', search = '' } = {}) {
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  let selectStr = '*, categories:category_id (id, name, slug)'
+  
+  if (category && category !== 'Tất cả') {
+    selectStr = '*, categories!inner (id, name, slug)'
+  }
+
+  let query = supabase
     .from('posts')
-    .select('*, categories:category_id (id, name, slug)')
+    .select(selectStr, { count: 'exact' })
     .eq('status', 'approved')
     .eq('type', 'tip')
-    .order('created_at', { ascending: false })
+
+  if (category && category !== 'Tất cả') {
+    query = query.eq('categories.name', category)
+  }
+
+  if (search) {
+    query = query.ilike('title', `%${search}%`)
+  }
+
+  query = query.order('created_at', { ascending: false }).range(from, to)
+
+  const { data, count, error } = await query
 
   if (error || !data) {
-    return { data, error }
+    return { data: [], hasMore: false, error }
   }
 
   const hydratedPosts = await attachPublicProfilesToPosts(data)
-  return { data: hydratedPosts, error: null }
+  return { 
+    data: hydratedPosts, 
+    hasMore: count > to + 1,
+    error: null 
+  }
+}
+
+async function hydrateAndCheckPostAccess(postData) {
+  let profileData = null
+  if (postData.author_id) {
+    if (postData.status === 'approved') {
+      const profileMap = await fetchPublicProfilesMap([postData.author_id])
+      profileData = profileMap.get(postData.author_id) || null
+    } else {
+      const { data: pData } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, bio, role')
+        .eq('id', postData.author_id)
+        .single()
+      profileData = pData
+    }
+  }
+  
+  const data = { ...postData, profiles: profileData }
+
+  if (data.status !== 'approved') {
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData?.session) return { data: null, error: new Error('Không có quyền xem') }
+    const userId = sessionData.session.user.id
+    if (data.author_id !== userId) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
+      if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
+         return { data: null, error: new Error('Không có quyền xem') }
+      }
+    }
+  }
+
+  return { data, error: null }
 }
 
 export async function getPostBySlug(slug) {
@@ -225,36 +344,7 @@ export async function getPostBySlug(slug) {
 
   if (error || !postData) return { data: null, error }
 
-  let profileData = null
-  if (postData.author_id) {
-    if (postData.status === 'approved') {
-      const profileMap = await fetchPublicProfilesMap([postData.author_id])
-      profileData = profileMap.get(postData.author_id) || null
-    } else {
-      const { data: pData } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url, bio, role')
-        .eq('id', postData.author_id)
-        .single()
-      profileData = pData
-    }
-  }
-  
-  const data = { ...postData, profiles: profileData }
-
-  if (data.status !== 'approved') {
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData?.session) return { data: null, error: new Error('Không có quyền xem') }
-    const userId = sessionData.session.user.id
-    if (data.author_id !== userId) {
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-      if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
-         return { data: null, error: new Error('Không có quyền xem') }
-      }
-    }
-  }
-
-  return { data, error: null }
+  return hydrateAndCheckPostAccess(postData)
 }
 
 export async function getPostById(id) {
@@ -266,36 +356,7 @@ export async function getPostById(id) {
 
   if (error || !postData) return { data: null, error }
 
-  let profileData = null
-  if (postData.author_id) {
-    if (postData.status === 'approved') {
-      const profileMap = await fetchPublicProfilesMap([postData.author_id])
-      profileData = profileMap.get(postData.author_id) || null
-    } else {
-      const { data: pData } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url, bio, role')
-        .eq('id', postData.author_id)
-        .single()
-      profileData = pData
-    }
-  }
-  
-  const data = { ...postData, profiles: profileData }
-
-  if (data.status !== 'approved') {
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData?.session) return { data: null, error: new Error('Không có quyền xem') }
-    const userId = sessionData.session.user.id
-    if (data.author_id !== userId) {
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-      if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
-         return { data: null, error: new Error('Không có quyền xem') }
-      }
-    }
-  }
-
-  return { data, error: null }
+  return hydrateAndCheckPostAccess(postData)
 }
 
 export async function getCommunityPosts(page = 1, limit = 10, filter = 'Tất cả') {
@@ -322,11 +383,11 @@ export async function getCommunityPosts(page = 1, limit = 10, filter = 'Tất c�
   const { data, count, error } = await query.range(from, to);
 
   if (error || !data) {
-    return { data, count: 0, error }
+    return { data: [], count: 0, hasMore: false, error }
   }
 
   const hydratedPosts = await attachPublicProfilesToPosts(data)
-  return { data: hydratedPosts, count, error: null }
+  return { data: hydratedPosts, count, hasMore: count > to + 1, error: null }
 }
 
 export async function getRecentCommunityPosts(limitCount = 2) {
@@ -371,8 +432,8 @@ async function fetchPublicProfilesMap(authorIds = []) {
   }
 
   const { data: profiles, error } = await supabase
-    .from('public_profiles')
-    .select('id, name, avatar_url, bio, cover_url, facebook_url, website_url, profile_visibility, show_public_posts, show_facebook, allow_search_index')
+    .from('profiles')
+    .select('id, name, avatar_url, bio, cover_url, facebook_url, website_url, user_preferences')
     .in('id', authorIds)
 
   if (error) {
@@ -380,18 +441,21 @@ async function fetchPublicProfilesMap(authorIds = []) {
     return new Map()
   }
 
-  return new Map((profiles || []).map((profile) => [
-    profile.id,
-    {
-      ...profile,
-      user_preferences: {
-        profile_visibility: profile.profile_visibility || 'public',
-        show_public_posts: profile.show_public_posts !== false && profile.show_public_posts !== 'false',
-        show_facebook: profile.show_facebook !== false && profile.show_facebook !== 'false',
-        allow_search_index: profile.allow_search_index !== false && profile.allow_search_index !== 'false',
+  return new Map((profiles || []).map((profile) => {
+    const prefs = profile.user_preferences || {}
+    return [
+      profile.id,
+      {
+        ...profile,
+        user_preferences: {
+          profile_visibility: prefs.profile_visibility || 'public',
+          show_public_posts: prefs.show_public_posts !== false && prefs.show_public_posts !== 'false',
+          show_facebook: prefs.show_facebook !== false && prefs.show_facebook !== 'false',
+          allow_search_index: prefs.allow_search_index !== false && prefs.allow_search_index !== 'false',
+        },
       },
-    },
-  ]))
+    ]
+  }))
 }
 
 function isMissingRelationError(error) {
@@ -517,28 +581,36 @@ export async function getFeaturedPosts() {
   return { data: hydratedPosts, error: null }
 }
 
-export async function getMyPosts(userId) {
-  const { data, error } = await supabase
+export async function getMyPosts(userId, page = 1, limit = 10) {
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  const { data, count, error } = await supabase
     .from('posts')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('author_id', userId)
     .order('created_at', { ascending: false })
+    .range(from, to)
 
-  return { data, error }
+  return { data, hasMore: count > to + 1, error }
 }
 
-export async function getPublicPostsByUser(userId) {
-  const { data, error } = await supabase
+export async function getPublicPostsByUser(userId, page = 1, limit = 10) {
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  const { data, count, error } = await supabase
     .from('posts')
     .select(`
       *, 
       profiles:author_id (name, avatar_url, role)
-    `)
+    `, { count: 'exact' })
     .eq('author_id', userId)
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
+    .range(from, to)
 
-  return { data, error }
+  return { data, hasMore: count > to + 1, error }
 }
 
 
@@ -700,4 +772,21 @@ export async function getCategories() {
     .select('*')
     .order('name')
   return { data, error }
+}
+
+export async function getTopCategories(limit = 5) {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, slug, posts(id)')
+
+  if (error) return { data: null, error }
+
+  const mapped = data.map(cat => ({
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    count: cat.posts ? cat.posts.length : 0
+  })).sort((a, b) => b.count - a.count)
+
+  return { data: mapped.slice(0, limit), error: null }
 }

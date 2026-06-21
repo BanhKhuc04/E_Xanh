@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { useLocation } from 'react-router-dom'
 import DeviceInputForm from '../../components/electricity/DeviceInputForm'
 import DeviceUsageList from '../../components/electricity/DeviceUsageList'
@@ -99,16 +99,22 @@ function ElectricityCheckPage() {
 
   useEffect(() => {
     async function loadDevices() {
-      const { getVisibleDevices } = await import('../../services/electricityService')
-      const { data } = await getVisibleDevices()
-      if (data && data.length > 0) {
-        const options = data.map((d) => ({
-          label: d.name,
-          value: d.name,
-          defaultPower: d.default_power,
-          tone: d.icon === 'snowflake' ? 'teal' : d.icon === 'laptop' ? 'lime' : 'green',
-        }))
-        setDbDeviceOptions(options)
+      try {
+        const { getVisibleDevices } = await import('../../services/electricityService')
+        const { data, error } = await getVisibleDevices()
+        if (error) {
+          setFeedbackMessage(`Không thể tải thiết bị: ${error.message}`)
+        } else if (data && data.length > 0) {
+          const options = data.map((d) => ({
+            label: d.name,
+            value: d.name,
+            defaultPower: d.default_power,
+            tone: d.icon === 'snowflake' ? 'teal' : d.icon === 'laptop' ? 'lime' : 'green',
+          }))
+          setDbDeviceOptions(options)
+        }
+      } catch {
+        setFeedbackMessage('Lỗi hệ thống khi tải thiết bị.')
       }
     }
     loadDevices()
@@ -319,12 +325,12 @@ function ElectricityCheckPage() {
           setFeedbackMessage('Đã lưu lịch sử')
         } else {
           saveElectricityHistory(historyPayload, session.user.id)
-          setFeedbackMessage('Đã lưu lịch sử')
+          setFeedbackMessage('Đã lưu cục bộ/chưa đồng bộ server')
         }
       } catch (err) {
         console.error(err)
         saveElectricityHistory(historyPayload, session.user.id)
-        setFeedbackMessage('Đã lưu lịch sử')
+        setFeedbackMessage('Đã lưu cục bộ/chưa đồng bộ server')
       }
     } else {
       saveElectricityHistory(historyPayload, 'guest')
@@ -339,19 +345,7 @@ function ElectricityCheckPage() {
 
   return (
     <div className="electricity-page">
-      <Helmet>
-        <title>Kiểm tra tiền điện — E-XANH</title>
-        <meta name="description" content="Công cụ tính toán và dự báo tiền điện hàng tháng miễn phí. Nhập các thiết bị điện trong nhà để biết ngay số điện tiêu thụ và gợi ý tiết kiệm." />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Kiểm tra tiền điện — E-XANH" />
-        <meta property="og:description" content="Công cụ tính toán tiền điện miễn phí. Biết ngay bạn đang dùng bao nhiêu kWh mỗi tháng và cách giảm hóa đơn điện." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO title="Kiểm tra tiền điện" description="Công cụ tính toán và dự báo tiền điện hàng tháng miễn phí. Nhập các thiết bị điện trong nhà để biết ngay số điện tiêu thụ và gợi ý tiết kiệm." url={canonicalUrl} />
       <PageHero
         {...pageHeroContent['electricity-check']}
         badge={heroHighlights.badge}

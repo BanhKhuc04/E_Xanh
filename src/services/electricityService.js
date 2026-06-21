@@ -95,6 +95,7 @@ export async function getElectricityCheckById(id) {
       items:electricity_check_items(*)
     `)
     .eq('id', id)
+    .eq('user_id', session.user.id)
     .single()
 
   if (error) {
@@ -118,6 +119,19 @@ export async function deleteElectricityCheck(id) {
 
   if (error) {
     logError('[E-XANH] Lỗi xóa electricity_check:', error?.message || error)
+    return { error }
+  }
+  return { error: null }
+}
+
+export async function deleteAllElectricityChecks(userId) {
+  const { error } = await supabase
+    .from('electricity_checks')
+    .delete()
+    .eq('user_id', userId)
+
+  if (error) {
+    logError('[E-XANH] Error deleting all checks:', error.message)
     return { error }
   }
   return { error: null }

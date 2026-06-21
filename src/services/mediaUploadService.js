@@ -3,7 +3,7 @@ import { createSafeFileName } from '../utils/fileValidation'
 import { optimizeImage, generateImageVariants } from '../utils/media/imageOptimizer'
 import { validateImage } from '../utils/media/imageValidation'
 import { validateVideo, generateVideoPoster } from '../utils/media/videoOptimizer'
-import { MEDIA_VALIDATION } from '../utils/media/mediaConfig'
+
 import { logError } from '../utils/logger'
 
 async function uploadFileToSupabase(file, bucket, filePath) {

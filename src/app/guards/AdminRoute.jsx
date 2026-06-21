@@ -51,7 +51,8 @@ function AdminRoute() {
     return () => {
       isMounted = false
     }
-  }, [loading])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (loading) {
     return (

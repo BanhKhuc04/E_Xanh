@@ -22,14 +22,13 @@ function SupportModal({
   const [errorMsg, setErrorMsg] = useState('')
   const [toast, setToast] = useState(null)
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
-      // Mark as seen immediately when opened, or we can rely on onClose.
-      // The user requested: "Khi close modal, nếu có latestAdminNotice thì mark as seen."
-      // Let's do it on close.
       setActiveTab('report')
     }
-  }, [open])
+  }
 
   useEffect(() => {
     if (!toast) return undefined

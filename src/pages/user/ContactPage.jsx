@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
+import { supabase } from '../../lib/supabase'
 import '../../styles/static-pages.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -19,6 +20,13 @@ function ContactPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [toast, setToast] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeFaq, setActiveFaq] = useState(null)
+
+  const faqs = [
+    { q: 'Tôi có cần đăng nhập để kiểm tra tiền điện không?', a: 'Không bắt buộc, nhưng đăng nhập giúp bạn lưu lại lịch sử kiểm tra để theo dõi về sau.' },
+    { q: 'Kết quả tính tiền điện có chính xác tuyệt đối không?', a: 'Kết quả được tính theo biểu giá bậc thang mới nhất của EVN, tuy nhiên có thể lệch nhỏ do làm tròn số hoặc các yếu tố khác trong hóa đơn thực tế.' },
+    { q: 'Tôi có thể đăng bài chia sẻ mẹo tiết kiệm điện không?', a: 'Hoàn toàn được! Bạn hãy đăng nhập và truy cập trang Cộng đồng để chia sẻ bài viết của mình.' }
+  ]
 
   function handleChange(field, value) {
     setForm((current) => ({
@@ -28,7 +36,7 @@ function ContactPage() {
     setErrorMessage('')
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     if (!form.name.trim()) {
@@ -53,31 +61,35 @@ function ContactPage() {
 
     setIsSubmitting(true)
 
-    // Giả lập gửi form
-    window.setTimeout(() => {
+    try {
+      // Thực hiện gửi thật
+      const { error } = await supabase.from('contacts').insert([{
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.subject,
+        content: form.content.trim()
+      }])
+
+      if (error) {
+        setErrorMessage('Có lỗi xảy ra khi gửi liên hệ: ' + error.message)
+        setIsSubmitting(false)
+        return
+      }
+
       setErrorMessage('')
       setToast('Cảm ơn bạn đã liên hệ. E-XANH sẽ phản hồi trong 24–48 giờ làm việc.')
       setForm({ name: '', email: '', subject: 'Góp ý giao diện', content: '' })
       setIsSubmitting(false)
       setTimeout(() => setToast(''), 3000)
-    }, 1000)
+    } catch (err) {
+      setErrorMessage('Lỗi hệ thống: ' + err.message)
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="static-page">
-      <Helmet>
-        <title>Liên hệ — E-XANH</title>
-        <meta name="description" content="Liên hệ với đội ngũ E-XANH để gửi góp ý, báo lỗi, hợp tác hoặc nhận hỗ trợ tài khoản. Chúng tôi phản hồi trong 24 giờ." />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Liên hệ với E-XANH" />
-        <meta property="og:description" content="Gửi góp ý, báo lỗi hoặc hợp tác cùng E-XANH. Đội ngũ sẽ phản hồi sớm nhất." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO title="Liên hệ" description="Liên hệ với đội ngũ E-XANH để gửi góp ý, báo lỗi, hợp tác hoặc nhận hỗ trợ tài khoản. Chúng tôi phản hồi trong 24 giờ." url={canonicalUrl} />
       <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>
         <span>{'>'}</span>
@@ -184,9 +196,24 @@ function ContactPage() {
           <section className="static-page__contact-card">
             <h2>Câu hỏi thường gặp</h2>
             <div className="static-page__faq">
-              <article>Tôi có cần đăng nhập để kiểm tra tiền điện không?</article>
-              <article>Kết quả tính tiền điện có chính xác tuyệt đối không?</article>
-              <article>Tôi có thể đăng bài chia sẻ mẹo tiết kiệm điện không?</article>
+              {faqs.map((faq, index) => (
+                <article 
+                  key={index} 
+                  className={`faq-item ${activeFaq === index ? 'faq-item--active' : ''}`}
+                  onClick={() => setActiveFaq(activeFaq === index ? null : index)}
+                  style={{ cursor: 'pointer', padding: '12px 16px', borderBottom: '1px solid #eee', transition: 'background-color 0.2s' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold' }}>
+                    {faq.q}
+                    <span style={{ transform: activeFaq === index ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+                  </div>
+                  {activeFaq === index && (
+                    <div style={{ marginTop: '12px', color: '#555', lineHeight: '1.5' }}>
+                      {faq.a}
+                    </div>
+                  )}
+                </article>
+              ))}
             </div>
           </section>
         </div>

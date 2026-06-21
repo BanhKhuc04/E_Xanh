@@ -8,14 +8,17 @@ function SavedSidebar({ folders, recentlyRead }) {
         <h2>Thư mục lưu</h2>
         <div className="saved-sidebar__folders">
           {folders.map((folder) => (
-            <button
-              key={folder.id}
-              type="button"
-              className={`saved-sidebar__folder${folder.isActive ? ' is-active' : ''}`}
-            >
-              <span>{folder.label}</span>
-              <strong>{folder.count}</strong>
-            </button>
+              <button
+                key={folder.id}
+                type="button"
+                disabled
+                title="Tính năng đang phát triển"
+                className={`saved-sidebar__folder${folder.isActive ? ' is-active' : ''}`}
+                style={{ cursor: 'not-allowed', opacity: 0.6 }}
+              >
+                <span>{folder.label}</span>
+                <strong>{folder.count}</strong>
+              </button>
           ))}
         </div>
       </section>
@@ -26,7 +29,7 @@ function SavedSidebar({ folders, recentlyRead }) {
           <div className="saved-sidebar__recent-list">
             {recentlyRead.map((post) => (
               <Link key={post.id} to={`/meo-tiet-kiem/${post.slug}`} className="saved-sidebar__recent-item">
-                <PostImage src={post.image} alt={post.title} variant="thumbnail" aspect="1:1" />
+                <PostImage src={post.image} alt={post.title} variant="card" aspect="16:9" />
                 <div>
                   <h3>{post.title}</h3>
                   <p>{post.recentReadAt}</p>

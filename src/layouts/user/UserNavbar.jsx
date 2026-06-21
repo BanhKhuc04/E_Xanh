@@ -114,31 +114,37 @@ function UserNavbar() {
 
   useEffect(() => {
     let timerId
+    let delay = 45000
+    let cancelled = false
 
-    async function loadNotifications() {
+    async function loadNotifications(isInitial = false) {
       if (!currentUser?.id) return
+      if (isInitial) setIsLoadingNotifications(true)
 
-      setIsLoadingNotifications(true)
       const { data, error } = await getMyNotifications({ limit: 8 })
+      if (cancelled) return
 
       if (error) {
         console.error('[UserNavbar] Lỗi tải notifications:', error)
         setNotificationError(error.message || 'Không thể tải thông báo.')
+        delay = Math.min(delay * 2, 300000) // backoff up to 5 mins
       } else {
         setNotificationError('')
+        delay = 45000 // reset delay
+        setNotifications(data?.items ?? [])
+        setUnreadCount(data?.unreadCount ?? 0)
+        setNotificationsSupported(data?.supported ?? true)
       }
 
-      setNotifications(data?.items ?? [])
-      setUnreadCount(data?.unreadCount ?? 0)
-      setNotificationsSupported(data?.supported ?? true)
-      setIsLoadingNotifications(false)
+      if (isInitial) setIsLoadingNotifications(false)
+      timerId = window.setTimeout(() => loadNotifications(false), delay)
     }
 
-    loadNotifications()
-    timerId = window.setInterval(loadNotifications, 45000)
+    loadNotifications(true)
 
     return () => {
-      window.clearInterval(timerId)
+      cancelled = true
+      window.clearTimeout(timerId)
     }
   }, [currentUser?.id])
 
@@ -334,7 +340,7 @@ function UserNavbar() {
               <div className="user-navbar__user-menu">
                 <button
                   type="button"
-                  className="user-navbar__user-trigger"
+                  className="navbar-avatar-btn"
                   onClick={() => {
                     setIsOpen((current) => !current)
                     setIsNotificationOpen(false)
@@ -347,12 +353,12 @@ function UserNavbar() {
                     <img
                       src={currentUser.avatar_url}
                       alt={`Avatar của ${getShortName(currentUser.name, currentUser.email)}`}
-                      className="user-navbar__avatar-img"
+                      className="navbar-avatar-img"
                     />
                   ) : (
-                    <span className="user-navbar__avatar">{getInitials(currentUser.name || currentUser.email)}</span>
+                    <span className="navbar-avatar-fallback">{getInitials(currentUser.name || currentUser.email)}</span>
                   )}
-                  <span className="user-navbar__user-name">{getShortName(currentUser.name, currentUser.email)}</span>
+                  <span className="navbar-user__name">{getShortName(currentUser.name, currentUser.email)}</span>
                 </button>
 
                 {isOpen ? (

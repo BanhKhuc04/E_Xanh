@@ -238,11 +238,13 @@
 }
 
 .tips-post-card__media img,
-.tips-post-card__media .smart-image-container img {
+.tips-post-card__media .smart-image-container img,
+.tips-post-card__media .optimized-image-wrapper img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
+  object-position: center;
   opacity: 1 !important;
   filter: none !important;
   mix-blend-mode: normal !important;
@@ -273,6 +275,9 @@
   width: 34px;
   height: 34px;
   border: 0;
+  padding: 0;
+  appearance: none;
+  outline: none;
   border-radius: 50%;
   color: #336a29;
   background: rgba(255, 255, 255, 0.95);
@@ -320,17 +325,24 @@
   margin-top: auto;
   padding-top: 14px;
   border-top: 1px solid rgba(51, 106, 41, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .tips-post-card__author {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
   position: relative;
   z-index: 3;
   text-decoration: none;
   color: inherit;
+  flex: 1;
+  min-width: 0;
 }
 
 .tips-post-card__avatar {
@@ -351,6 +363,9 @@
   font-size: 0.9rem;
   font-weight: 700;
   color: #173715;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tips-post-card__author-time {
@@ -361,11 +376,11 @@
 .tips-post-card__stats {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   color: #526b4d;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .tips-post-card__stat {

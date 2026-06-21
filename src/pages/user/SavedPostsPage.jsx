@@ -1,12 +1,13 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import PageHero from '../../components/common/PageHero'
 import SavedPostCard from '../../components/posts/SavedPostCard'
 import SavedPostsFilter from '../../components/posts/SavedPostsFilter'
 import SavedSidebar from '../../components/posts/SavedSidebar'
 import PageLoader from '../../components/common/PageLoader'
 import EmptyState from '../../components/common/EmptyState'
+import Toast from '../../components/common/Toast'
 import { pageHeroContent } from '../../data/pageHeroes'
 import {
   savedFilterChips,
@@ -38,29 +39,42 @@ function SavedPostsPage() {
   
   const [dbSavedPosts, setDbSavedPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasMorePosts, setHasMorePosts] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [heroSrc, setHeroSrc] = useState(heroImage)
+  const [toast, setToast] = useState('')
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
 
   useEffect(() => {
     async function loadSavedPosts() {
+      if (page === 1) setLoading(true)
+      else setIsLoadingMore(true)
+      
       const { getCurrentSession } = await import('../../services/authService')
       const session = await getCurrentSession()
       if (!session?.user) {
         return
       }
       const { getMySavedPosts } = await import('../../services/interactionService')
-      const { data, error } = await getMySavedPosts()
+      const { data, hasMore, error } = await getMySavedPosts(page, 12)
       if (data) {
-        setDbSavedPosts(data)
+        if (page === 1) {
+          setDbSavedPosts(data)
+        } else {
+          setDbSavedPosts(prev => [...prev, ...data])
+        }
+        setHasMorePosts(hasMore)
       } else {
-        setDbSavedPosts([])
+        if (page === 1) setDbSavedPosts([])
         if (error) console.error('Lỗi lấy bài lưu:', error.message)
       }
       setLoading(false)
+      setIsLoadingMore(false)
     }
     loadSavedPosts()
-  }, [])
+  }, [page])
 
   useEffect(() => {
     async function loadHero() {
@@ -83,7 +97,8 @@ function SavedPostsPage() {
   }, [])
 
   async function handleUnsave(postId) {
-    if (String(postId).length < 30) {
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(postId))
+    if (!isUUID) {
       setDbSavedPosts(prev => prev.filter(p => p.id !== postId))
       return
     }
@@ -92,7 +107,7 @@ function SavedPostsPage() {
     if (!error) {
       setDbSavedPosts(prev => prev.filter(p => p.id !== postId))
     } else {
-      alert(error.message)
+      setToast(error.message)
     }
   }
 
@@ -134,24 +149,7 @@ function SavedPostsPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Bài viết đã lưu - E-XANH</title>
-        <meta
-          name="description"
-          content="Quản lý và xem lại danh sách các bài viết mẹo tiết kiệm điện mà bạn đã lưu trên E-XANH."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Bài viết đã lưu - E-XANH" />
-        <meta
-          property="og:description"
-          content="Quản lý và xem lại danh sách các bài viết mẹo tiết kiệm điện mà bạn đã lưu trên E-XANH."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content="https://e-xanh.vercel.app/og-image-v2.png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <SEO title="Bài viết đã lưu" noIndex={true} />
 
       <div className="saved-posts-page">
 
@@ -181,15 +179,28 @@ function SavedPostsPage() {
         onSortChange={setSortValue}
       />
 
-      <div className="saved-posts-layout">
-        <div className="saved-posts-layout__content">
-          {visiblePosts.length > 0 ? (
-            <div className="saved-posts-grid">
-              {visiblePosts.map((post) => (
-                <SavedPostCard key={post.id} post={post} onUnsave={handleUnsave} />
-              ))}
-            </div>
-          ) : (
+        <div className="saved-posts-layout">
+          <div className="saved-posts-layout__content">
+            {visiblePosts.length > 0 ? (
+              <>
+                <div className="saved-posts-grid">
+                  {visiblePosts.map((post) => (
+                    <SavedPostCard key={post.id} post={post} onUnsave={handleUnsave} />
+                  ))}
+                </div>
+                {hasMorePosts && (
+                  <div className="saved-posts-load-more" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+                    <button 
+                      className="btn btn--secondary" 
+                      onClick={() => setPage(p => p + 1)} 
+                      disabled={isLoadingMore}
+                    >
+                      {isLoadingMore ? 'Đang tải...' : 'Tải thêm bài đã lưu'}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
             <EmptyState 
               icon="⌘"
               title="Bạn chưa lưu bài viết nào."
@@ -205,6 +216,8 @@ function SavedPostsPage() {
 
         <SavedSidebar folders={dynamicFolders} recentlyRead={[]} />
       </div>
+
+      <Toast message={toast} onClose={() => setToast('')} />
     </div>
     </>
   )

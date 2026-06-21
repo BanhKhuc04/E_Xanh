@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import SupportModal from './SupportModal'
 import SupportFloatingButton from './SupportFloatingButton'
-import { getActiveSiteNotice } from '../../services/siteNoticeService'
 
 const LAST_SEEN_KEY = 'exanh:lastSeenAdminNoticeId'
 
@@ -13,27 +12,26 @@ function SupportCenter() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadNotice() {
-      const { data } = await getActiveSiteNotice()
-      if (cancelled || !data) return
-
-      // Use the database's notice as the fallback format
-      // In a real system we'd check if it's an admin notice, here we use the active site notice
-      const formattedNotice = {
-        id: data.id || `admin-notice-${data.version || 'v1'}`,
-        title: data.title || 'Cập nhật mới từ admin',
-        description: data.description || 'E-XANH đã cập nhật khu vực báo lỗi và liên hệ để hỗ trợ người dùng tốt hơn.',
-        created_at: data.updated_at || data.created_at || new Date().toISOString(),
-        contact_url: data.contact_url,
-        contact_label: data.contact_label,
+    function loadNotice() {
+      // In a real system we'd check an admin_notices endpoint
+      // Using a local static notice to avoid semantic mismatch with public site notices
+      const staticAdminNotice = {
+        id: 'admin-notice-v1',
+        title: 'Cập nhật khu vực Hỗ trợ',
+        description: 'E-XANH đã cải thiện khu vực báo lỗi và hỗ trợ trực tuyến để phục vụ bạn tốt hơn.',
+        created_at: new Date('2024-01-01').toISOString(),
+        contact_url: '/lien-he',
+        contact_label: 'Liên hệ Hỗ trợ',
       }
 
-      setNotice(formattedNotice)
+      if (!cancelled) {
+        setNotice(staticAdminNotice)
 
-      if (typeof window !== 'undefined') {
-        const lastSeenId = window.localStorage.getItem(LAST_SEEN_KEY)
-        if (lastSeenId !== String(formattedNotice.id)) {
-          setHasUnreadNotice(true)
+        if (typeof window !== 'undefined') {
+          const lastSeenId = window.localStorage.getItem(LAST_SEEN_KEY)
+          if (lastSeenId !== String(staticAdminNotice.id)) {
+            setHasUnreadNotice(true)
+          }
         }
       }
     }

@@ -332,6 +332,14 @@ body {
   height: 100%;
 }
 
+.community-card-image--safe {
+  background-color: #f4f8e8 !important;
+}
+
+.community-card-image--safe .optimized-image-img.object-contain {
+  object-position: center;
+}
+
 .community-post-card__right:hover .community-post-card__image .post-image__img {
   transform: scale(1.03);
 }

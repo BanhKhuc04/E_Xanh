@@ -106,8 +106,10 @@ function PublicCard({ post, onView }) {
   const summary = getPostSummary(post)
   const typeLabel = getPostTypeLabel(post.type)
 
+  const imgSrc = resolvePostImageSource(post)
+
   return (
-    <article className="public-post-card">
+    <article className={`public-post-card ${imgSrc ? 'has-thumbnail' : 'no-thumbnail'}`}>
       <div className="public-post-card__content">
         <div className="public-post-card__top">
           <span className="public-post-card__type">{typeLabel}</span>
@@ -136,14 +138,16 @@ function PublicCard({ post, onView }) {
           </button>
         </div>
       </div>
-      <div className="public-post-card__thumbnail" onClick={() => onView(post)}>
-        <PostImage
-          src={resolvePostImageSource(post)}
-          alt={post.title}
-          variant="thumbnail"
-          aspect="16:9"
-        />
-      </div>
+      {imgSrc && (
+        <div className="public-post-card__thumbnail" onClick={() => onView(post)}>
+          <PostImage
+            src={imgSrc}
+            alt={post.title}
+            variant="card"
+            aspect="16:9"
+          />
+        </div>
+      )}
     </article>
   )
 }
@@ -158,8 +162,10 @@ function PrivateCard({ post, onView }) {
   const summary = getPostSummary(post)
   const typeLabel = getPostTypeLabel(post.type)
 
+  const imgSrc = resolvePostImageSource(post)
+
   return (
-    <article className="private-post-card">
+    <article className={`private-post-card ${imgSrc ? 'has-thumbnail' : 'no-thumbnail'}`}>
       <div className="private-post-card__content">
         <div className="private-post-card__header">
           <div className="private-post-card__headline">
@@ -210,14 +216,16 @@ function PrivateCard({ post, onView }) {
         </div>
       </div>
 
-      <div className="private-post-card__thumbnail" onClick={() => onView(post)}>
-        <PostImage
-          src={resolvePostImageSource(post)}
-          alt={post.title}
-          variant="thumbnail"
-          aspect="16:9"
-        />
-      </div>
+      {imgSrc && (
+        <div className="private-post-card__thumbnail" onClick={() => onView(post)}>
+          <PostImage
+            src={imgSrc}
+            alt={post.title}
+            variant="card"
+            aspect="16:9"
+          />
+        </div>
+      )}
 
       <div className="private-post-card__actions">
         <button type="button" className="btn btn--primary btn--small" onClick={() => onView(post)}>
@@ -239,7 +247,7 @@ function PrivateCard({ post, onView }) {
 }
 
 /* ─── Main Component ───────────────────────────────────────────────────────── */
-function MyPostsList({ posts, isPublicView = false, loading = false }) {
+function MyPostsList({ posts, isPublicView = false, loading = false, hasMore = false, onLoadMore = () => {}, isLoadingMore = false }) {
   const navigate = useNavigate()
 
   const displayPosts = isPublicView ? posts.filter(p => p.status === 'approved') : posts
@@ -263,15 +271,28 @@ function MyPostsList({ posts, isPublicView = false, loading = false }) {
       ) : displayPosts.length === 0 ? (
         <EmptyState isPublicView={isPublicView} />
       ) : (
-        <div className="my-posts-list">
-          {displayPosts.map((post) =>
-            isPublicView ? (
-              <PublicCard key={post.id || post.title} post={post} onView={handleView} />
-            ) : (
-              <PrivateCard key={post.id || post.title} post={post} onView={handleView} />
-            )
+        <>
+          <div className="my-posts-list">
+            {displayPosts.map((post) =>
+              isPublicView ? (
+                <PublicCard key={post.id || post.title} post={post} onView={handleView} />
+              ) : (
+                <PrivateCard key={post.id || post.title} post={post} onView={handleView} />
+              )
+            )}
+          </div>
+          {hasMore && (
+            <div className="my-posts-load-more" style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+              <button 
+                className="btn btn--secondary" 
+                onClick={onLoadMore} 
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? 'Đang tải...' : 'Tải thêm'}
+              </button>
+            </div>
           )}
-        </div>
+        </>
       )}
     </section>
   )

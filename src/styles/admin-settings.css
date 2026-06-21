@@ -166,20 +166,19 @@
 
 .st-card__input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background: rgba(234, 245, 157, 0.1);
+  background: var(--color-surface);
   color: var(--color-text);
-  font: inherit;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .st-card__input:focus {
-  border-color: var(--color-primary-200);
-  box-shadow: 0 0 0 4px rgba(193, 217, 92, 0.22);
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-ring);
 }
 
 .st-card__textarea {

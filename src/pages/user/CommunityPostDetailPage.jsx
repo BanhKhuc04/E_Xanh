@@ -3,6 +3,7 @@ import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import PostBlockRenderer from '../../components/community/PostBlockRenderer'
 import OptimizedImage from '../../components/common/OptimizedImage'
+import UserAvatar from '../../components/common/UserAvatar'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
 import InlineCommentSection from '../../components/community/InlineCommentSection'
@@ -286,8 +287,8 @@ function CommunityPostDetailPage() {
               )}
 
               <div className="community-detail__header">
-                <Link to={`/nguoi-dung/${post.authorId}`}>
-                  <img src={post.avatar} alt={post.author} className="community-detail__avatar" />
+                <Link to={`/nguoi-dung/${post.authorId}`} className="community-detail__avatar-link">
+                  <UserAvatar src={post.avatar} name={post.author} size="lg" className="community-detail__avatar" withFrame={false} />
                 </Link>
                 <div className="community-detail__meta">
                   <h3>

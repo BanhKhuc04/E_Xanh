@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getInitials, isValidImageUrl } from '../../utils/avatar'
 import { createComment, getCommentsByPost } from '../../services/commentService'
+import Toast from '../common/Toast'
+import PromptModal from '../common/PromptModal'
 
 function formatRelativeTime(value) {
   if (!value) return 'Vừa xong'
@@ -32,6 +34,9 @@ function InlineCommentSection({
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [loadedPostId, setLoadedPostId] = useState(null)
+  const [toast, setToast] = useState('')
+  const [isPromptOpen, setIsPromptOpen] = useState(false)
+  const [promptData, setPromptData] = useState({ title: '', message: '', placeholder: '', commentId: null })
   const commentRefs = useRef({})
 
   useEffect(() => {
@@ -212,19 +217,13 @@ function InlineCommentSection({
                       <button
                         type="button"
                         onClick={async () => {
-                          const reason = window.prompt('Nhập lý do báo cáo bình luận này:')
-                          if (reason === null) return
-                          if (!reason.trim()) {
-                            alert('Vui lòng nhập lý do báo cáo.')
-                            return
-                          }
-                          const { createReport } = await import('../../services/reportService')
-                          const { error } = await createReport({ commentId: comment.id, reason: reason.trim() })
-                          if (error) {
-                            alert(error.message || 'Lỗi gửi báo cáo.')
-                          } else {
-                            alert('Báo cáo bình luận thành công.')
-                          }
+                          setPromptData({
+                            title: 'Báo cáo bình luận',
+                            message: 'Vui lòng cung cấp lý do báo cáo bình luận này để quản trị viên xem xét.',
+                            placeholder: 'Ví dụ: Ngôn từ phản cảm, spam...',
+                            commentId: comment.id
+                          })
+                          setIsPromptOpen(true)
                         }}
                         style={{
                           background: 'none',
@@ -246,6 +245,30 @@ function InlineCommentSection({
             ))
           : null}
       </div>
+
+      <Toast message={toast} onClose={() => setToast('')} />
+
+      <PromptModal
+        isOpen={isPromptOpen}
+        title={promptData.title}
+        message={promptData.message}
+        placeholder={promptData.placeholder}
+        onClose={() => setIsPromptOpen(false)}
+        onSubmit={async (reason) => {
+          setIsPromptOpen(false)
+          if (!reason.trim()) {
+            setToast('Vui lòng nhập lý do báo cáo.')
+            return
+          }
+          const { createReport } = await import('../../services/reportService')
+          const { error } = await createReport({ commentId: promptData.commentId, reason: reason.trim() })
+          if (error) {
+            setToast(error.message || 'Lỗi gửi báo cáo.')
+          } else {
+            setToast('Báo cáo bình luận thành công.')
+          }
+        }}
+      />
     </section>
   )
 }

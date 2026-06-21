@@ -1,0 +1,12 @@
+export const DRAFT_STORAGE_KEY = 'exanh_draft_post'
+export const POST_COOLDOWN_MS = 30 * 1000
+export const TITLE_MIN_LENGTH = 10
+export const TITLE_MAX_LENGTH = 120
+export const DESCRIPTION_MAX_LENGTH = 180
+export const CONTENT_MIN_LENGTH = 80
+export const CONTENT_MAX_LENGTH = 4000
+export const TAGS_MAX_COUNT = 5
+export const TAGS_SEPARATOR = ','
+export const MAX_POST_IMAGE_SIZE = 5 * 1024 * 1024
+export const POST_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+export const AUTOSAVE_DEBOUNCE_MS = 1500

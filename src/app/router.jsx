@@ -8,10 +8,10 @@ import AdminLayout from '../layouts/admin/AdminLayout'
 import UserLayout from '../layouts/user/UserLayout'
 
 // ─── Eager pages (critical path — kept small) ────────────────────────────────
-import HomePage from '../pages/user/HomePage'
-import LoginPage from '../pages/auth/LoginPage'
-import RegisterPage from '../pages/auth/RegisterPage'
-import NotFoundPage from '../pages/shared/NotFoundPage'
+const HomePage = lazy(() => import('../pages/user/HomePage'))
+const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
+const NotFoundPage = lazy(() => import('../pages/shared/NotFoundPage'))
 
 // ─── Lazy pages — User ────────────────────────────────────────────────────────
 const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage'))

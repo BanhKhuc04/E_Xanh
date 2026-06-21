@@ -53,16 +53,14 @@ export async function savePost(postId) {
     .from('saved_posts')
     .insert({ user_id: session.user.id, post_id: postId })
 
-  if (error && error.code !== '23505') {
+  if (error) {
+    if (error.code === '23505') return { error: null } // already saved, ignore and don't increment
     logError('[E-XANH] Lỗi lưu bài viết:', error?.message || error)
     return { error }
   }
 
-  // Cập nhật đếm
-  const { data: post } = await supabase.from('posts').select('saved_count').eq('id', postId).single()
-  if (post) {
-    await supabase.from('posts').update({ saved_count: (post.saved_count || 0) + 1 }).eq('id', postId)
-  }
+  // Dùng RPC hoặc Trigger để cập nhật đếm (tránh race condition)
+  await supabase.rpc('increment_saved_count', { row_id: postId })
 
   return { error: null }
 }
@@ -71,43 +69,49 @@ export async function unsavePost(postId) {
   const session = await getCurrentSession()
   if (!session?.user) return { error: new Error('Bạn cần đăng nhập.') }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('saved_posts')
     .delete()
     .eq('user_id', session.user.id)
     .eq('post_id', postId)
+    .select()
 
   if (error) {
     logError('[E-XANH] Lỗi bỏ lưu bài viết:', error?.message || error)
     return { error }
   }
 
-  // Cập nhật đếm (không để âm)
-  const { data: post } = await supabase.from('posts').select('saved_count').eq('id', postId).single()
-  if (post && post.saved_count > 0) {
-    await supabase.from('posts').update({ saved_count: post.saved_count - 1 }).eq('id', postId)
+  if (!data || data.length === 0) {
+    return { error: null }
   }
+
+  // Dùng RPC hoặc Trigger để cập nhật đếm (tránh race condition)
+  await supabase.rpc('decrement_saved_count', { row_id: postId })
 
   return { error: null }
 }
 
-export async function getMySavedPosts() {
+export async function getMySavedPosts(page = 1, limit = 10) {
   const session = await getCurrentSession()
-  if (!session?.user) return { data: [], error: new Error('Bạn cần đăng nhập.') }
+  if (!session?.user) return { data: [], hasMore: false, error: new Error('Bạn cần đăng nhập.') }
 
-  const { data: savedRows, error: savedError } = await supabase
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  const { data: savedRows, count, error: savedError } = await supabase
     .from('saved_posts')
-    .select('post_id, created_at')
+    .select('post_id, created_at', { count: 'exact' })
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false })
+    .range(from, to)
 
   if (savedError) {
     logError('[E-XANH] Lỗi lấy bài đã lưu:', savedError?.message || savedError)
-    return { data: [], error: savedError }
+    return { data: [], hasMore: false, error: savedError }
   }
 
   if (!savedRows || savedRows.length === 0) {
-    return { data: [], error: null }
+    return { data: [], hasMore: false, error: null }
   }
 
   const postIds = savedRows.map(row => row.post_id)
@@ -123,7 +127,7 @@ export async function getMySavedPosts() {
 
   if (postsError) {
     logError('[E-XANH] Lỗi lấy chi tiết posts:', postsError?.message || postsError)
-    return { data: [], error: postsError }
+    return { data: [], hasMore: false, error: postsError }
   }
 
   const postsMap = new Map(postsData.map(p => [p.id, p]))
@@ -151,7 +155,26 @@ export async function getMySavedPosts() {
     }
   }).filter(Boolean)
 
-  return { data: mappedPosts, error: null }
+  return { data: mappedPosts, hasMore: count > to + 1, error: null }
+}
+
+export async function getPostMetrics(postId) {
+  const { data: likesCount } = await supabase.from('post_likes').select('id', { count: 'exact' }).eq('post_id', postId)
+  const { data: savesCount } = await supabase.from('saved_posts').select('id', { count: 'exact' }).eq('post_id', postId)
+  return { likes: likesCount?.length || 0, saves: savesCount?.length || 0 }
+}
+
+export async function getUserInteractionMap(userId) {
+  if (!userId) return { likedMap: {}, savedMap: {} }
+  const [{ data: likes }, { data: saves }] = await Promise.all([
+    supabase.from('post_likes').select('post_id').eq('user_id', userId),
+    supabase.from('saved_posts').select('post_id').eq('user_id', userId)
+  ])
+  const likedMap = {}
+  const savedMap = {}
+  likes?.forEach(l => likedMap[l.post_id] = true)
+  saves?.forEach(s => savedMap[s.post_id] = true)
+  return { likedMap, savedMap }
 }
 
 export async function isPostSaved(postId) {
@@ -184,15 +207,14 @@ export async function likePost(postId) {
     .from('post_likes')
     .insert({ user_id: session.user.id, post_id: postId })
 
-  if (error && error.code !== '23505') {
+  if (error) {
+    if (error.code === '23505') return { error: null } // already liked, ignore and don't increment
     logError('[E-XANH] Lỗi thích bài viết:', error?.message || error)
     return { error }
   }
 
-  const { data: post } = await supabase.from('posts').select('likes_count').eq('id', postId).single()
-  if (post) {
-    await supabase.from('posts').update({ likes_count: (post.likes_count || 0) + 1 }).eq('id', postId)
-  }
+  // Dùng RPC hoặc Trigger để cập nhật đếm (tránh race condition)
+  await supabase.rpc('increment_likes_count', { row_id: postId })
 
   return { error: null }
 }
@@ -201,21 +223,24 @@ export async function unlikePost(postId) {
   const session = await getCurrentSession()
   if (!session?.user) return { error: new Error('Bạn cần đăng nhập.') }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('post_likes')
     .delete()
     .eq('user_id', session.user.id)
     .eq('post_id', postId)
+    .select()
 
   if (error) {
     logError('[E-XANH] Lỗi bỏ thích bài viết:', error?.message || error)
     return { error }
   }
 
-  const { data: post } = await supabase.from('posts').select('likes_count').eq('id', postId).single()
-  if (post && post.likes_count > 0) {
-    await supabase.from('posts').update({ likes_count: post.likes_count - 1 }).eq('id', postId)
+  if (!data || data.length === 0) {
+    return { error: null }
   }
+
+  // Dùng RPC hoặc Trigger để cập nhật đếm (tránh race condition)
+  await supabase.rpc('decrement_likes_count', { row_id: postId })
 
   return { error: null }
 }
@@ -486,59 +511,3 @@ export async function sendCommentNotification(userId, commentContent, action, po
   }
 }
 
-export async function followUser(followingId) {
-  const session = await getCurrentSession()
-  if (!session?.user) return { error: new Error('Bạn cần đăng nhập để theo dõi.') }
-
-  if (session.user.id === followingId) {
-    return { error: new Error('Không thể tự theo dõi chính mình.') }
-  }
-
-  const { error } = await supabase
-    .from('user_follows')
-    .insert({ follower_id: session.user.id, following_id: followingId })
-
-  if (error && error.code !== '23505') {
-    logError('[E-XANH] Lỗi theo dõi người dùng:', error?.message || error)
-    return { error }
-  }
-
-  return { error: null }
-}
-
-export async function unfollowUser(followingId) {
-  const session = await getCurrentSession()
-  if (!session?.user) return { error: new Error('Bạn cần đăng nhập.') }
-
-  const { error } = await supabase
-    .from('user_follows')
-    .delete()
-    .eq('follower_id', session.user.id)
-    .eq('following_id', followingId)
-
-  if (error) {
-    logError('[E-XANH] Lỗi hủy theo dõi người dùng:', error?.message || error)
-    return { error }
-  }
-
-  return { error: null }
-}
-
-export async function checkFollowStatus(followingId) {
-  const session = await getCurrentSession()
-  if (!session?.user) return { data: false, error: null }
-
-  const { data, error } = await supabase
-    .from('user_follows')
-    .select('following_id')
-    .eq('follower_id', session.user.id)
-    .eq('following_id', followingId)
-    .maybeSingle()
-
-  if (error) {
-    logError('[E-XANH] Lỗi kiểm tra theo dõi:', error?.message || error)
-    return { data: false, error }
-  }
-  
-  return { data: !!data, error: null }
-}

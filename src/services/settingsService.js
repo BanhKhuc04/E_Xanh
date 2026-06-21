@@ -56,23 +56,33 @@ function decodeSettingValue(value, fallback) {
   return value
 }
 
-async function isTableAvailable(tableName) {
+async function isTableAvailable(tableName, force = false) {
+  if (force) TABLE_CACHE[tableName] = null
   if (TABLE_CACHE[tableName] !== null) {
     return TABLE_CACHE[tableName]
   }
 
   const { error } = await supabase.from(tableName).select('*').limit(1)
-  if (isMissingRelationError(error)) {
-    TABLE_CACHE[tableName] = false
-    return false
-  }
-
-  if (error && !isPermissionError(error)) {
+  const available = !isMissingRelationError(error)
+  TABLE_CACHE[tableName] = available
+  
+  if (error && !isPermissionError(error) && available) {
     logWarn(`[Settings] Probe bảng ${tableName} trả lỗi`, error)
   }
 
-  TABLE_CACHE[tableName] = true
-  return true
+  if (!available) {
+    setTimeout(() => {
+      TABLE_CACHE[tableName] = null
+    }, 10000)
+  }
+
+  return available
+}
+
+export function clearSettingsCache() {
+  Object.keys(TABLE_CACHE).forEach(key => {
+    TABLE_CACHE[key] = null
+  })
 }
 
 async function getAuthenticatedStaffProfile() {

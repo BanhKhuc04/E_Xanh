@@ -610,19 +610,22 @@
 
 .account-modal__field input,
 .account-modal__field textarea {
-  padding: 12px 16px;
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   font-family: inherit;
+  outline: none;
 }
 
 .account-modal__field input:focus,
 .account-modal__field textarea:focus {
-  border-color: #4f8428;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(193, 217, 92, 0.3);
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-ring);
 }
 
 .account-modal__field textarea {

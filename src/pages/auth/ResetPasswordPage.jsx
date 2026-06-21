@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import BannerCarousel from '../../components/common/BannerCarousel'
 import BrandLogo from '../../components/common/BrandLogo'
@@ -286,15 +286,7 @@ function ResetPasswordPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Đặt lại mật khẩu - E-XANH</title>
-        <meta
-          name="description"
-          content="Cập nhật mật khẩu mới cho tài khoản E-XANH sau khi xác minh bằng liên kết email."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      <SEO title="Đặt lại mật khẩu" noIndex={true} />
 
       <div className="auth-page">
         <div className="auth-layout">
@@ -331,7 +323,7 @@ function ResetPasswordPage() {
               {banners.length > 0 ? (
                 <BannerCarousel banners={banners} />
               ) : (
-                <span style={{ display: 'grid', placeItems: 'center', height: '100%' }}>Ảnh minh họa đang cập nhật</span>
+                <img src="/assets/images/auth-illustration.png" alt="Minh họa E-XANH" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               )}
             </div>
           </section>

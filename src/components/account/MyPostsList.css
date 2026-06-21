@@ -23,6 +23,10 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+.public-post-card.no-thumbnail {
+  grid-template-columns: 1fr;
+}
+
 .public-post-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(79, 132, 40, 0.1);
@@ -140,6 +144,10 @@
   border: 1px solid rgba(79, 132, 40, 0.1);
   box-shadow: 0 12px 26px rgba(51, 106, 41, 0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.private-post-card.no-thumbnail {
+  grid-template-columns: 1fr;
 }
 
 .private-post-card:hover {
@@ -435,9 +443,15 @@
   .public-post-card {
     grid-template-columns: minmax(0, 1fr) 228px;
   }
+  .public-post-card.no-thumbnail {
+    grid-template-columns: 1fr;
+  }
 
   .private-post-card {
     grid-template-columns: minmax(0, 1fr) 196px;
+  }
+  .private-post-card.no-thumbnail {
+    grid-template-columns: 1fr;
   }
 
   .my-posts-skeleton__card {
@@ -651,9 +665,15 @@
   .public-post-card {
     grid-template-columns: 1fr 320px;
   }
+  .public-post-card.no-thumbnail {
+    grid-template-columns: 1fr;
+  }
 
   .private-post-card {
     grid-template-columns: 1fr 252px;
+  }
+  .private-post-card.no-thumbnail {
+    grid-template-columns: 1fr;
   }
 
   .public-post-card__content {

@@ -12,10 +12,25 @@ function UserRoute() {
 
     async function checkAuth() {
       try {
-        const { getCurrentSession } = await import('../../services/authService')
+        const { getCurrentSession, ensureActiveProfileSession } = await import('../../services/authService')
         const session = await getCurrentSession()
+        
+        if (!session?.user) {
+          if (isMounted) {
+            setUser(null)
+            setLoading(false)
+          }
+          return
+        }
+
+        const { allowed } = await ensureActiveProfileSession(session.user.id)
         if (isMounted) {
-          setUser(session?.user || null)
+          if (allowed) {
+            setUser(session.user)
+          } else {
+            setUser(null)
+            // State message can be passed via navigate, but here we just sign out
+          }
           setLoading(false)
         }
       } catch (err) {

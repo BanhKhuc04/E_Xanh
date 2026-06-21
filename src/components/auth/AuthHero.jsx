@@ -1,6 +1,5 @@
 import BannerCarousel from '../common/BannerCarousel'
 import BrandLogo from '../common/BrandLogo'
-import heroImage from '../../assets/hero.png'
 
 function AuthHero({
   badge = 'Cộng đồng sống xanh',
@@ -9,6 +8,7 @@ function AuthHero({
   highlights = [],
   banners = [],
   showMedia = true,
+  isLoadingBanners = false,
 }) {
   return (
     <section className="auth-hero-panel">
@@ -34,10 +34,12 @@ function AuthHero({
 
       {showMedia ? (
         <div className="auth-hero-media">
-          {banners.length > 0 ? (
+          {isLoadingBanners ? (
+            <div className="hero-media__skeleton" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', backgroundColor: '#e5e7eb', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+          ) : banners.length > 0 ? (
             <BannerCarousel banners={banners} />
           ) : (
-            <img src={heroImage} alt="Không gian cộng đồng E-XANH" width="1280" height="720" />
+            <div className="hero-media__skeleton" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', backgroundColor: '#f3f4f6' }} />
           )}
         </div>
       ) : null}

@@ -1,18 +1,16 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { Helmet } from 'react-helmet-async'
+import { useEffect, useState, useMemo } from 'react'
+import SEO from '../../components/SEO'
 import ProfileHeader from '../../components/account/ProfileHeader'
-import ProfileStats from '../../components/account/ProfileStats'
 import MyPostsList from '../../components/account/MyPostsList'
 import RecentSavedPosts from '../../components/account/RecentSavedPosts'
 import RecentComments from '../../components/account/RecentComments'
 import AccountInfoCard from '../../components/account/AccountInfoCard'
-import {
-  getCurrentSession,
-  getCurrentUserProfile,
-  onAuthStateChange,
-  signOut,
+import { 
+  signOut
 } from '../../services/authService'
+import { useAuth } from '../../contexts/AuthContext'
 import '../../styles/account.css'
 
 function getAvatar(name, email, avatarUrl) {
@@ -26,101 +24,111 @@ function getAvatar(name, email, avatarUrl) {
   return 'EX'
 }
 
-function AccountPage() {
+const AccountPage = () => {
   const navigate = useNavigate()
-  const [currentUser, setCurrentUser] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [myPostsData, setMyPostsData] = useState([])
   const [postsLoading, setPostsLoading] = useState(true)
+  const [myPostsPage, setMyPostsPage] = useState(1)
+  const [hasMoreMyPosts, setHasMoreMyPosts] = useState(false)
+  const [isLoadingMoreMyPosts, setIsLoadingMoreMyPosts] = useState(false)
   const [savedPostsData, setSavedPostsData] = useState([])
   const [recentCommentsData, setRecentCommentsData] = useState([])
+  const [postsError, setPostsError] = useState('')
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
   const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
 
+  const { user: authUser, profile: authProfile, loading: authLoading } = useAuth()
+  
+  const currentUser = useMemo(() => {
+    if (!authUser) return null
+    return {
+      id: authUser.id,
+      email: authUser.email,
+      name: authProfile?.name || authUser.email.split('@')[0],
+      avatar: getAvatar(authProfile?.name, authUser.email, authProfile?.avatar_url),
+      avatar_url: authProfile?.avatar_url || '',
+      cover_url: authProfile?.cover_url || '',
+      facebook_url: authProfile?.facebook_url || '',
+      role: authProfile?.role || 'user',
+      status: authProfile?.status || 'active',
+      bio: authProfile?.bio,
+      created_at: authProfile?.created_at,
+    }
+  }, [authUser, authProfile])
+
   useEffect(() => {
     let isMounted = true
 
-    async function loadUser(session) {
-      if (!session?.user) {
-        if (isMounted) {
-          setCurrentUser(null)
-          setLoading(false)
-          setPostsLoading(false)
-        }
-        return
-      }
-      const profile = await getCurrentUserProfile(session.user.id)
+    if (authLoading) return
+
+    if (!authUser) {
       if (isMounted) {
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email,
-          name: profile?.name || session.user.email.split('@')[0],
-          avatar: getAvatar(profile?.name, session.user.email, profile?.avatar_url),
-          avatar_url: profile?.avatar_url || '',
-          cover_url: profile?.cover_url || '',
-          facebook_url: profile?.facebook_url || '',
-          role: profile?.role || 'user',
-          status: profile?.status || 'active',
-          bio: profile?.bio,
-          created_at: profile?.created_at,
-        })
-        setLoading(false)
+        setPostsLoading(false)
       }
+      return
     }
 
-    async function initAuth() {
-      const session = await getCurrentSession()
-      loadUser(session)
-      
-      if (session?.user) {
+    async function loadData() {
+      const { getMyPosts } = await import('../../services/postService')
+      const { getMySavedPosts } = await import('../../services/interactionService')
+      const { getMyComments } = await import('../../services/commentService')
 
-        const { getMyPosts } = await import('../../services/postService')
-        const { getMySavedPosts } = await import('../../services/interactionService')
-        const { getMyComments } = await import('../../services/commentService')
+      const [myPostsRes, savedRes, commentsRes] = await Promise.all([
+        getMyPosts(authUser.id, 1, 10),
+        getMySavedPosts(1, 10),
+        getMyComments(authUser.id)
+      ])
 
-        const [myPostsRes, savedRes, commentsRes] = await Promise.all([
-          getMyPosts(session.user.id),
-          getMySavedPosts(),
-          getMyComments(session.user.id)
-        ])
-
-        if (isMounted) {
-          if (myPostsRes.data) setMyPostsData(myPostsRes.data)
-          if (savedRes.data) setSavedPostsData(savedRes.data)
-          if (commentsRes.data) setRecentCommentsData(commentsRes.data)
-          setPostsLoading(false)
+      if (isMounted) {
+        if (myPostsRes.error || savedRes.error || commentsRes.error) {
+           setPostsError('Không thể tải một số dữ liệu cá nhân. Vui lòng thử lại sau.')
         }
+        if (myPostsRes.data) {
+          setMyPostsData(myPostsRes.data)
+          setHasMoreMyPosts(myPostsRes.hasMore)
+        }
+        if (savedRes.data) setSavedPostsData(savedRes.data)
+        if (commentsRes.data) setRecentCommentsData(commentsRes.data)
+        setPostsLoading(false)
       }
     }
 
-    initAuth()
-
-    const subscription = onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        loadUser(session)
-      }
-    })
-
-    const handleProfileUpdate = () => {
-      getCurrentSession().then(loadUser)
-    }
-    window.addEventListener('profileUpdated', handleProfileUpdate)
+    loadData()
 
     return () => {
       isMounted = false
-      subscription?.unsubscribe?.()
-      window.removeEventListener('profileUpdated', handleProfileUpdate)
     }
-  }, [])
+  }, [authUser, authProfile, authLoading])
 
-  async function handleLogout() {
-    await signOut()
-    navigate('/')
+  const handleLoadMoreMyPosts = async () => {
+    if (isLoadingMoreMyPosts || !hasMoreMyPosts) return
+    setIsLoadingMoreMyPosts(true)
+    const { getMyPosts } = await import('../../services/postService')
+    const nextPage = myPostsPage + 1
+    const { data, hasMore } = await getMyPosts(authUser.id, nextPage, 10)
+    if (data) {
+      setMyPostsData(prev => [...prev, ...data])
+      setHasMoreMyPosts(hasMore)
+      setMyPostsPage(nextPage)
+    }
+    setIsLoadingMoreMyPosts(false)
   }
 
-  if (loading) {
+  const [logoutError, setLogoutError] = useState('')
+
+  async function handleLogout() {
+    setLogoutError('')
+    const { error } = await signOut()
+    if (error) {
+      setLogoutError('Đăng xuất thất bại. Vui lòng thử lại.')
+    } else {
+      navigate('/')
+    }
+  }
+
+  if (authLoading) {
     return <div className="account-page"><div className="shell" style={{ padding: '40px 0', textAlign: 'center' }}>Đang tải...</div></div>
   }
 
@@ -145,24 +153,7 @@ function AccountPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Tài khoản cá nhân - E-XANH</title>
-        <meta
-          name="description"
-          content="Quản lý thông tin tài khoản, xem lại các bài viết đã lưu, lịch sử tra cứu điện và các hoạt động khác của bạn trên E-XANH."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Tài khoản cá nhân - E-XANH" />
-        <meta
-          property="og:description"
-          content="Quản lý thông tin tài khoản, xem lại các bài viết đã lưu, lịch sử tra cứu điện và các hoạt động khác của bạn trên E-XANH."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <SEO title="Tài khoản cá nhân" noIndex={true} />
 
       <div className="account-page">
         <div className="account-page__breadcrumb">
@@ -174,16 +165,32 @@ function AccountPage() {
         <ProfileHeader 
           user={currentUser} 
           onLogout={handleLogout} 
+          stats={[
+            { label: 'Bài đã đăng', value: myPostsData.length },
+            { label: 'Bài đã lưu', value: savedPostsData.length },
+            { label: 'Bình luận', value: recentCommentsData.length },
+          ]}
         />
-        <ProfileStats stats={[
-          { label: 'Bài đã đăng', value: myPostsData.length },
-          { label: 'Bài đã lưu', value: savedPostsData.length },
-          { label: 'Bình luận', value: recentCommentsData.length },
-        ]} />
 
         <div className="account-layout">
           <div className="account-layout__main">
-            <MyPostsList posts={myPostsData} loading={postsLoading} />
+            {postsError && (
+              <div className="admin-alert admin-alert--error" style={{ marginBottom: '24px' }}>
+                {postsError}
+              </div>
+            )}
+            {logoutError && (
+              <div className="admin-alert admin-alert--error" style={{ marginBottom: '24px' }}>
+                {logoutError}
+              </div>
+            )}
+            <MyPostsList 
+              posts={myPostsData} 
+              loading={postsLoading} 
+              hasMore={hasMoreMyPosts}
+              onLoadMore={handleLoadMoreMyPosts}
+              isLoadingMore={isLoadingMoreMyPosts}
+            />
             <RecentSavedPosts posts={savedPostsData.slice(0, 3)} />
             <RecentComments comments={recentCommentsData.slice(0, 3)} />
           </div>

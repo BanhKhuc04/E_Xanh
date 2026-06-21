@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAdminStats } from '../../services/analyticsService'
 import { postStatusMap } from '../../data/mock/adminPosts'
+import PageLoader from '../../components/common/PageLoader'
 
 function DashboardIcon({ icon }) {
   const icons = {
@@ -43,15 +44,23 @@ function DashboardIcon({ icon }) {
 function AdminDashboardPage() {
   const [statsData, setStatsData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
     async function loadStats() {
-      const data = await getAdminStats('30 ngày qua')
-      if (isMounted) {
-        setStatsData(data)
-        setIsLoading(false)
+      try {
+        const data = await getAdminStats('30 ngày qua')
+        if (isMounted) {
+          setStatsData(data)
+          setIsLoading(false)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Lỗi tải dữ liệu thống kê')
+          setIsLoading(false)
+        }
       }
     }
 
@@ -77,14 +86,19 @@ function AdminDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="admin-dashboard page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <p style={{ fontSize: '1.2rem', color: '#666' }}>Đang tải dữ liệu tổng quan...</p>
+      <div className="admin-dashboard page">
+        <PageLoader />
       </div>
     )
   }
 
   return (
     <div className="admin-dashboard page">
+      {error && (
+        <div className="admin-alert admin-alert--error" style={{ marginBottom: '24px' }}>
+          {error}
+        </div>
+      )}
       <section className="admin-dashboard__hero">
         <span className="page-badge page-badge--soft">Bảng điều khiển quản trị</span>
         <div className="admin-dashboard__hero-copy">

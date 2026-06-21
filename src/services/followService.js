@@ -12,11 +12,25 @@ export async function followUser(targetUserId) {
     return { data: null, error: new Error('Không thể theo dõi chính mình.') }
   }
 
+  const { data: existing, error: checkError } = await supabase
+    .from('user_follows')
+    .select('id')
+    .eq('follower_id', currentUserId)
+    .eq('following_id', targetUserId)
+    .maybeSingle()
+
+  if (checkError) return { data: null, error: checkError }
+  if (existing) return { data: existing, error: null }
+
   const { data, error } = await supabase
     .from('user_follows')
     .insert([{ follower_id: currentUserId, following_id: targetUserId }])
     .select()
-    .single()
+    .maybeSingle()
+
+  if (error && error.code === '23505') {
+    return { data: { follower_id: currentUserId, following_id: targetUserId, already_followed: true }, error: null }
+  }
 
   return { data, error }
 }
@@ -35,6 +49,10 @@ export async function unfollowUser(targetUserId) {
     .eq('follower_id', currentUserId)
     .eq('following_id', targetUserId)
     .select()
+
+  if (!error && (!data || data.length === 0)) {
+    return { data: { already_unfollowed: true }, error: null }
+  }
 
   return { data, error }
 }

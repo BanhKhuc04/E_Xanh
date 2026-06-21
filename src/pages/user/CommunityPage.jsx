@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { useLocation } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
@@ -143,13 +143,10 @@ function CommunityPage() {
           let likedMap = {}
           let savedMap = {}
           if (userId) {
-            const { supabase } = await import('../../lib/supabase')
-            const [{ data: likes }, { data: saves }] = await Promise.all([
-              supabase.from('post_likes').select('post_id').eq('user_id', userId),
-              supabase.from('saved_posts').select('post_id').eq('user_id', userId)
-            ])
-            likes?.forEach(l => likedMap[l.post_id] = true)
-            saves?.forEach(s => savedMap[s.post_id] = true)
+            const { getUserInteractionMap } = await import('../../services/interactionService')
+            const maps = await getUserInteractionMap(userId)
+            likedMap = maps.likedMap
+            savedMap = maps.savedMap
           }
 
           const formattedPosts = data.map(p => {
@@ -163,7 +160,7 @@ function CommunityPage() {
               if (p.profiles?.name) return p.profiles.name
               if (p.profiles?.display_name) return p.profiles.display_name
               if (userId && p.author_id === userId) {
-                 return 'Thành viên E-XANH'
+                 return currentUser?.name || 'Bạn'
               }
               return 'Thành viên E-XANH'
             }
@@ -213,7 +210,7 @@ function CommunityPage() {
             setPosts(prev => [...prev, ...formattedPosts])
           }
           
-          setHasMorePosts(formattedPosts.length === limit)
+            setHasMorePosts(postsResult.hasMore)
         }
 
         if (page === 1 && activeMembersResult) {
@@ -236,7 +233,7 @@ function CommunityPage() {
       }
     }
     loadData()
-  }, [page, activeFilter])
+  }, [page, activeFilter, currentUser?.id, currentUser?.name])
 
   useEffect(() => {
     function handleComposerSuccess(event) {
@@ -389,19 +386,7 @@ function CommunityPage() {
 
   return (
     <div className="community-page">
-      <Helmet>
-        <title>Cộng đồng — E-XANH</title>
-        <meta name="description" content="Tham gia cộng đồng E-XANH, nơi sinh viên và người trẻ chia sẻ kinh nghiệm sống xanh, mẹo tiết kiệm điện và lối sống bền vững." />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Cộng đồng E-XANH — Chia sẻ kinh nghiệm sống xanh" />
-        <meta property="og:description" content="Cộng đồng nơi sinh viên chia sẻ mẹo tiết kiệm điện, kinh nghiệm sống xanh và các bí quyết giảm chi phí điện." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO title="Cộng đồng" description="Tham gia cộng đồng E-XANH, nơi sinh viên và người trẻ chia sẻ kinh nghiệm sống xanh, mẹo tiết kiệm điện và lối sống bền vững." url={canonicalUrl} />
       <PageHero
         {...pageHeroContent.community}
         actions={(

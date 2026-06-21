@@ -7,7 +7,9 @@ export function countMarkdownImages(content = '') {
 }
 
 export function buildMarkdownImage(altText = 'Ảnh minh họa', url = '') {
-  return `![${altText.trim() || 'Ảnh minh họa'}](${url})`
+  const safeAlt = (altText || '').replace(/[\][]/g, '').trim() || 'Ảnh minh họa'
+  const safeUrl = (url || '').replace(/[()]/g, '').trim()
+  return `![${safeAlt}](${safeUrl})`
 }
 
 export function isRenderableMarkdownImageUrl(url = '') {
@@ -16,6 +18,7 @@ export function isRenderableMarkdownImageUrl(url = '') {
 
 export function stripMarkdownToPlainText(content = '') {
   return content
+    .replace(/<[^>]*>?/gm, '') // Strip HTML tags
     .replace(MARKDOWN_IMAGE_PATTERN, '$1 ')
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '$1')
     .replace(/[*_`>#-]/g, ' ')

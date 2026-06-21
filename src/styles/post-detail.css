@@ -515,7 +515,7 @@
 
 .post-detail-suggestions__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 24px;
 }
 
@@ -530,10 +530,13 @@
 }
 
 @media (max-width: 1120px) {
-  .post-detail-layout,
-  .post-detail-suggestions__grid {
+  .post-detail-layout {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 992px) {
+  /* auto-fill already handles responsive, no override needed */
 }
 
 @media (max-width: 768px) {
@@ -573,5 +576,9 @@
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
+  }
+
+  .post-detail-suggestions__grid {
+    grid-template-columns: 1fr;
   }
 }

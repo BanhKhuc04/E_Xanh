@@ -1,13 +1,14 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Turnstile } from '@marsidev/react-turnstile'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { signUpWithEmail } from '../../services/authService'
 import { fetchBanners } from '../../services/bannerService'
 import AuthLayout from '../../components/auth/AuthLayout'
 import AuthHero from '../../components/auth/AuthHero'
 import AuthModeSwitch from '../../components/auth/AuthModeSwitch'
 import AuthGoogleButton from '../../components/auth/AuthGoogleButton'
+import Toast from '../../components/common/Toast'
 import '../../styles/auth.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -28,6 +29,8 @@ function RegisterPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [banners, setBanners] = useState([])
+  const [isLoadingBanners, setIsLoadingBanners] = useState(true)
+  const [toast, setToast] = useState('')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccessMode, setIsSuccessMode] = useState(false)
@@ -39,6 +42,7 @@ function RegisterPage() {
     async function load() {
       const { data } = await fetchBanners('auth', true)
       if (data) setBanners(data)
+      setIsLoadingBanners(false)
     }
     load()
   }, [])
@@ -96,13 +100,43 @@ function RegisterPage() {
       return
     }
 
-    if (!isCaptchaDisabled && !turnstileToken) {
-      setSuccessMessage('')
-      setErrorMessage('Vui lòng xác minh bạn là người.')
-      return
-    }
+    if (!isCaptchaDisabled) {
+      if (!turnstileToken) {
+        setSuccessMessage('')
+        setErrorMessage('Vui lòng xác minh bạn là người.')
+        return
+      }
 
-    setIsSubmitting(true)
+      const verifyUrl = import.meta.env.VITE_CAPTCHA_VERIFY_URL
+      if (!verifyUrl) {
+        setSuccessMessage('')
+        setErrorMessage('Hệ thống thiếu API/Edge Function để verify CAPTCHA. Vui lòng bổ sung VITE_CAPTCHA_VERIFY_URL hoặc set VITE_DISABLE_CAPTCHA=true.')
+        return
+      }
+
+      setIsSubmitting(true)
+
+      try {
+        const verifyRes = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: turnstileToken }),
+        })
+        const verifyData = await verifyRes.json()
+        if (!verifyData.success) {
+          setErrorMessage('Xác minh CAPTCHA thất bại. Vui lòng thử lại.')
+          setIsSubmitting(false)
+          return
+        }
+      } catch (err) {
+        console.error('Lỗi verify CAPTCHA:', err)
+        setErrorMessage('Lỗi kết nối khi xác minh CAPTCHA.')
+        setIsSubmitting(false)
+        return
+      }
+    } else {
+      setIsSubmitting(true)
+    }
 
     const { error } = await signUpWithEmail({
       name: form.name.trim(),
@@ -133,12 +167,7 @@ function RegisterPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Đăng ký - E-XANH</title>
-        <meta name="description" content="Tạo tài khoản E-XANH để tham gia cộng đồng và lưu các mẹo tiết kiệm điện." />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      <SEO title="Đăng ký" noIndex={true} />
 
       <AuthLayout
         hero={(
@@ -148,6 +177,7 @@ function RegisterPage() {
             description="Tạo tài khoản để lưu bài viết, đăng chia sẻ với cộng đồng và theo dõi các dấu mốc tiết kiệm điện của riêng bạn trong một không gian gọn và dễ dùng."
             highlights={['Lưu nội dung hữu ích', 'Đăng bài chia sẻ', 'Cá nhân hóa trải nghiệm']}
             banners={banners}
+            isLoadingBanners={isLoadingBanners}
           />
         )}
         form={(
@@ -179,9 +209,9 @@ function RegisterPage() {
                     try {
                       const { supabase } = await import('../../lib/supabase')
                       await supabase.auth.resend({ type: 'signup', email: form.email })
-                      alert('Đã gửi lại email xác nhận!')
+                      setToast('Đã gửi lại email xác nhận!')
                     } catch {
-                      alert('Lỗi gửi lại email. Vui lòng thử lại sau.')
+                      setToast('Lỗi gửi lại email. Vui lòng thử lại sau.')
                     }
                   }}
                 >
@@ -319,6 +349,8 @@ function RegisterPage() {
           </section>
         )}
       />
+
+      <Toast message={toast} onClose={() => setToast('')} />
     </>
   )
 }

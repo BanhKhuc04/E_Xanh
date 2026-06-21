@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import { Globe2, Mail, Phone, Sparkles, Target, Users } from 'lucide-react'
 import '../../styles/static-pages.css'
 import BrandLogo from '../../components/common/BrandLogo'
@@ -14,7 +14,7 @@ const teamMembers = [
   { name: 'Trần Mạnh Tuấn', role: 'Media', image: '/images/team/manh-tuan.jpg', bio: 'Phụ trách media, hỗ trợ kể câu chuyện E-XANH qua hình ảnh và video.' },
   { name: 'Trịnh Thị Ngọc Ánh', role: 'Content', image: '/images/team/ngoc-anh.jpg', bio: 'Phát triển nội dung truyền thông gần gũi với sinh viên và Gen Z.' },
   { name: 'Đỗ Yến Nhi', role: 'Content', image: '/images/team/yen-nhi.jpg', bio: 'Chắt lọc thông điệp thực tế để lan tỏa thói quen sử dụng điện tiết kiệm hơn.' },
-  { name: 'Khúc Việt Anh', role: 'Web Developer', image: '/images/team/viet-anh.jpg', bio: 'Phát triển website và hoàn thiện các tính năng số cho hệ sinh thái E-XANH.' },
+  { name: 'Khúc Việt Anh', role: 'Web Developer', image: '/images/team/viet-anh.webp', bio: 'Phát triển website và hoàn thiện các tính năng số cho hệ sinh thái E-XANH.' },
 ]
 
 const missionHighlights = [
@@ -71,25 +71,7 @@ function AboutPage() {
 
   return (
     <div className="static-page about-page">
-      <Helmet>
-        <title>Về chúng tôi — E-XANH</title>
-        <meta
-          name="description"
-          content="Tìm hiểu về dự án E-XANH, đội ngũ thực hiện và sứ mệnh nâng cao nhận thức sử dụng điện tiết kiệm hơn cho sinh viên FPT Hà Nội và Gen Z."
-        />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content="Về chúng tôi — E-XANH" />
-        <meta
-          property="og:description"
-          content="Dự án truyền thông giúp sinh viên và Gen Z hình thành thói quen sử dụng điện tiết kiệm, thông minh và bền vững hơn."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <SEO title="Về chúng tôi" description="Tìm hiểu về dự án E-XANH, đội ngũ thực hiện và sứ mệnh nâng cao nhận thức sử dụng điện tiết kiệm hơn cho sinh viên FPT Hà Nội và Gen Z." url={canonicalUrl} />
 
       <div className="static-page__breadcrumb">
         <Link to="/">Trang chủ</Link>

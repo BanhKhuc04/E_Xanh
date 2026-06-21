@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import UserAvatar from '../common/UserAvatar'
 import '../../styles/author-sidebar-card.css'
 
 function AuthorSidebarCard({ 
@@ -14,8 +15,6 @@ function AuthorSidebarCard({
   isCurrentUser
 }) {
   const defaultName = authorName || 'Thành viên'
-  const fallbackInitial = defaultName.charAt(0).toUpperCase()
-  
   const displayRole = authorRole === 'admin' ? 'Quản trị viên' 
     : authorRole === 'moderator' ? 'Điều hành viên' 
     : 'Thành viên E-XANH'
@@ -25,11 +24,13 @@ function AuthorSidebarCard({
       <div className="exanh-author-card__cover"></div>
 
       <div className="exanh-author-card__avatarWrap">
-        {authorAvatar ? (
-          <img src={authorAvatar} alt={defaultName} className="exanh-author-card__avatar" />
-        ) : (
-          <div className="exanh-author-card__avatar">{fallbackInitial}</div>
-        )}
+        <UserAvatar
+          src={authorAvatar}
+          name={defaultName}
+          size="lg"
+          withFrame={false}
+          className="exanh-author-card__avatar"
+        />
       </div>
 
       <div className="exanh-author-card__body">
@@ -62,7 +63,7 @@ function AuthorSidebarCard({
               {isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
             </button>
           )}
-          <Link to={`/nguoi-dung/${authorId}`} className="exanh-author-card__profile">
+          <Link to={isCurrentUser ? '/tai-khoan' : `/nguoi-dung/${authorId}`} className="exanh-author-card__profile">
             {isCurrentUser ? 'Chỉnh sửa hồ sơ' : 'Xem trang cá nhân'}
           </Link>
         </div>

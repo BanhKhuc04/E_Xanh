@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import SEO from '../../components/SEO'
 import {
   formatCurrency,
   formatHistoryDate,
@@ -49,6 +49,51 @@ function ElectricityHistoryPage() {
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
+
+  const modalRef = useRef(null)
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && selectedHistory) {
+        setSelectedHistory(null)
+      }
+      
+      if (e.key === 'Tab' && selectedHistory && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        const firstElement = focusableElements[0]
+        const lastElement = focusableElements[focusableElements.length - 1]
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus()
+            e.preventDefault()
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus()
+            e.preventDefault()
+          }
+        }
+      }
+    }
+
+    if (selectedHistory) {
+      document.addEventListener('keydown', handleKeyDown)
+      // Focus modal when opened
+      setTimeout(() => {
+        if (modalRef.current) {
+          const firstFocusable = modalRef.current.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+          if (firstFocusable) firstFocusable.focus()
+        }
+      }, 50)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedHistory])
 
   useEffect(() => {
     async function fetchHistories() {
@@ -149,6 +194,10 @@ function ElectricityHistoryPage() {
   }, [visibleHistories])
 
   async function handleDelete(id) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa mục lịch sử này không? Thao tác này không thể hoàn tác.')) {
+      return
+    }
+
     const { getCurrentSession } = await import('../../services/authService')
     const session = await getCurrentSession()
     
@@ -185,8 +234,8 @@ function ElectricityHistoryPage() {
       
       if (session?.user) {
         try {
-          const { supabase } = await import('../../lib/supabase')
-          const { error } = await supabase.from('electricity_checks').delete().eq('user_id', session.user.id)
+          const { deleteAllElectricityChecks } = await import('../../services/electricityService')
+          const { error } = await deleteAllElectricityChecks(session.user.id)
           if (!error) {
             setHistories([])
           } else {
@@ -235,12 +284,7 @@ function ElectricityHistoryPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Lịch sử kiểm tra tiền điện - E-XANH</title>
-        <meta name="description" content="Xem lại các lần kiểm tra tiền điện, so sánh mức tiêu thụ và theo dõi chi phí hằng tháng của bạn." />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta name="robots" content="noindex,nofollow" />
-      </Helmet>
+      <SEO title="Lịch sử kiểm tra tiền điện" noIndex={true} />
 
       <div className="electricity-history-page">
       <div className="electricity-history-page__breadcrumb">
@@ -469,7 +513,13 @@ function ElectricityHistoryPage() {
       )}
 
       {selectedHistory ? (
-        <div className="electricity-history-modal">
+        <div 
+          className="electricity-history-modal" 
+          ref={modalRef} 
+          role="dialog" 
+          aria-modal="true" 
+          tabIndex="-1"
+        >
           <div className="electricity-history-modal__backdrop" onClick={() => setSelectedHistory(null)}></div>
           <div className="electricity-history-modal__panel">
             <div className="electricity-history-modal__header">

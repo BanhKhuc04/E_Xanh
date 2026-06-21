@@ -11,7 +11,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+const createChainableMock = () => {
+  const handler = {
+    get: (target, prop) => {
+      if (prop === 'then') {
+        return (resolve) => resolve({ data: null, error: new Error('Thiếu cấu hình Supabase. Vui lòng kiểm tra .env.local') })
+      }
+      if (prop === 'onAuthStateChange') {
+        return () => ({ data: { subscription: { unsubscribe: () => {} } } })
+      }
+      return createChainableMock()
+    },
+    apply: () => createChainableMock()
+  }
+  return new Proxy(function() {}, handler)
+}
+
 export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)
-    : null
+    : createChainableMock()

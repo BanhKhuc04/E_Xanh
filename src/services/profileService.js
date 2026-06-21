@@ -1,10 +1,5 @@
 import { supabase } from '../lib/supabase'
-import {
-  ALLOWED_PROFILE_IMAGE_TYPES,
-  validateImageFile,
-} from '../utils/fileValidation'
 import { uploadOptimizedImage } from './mediaUploadService'
-import { logError } from '../utils/logger'
 
 export const DEFAULT_USER_PREFERENCES = {
   profile_visibility: 'public',
@@ -63,6 +58,17 @@ export function isProfileSettingsMigrationRequired(error) {
   )
 }
 
+export async function getPublicProfile(userId) {
+  if (!userId) return { data: null, error: new Error('User ID required') }
+  const { data, error } = await supabase
+    .from('public_profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+  
+  if (error) return { data: null, error }
+  return { data: normalizeProfileRecord(data), error: null }
+}
 export async function getCurrentProfile() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError || !sessionData.session) {

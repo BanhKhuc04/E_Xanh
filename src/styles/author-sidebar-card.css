@@ -22,20 +22,7 @@
 }
 
 .exanh-author-card__avatar {
-  width: 96px;
-  height: 96px;
-  border-radius: 999px;
-  object-fit: cover;
-  border: 6px solid #fff;
-  box-shadow: 0 14px 32px rgba(51, 106, 41, 0.22);
-  background: #eef6df;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #4f8428;
-  font-size: 32px;
-  font-weight: bold;
-  text-transform: uppercase;
+  --user-avatar-size: 96px;
 }
 
 .exanh-author-card__body {
@@ -173,9 +160,7 @@
   }
 
   .exanh-author-card__avatar {
-    width: 84px;
-    height: 84px;
-    font-size: 28px;
+    --user-avatar-size: 84px;
   }
 
   .exanh-author-card__stats {

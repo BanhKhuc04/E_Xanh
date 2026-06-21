@@ -143,33 +143,36 @@ function AdminTopbar() {
   }, [])
 
   useEffect(() => {
-    let timerId
     let cancelled = false
+    let timerId
+    let delay = 45000
 
-    async function loadNotifications() {
-      setLoadingNotifications(true)
+    async function loadNotifications(isInitial = false) {
+      if (isInitial) setLoadingNotifications(true)
       const { data, error } = await getMyNotifications({ limit: 8 })
 
       if (cancelled) return
 
       if (error) {
         setNotificationError(error.message || 'Không thể tải thông báo.')
+        delay = Math.min(delay * 2, 300000)
       } else {
         setNotificationError('')
+        delay = 45000
+        setNotifications(data?.items ?? [])
+        setUnreadCount(data?.unreadCount ?? 0)
+        setNotificationsSupported(data?.supported ?? true)
       }
 
-      setNotifications(data?.items ?? [])
-      setUnreadCount(data?.unreadCount ?? 0)
-      setNotificationsSupported(data?.supported ?? true)
-      setLoadingNotifications(false)
+      if (isInitial) setLoadingNotifications(false)
+      timerId = window.setTimeout(() => loadNotifications(false), delay)
     }
 
-    loadNotifications()
-    timerId = window.setInterval(loadNotifications, 45000)
+    loadNotifications(true)
 
     return () => {
       cancelled = true
-      window.clearInterval(timerId)
+      window.clearTimeout(timerId)
     }
   }, [location.pathname])
 

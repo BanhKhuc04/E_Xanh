@@ -3,7 +3,6 @@ import { ImageOff, Leaf } from 'lucide-react'
 import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
 import {
   DEFAULT_POST_IMAGE_ASPECT,
-  detectPostImageAspectKey,
   getPostImageAspectPreset,
   normalizePostImageAspectKey,
 } from '../../utils/postImageRatios'
@@ -44,7 +43,6 @@ function PostImage({
   const fallbackAspect = normalizePostImageAspectKey(aspect || VARIANT_DEFAULT_ASPECT[variant] || DEFAULT_POST_IMAGE_ASPECT)
   const [hasError, setHasError] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
-  const [resolvedAspect, setResolvedAspect] = useState(fallbackAspect)
   const resolvedWidth = resolveWidth(variant, width)
   const resolvedHeight = useMemo(() => {
     if (height) return height
@@ -56,7 +54,6 @@ function PostImage({
     const timerId = window.setTimeout(() => {
       setHasError(false)
       setIsLoaded(false)
-      setResolvedAspect(fallbackAspect)
     }, 0)
 
     return () => {
@@ -87,14 +84,7 @@ function PostImage({
           loading={priority ? 'eager' : loading}
           fetchPriority={priority ? 'high' : undefined}
           decoding="async"
-          onLoad={(event) => {
-            setIsLoaded(true)
-            if (!aspect) {
-              setResolvedAspect(
-                detectPostImageAspectKey(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight),
-              )
-            }
-          }}
+          onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
           style={{ objectPosition }}
         />

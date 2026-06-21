@@ -38,8 +38,9 @@ function isPermissionError(error) {
   )
 }
 
-async function isTableAvailable(tableName) {
+async function isTableAvailable(tableName, force = false) {
   if (!supabase) return false
+  if (force) AVAILABILITY_CACHE.delete(tableName)
   if (AVAILABILITY_CACHE.has(tableName)) {
     return AVAILABILITY_CACHE.get(tableName)
   }
@@ -47,7 +48,18 @@ async function isTableAvailable(tableName) {
   const { error } = await supabase.from(tableName).select('*').limit(1)
   const available = !isMissingRelationError(error)
   AVAILABILITY_CACHE.set(tableName, available)
+  
+  if (!available) {
+    setTimeout(() => {
+      AVAILABILITY_CACHE.delete(tableName)
+    }, 10000)
+  }
+  
   return available
+}
+
+export function clearNotificationCache() {
+  AVAILABILITY_CACHE.clear()
 }
 
 function mapNotificationFeedError(error) {
