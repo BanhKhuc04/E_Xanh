@@ -393,7 +393,7 @@ body {
   aspect-ratio: 16 / 9;
   border-radius: 18px;
   overflow: hidden;
-  background: #eef3e8;
+  background: var(--color-primary-soft);
 }
 
 .community-post-card__image-wrap {
@@ -523,7 +523,7 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding-top: 8px;
-  border-top: 1px solid #edf0ea;
+  border-top: 1px solid var(--color-border);
 }
 
 .post-action-btn {
@@ -552,7 +552,7 @@ body {
 }
 
 .post-action-btn:hover {
-  background: #f0f7e8;
+  background: var(--color-primary-soft);
   color: #2f6f35;
 }
 
@@ -561,7 +561,7 @@ body {
 }
 
 .post-action-btn.is-active {
-  background: #ecf8e8;
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
 }
 
@@ -916,12 +916,12 @@ body {
   flex: 1;
   min-width: 0;
   padding: 8px 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.85rem;
   outline: none;
-  background-color: #f9f9f9;
-  color: #333;
+  background-color: var(--color-surface-soft);
+  color: var(--color-text);
 }
 
 .community-post-card__share-row .btn {
@@ -943,7 +943,7 @@ body {
   border: none;
   text-align: left;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text);
   transition: background 0.2s;
 }
 

@@ -512,13 +512,13 @@
 
 .account-modal__header h2 {
   margin: 0 0 4px;
-  color: #27500a;
+  color: var(--color-primary-500);
   font-size: 1.5rem;
 }
 
 .account-modal__header p {
   margin: 0;
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 0.95rem;
 }
 
@@ -528,7 +528,7 @@
   right: 24px;
   background: transparent;
   border: none;
-  color: #999;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
@@ -539,7 +539,7 @@
 
 .account-modal__close:hover {
   background: rgba(79, 132, 40, 0.1);
-  color: #27500a;
+  color: var(--color-primary-500);
 }
 
 .account-modal__body {
@@ -579,13 +579,13 @@
 
 .account-modal__avatar-preview label {
   font-weight: 600;
-  color: #27500a;
+  color: var(--color-primary-500);
 }
 
 .account-modal__avatar-preview p {
   margin: 0;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--color-text-muted);
   text-align: center;
 }
 
@@ -604,7 +604,7 @@
 
 .account-modal__field label {
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
   font-size: 0.95rem;
 }
 
@@ -634,7 +634,7 @@
 }
 
 .account-modal__field small {
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
 }
 
@@ -647,7 +647,7 @@
 
 .account-modal__success {
   background: var(--color-primary-soft);
-  color: #27500a;
+  color: var(--color-primary-500);
   padding: 12px 16px;
   border-radius: 8px;
   font-weight: 500;
@@ -671,7 +671,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: #fafafa;
+  background: var(--color-surface-soft);
 }
 
 .account-modal__actions .btn {
@@ -688,7 +688,7 @@
 }
 
 .account-modal__primary:hover:not(:disabled) {
-  background: #27500a;
+  background: var(--color-primary-500);
 }
 
 .account-modal__primary:disabled {
@@ -697,13 +697,13 @@
 }
 
 .account-modal__secondary {
-  background: #f1f1f1;
-  color: #333;
+  background: var(--color-surface-soft);
+  color: var(--color-text);
   border: none;
 }
 
 .account-modal__secondary:hover:not(:disabled) {
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .account-modal__password-field {
@@ -722,7 +722,7 @@
   right: 8px;
   background: transparent;
   border: none;
-  color: #666;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 8px;
   display: grid;
@@ -730,7 +730,7 @@
 }
 
 .account-modal__password-toggle:hover {
-  color: #27500a;
+  color: var(--color-primary-500);
 }
 
 @media (max-width: 760px) {
@@ -1194,7 +1194,7 @@
 
 .settings-inline-alert--success {
   background: var(--color-primary-soft);
-  color: #27500a;
+  color: var(--color-primary-500);
 }
 
 .settings-inline-alert--error {

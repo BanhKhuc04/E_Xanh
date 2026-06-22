@@ -913,7 +913,7 @@
   aspect-ratio: 16 / 9;
   border-radius: 18px;
   overflow: hidden;
-  background: #eef3e8;
+  background: var(--color-primary-soft);
 }
 
 .community-preview__post-image-wrap {
@@ -1213,7 +1213,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding-top: 8px;
-  border-top: 1px solid #edf0ea;
+  border-top: 1px solid var(--color-border);
 }
 
 .post-action-btn {
@@ -1242,7 +1242,7 @@
 }
 
 .post-action-btn:hover {
-  background: #f0f7e8;
+  background: var(--color-primary-soft);
   color: #2f6f35;
 }
 
@@ -1251,7 +1251,7 @@
 }
 
 .post-action-btn.is-active {
-  background: #ecf8e8;
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
 }
 

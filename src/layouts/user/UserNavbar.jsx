@@ -11,7 +11,6 @@ import {
   markNotificationAsRead,
 } from '../../services/userNotificationService'
 import { supabase } from '../../lib/supabase'
-import ThemeToggle from '../../components/ui/ThemeToggle'
 
 
 function getShortName(name, email) {
@@ -438,8 +437,6 @@ function UserNavbar() {
               Đăng nhập
             </Link>
           )}
-
-          <ThemeToggle />
 
           <button
             type="button"
