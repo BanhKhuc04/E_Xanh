@@ -28,7 +28,7 @@ export default function PromptModal({ isOpen, title, message, placeholder, onClo
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
           <button 
             type="button" 
-            className="btn btn--outline" 
+            className="btn btn--ghost" 
             onClick={() => { setValue(''); onClose() }}
           >
             Hủy

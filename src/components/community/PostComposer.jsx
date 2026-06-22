@@ -32,8 +32,7 @@ function PostComposer() {
     <section className="community-composer">
       <div className="community-composer__top">
         {isValidImageUrl(currentUser?.avatar_url) ? (
-          <img
-            className="community-composer__avatar"
+          <img loading="lazy" className="community-composer__avatar"
             src={currentUser.avatar_url}
             alt={`Avatar của ${currentUser?.name || 'người dùng'}`}
           />

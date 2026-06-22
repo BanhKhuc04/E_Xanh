@@ -21,7 +21,7 @@
   width: fit-content;
   padding: 10px 16px;
   border-radius: 999px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-glow);
   font-size: 0.9rem;
   font-weight: 700;
@@ -53,14 +53,14 @@
 }
 
 .electricity-hero__secondary {
-  color: #336a29;
-  background: #eaf59d;
+  color: var(--color-primary-500);
+  background: var(--color-primary-50);
 }
 
 .electricity-tool-layout__reset {
-  color: #336a29;
+  color: var(--color-primary-500);
   background: transparent;
-  border: 1.5px solid #336a29;
+  border: 1.5px solid var(--color-primary-500);
 }
 
 .electricity-hero__visual {
@@ -192,9 +192,9 @@
   width: 100%;
   margin-top: 4px;
   padding: 14px;
-  border: 2px dashed #4f8428;
+  border: 2px dashed var(--color-primary-400);
   border-radius: 14px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: transparent;
   font: inherit;
   font-weight: 700;
@@ -279,7 +279,7 @@
 }
 
 .electricity-tool-layout__save-button {
-  color: #336a29;
+  color: var(--color-primary-500);
   background: rgba(234, 245, 157, 0.9);
 }
 
@@ -289,7 +289,7 @@
 }
 
 .electricity-tool-layout__save-message {
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-size: 0.92rem;
   font-weight: 700;
 }
@@ -303,7 +303,7 @@
   gap: 16px;
   padding: 28px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #eaf59d 0%, #caffb9 100%);
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, #caffb9 100%);
   box-shadow: 0 4px 20px rgba(79, 132, 40, 0.08);
 }
 
@@ -382,11 +382,11 @@
 }
 
 .electricity-breakdown__fill--0 {
-  background: #336a29;
+  background: var(--color-primary-500);
 }
 
 .electricity-breakdown__fill--1 {
-  background: #80b155;
+  background: var(--color-primary-300);
 }
 
 .electricity-breakdown__fill--2 {
@@ -419,7 +419,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-glow);
   font-size: 0.82rem;
   font-weight: 800;
@@ -448,7 +448,7 @@
 }
 
 .electricity-history__header a {
-  color: #336a29;
+  color: var(--color-primary-500);
   font-weight: 700;
 }
 

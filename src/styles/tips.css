@@ -93,7 +93,7 @@
 
 .tips-filter-bar__search input:focus,
 .tips-filter-bar__sort select:focus {
-  border-color: #4f8428;
+  border-color: var(--color-primary-400);
   box-shadow: 0 0 0 2px rgba(128, 177, 85, 0.15);
 }
 
@@ -130,14 +130,14 @@
 
 .tips-filter-chip:hover {
   background: var(--color-background);
-  color: #4f8428;
-  border-color: #4f8428;
+  color: var(--color-primary-400);
+  border-color: var(--color-primary-400);
 }
 
 .tips-filter-chip.is-active {
   color: #fff;
-  background: #4f8428;
-  border-color: #4f8428;
+  background: var(--color-primary-400);
+  border-color: var(--color-primary-400);
 }
 
 /* LIST BÀI VIẾT VÀ STATUS BAR */
@@ -256,12 +256,12 @@
   left: 12px;
   z-index: 2;
   padding: 4px 10px;
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.75rem;
   font-weight: 800;
   border-radius: 999px;
   background: var(--color-surface-soft);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .tips-post-card__save-btn {
@@ -279,9 +279,9 @@
   appearance: none;
   outline: none;
   border-radius: 50%;
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-surface-soft);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -481,7 +481,7 @@ button.tips-post-card__stat-btn.is-liked {
   border-radius: 999px;
   border: 1px solid rgba(51, 106, 41, 0.2);
   background: var(--color-surface);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -494,8 +494,8 @@ button.tips-post-card__stat-btn.is-liked {
 }
 
 .tips-pagination__btn:not(:disabled):hover {
-  background: #f0f7e6;
-  border-color: #336a29;
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-500);
 }
 
 .tips-pagination__numbers {
@@ -519,12 +519,12 @@ button.tips-post-card__stat-btn.is-liked {
 }
 
 .tips-pagination__number:hover {
-  background: #f0f7e6;
-  color: #336a29;
+  background: var(--color-primary-50);
+  color: var(--color-primary-500);
 }
 
 .tips-pagination__number.is-active {
-  background: #336a29;
+  background: var(--color-primary-500);
   color: #fff;
 }
 

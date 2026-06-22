@@ -134,9 +134,15 @@ function DeviceManagementPage() {
     
     // Optimistic update
     setDevices(prev => prev.map(d => d.id === id ? { ...d, is_visible: newStatus } : d))
-    showToast(`Đã ${newStatus ? 'hiện' : 'ẩn'} thiết bị.`)
     
-    await updateDevice(id, { is_visible: newStatus })
+    const { error } = await updateDevice(id, { is_visible: newStatus })
+    if (error) {
+      // Revert if error
+      setDevices(prev => prev.map(d => d.id === id ? { ...d, is_visible: !newStatus } : d))
+      showToast('Lỗi cập nhật thiết bị.')
+      return
+    }
+    showToast(`Đã ${newStatus ? 'hiện' : 'ẩn'} thiết bị.`)
   }
 
   const handleDrawerToggleStatus = async (id) => {
@@ -147,9 +153,14 @@ function DeviceManagementPage() {
     setDevices(prev => prev.map(d => d.id === id ? { ...d, is_visible: newStatus } : d))
     setDrawerMode(null)
     setEditDeviceId(null)
-    showToast(`Đã ${newStatus ? 'hiện' : 'ẩn'} thiết bị.`)
     
-    await updateDevice(id, { is_visible: newStatus })
+    const { error } = await updateDevice(id, { is_visible: newStatus })
+    if (error) {
+      setDevices(prev => prev.map(d => d.id === id ? { ...d, is_visible: !newStatus } : d))
+      showToast('Lỗi cập nhật thiết bị.')
+      return
+    }
+    showToast(`Đã ${newStatus ? 'hiện' : 'ẩn'} thiết bị.`)
   }
 
   const handleSave = async (formData) => {
@@ -179,35 +190,59 @@ function DeviceManagementPage() {
   }
 
   const handleBulkHide = async () => {
+    const ids = [...selectedIds]
     setDevices((prev) =>
       prev.map((d) =>
-        selectedIds.includes(d.id) ? { ...d, is_visible: false } : d,
+        ids.includes(d.id) ? { ...d, is_visible: false } : d,
       ),
     )
-    showToast('Đã ẩn các thiết bị đã chọn.')
-    const ids = [...selectedIds]
     setSelectedIds([])
-    await bulkUpdateDeviceVisibility(ids, false)
+    
+    const { error } = await bulkUpdateDeviceVisibility(ids, false)
+    if (error) {
+      setDevices((prev) =>
+        prev.map((d) =>
+          ids.includes(d.id) ? { ...d, is_visible: true } : d,
+        ),
+      )
+      showToast('Lỗi ẩn thiết bị.')
+      return
+    }
+    showToast('Đã ẩn các thiết bị đã chọn.')
   }
 
   const handleBulkShow = async () => {
+    const ids = [...selectedIds]
     setDevices((prev) =>
       prev.map((d) =>
-        selectedIds.includes(d.id) ? { ...d, is_visible: true } : d,
+        ids.includes(d.id) ? { ...d, is_visible: true } : d,
       ),
     )
-    showToast('Đã hiện lại các thiết bị đã chọn.')
-    const ids = [...selectedIds]
     setSelectedIds([])
-    await bulkUpdateDeviceVisibility(ids, true)
+    
+    const { error } = await bulkUpdateDeviceVisibility(ids, true)
+    if (error) {
+      setDevices((prev) =>
+        prev.map((d) =>
+          ids.includes(d.id) ? { ...d, is_visible: false } : d,
+        ),
+      )
+      showToast('Lỗi hiện thiết bị.')
+      return
+    }
+    showToast('Đã hiện lại các thiết bị đã chọn.')
   }
 
   const handleBulkDelete = async () => {
-    setDevices((prev) => prev.filter((d) => !selectedIds.includes(d.id)))
-    showToast('Đã xóa các thiết bị đã chọn.')
     const ids = [...selectedIds]
+    const { error } = await bulkDeleteDevices(ids)
+    if (error) {
+      showToast('Lỗi xóa thiết bị.')
+      return
+    }
+    setDevices((prev) => prev.filter((d) => !ids.includes(d.id)))
     setSelectedIds([])
-    await bulkDeleteDevices(ids)
+    showToast('Đã xóa các thiết bị đã chọn.')
   }
 
   const handleReset = () => {

@@ -88,7 +88,7 @@
 }
 
 .ap-stats__card--success .ap-stats__icon {
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-primary-glow);
 }
 
@@ -98,7 +98,7 @@
 }
 
 .ap-stats__card--highlight .ap-stats__icon {
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-soft);
 }
 
@@ -578,7 +578,7 @@
   gap: 10px;
   padding: 14px 24px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #336a29, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-400));
   color: #fff;
   font-weight: 600;
   font-size: 0.95rem;

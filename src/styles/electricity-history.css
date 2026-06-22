@@ -40,7 +40,7 @@
   width: fit-content;
   padding: 8px 14px;
   border-radius: 999px;
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-primary-soft);
   font-size: 0.84rem;
   font-weight: 800;
@@ -191,8 +191,8 @@
 }
 
 .electricity-history-filters__reset {
-  color: #336a29;
-  background: #eaf59d;
+  color: var(--color-primary-500);
+  background: var(--color-primary-50);
 }
 
 .electricity-history-layout {
@@ -289,7 +289,7 @@
   padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid rgba(79, 132, 40, 0.18);
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-surface-soft);
   font: inherit;
   font-weight: 600;
@@ -340,7 +340,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #4f8428;
+  background: var(--color-primary-400);
 }
 
 .electricity-history-side__card ul {
@@ -365,7 +365,7 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-soft);
   font-size: 2rem;
 }

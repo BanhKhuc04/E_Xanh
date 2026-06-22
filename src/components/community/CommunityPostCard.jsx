@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Bookmark, Heart, Link2, MessageCircle, UserRound } from 'lucide-react'
+import { Bookmark, Heart, Link2, MessageCircle, UserRound, Flag } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
+import { triggerLikeBurst } from '../../utils/animations'
 import InlineCommentSection from './InlineCommentSection'
 import OptimizedImage from '../common/OptimizedImage'
+import ReactionPopover from './ReactionPopover'
+import ReactionDetailsModal from './ReactionDetailsModal'
 
 const COMMUNITY_IMAGE_FALLBACK = '/og-image-v2.png'
 
@@ -119,6 +123,7 @@ function CommunityPostCard({
   const shareRef = useRef(null)
   const toastTimeoutRef = useRef(null)
   const navigate = useNavigate()
+  const [showReactionDetails, setShowReactionDetails] = useState(false)
 
   // Đảm bảo không hiển thị "Ẩn danh" khi có authorId
   const authorName = post.author || (post.authorId ? 'Thành viên E-XANH' : 'Ẩn danh')
@@ -220,6 +225,7 @@ function CommunityPostCard({
               <button
                 type="button"
                 className="community-post-card__report-btn"
+                title="Báo cáo bài viết"
                 onClick={async (e) => {
                   e.stopPropagation()
                   const reason = window.prompt('Nhập lý do báo cáo bài viết này:')
@@ -229,7 +235,7 @@ function CommunityPostCard({
                   showToast(error ? (error.message || 'Lỗi gửi báo cáo.') : 'Đã gửi báo cáo thành công.')
                 }}
               >
-                Báo cáo
+                <Flag size={14} strokeWidth={2.5} />
               </button>
             )}
           </div>
@@ -262,7 +268,13 @@ function CommunityPostCard({
           {(!post.status || post.status === 'approved') && (
             <div className="community-post-card__footer">
               <div className="post-stats">
-                <span>{post.likes} lượt thích</span>
+                <span 
+                  onClick={(e) => { e.stopPropagation(); setShowReactionDetails(true) }}
+                  style={{ cursor: 'pointer' }}
+                  className="hover-underline"
+                >
+                  {post.likes} lượt thích
+                </span>
                 <span 
                   onClick={(e) => { e.stopPropagation(); if (onToggleComment) onToggleComment(post.id) }}
                   style={{ cursor: onToggleComment ? 'pointer' : 'default' }}
@@ -273,32 +285,39 @@ function CommunityPostCard({
               </div>
 
               <div className="post-actions">
-                <button
-                  type="button"
-                  className={`post-action-btn${post.isLiked ? ' is-active is-liked' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); onToggleLike(post.id) }}
-                >
-                  <Heart size={18} strokeWidth={2.2} fill={post.isLiked ? "currentColor" : "none"} />
-                  <span>Thích</span>
-                </button>
+                <ReactionPopover
+                  currentReaction={post.reactionType}
+                  onSelectReaction={(e, type) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onToggleLike(post.id, type)
+                  }}
+                  onToggleLike={(e, type) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onToggleLike(post.id, type)
+                  }}
+                />
 
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.9 }}
                   className={`post-action-btn comment-toggle-btn${isCommentActive ? ' is-active' : ''}`}
                   onClick={(e) => { e.stopPropagation(); onToggleComment(post.id) }}
                 >
                   <MessageCircle size={18} strokeWidth={2.2} />
                   <span>Bình luận</span>
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.9 }}
                   className={`post-action-btn${post.isSaved ? ' is-active' : ''}`}
                   onClick={(e) => { e.stopPropagation(); onToggleSave(post.id) }}
                 >
                   <Bookmark size={18} strokeWidth={2.2} fill={post.isSaved ? "currentColor" : "none"} />
                   <span>Lưu bài</span>
-                </button>
+                </motion.button>
               </div>
             </div>
           )}
@@ -367,6 +386,12 @@ function CommunityPostCard({
           </svg>
           {toast}
         </div>
+      )}
+      {showReactionDetails && (
+        <ReactionDetailsModal 
+          postId={post.id} 
+          onClose={() => setShowReactionDetails(false)} 
+        />
       )}
     </article>
   )

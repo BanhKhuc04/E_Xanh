@@ -1,6 +1,4 @@
 import { useEffect } from 'react'
-import '../../styles/toast.css'
-
 export default function Toast({ message, onClose, duration = 3000 }) {
   useEffect(() => {
     if (!message) return

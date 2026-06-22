@@ -117,7 +117,7 @@
 .exanh-support-tab--active {
   background: var(--color-surface);
   color: var(--color-primary-500);
-  box-shadow: 0 4px 12px rgba(18, 52, 18, 0.06);
+  box-shadow: var(--shadow-md);
 }
 
 .exanh-support-notice-card {
@@ -262,7 +262,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 8px 24px rgba(79, 132, 40, 0.25);
+  box-shadow: var(--shadow-lg);
 }
 
 .exanh-support-submit:hover:not(:disabled) {

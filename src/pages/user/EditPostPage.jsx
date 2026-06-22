@@ -92,7 +92,7 @@ function EditPostPage() {
           </div>
         </section>
 
-        <div className="create-post-page__layout">
+        <div className="create-post-page__layout create-post-page__layout--focused">
           <CreatePostForm
             form={composer.form}
             errorMessage={composer.errorMessage}
@@ -102,7 +102,6 @@ function EditPostPage() {
             onChange={composer.handleChange}
             onCoverChange={composer.handleCoverChange}
             onRemoveCover={composer.removeCover}
-            onClearDraft={undefined} // No draft feature in edit mode
             onSubmit={composer.handleSubmit}
             onInsertInlineImage={composer.handleInlineImageUpload}
             isSubmitting={composer.isSubmitting}
@@ -114,10 +113,6 @@ function EditPostPage() {
             cooldownRemaining={0}
             limits={composer.limits}
           />
-
-          <aside className="create-post-page__preview-column">
-            <PostLivePreview form={composer.form} author={composer.profile || composer.user} />
-          </aside>
         </div>
       </div>
     </>

@@ -8,6 +8,7 @@ import {
 import { validatePostForm } from './validation'
 
 export function useComposerState(defaultType, initialDraft, setDraftMeta) {
+  const [isInitialized, setIsInitialized] = useState(() => initialDraft !== null)
   const [form, setForm] = useState(() => {
     const draft = initialDraft
     const base = buildInitialForm(defaultType)
@@ -23,6 +24,7 @@ export function useComposerState(defaultType, initialDraft, setDraftMeta) {
       content: draft.content || '',
       content_blocks: draft.content_blocks || [],
       tags: draft.tags || '',
+      coverPreview: draft.coverPreview || '',
     }
   })
   
@@ -40,6 +42,29 @@ export function useComposerState(defaultType, initialDraft, setDraftMeta) {
   const currentPreviewUrlRef = useRef('')
 
   const validation = useMemo(() => validatePostForm(form), [form])
+
+  useEffect(() => {
+    if (!isInitialized && initialDraft) {
+      setForm((current) => {
+        const base = buildInitialForm(defaultType)
+        return {
+          ...base,
+          title: initialDraft.title || '',
+          type: initialDraft.type || base.type,
+          category: initialDraft.category || '',
+          description: initialDraft.description || '',
+          content: initialDraft.content || '',
+          content_blocks: initialDraft.content_blocks || [],
+          tags: initialDraft.tags || '',
+          coverPreview: initialDraft.coverPreview || current.coverPreview,
+        }
+      })
+      setIsInitialized(true)
+      if (initialDraft.title || initialDraft.content) {
+        setInfoMessage('Đã tự động tải dữ liệu bài viết.')
+      }
+    }
+  }, [initialDraft, isInitialized, defaultType])
 
   useEffect(() => {
     currentPreviewUrlRef.current = form.coverPreview

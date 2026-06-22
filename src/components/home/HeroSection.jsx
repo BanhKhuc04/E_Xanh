@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { homeHero } from '../../data/home'
 import BannerCarousel from '../common/BannerCarousel'
 import { fetchBanners } from '../../services/bannerService'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 function HeroSection() {
   const [banners, setBanners] = useState([])
@@ -27,6 +28,9 @@ function HeroSection() {
     }
     load()
   }, [])
+
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 500], [0, 150])
 
   return (
     <section className="home-hero">
@@ -64,9 +68,9 @@ function HeroSection() {
         </div>
 
         <div className="home-hero__visual">
-          <div className="home-hero__image-shell">
+          <motion.div className="home-hero__image-shell" style={{ y }}>
             <BannerCarousel banners={banners} />
-          </div>
+          </motion.div>
 
           <div className="home-hero__floating-grid">
             <div className="home-floating-card home-floating-card--savings">

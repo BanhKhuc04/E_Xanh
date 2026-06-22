@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ImageOff, Leaf } from 'lucide-react'
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
 import { getImageUrl, IMAGE_TRANSFORM_WIDTHS } from '../../utils/imageUrl'
 import {
   DEFAULT_POST_IMAGE_ASPECT,
@@ -76,18 +78,35 @@ function PostImage({
   return (
     <div className={rootClassName}>
       {imageSrc && !hasError ? (
-        <img
-          src={imageSrc}
-          alt={alt}
-          width={resolvedWidth}
-          height={resolvedHeight}
-          loading={priority ? 'eager' : loading}
-          fetchPriority={priority ? 'high' : undefined}
-          decoding="async"
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setHasError(true)}
-          style={{ objectPosition }}
-        />
+        variant === 'inline' ? (
+          <Zoom zoomMargin={40} overlayBgColorEnd="rgba(255, 255, 255, 0.95)">
+            <img
+              src={imageSrc}
+              alt={alt}
+              width={resolvedWidth}
+              height={resolvedHeight}
+              loading={priority ? 'eager' : loading}
+              fetchPriority={priority ? 'high' : undefined}
+              decoding="async"
+              onLoad={() => setIsLoaded(true)}
+              onError={() => setHasError(true)}
+              style={{ objectPosition }}
+            />
+          </Zoom>
+        ) : (
+          <img
+            src={imageSrc}
+            alt={alt}
+            width={resolvedWidth}
+            height={resolvedHeight}
+            loading={priority ? 'eager' : loading}
+            fetchPriority={priority ? 'high' : undefined}
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setHasError(true)}
+            style={{ objectPosition }}
+          />
+        )
       ) : null}
 
       {(!imageSrc || hasError) ? (

@@ -220,8 +220,7 @@ function ProfileAvatarSettings({
               </button>
             </div>
             <div style={{ padding: '24px', display: 'grid', placeItems: 'center' }}>
-              <img
-                src={previewUrl}
+              <img loading="lazy" src={previewUrl}
                 alt="Xem trước ảnh đại diện"
                 style={{ width: 'min(100%, 320px)', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: '50%' }}
               />

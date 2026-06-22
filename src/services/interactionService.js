@@ -164,15 +164,71 @@ export async function getPostMetrics(postId) {
   return { likes: likesCount?.length || 0, saves: savesCount?.length || 0 }
 }
 
+export async function getPostReactionsDetails(postId) {
+  const session = await getCurrentSession()
+  const currentUserId = session?.user?.id
+
+  const { data: likes, error } = await supabase
+    .from('post_likes')
+    .select(`
+      reaction_type,
+      created_at,
+      profiles (
+        id,
+        name,
+        display_name,
+        avatar_url
+      )
+    `)
+    .eq('post_id', postId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    logError('[E-XANH] Lỗi lấy chi tiết cảm xúc:', error?.message || error)
+    return { data: [], error }
+  }
+
+  let followMap = {}
+  if (currentUserId && likes && likes.length > 0) {
+    const userIds = likes.map(l => l.profiles?.id).filter(id => id && id !== currentUserId)
+    if (userIds.length > 0) {
+      const { data: follows } = await supabase
+        .from('user_follows')
+        .select('following_id')
+        .eq('follower_id', currentUserId)
+        .in('following_id', userIds)
+      
+      if (follows) {
+        follows.forEach(f => followMap[f.following_id] = true)
+      }
+    }
+  }
+
+  const formatted = (likes || []).map(l => {
+    const profileId = l.profiles?.id
+    return {
+      userId: profileId,
+      name: l.profiles?.name || l.profiles?.display_name || 'Người dùng',
+      avatar: l.profiles?.avatar_url,
+      reactionType: l.reaction_type || 'like',
+      createdAt: l.created_at,
+      isFollowing: !!followMap[profileId],
+      isCurrentUser: profileId === currentUserId
+    }
+  }).filter(l => l.userId)
+
+  return { data: formatted, error: null }
+}
+
 export async function getUserInteractionMap(userId) {
   if (!userId) return { likedMap: {}, savedMap: {} }
   const [{ data: likes }, { data: saves }] = await Promise.all([
-    supabase.from('post_likes').select('post_id').eq('user_id', userId),
+    supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', userId),
     supabase.from('saved_posts').select('post_id').eq('user_id', userId)
   ])
   const likedMap = {}
   const savedMap = {}
-  likes?.forEach(l => likedMap[l.post_id] = true)
+  likes?.forEach(l => likedMap[l.post_id] = l.reaction_type || 'like')
   saves?.forEach(s => savedMap[s.post_id] = true)
   return { likedMap, savedMap }
 }
@@ -196,16 +252,32 @@ export async function isPostSaved(postId) {
   return { data: !!data, error: null }
 }
 
-export async function likePost(postId) {
+export async function likePost(postId, reactionType = 'like') {
   const session = await getCurrentSession()
   if (!session?.user) return { error: new Error('Bạn cần đăng nhập để thích bài viết.') }
 
-  const { data: existing } = await supabase.from('post_likes').select('user_id').eq('user_id', session.user.id).eq('post_id', postId).maybeSingle()
-  if (existing) return { error: null } // already liked
+  const { data: existing } = await supabase.from('post_likes').select('user_id, reaction_type').eq('user_id', session.user.id).eq('post_id', postId).maybeSingle()
+  
+  if (existing) {
+    if (existing.reaction_type === reactionType) return { error: null }
+    
+    // Update reaction
+    const { error } = await supabase
+      .from('post_likes')
+      .update({ reaction_type: reactionType })
+      .eq('user_id', session.user.id)
+      .eq('post_id', postId)
+      
+    if (error) {
+      logError('[E-XANH] Lỗi cập nhật cảm xúc:', error?.message || error)
+      return { error }
+    }
+    return { error: null, updated: true }
+  }
 
   const { error } = await supabase
     .from('post_likes')
-    .insert({ user_id: session.user.id, post_id: postId })
+    .insert({ user_id: session.user.id, post_id: postId, reaction_type: reactionType })
 
   if (error) {
     if (error.code === '23505') return { error: null } // already liked, ignore and don't increment
@@ -251,7 +323,7 @@ export async function isPostLiked(postId) {
 
   const { data, error } = await supabase
     .from('post_likes')
-    .select('post_id')
+    .select('post_id, reaction_type')
     .eq('user_id', session.user.id)
     .eq('post_id', postId)
     .maybeSingle()
@@ -261,7 +333,7 @@ export async function isPostLiked(postId) {
     return { data: false, error }
   }
   
-  return { data: !!data, error: null }
+  return { data: data ? (data.reaction_type || 'like') : false, error: null }
 }
 
 export async function addComment(postId, content) {

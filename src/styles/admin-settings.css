@@ -267,7 +267,7 @@
 }
 
 .st-toggle__switch.is-on .st-toggle__track {
-  background: linear-gradient(135deg, #80B155, #336A29);
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
 }
 
 .st-toggle__switch.is-on .st-toggle__thumb {
@@ -339,7 +339,7 @@
   width: 14px;
   height: 14px;
   border-radius: 6px;
-  background: linear-gradient(135deg, #80B155, #336A29);
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-500));
   flex-shrink: 0;
 }
 
@@ -641,7 +641,7 @@
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid rgba(79, 132, 40, 0.15);
-  box-shadow: 0 4px 12px rgba(79, 132, 40, 0.05);
+  box-shadow: var(--shadow-md);
   background: white;
 }
 
@@ -709,7 +709,7 @@
   border: 0;
   border-radius: 999px;
   color: #fff;
-  background: linear-gradient(135deg, #336a29, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-400));
   font-weight: 700;
 }
 
@@ -1143,7 +1143,7 @@
   gap: 10px;
   padding: 14px 24px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #336a29, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-400));
   color: #fff;
   font-weight: 600;
   font-size: 0.95rem;
@@ -1228,9 +1228,9 @@
 }
 
 .banner-upload-card__switch-btn.is-active {
-  color: #fff;
+  color: var(--color-surface);
   border-color: transparent;
-  background: linear-gradient(135deg, #336a29, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-400));
   box-shadow: 0 12px 24px rgba(79, 132, 40, 0.18);
 }
 

@@ -6,11 +6,19 @@ import {
   MessageCircle,
   Share2,
   UserRound,
+  Eye,
+  ArrowRight,
+  TrendingUp,
 } from 'lucide-react'
 import ActiveMembersPanel from '../community/ActiveMembersPanel'
 import { usePostComposer } from '../community/PostComposerContext'
 import { getInitials, isValidImageUrl, normalizeAvatarUrl } from '../../utils/avatar'
 import OptimizedImage from '../common/OptimizedImage'
+import { useAuth } from '../../contexts/AuthContext'
+import { triggerLikeBurst } from '../../utils/animations'
+import ReactionPopover from '../community/ReactionPopover'
+import ReactionDetailsModal from '../community/ReactionDetailsModal'
+import { motion } from 'framer-motion'
 
 /* ── Tính thời gian tương đối ── */
 function getTimeAgo(dateString) {
@@ -59,8 +67,7 @@ function PreviewAuthorAvatar({ src, name }) {
   }
 
   return (
-    <img
-      src={normalizedSrc}
+    <img loading="lazy" src={normalizedSrc}
       alt={name}
       className="community-post-card__avatar-img"
       onError={() => setFailed(true)}
@@ -71,11 +78,13 @@ function PreviewAuthorAvatar({ src, name }) {
 
 function CommunityPreview() {
   const { openComposer } = usePostComposer()
+  const { user: currentUser } = useAuth()
   const [posts, setPosts] = useState([])
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
   const [membersLoading, setMembersLoading] = useState(true)
   const [membersError, setMembersError] = useState('')
+  const [activeReactionPostId, setActiveReactionPostId] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -86,7 +95,25 @@ function CommunityPreview() {
           getTopActiveMembers(3),
         ])
         if (postsRes.error) throw postsRes.error
-        if (postsRes.data) setPosts(postsRes.data)
+        if (postsRes.data) {
+          let fetchedPosts = postsRes.data
+          // If logged in, fetch interactions
+          if (currentUser?.id) {
+            const { getUserInteractionMap } = await import('../../services/interactionService')
+            const maps = await getUserInteractionMap(currentUser.id)
+            if (maps) {
+              const likedMap = maps.likedMap || {}
+              const savedMap = maps.savedMap || {}
+              fetchedPosts = fetchedPosts.map(p => ({
+                ...p,
+                isLiked: !!likedMap[p.id],
+                reactionType: typeof likedMap[p.id] === 'string' ? likedMap[p.id] : (likedMap[p.id] ? 'like' : null),
+                isSaved: !!savedMap[p.id]
+              }))
+            }
+          }
+          setPosts(fetchedPosts)
+        }
         if (membersRes.error) {
           console.error('[CommunityPreview] active members error:', membersRes.error)
           setMembersError('Không thể tải thành viên tích cực.')
@@ -104,7 +131,63 @@ function CommunityPreview() {
       }
     }
     load()
-  }, [])
+  }, [currentUser?.id])
+
+  const handleToggleLike = async (e, post, reactionType = 'like') => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!currentUser) return window.alert('Vui lòng đăng nhập để thích bài viết.')
+    
+    const wasLiked = post.isLiked
+    const currentReaction = post.reactionType
+    const isUnliking = reactionType === null
+
+    // Optimistic update
+    setPosts(prev => prev.map(p => {
+      if (p.id === post.id) {
+        return { 
+          ...p, 
+          isLiked: !isUnliking,
+          reactionType: isUnliking ? null : reactionType,
+          likes_count: isUnliking ? Math.max(0, (p.likes_count || 0) - 1) : (wasLiked ? p.likes_count : (p.likes_count || 0) + 1)
+        }
+      }
+      return p
+    }))
+
+    const { likePost, unlikePost } = await import('../../services/interactionService')
+    const { error } = isUnliking ? await unlikePost(post.id) : await likePost(post.id, reactionType)
+    if (error) {
+      // Revert on error
+      setPosts(prev => prev.map(p => {
+        if (p.id === post.id) {
+          return { ...p, isLiked: wasLiked, reactionType: currentReaction, likes_count: post.likes_count }
+        }
+        return p
+      }))
+    }
+  }
+
+  const handleToggleSave = async (e, post) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!currentUser) return window.alert('Vui lòng đăng nhập để lưu bài viết.')
+
+    const wasSaved = post.isSaved
+    setPosts(prev => prev.map(p => {
+      if (p.id === post.id) return { ...p, isSaved: !wasSaved }
+      return p
+    }))
+
+    const { savePost, unsavePost } = await import('../../services/interactionService')
+    const { error } = wasSaved ? await unsavePost(post.id) : await savePost(post.id)
+    if (error) {
+      setPosts(prev => prev.map(p => {
+        if (p.id === post.id) return { ...p, isSaved: wasSaved }
+        return p
+      }))
+    }
+  }
 
   return (
     <section className="home-section">
@@ -186,7 +269,13 @@ function CommunityPreview() {
                         {/* Footer: Reactions Summary + Actions */}
                         <div className="community-post-card__footer">
                           <div className="post-stats">
-                            <span>{post.likes_count || 0} lượt thích</span>
+                            <span 
+                              onClick={(e) => { e.stopPropagation(); setActiveReactionPostId(post.id) }}
+                              style={{ cursor: 'pointer' }}
+                              className="hover-underline"
+                            >
+                              {post.likes_count || 0} lượt thích
+                            </span>
                             <Link 
                               to={`/cong-dong/${post.id}#comments`}
                               style={{ textDecoration: 'none', color: 'inherit' }}
@@ -197,20 +286,26 @@ function CommunityPreview() {
                           </div>
 
                           <div className="post-actions">
-                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" title="Đi tới bài viết để Thích" style={{ textDecoration: 'none' }}>
-                              <Heart size={18} strokeWidth={2.2} />
-                              <span>Thích</span>
-                            </Link>
+                            <ReactionPopover
+                              currentReaction={post.reactionType}
+                              onSelectReaction={(e, type) => handleToggleLike(e, post, type)}
+                              onToggleLike={(e, type) => handleToggleLike(e, post, type)}
+                            />
 
                             <Link to={`/cong-dong/${post.id}#comments`} className="post-action-btn" title="Đi tới bài viết để Bình luận" style={{ textDecoration: 'none' }}>
                               <MessageCircle size={18} strokeWidth={2.2} />
                               <span>Bình luận</span>
                             </Link>
 
-                            <Link to={`/cong-dong/${post.id}`} className="post-action-btn" title="Đi tới bài viết để Lưu bài" style={{ textDecoration: 'none' }}>
-                              <Bookmark size={18} strokeWidth={2.2} />
+                            <motion.button 
+                              type="button"
+                              whileTap={{ scale: 0.85 }}
+                              className={`post-action-btn ${post.isSaved ? 'is-active' : ''}`}
+                              onClick={(e) => handleToggleSave(e, post)}
+                            >
+                              <Bookmark size={18} strokeWidth={2.2} fill={post.isSaved ? "currentColor" : "none"} />
                               <span>Lưu bài</span>
-                            </Link>
+                            </motion.button>
                           </div>
                         </div>
                       </div>
@@ -285,8 +380,14 @@ function CommunityPreview() {
             </button>
           </section>
         </aside>
-
       </div>
+
+      {activeReactionPostId && (
+        <ReactionDetailsModal 
+          postId={activeReactionPostId} 
+          onClose={() => setActiveReactionPostId(null)} 
+        />
+      )}
     </section>
   )
 }

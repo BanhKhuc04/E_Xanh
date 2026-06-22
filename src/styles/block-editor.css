@@ -28,7 +28,7 @@
   border-radius: 999px;
   padding: 0 14px;
   background: var(--color-surface-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.88rem;
   font-weight: 700;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
@@ -104,9 +104,9 @@
 .block-editor-card {
   position: relative;
   display: grid;
-  gap: 12px;
-  padding: 16px 0 0;
-  border-top: 1px solid rgba(79, 132, 40, 0.12);
+  gap: 8px;
+  padding: 8px 0;
+  border: none;
   background: transparent;
 }
 
@@ -120,32 +120,32 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+}
+
+.block-editor-card:hover .block-editor-card__top,
+.block-editor-card:focus-within .block-editor-card__top {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(-8px);
 }
 
 .block-editor-card__title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(51, 106, 41, 0.74);
-  font-size: 0.82rem;
-  font-weight: 700;
+  display: none; /* Hide 'Đoạn văn' title for cleaner look */
 }
 
 .block-editor-card__actions {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-2px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.block-editor-card:hover .block-editor-card__actions,
-.block-editor-card:focus-within .block-editor-card__actions {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+  gap: 4px;
 }
 
 .block-editor-card__actions button {
@@ -164,7 +164,7 @@
 .block-editor-card__actions button:hover:not(:disabled) {
   border-color: rgba(79, 132, 40, 0.22);
   background: var(--color-primary-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
 }
 
 .block-editor-card__actions button:disabled {
@@ -175,11 +175,28 @@
 .block-editor-card__toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid rgba(79, 132, 40, 0.1);
-  border-radius: 16px;
-  background: rgba(250, 252, 239, 0.86);
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid rgba(79, 132, 40, 0.15);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.block-editor-card:focus-within .block-editor-card__toolbar,
+.block-editor-card:hover .block-editor-card__toolbar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
 }
 
 .block-editor-card__toolbar button {
@@ -202,20 +219,25 @@
   box-shadow: 0 8px 16px rgba(51, 106, 41, 0.08);
 }
 
-.block-editor-card__textarea {
-  min-height: 320px;
-  padding: 20px 22px;
-  border: 1px solid rgba(79, 132, 40, 0.14);
-  border-radius: 20px;
-  background: var(--color-surface);
+.block-editor-card textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
   color: var(--color-text);
-  line-height: 1.85;
-  resize: vertical;
-  box-shadow: 0 10px 24px rgba(51, 106, 41, 0.04);
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  resize: none;
+  transition: border-color 0.18s ease;
 }
 
-.block-editor-card__textarea:focus {
-  box-shadow: 0 0 0 4px rgba(193, 217, 92, 0.18), 0 10px 24px rgba(51, 106, 41, 0.06);
+.block-editor-card textarea:focus {
+  outline: none;
+  border-left-color: var(--color-primary, var(--color-primary-400));
 }
 
 .block-editor-card__meta {
@@ -241,7 +263,7 @@
   gap: 8px;
   min-height: 220px;
   padding: 24px;
-  color: #336a29;
+  color: var(--color-primary-500);
   text-align: center;
   cursor: pointer;
 }

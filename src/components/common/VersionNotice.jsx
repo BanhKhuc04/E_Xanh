@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { getActiveSiteNotice } from '../../services/siteNoticeService'
-import '../../styles/version-notice.css'
-
 export default function VersionNotice() {
   const [isVisible, setIsVisible] = useState(false)
   const [noticeData, setNoticeData] = useState(null)

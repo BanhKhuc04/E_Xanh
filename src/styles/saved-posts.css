@@ -92,7 +92,7 @@
   padding: 10px 14px;
   border: 1px solid rgba(128, 177, 85, 0.22);
   border-radius: 999px;
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-primary-soft);
   font-size: 0.9rem;
   font-weight: 700;
@@ -100,7 +100,7 @@
 
 .saved-posts-filter__chip.is-active {
   color: #fff;
-  background: #4f8428;
+  background: var(--color-primary-400);
 }
 
 .saved-posts-layout {
@@ -155,7 +155,7 @@
 .saved-post-card__tag {
   left: 14px;
   padding: 8px 12px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -164,7 +164,7 @@
   right: 14px;
   border: 0;
   padding: 10px 12px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-weight: 700;
 }
 
@@ -196,8 +196,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  color: #336a29;
-  background: #c1d95c;
+  color: var(--color-primary-500);
+  background: var(--color-primary-200);
   font-size: 0.74rem;
   font-weight: 800;
 }
@@ -222,7 +222,7 @@
   padding: 10px 16px;
   border-radius: 10px;
   color: #fff;
-  background: linear-gradient(135deg, #80b155, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400));
   font-size: 0.92rem;
   font-weight: 700;
 }
@@ -269,7 +269,7 @@
 }
 
 .saved-sidebar__folder.is-active {
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-glow);
 }
 
@@ -277,7 +277,7 @@
   min-width: 28px;
   padding: 3px 8px;
   border-radius: 999px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-soft);
   font-size: 0.8rem;
   text-align: center;
@@ -310,7 +310,7 @@
 
 .saved-sidebar__card--cta {
   color: #fff;
-  background: linear-gradient(135deg, #80b155, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-300), var(--color-primary-400));
 }
 
 .saved-sidebar__card--cta h2,
@@ -336,7 +336,7 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-soft);
   font-size: 2rem;
 }

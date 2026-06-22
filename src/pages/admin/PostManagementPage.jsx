@@ -529,7 +529,7 @@ function PostManagementPage() {
                 <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <strong>Ảnh bìa</strong>
                   {formData.image_url && (
-                    <img src={formData.image_url} alt="Cover" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }} />
+                    <img loading="lazy" src={formData.image_url} alt="Cover" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }} />
                   )}
                   <input
                     type="file"

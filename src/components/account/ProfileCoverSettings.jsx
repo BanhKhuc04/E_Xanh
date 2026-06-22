@@ -143,7 +143,7 @@ function ProfileCoverSettings({ currentCoverUrl, onCoverUpdated }) {
 
       <div className="settings-cover-preview">
         {displayUrl ? (
-          <img src={displayUrl} alt="Xem trước ảnh bìa" className="settings-cover-preview__image" />
+          <img loading="lazy" src={displayUrl} alt="Xem trước ảnh bìa" className="settings-cover-preview__image" />
         ) : (
           <div className="settings-cover-preview__empty">
             <strong>Chưa có ảnh bìa</strong>

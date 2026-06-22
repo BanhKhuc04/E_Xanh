@@ -8,7 +8,7 @@ function BrandLogo({ to = '/', size = 'medium', className = '' }) {
     <Link to={to} className={`brand-logo brand-logo--${size} ${className}`} data-testid="site-logo" aria-label="E-XANH về trang chủ">
       <picture>
         <source media="(max-width: 600px)" srcSet={logoMobile} />
-        <img src={logo} alt="E-XANH" width="400" height="250" className="brand-logo__image" />
+        <img loading="lazy" src={logo} alt="E-XANH" width="400" height="250" className="brand-logo__image" />
       </picture>
     </Link>
   )

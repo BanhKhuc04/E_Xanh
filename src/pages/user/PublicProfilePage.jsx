@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import SEO from '../../components/SEO'
 import AvatarLightbox from '../../components/common/AvatarLightbox'
 import UserAvatar from '../../components/common/UserAvatar'
+import UserBadges from '../../components/account/UserBadges'
 
 import { getCurrentSession } from '../../services/authService'
 import { followUser, unfollowUser, isFollowing, getFollowStats } from '../../services/followService'
@@ -287,6 +288,7 @@ function PublicProfilePage() {
                       <span>Tham gia từ {joinDate}</span>
                     </span>
                   </div>
+                  <UserBadges profile={profile} />
                 </div>
               </div>
 
@@ -308,6 +310,10 @@ function PublicProfilePage() {
             </div>
 
             <div className="profile-stats">
+              <div className="profile-stat">
+                <span className="profile-stat-value">{profile.points || 0}</span>
+                <span className="profile-stat-label">Điểm Xanh</span>
+              </div>
               <div className="profile-stat">
                 <span className="profile-stat-value">{canShowPosts ? posts.length : 0}</span>
                 <span className="profile-stat-label">Bài viết</span>

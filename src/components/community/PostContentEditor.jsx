@@ -330,7 +330,7 @@ function PostContentEditor({
         {block.url ? (
           <div className="block-editor-image-card">
             <div className="block-editor-image-card__frame">
-              <img src={block.url} alt={caption || block.alt || 'Ảnh minh họa'} className="block-editor-image-card__preview" />
+              <img loading="lazy" src={block.url} alt={caption || block.alt || 'Ảnh minh họa'} className="block-editor-image-card__preview" />
             </div>
 
             <div className="block-editor-image-card__fields">

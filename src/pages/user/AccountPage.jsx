@@ -7,6 +7,7 @@ import MyPostsList from '../../components/account/MyPostsList'
 import RecentSavedPosts from '../../components/account/RecentSavedPosts'
 import RecentComments from '../../components/account/RecentComments'
 import AccountInfoCard from '../../components/account/AccountInfoCard'
+import UserBadges from '../../components/account/UserBadges'
 import { 
   signOut
 } from '../../services/authService'
@@ -197,6 +198,7 @@ const AccountPage = () => {
 
           <div className="account-layout__side">
             <AccountInfoCard user={currentUser} />
+            <UserBadges profile={currentUser} />
             {myPostsData.length > 0 || savedPostsData.length > 0 ? (
               <section className="account-side-card account-side-card--tips">
                 <h2>Gợi ý dành cho bạn</h2>

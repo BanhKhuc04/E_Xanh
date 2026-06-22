@@ -99,7 +99,7 @@ export default function AdminMFASettings() {
       {factors.length > 0 ? (
         <div>
           <p style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓ Xác minh 2 bước đã được bật</p>
-          <button type="button" className="btn btn--outline" onClick={() => handleUnenroll(factors[0].id)} style={{ padding: '6px 12px', fontSize: '0.85rem' }}>
+          <button type="button" className="btn btn--ghost" onClick={() => handleUnenroll(factors[0].id)} style={{ padding: '6px 12px', fontSize: '0.85rem' }}>
             Tắt 2FA
           </button>
         </div>
@@ -113,7 +113,7 @@ export default function AdminMFASettings() {
             <div style={{ background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #ddd' }}>
               <p>1. Quét mã QR này bằng ứng dụng Authenticator (Google Authenticator, Authy...)</p>
               <div style={{ margin: '16px 0' }}>
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeUrl)}`} alt="QR Code" />
+                <img loading="lazy" src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeUrl)}`} alt="QR Code" />
               </div>
               <p>2. Nhập mã 6 số từ ứng dụng để xác nhận:</p>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>

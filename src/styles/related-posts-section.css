@@ -105,7 +105,7 @@
 }
 
 .exanh-related-card__category {
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-weight: 700;
   text-transform: uppercase;
   font-size: 12px;

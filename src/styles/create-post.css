@@ -119,7 +119,7 @@
 
 .create-post-form__clear-draft {
   border: 0;
-  color: #336a29;
+  color: var(--color-primary-500);
   background: transparent;
   font: inherit;
   font-weight: 700;
@@ -184,7 +184,7 @@
 
 .post-form-group label {
   display: block;
-  color: #336a29;
+  color: var(--color-primary-500);
   font-weight: 700;
 }
 
@@ -289,7 +289,7 @@ select.post-form-control,
 
 .create-post-form__upload-box:focus-visible {
   outline: none;
-  border-color: #4f8428;
+  border-color: var(--color-primary-400);
   box-shadow: 0 0 0 4px rgba(128, 177, 85, 0.18);
 }
 
@@ -349,7 +349,7 @@ select.post-form-control,
   border: 1px solid rgba(79, 132, 40, 0.1);
   border-radius: 999px;
   padding: 9px 14px;
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-primary-soft);
   font: inherit;
   font-size: 0.88rem;
@@ -358,8 +358,8 @@ select.post-form-control,
 
 .post-editor__tab.is-active {
   color: #fff;
-  background: linear-gradient(135deg, #4f8428, #336a29);
-  border-color: #336a29;
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
+  border-color: var(--color-primary-500);
 }
 
 .post-editor__textarea {
@@ -424,13 +424,13 @@ select.post-form-control,
 
 .markdown-content blockquote {
   padding: 14px 16px;
-  border-left: 4px solid #80b155;
+  border-left: 4px solid var(--color-primary-300);
   border-radius: 0 16px 16px 0;
   background: rgba(234, 245, 157, 0.24);
 }
 
 .markdown-content a {
-  color: #336a29;
+  color: var(--color-primary-500);
   text-decoration: underline;
 }
 
@@ -483,18 +483,18 @@ select.post-form-control,
 }
 
 .create-post-form__actions .btn--primary {
-  background: linear-gradient(135deg, #4f8428, #336a29);
-  border-color: #336a29;
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
+  border-color: var(--color-primary-500);
 }
 
 .create-post-form__actions .btn--secondary {
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-primary-soft);
   border-color: rgba(79, 132, 40, 0.14);
 }
 
 .create-post-form__draft {
-  color: #336a29;
+  color: var(--color-primary-500);
   background: linear-gradient(180deg, rgba(234, 245, 157, 0.98), rgba(193, 217, 92, 0.9));
   border: 1px solid rgba(79, 132, 40, 0.16);
 }
@@ -566,7 +566,7 @@ select.post-form-control,
   min-height: 120px;
   aspect-ratio: 16 / 9;
   color: rgba(51, 106, 41, 0.62);
-  background: linear-gradient(180deg, #f8fafc, #eef2f7);
+  background: linear-gradient(180deg, var(--color-surface-soft), #eef2f7);
 }
 
 .create-post-sidebar__preview-cover em {
@@ -930,7 +930,7 @@ select.post-form-control,
   border-radius: 999px;
   border: 1px solid rgba(128, 177, 85, 0.3);
   background: rgba(234, 245, 157, 0.72);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1113,7 +1113,7 @@ select.post-form-control,
   padding: 7px 10px;
   border-radius: 999px;
   background: var(--color-primary-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.82rem;
   font-weight: 800;
 }
@@ -1363,7 +1363,7 @@ select.post-form-control,
   padding: 6px 10px;
   border-radius: 999px;
   background: var(--color-primary-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1389,7 +1389,7 @@ select.post-form-control,
 }
 
 .post-live-preview__mode-toggle button.is-active {
-  background: #4f8428;
+  background: var(--color-primary-400);
   color: #fff;
   box-shadow: 0 12px 18px rgba(79, 132, 40, 0.24);
 }
@@ -1455,7 +1455,7 @@ select.post-form-control,
   padding: 8px 12px;
   border-radius: 999px;
   background: var(--color-surface-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.8rem;
   font-weight: 800;
   box-shadow: 0 10px 16px rgba(0, 0, 0, 0.08);
@@ -1489,7 +1489,7 @@ select.post-form-control,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #c1d95c, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-400));
   color: #fff;
   font-weight: 800;
 }
@@ -1569,7 +1569,7 @@ select.post-form-control,
   padding: 8px 12px;
   border-radius: 999px;
   background: var(--color-primary-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -1608,7 +1608,7 @@ select.post-form-control,
 
 .post-blocks__quote {
   padding: 16px 18px;
-  border-left: 4px solid #80b155;
+  border-left: 4px solid var(--color-primary-300);
   border-radius: 16px;
   background: rgba(234, 245, 157, 0.24);
   color: rgba(26, 49, 18, 0.9);
@@ -1645,7 +1645,7 @@ select.post-form-control,
 }
 
 .post-blocks__anchor {
-  color: #336a29;
+  color: var(--color-primary-500);
   font-weight: 700;
   text-decoration: underline;
   text-decoration-thickness: 1.5px;
@@ -2274,7 +2274,7 @@ select.post-form-control,
 }
 
 .create-post-page__intro-note strong {
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.94rem;
 }
 
@@ -2320,7 +2320,7 @@ select.post-form-control,
   padding: 0 12px;
   border-radius: 999px;
   background: var(--color-primary-soft);
-  color: #336a29;
+  color: var(--color-primary-500);
   font-size: 0.84rem;
   font-weight: 700;
 }
@@ -2679,7 +2679,7 @@ select.post-form-control,
 .composer-status-card--success,
 .composer-status-card__badge--success,
 .composer-status-card--success .composer-status-card__icon {
-  color: #336a29;
+  color: var(--color-primary-500);
 }
 
 .composer-status-card--ready,
@@ -2815,4 +2815,83 @@ select.post-form-control,
   .composer-status-card__body {
     padding-left: 0;
   }
+}
+
+/* ====== NEW MEDIUM-LIKE EDITOR STYLES ====== */
+
+.create-post-page__layout--focused {
+  display: block;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Hide labels for title and description */
+.create-post-form__title-group .post-form-group__header,
+.create-post-form__desc-group .post-form-group__header {
+  display: none;
+}
+
+/* Title Input */
+.create-post-form__title-input {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  line-height: 1.2 !important;
+  margin-top: 16px;
+  color: var(--color-text-title, #111);
+}
+.create-post-form__title-input::placeholder {
+  color: #ccc;
+}
+
+/* Description Input */
+.create-post-form__desc-input {
+  font-size: 1.2rem !important;
+  font-style: italic;
+  color: var(--color-text-muted, #666);
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  resize: none;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+/* Editor Shell (remove borders) */
+.create-post-form__editor-group .post-form-group__header {
+  display: none;
+}
+.create-post-form__editor-shell {
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The actual PostContentEditor has a border? Let's remove it if it exists inside */
+.create-post-form__editor-shell .block-editor {
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.create-post-form__editor-shell .block-editor__content {
+  padding: 0 !important;
+}
+
+/* Publish Settings Block at bottom */
+.create-post-form__publish-settings {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid var(--color-border);
+}
+.create-post-form__settings-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--color-primary-600);
 }

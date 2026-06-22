@@ -4,9 +4,13 @@ import { Helmet } from 'react-helmet-async'
 import PostBlockRenderer from '../../components/community/PostBlockRenderer'
 import OptimizedImage from '../../components/common/OptimizedImage'
 import UserAvatar from '../../components/common/UserAvatar'
+import InlineCommentSection from '../../components/community/InlineCommentSection'
+import ReactionPopover from '../../components/community/ReactionPopover'
+import ReactionDetailsModal from '../../components/community/ReactionDetailsModal'
 import { getPostById } from '../../services/postService'
 import { getCurrentSession, getCurrentUserProfile } from '../../services/authService'
-import InlineCommentSection from '../../components/community/InlineCommentSection'
+import ReadingProgress from '../../components/common/ReadingProgress'
+import { triggerLikeBurst } from '../../utils/animations'
 import './CommunityPostDetailPage.css'
 
 async function copyTextToClipboard(text) {
@@ -63,6 +67,7 @@ function CommunityPostDetailPage() {
   
   const [isCommentActive, setIsCommentActive] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
+  const [showReactionDetails, setShowReactionDetails] = useState(false)
 
   const { pathname } = useLocation()
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
@@ -175,11 +180,16 @@ function CommunityPostDetailPage() {
     })
   }
 
-  async function handleToggleLike() {
+  async function handleToggleLike(e, reactionType = 'like') {
     if (!checkLogin('thích bài viết')) return
     if (!post) return
 
     const isCurrentlyLiked = post.isLiked
+    
+    if (!isCurrentlyLiked) {
+      triggerLikeBurst(e)
+    }
+
     setPost(current => ({
       ...current,
       isLiked: !isCurrentlyLiked,
@@ -229,6 +239,7 @@ function CommunityPostDetailPage() {
 
   return (
     <>
+      <ReadingProgress />
       <Helmet>
         <title>{post ? `${post.title} - E-XANH` : 'Chi tiết bài viết - E-XANH'}</title>
         <meta name="description" content={post ? post.excerpt : 'Xem chi tiết bài viết trên cộng đồng E-XANH.'} />
@@ -343,14 +354,29 @@ function CommunityPostDetailPage() {
                 </div>
               ) : null}
 
-              <div className="community-detail__actions">
-                <button 
-                  type="button" 
-                  className={`community-detail__action-btn ${post.isLiked ? 'is-active' : ''}`}
-                  onClick={handleToggleLike}
+              <div className="post-stats" style={{ display: 'flex', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--color-border)', marginBottom: '16px', color: 'var(--color-text-muted)' }}>
+                <span 
+                  onClick={(e) => { e.stopPropagation(); setShowReactionDetails(true) }}
+                  style={{ cursor: 'pointer' }}
+                  className="hover-underline"
                 >
-                  <HeartIcon isLiked={post.isLiked} /> Thích {post.likes > 0 && post.likes}
-                </button>
+                  {post.likes} lượt thích
+                </span>
+                <span 
+                  onClick={handleToggleComment}
+                  style={{ cursor: 'pointer' }}
+                  className="hover-underline"
+                >
+                  {post.commentsCount} bình luận
+                </span>
+              </div>
+
+              <div className="community-detail__actions">
+                <ReactionPopover
+                  currentReaction={post.reactionType}
+                  onSelectReaction={(e, type) => handleToggleLike(e, type)}
+                  onToggleLike={(e, type) => handleToggleLike(e, type)}
+                />
                 <button 
                   type="button" 
                   className={`community-detail__action-btn ${isCommentActive ? 'is-active' : ''}`}
@@ -390,6 +416,13 @@ function CommunityPostDetailPage() {
           )}
         </div>
       </div>
+
+      {showReactionDetails && (
+        <ReactionDetailsModal 
+          postId={post.id} 
+          onClose={() => setShowReactionDetails(false)} 
+        />
+      )}
 
       {toastMsg && (
         <div className="ui-toast toast" role="status" aria-live="polite">

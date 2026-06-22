@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import SEO from '../../components/SEO'
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import SEO from '../../components/SEO'
 import PostCard from '../../components/posts/PostCard'
 import PostFilterBar from '../../components/posts/PostFilterBar'
 import PageLoader from '../../components/common/PageLoader'
@@ -9,6 +10,7 @@ import EmptyState from '../../components/common/EmptyState'
 import PageHero from '../../components/common/PageHero'
 import RelatedPostsSection from '../../components/posts/RelatedPostsSection'
 import { getCategories, getTipPosts } from '../../services/postService'
+import { useAuth } from '../../contexts/AuthContext'
 import heroImage from '../../assets/hero.png'
 import '../../styles/tips.css'
 
@@ -281,11 +283,25 @@ function TipsPage() {
 
           {!errorMsg && visiblePosts.length > 0 ? (
             <>
-              <div className="tips-posts-grid">
+              <motion.div 
+                className="tips-posts-grid"
+                initial="hidden"
+                animate="visible"
+                variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+              >
                 {visiblePosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
+                  <motion.div
+                    key={post.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                  >
+                    <PostCard post={post} />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
               {hasMorePosts && (
                 <div className="tips-pagination" style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>

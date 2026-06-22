@@ -134,8 +134,7 @@ function InlineCommentSection({
 
       <div className="inline-comments__composer">
         {isValidImageUrl(currentUser?.avatar_url) ? (
-          <img
-            src={currentUser.avatar_url}
+          <img loading="lazy" src={currentUser.avatar_url}
             alt={`Ảnh đại diện của ${currentUser.name || 'bạn'}`}
             className="inline-comments__avatar"
           />
@@ -193,8 +192,7 @@ function InlineCommentSection({
                 >
                 <Link to={`/nguoi-dung/${comment.authorId}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
                   {isValidImageUrl(comment.avatar) ? (
-                    <img
-                      src={comment.avatar}
+                    <img loading="lazy" src={comment.avatar}
                       alt={`Ảnh đại diện của ${comment.author}`}
                       className="inline-comments__item-avatar"
                     />

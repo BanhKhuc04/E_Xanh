@@ -1,5 +1,3 @@
-import '../../styles/loading.css'
-
 function EmptyState({ 
   icon = '⌘', 
   title = 'Chưa có dữ liệu', 

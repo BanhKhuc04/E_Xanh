@@ -72,7 +72,7 @@ function AdminUserDrawer({
           <div className="au-drawer__profile">
             <span className="au-drawer__avatar">
               {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.name} className="au-drawer__avatar-img" />
+                <img loading="lazy" src={user.avatarUrl} alt={user.name} className="au-drawer__avatar-img" />
               ) : (
                 user.avatar
               )}

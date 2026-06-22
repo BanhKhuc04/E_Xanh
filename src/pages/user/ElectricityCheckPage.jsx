@@ -343,6 +343,41 @@ function ElectricityCheckPage() {
   const canonicalUrl = `https://e-xanh.vercel.app${pathname}`
   const OG_IMAGE = 'https://e-xanh.vercel.app/og-image-v2.png'
 
+  const dynamicSuggestions = useMemo(() => {
+    if (!hasCalculated || !summary.topDevice) return savingSuggestions
+    
+    const topName = summary.topDevice.name.toLowerCase()
+    let dynamicSugg;
+    
+    if (topName.includes('điều hòa') || topName.includes('máy lạnh')) {
+      dynamicSugg = {
+        title: '💡 Gợi ý đổi máy: Điều hòa Inverter',
+        description: `Thiết bị ngốn điện nhất của bạn là ${summary.topDevice.name}. Nâng cấp sang dòng Inverter hoặc nhãn năng lượng 5 sao để tiết kiệm 30-50% điện năng mỗi tháng.`,
+        icon: 'Nhiệt'
+      }
+    } else if (topName.includes('tủ lạnh')) {
+      dynamicSugg = {
+        title: '💡 Gợi ý tối ưu: Tủ lạnh',
+        description: `Tủ lạnh đang tiêu thụ nhiều điện (${summary.topDevice.kwh.toFixed(1)} kWh). Hãy kiểm tra ron cao su cửa, đừng để tủ quá đầy và cân nhắc tủ lạnh Inverter.`,
+        icon: 'Tắt'
+      }
+    } else if (topName.includes('bình nóng lạnh') || topName.includes('máy nước nóng')) {
+      dynamicSugg = {
+        title: '💡 Gợi ý tối ưu: Bình nóng lạnh',
+        description: `Chỉ nên bật bình nóng lạnh 15-20 phút trước khi tắm rồi tắt đi. Cân nhắc đổi sang bình năng lượng mặt trời.`,
+        icon: 'Nhiệt'
+      }
+    } else {
+      dynamicSugg = {
+        title: `💡 Gợi ý tối ưu: ${summary.topDevice.name}`,
+        description: `${summary.topDevice.name} là thiết bị tiêu thụ điện cao nhất của bạn. Hãy rút phích cắm khi không sử dụng và bảo dưỡng định kỳ.`,
+        icon: 'Tắt'
+      }
+    }
+    
+    return [dynamicSugg, ...savingSuggestions.slice(0, 3)]
+  }, [hasCalculated, summary.topDevice])
+
   return (
     <div className="electricity-page">
       <SEO title="Kiểm tra tiền điện" description="Công cụ tính toán và dự báo tiền điện hàng tháng miễn phí. Nhập các thiết bị điện trong nhà để biết ngay số điện tiêu thụ và gợi ý tiết kiệm." url={canonicalUrl} />
@@ -404,7 +439,7 @@ function ElectricityCheckPage() {
         </div>
       </section>
 
-      <SavingSuggestions suggestions={savingSuggestions} />
+      <SavingSuggestions suggestions={dynamicSuggestions} />
       {recentHistories.length > 0 && <RecentElectricityHistory history={recentHistories} />}
 
       <section id="cach-tinh" className="electricity-formula">

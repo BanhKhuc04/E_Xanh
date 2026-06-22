@@ -1,5 +1,3 @@
-import '../../styles/loading.css'
-
 function SectionSkeleton({ 
   count = 3, 
   height = '120px', 

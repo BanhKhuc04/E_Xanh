@@ -1,11 +1,13 @@
 import { useMemo, useState, useEffect } from 'react'
-import SEO from '../../components/SEO'
 import { useLocation } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
 import CommunityFilterBar from '../../components/community/CommunityFilterBar'
 import CommunityPostCard from '../../components/community/CommunityPostCard'
 import CommunitySidebar from '../../components/community/CommunitySidebar'
 import PostComposer from '../../components/community/PostComposer'
+import { Helmet } from 'react-helmet-async'
+import { motion } from 'framer-motion'
+import SEO from '../../components/SEO'
 import PageHero from '../../components/common/PageHero'
 import SectionSkeleton from '../../components/common/SectionSkeleton'
 import EmptyState from '../../components/common/EmptyState'
@@ -267,12 +269,15 @@ function CommunityPage() {
     return true
   }
 
-  async function handleToggleLike(postId) {
+  async function handleToggleLike(postId, reactionType = 'like') {
     if (!checkLogin('thích bài viết')) return
 
     const postToUpdate = posts.find(p => p.id === postId)
     if (!postToUpdate) return
     const isCurrentlyLiked = postToUpdate.isLiked
+    const currentReaction = postToUpdate.reactionType
+
+    const isUnliking = reactionType === null
 
     // Optimistic UI update
     setPosts((current) =>
@@ -280,14 +285,17 @@ function CommunityPage() {
         if (post.id !== postId) return post
         return {
           ...post,
-          isLiked: !isCurrentlyLiked,
-          likes: isCurrentlyLiked ? Math.max(0, post.likes - 1) : post.likes + 1,
+          isLiked: !isUnliking,
+          reactionType: isUnliking ? null : reactionType,
+          likes: isUnliking 
+            ? Math.max(0, post.likes - 1) 
+            : (isCurrentlyLiked ? post.likes : post.likes + 1),
         }
       })
     )
 
     const { likePost, unlikePost } = await import('../../services/interactionService')
-    const { error } = isCurrentlyLiked ? await unlikePost(postId) : await likePost(postId)
+    const { error } = isUnliking ? await unlikePost(postId) : await likePost(postId, reactionType)
 
     if (error) {
       // Revert on error
@@ -297,7 +305,8 @@ function CommunityPage() {
           return {
             ...post,
             isLiked: isCurrentlyLiked,
-            likes: isCurrentlyLiked ? post.likes + 1 : Math.max(0, post.likes - 1),
+            reactionType: currentReaction,
+            likes: postToUpdate.likes,
           }
         })
       )
@@ -421,20 +430,40 @@ function CommunityPage() {
             {isLoading ? (
               <SectionSkeleton count={3} height="200px" />
             ) : posts.length > 0 ? (
-              posts.map((post) => (
-                <CommunityPostCard
-                  key={post.id}
-                  post={post}
-                  onToggleLike={handleToggleLike}
-                  onToggleSave={handleToggleSave}
-                  onToggleComment={handleToggleComment}
-                  onToggleShare={handleToggleShare}
-                  isCommentActive={activeCommentPostId === post.id}
-                  isShareActive={activeSharePostId === post.id}
-                  currentUser={currentUser}
-                  onCommentCountChange={(count) => handleCommentCountChange(post.id, count)}
-                />
-              ))
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.1
+                    }
+                  }
+                }}
+              >
+                {posts.map((post) => (
+                  <motion.div
+                    key={post.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                  >
+                    <CommunityPostCard
+                      post={post}
+                      onToggleLike={handleToggleLike}
+                      onToggleSave={handleToggleSave}
+                      onToggleComment={handleToggleComment}
+                      onToggleShare={handleToggleShare}
+                      isCommentActive={activeCommentPostId === post.id}
+                      isShareActive={activeSharePostId === post.id}
+                      currentUser={currentUser}
+                      onCommentCountChange={(count) => handleCommentCountChange(post.id, count)}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
             ) : (
               <EmptyState 
                 icon="💬"

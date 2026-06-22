@@ -12,7 +12,7 @@
   height: 92px;
   background:
     radial-gradient(circle at 20% 20%, rgba(234, 245, 157, 0.95), transparent 38%),
-    linear-gradient(135deg, #eaf59d, #cfeaa1 45%, #f8fff0);
+    linear-gradient(135deg, var(--color-primary-50), #cfeaa1 45%, #f8fff0);
 }
 
 .exanh-author-card__avatarWrap {
@@ -45,7 +45,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   background: #eef8d9;
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-size: 13px;
   font-weight: 800;
 }
@@ -109,7 +109,7 @@
 
 .exanh-author-card__follow {
   border: none;
-  background: linear-gradient(135deg, #4f8428, #2f7226);
+  background: linear-gradient(135deg, var(--color-primary-400), #2f7226);
   color: white;
   box-shadow: 0 12px 28px rgba(47, 114, 38, 0.25);
 }
@@ -134,7 +134,7 @@
 .exanh-author-card__profile {
   border: 1px solid rgba(79, 132, 40, 0.18);
   background: #f8fff0;
-  color: #336a29;
+  color: var(--color-primary-500);
 }
 
 .exanh-author-card__profile:hover {

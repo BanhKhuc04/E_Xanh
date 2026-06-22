@@ -17,7 +17,7 @@
 }
 
 .post-breadcrumb a:hover {
-  color: #4f8428;
+  color: var(--color-primary-400);
 }
 
 .post-detail-layout {
@@ -48,7 +48,7 @@
   width: fit-content;
   padding: 10px 16px;
   border-radius: 999px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-glow);
   font-size: 0.88rem;
   font-weight: 700;
@@ -231,7 +231,7 @@
 }
 
 .article-quick-tip strong {
-  color: #4f8428;
+  color: var(--color-primary-400);
 }
 
 .article-actions {
@@ -268,7 +268,7 @@
 
 .article-actions__button:hover {
   background: var(--color-primary-glow);
-  color: #2f7d32;
+  color: var(--color-primary-500);
 }
 
 .article-actions__button:active {
@@ -276,7 +276,7 @@
 }
 
 .article-actions__button.is-accent {
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-glow);
 }
 
@@ -293,7 +293,7 @@
 .comment-section__avatar {
   width: 48px;
   height: 48px;
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-soft);
 }
 
@@ -331,8 +331,8 @@
   width: 40px;
   height: 40px;
   flex: 0 0 auto;
-  color: #336a29;
-  background: #eaf59d;
+  color: var(--color-primary-500);
+  background: var(--color-primary-50);
   font-size: 0.82rem;
 }
 
@@ -400,7 +400,7 @@
   flex: 0 0 auto;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .related-posts__item-body {
@@ -428,7 +428,7 @@
 }
 
 .related-posts__item-category {
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -451,7 +451,7 @@
   gap: 14px;
   padding: 14px 18px;
   border-radius: 16px;
-  background: #f8fafc;
+  background: var(--color-surface-soft);
   border: 1px solid rgba(51, 106, 41, 0.08);
   text-decoration: none;
   color: inherit;
@@ -459,10 +459,10 @@
 }
 
 .post-side-card__topic-item:hover {
-  background: #f0f7e6;
+  background: var(--color-primary-50);
   border-color: rgba(79, 132, 40, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(51, 106, 41, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .topic-item__icon {
@@ -495,7 +495,7 @@
 
 .post-side-card--cta {
   color: #fff;
-  background: linear-gradient(180deg, #4f8428 0%, #336a29 100%);
+  background: linear-gradient(180deg, var(--color-primary-400) 0%, var(--color-primary-500) 100%);
 }
 
 .post-side-card--cta h2,

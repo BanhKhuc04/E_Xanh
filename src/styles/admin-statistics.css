@@ -52,7 +52,7 @@
 }
 
 .as-time-filter__btn.is-active {
-  background: linear-gradient(135deg, #336a29, #4f8428);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-400));
   color: #fff;
   border-color: transparent;
   box-shadow: 0 6px 18px rgba(51, 106, 41, 0.25);
@@ -121,19 +121,19 @@
 }
 
 .as-overview__change {
-  color: #4f8428;
+  color: var(--color-primary-400);
   font-size: 0.8rem;
   font-weight: 600;
 }
 
 /* Accent variants */
 .as-overview__card--success .as-overview__icon {
-  color: #336a29;
+  color: var(--color-primary-500);
   background: var(--color-primary-glow);
 }
 
 .as-overview__card--highlight .as-overview__icon {
-  color: #4f8428;
+  color: var(--color-primary-400);
   background: var(--color-primary-soft);
 }
 
@@ -284,7 +284,7 @@
   display: grid;
   place-items: center;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(79, 132, 40, 0.06);
+  box-shadow: var(--shadow-md);
 }
 
 .as-donut__center strong {
@@ -418,7 +418,7 @@
 .as-ranking__bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #80B155, #336A29);
+  background: linear-gradient(90deg, var(--color-primary-300), var(--color-primary-500));
   transition: width 0.4s ease;
 }
 
@@ -555,7 +555,7 @@
   margin: 0 auto;
   border-radius: 12px;
   background: var(--color-primary-glow);
-  color: #336a29;
+  color: var(--color-primary-500);
 }
 
 .as-community-grid__icon svg {

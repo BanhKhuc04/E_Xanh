@@ -1,5 +1,3 @@
-import '../../styles/loading.css'
-
 function PageLoader({ message = 'Đang tải dữ liệu...' }) {
   return (
     <div className="page-loader">

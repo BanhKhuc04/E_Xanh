@@ -115,7 +115,7 @@ function PostLivePreview({ form, author }) {
           <div className="post-live-preview__body">
             <div className="post-live-preview__meta">
               {isValidImageUrl(authorAvatar) ? (
-                <img src={authorAvatar} alt={authorName} className="post-live-preview__avatar-image" />
+                <img loading="lazy" src={authorAvatar} alt={authorName} className="post-live-preview__avatar-image" />
               ) : (
                 <span className="post-live-preview__avatar-fallback">{getInitials(authorName)}</span>
               )}

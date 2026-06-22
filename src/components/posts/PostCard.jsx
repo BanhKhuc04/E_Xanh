@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bookmark, Clock3, Heart, MessageCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { triggerLikeBurst } from '../../utils/animations'
 import OptimizedImage from '../common/OptimizedImage'
 import PostAuthorAvatar from './PostAuthorAvatar'
 import Toast from '../common/Toast'
@@ -68,6 +70,7 @@ function PostCard({ post, onToggleLike }) {
     if (isLiking) return
 
     if (onToggleLike) {
+      if (!isLiked) triggerLikeBurst(e);
       return onToggleLike(post.id)
     }
 
@@ -92,6 +95,7 @@ function PostCard({ post, onToggleLike }) {
     } else {
       setLikesCount(prev => prev + 1)
       setIsLiked(true)
+      triggerLikeBurst(e)
       const { error } = await likePost(post.id)
       if (error) {
         setLikesCount(prev => Math.max(0, prev - 1))
@@ -154,8 +158,9 @@ function PostCard({ post, onToggleLike }) {
             </Link>
 
             <div className="tips-post-card__stats">
-              <button 
+              <motion.button 
                 type="button" 
+                whileTap={{ scale: 0.85 }}
                 className={`tips-post-card__stat-btn tips-post-card__stat ${isLiked ? 'is-liked' : ''}`}
                 onClick={handleToggleLikeClick}
                 aria-label={isLiked ? "Bỏ thích" : "Thích"}
@@ -163,7 +168,7 @@ function PostCard({ post, onToggleLike }) {
               >
                 <Heart size={16} strokeWidth={2.5} fill={isLiked ? "currentColor" : "none"} />
                 {likesCount}
-              </button>
+              </motion.button>
               <Link to={`${postUrl}#comments`} className="tips-post-card__stat" style={{ textDecoration: 'none', color: 'inherit', zIndex: 2, position: 'relative' }}>
                 <MessageCircle size={16} strokeWidth={2} />
                 {post?.comments}

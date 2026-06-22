@@ -10,6 +10,8 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from '../../services/userNotificationService'
+import { supabase } from '../../lib/supabase'
+import ThemeToggle from '../../components/ui/ThemeToggle'
 
 
 function getShortName(name, email) {
@@ -144,9 +146,27 @@ function UserNavbar() {
 
     loadNotifications(true)
 
+    // Setup Supabase Realtime for Notifications
+    let channel = null
+    if (currentUser?.id) {
+      channel = supabase.channel('public:notifications')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${currentUser.id}` },
+          (payload) => {
+            // Play a small sound or just reload notifications
+            loadNotifications(false)
+          }
+        )
+        .subscribe()
+    }
+
     return () => {
       cancelled = true
       window.clearTimeout(timerId)
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
     }
   }, [currentUser?.id])
 
@@ -353,8 +373,7 @@ function UserNavbar() {
                   aria-label="Mở menu tài khoản"
                 >
                   {isValidImageUrl(currentUser.avatar_url) ? (
-                    <img
-                      src={currentUser.avatar_url}
+                    <img loading="lazy" src={currentUser.avatar_url}
                       alt={`Avatar của ${getShortName(currentUser.name, currentUser.email)}`}
                       className="navbar-avatar-img"
                     />
@@ -419,6 +438,8 @@ function UserNavbar() {
               Đăng nhập
             </Link>
           )}
+
+          <ThemeToggle />
 
           <button
             type="button"

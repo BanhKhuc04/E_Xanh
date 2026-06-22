@@ -54,7 +54,7 @@ function CreatePostPage() {
           </div>
         </section>
 
-        <div className="create-post-page__layout">
+        <div className="create-post-page__layout create-post-page__layout--focused">
           <CreatePostForm
             form={composer.form}
             errorMessage={composer.errorMessage}
@@ -76,10 +76,6 @@ function CreatePostPage() {
             cooldownRemaining={composer.cooldownRemaining}
             limits={composer.limits}
           />
-
-          <aside className="create-post-page__preview-column">
-            <PostLivePreview form={composer.form} author={composer.profile || composer.user} />
-          </aside>
         </div>
       </div>
     </>
