@@ -32,7 +32,7 @@
   padding: 24px 26px;
   border-radius: 28px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   box-shadow: var(--shadow-card);
 }
 
@@ -52,7 +52,7 @@
   align-items: center;
   padding: 18px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.1);
   box-shadow: var(--shadow-card);
 }
@@ -93,7 +93,7 @@
   border: 1px solid rgba(128, 177, 85, 0.22);
   border-radius: 999px;
   color: #336a29;
-  background: rgba(193, 217, 92, 0.18);
+  background: var(--color-primary-soft);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -126,7 +126,7 @@
   overflow: hidden;
   border-radius: 28px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   box-shadow: var(--shadow-card);
 }
 
@@ -149,7 +149,7 @@
   top: 14px;
   z-index: 1;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-surface-soft);
 }
 
 .saved-post-card__tag {
@@ -238,7 +238,7 @@
   padding: 22px;
   border-radius: 28px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   box-shadow: var(--shadow-card);
 }
 
@@ -270,7 +270,7 @@
 
 .saved-sidebar__folder.is-active {
   color: #4f8428;
-  background: rgba(128, 177, 85, 0.12);
+  background: var(--color-primary-glow);
 }
 
 .saved-sidebar__folder strong {
@@ -278,7 +278,7 @@
   padding: 3px 8px;
   border-radius: 999px;
   color: #4f8428;
-  background: rgba(193, 217, 92, 0.38);
+  background: var(--color-primary-soft);
   font-size: 0.8rem;
   text-align: center;
 }
@@ -326,7 +326,7 @@
   border-radius: 28px;
   border: 1px solid rgba(79, 132, 40, 0.08);
   text-align: center;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--color-surface-soft);
   box-shadow: var(--shadow-card);
 }
 
@@ -337,7 +337,7 @@
   height: 72px;
   border-radius: 50%;
   color: #4f8428;
-  background: rgba(234, 245, 157, 0.6);
+  background: var(--color-primary-soft);
   font-size: 2rem;
 }
 

@@ -281,7 +281,7 @@ function CommunityPage() {
         return {
           ...post,
           isLiked: !isCurrentlyLiked,
-          likes: isCurrentlyLiked ? post.likes - 1 : post.likes + 1,
+          likes: isCurrentlyLiked ? Math.max(0, post.likes - 1) : post.likes + 1,
         }
       })
     )
@@ -297,7 +297,7 @@ function CommunityPage() {
           return {
             ...post,
             isLiked: isCurrentlyLiked,
-            likes: isCurrentlyLiked ? post.likes + 1 : post.likes - 1,
+            likes: isCurrentlyLiked ? post.likes + 1 : Math.max(0, post.likes - 1),
           }
         })
       )

@@ -27,7 +27,7 @@
 .static-page__contact-card,
 .static-page__cta {
   border-radius: 30px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.08);
   box-shadow: var(--shadow-card);
 }
@@ -281,7 +281,7 @@
 
 .static-page__message--success {
   color: var(--color-primary-500);
-  background: rgba(234, 245, 157, 0.34);
+  background: var(--color-primary-soft);
   border: 1px solid rgba(79, 132, 40, 0.16);
 }
 
@@ -312,7 +312,7 @@
 .static-page__faq article {
   padding: 16px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(234, 245, 157, 0.2), rgba(255, 255, 255, 0.96));
+  background: var(--bg-panel);
 }
 
 .about-page__intro,
@@ -320,7 +320,7 @@
 .about-page__team-card,
 .about-page__contact-card {
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.08);
   box-shadow: var(--shadow-card);
 }
@@ -342,7 +342,7 @@
   padding: 8px 14px;
   border-radius: 999px;
   color: var(--color-primary-600);
-  background: rgba(193, 217, 92, 0.22);
+  background: var(--color-primary-soft);
   font-size: 0.82rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -382,7 +382,7 @@
   gap: 18px;
   padding: 22px;
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(234, 245, 157, 0.24), rgba(255, 255, 255, 0.95));
+  background: var(--bg-panel);
 }
 
 .about-page__intro-badge {
@@ -420,7 +420,7 @@
   height: 42px;
   border-radius: 14px;
   color: var(--color-primary-600);
-  background: rgba(193, 217, 92, 0.22);
+  background: var(--color-primary-soft);
 }
 
 .about-page__team-grid {
@@ -478,7 +478,7 @@
   padding: 8px 12px;
   border-radius: 999px;
   color: var(--color-primary-600);
-  background: rgba(193, 217, 92, 0.2);
+  background: var(--color-primary-soft);
   font-size: 0.82rem;
   font-weight: 800;
 }

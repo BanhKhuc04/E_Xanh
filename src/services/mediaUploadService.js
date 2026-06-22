@@ -1,7 +1,6 @@
 import { supabase } from '../lib/supabase'
-import { createSafeFileName } from '../utils/fileValidation'
+import { createSafeFileName, validateImageFile } from '../utils/fileValidation'
 import { optimizeImage, generateImageVariants } from '../utils/media/imageOptimizer'
-import { validateImage } from '../utils/media/imageValidation'
 import { validateVideo, generateVideoPoster } from '../utils/media/videoOptimizer'
 
 import { logError } from '../utils/logger'
@@ -37,8 +36,8 @@ export async function uploadOptimizedImage({
 }) {
   try {
     // 1. Validation
-    const validation = validateImage(file)
-    if (!validation.isValid) {
+    const validation = validateImageFile(file, { maxSize: 10 * 1024 * 1024 })
+    if (!validation.valid) {
       return { error: new Error(validation.error) }
     }
 

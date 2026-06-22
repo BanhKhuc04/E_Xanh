@@ -27,7 +27,7 @@
   border: 1px solid rgba(79, 132, 40, 0.14);
   border-radius: 999px;
   padding: 0 14px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   color: #336a29;
   font-size: 0.88rem;
   font-weight: 700;
@@ -41,7 +41,7 @@
 }
 
 .block-editor__primary-action--image {
-  background: rgba(234, 245, 157, 0.34);
+  background: var(--color-primary-soft);
 }
 
 .block-editor__primary-action.is-limit {
@@ -72,7 +72,7 @@
   min-height: 30px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(234, 245, 157, 0.45);
+  background: var(--color-primary-soft);
   color: rgba(51, 106, 41, 0.78);
   font-size: 0.8rem;
   font-weight: 700;
@@ -90,7 +90,7 @@
   padding: 24px;
   border: 1px dashed rgba(79, 132, 40, 0.22);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--color-surface-soft);
   text-align: center;
 }
 
@@ -156,14 +156,14 @@
   height: 32px;
   border: 1px solid rgba(79, 132, 40, 0.1);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   color: rgba(51, 106, 41, 0.72);
   transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 
 .block-editor-card__actions button:hover:not(:disabled) {
   border-color: rgba(79, 132, 40, 0.22);
-  background: rgba(234, 245, 157, 0.36);
+  background: var(--color-primary-soft);
   color: #336a29;
 }
 
@@ -190,7 +190,7 @@
   border: 0;
   border-radius: 12px;
   padding: 0 12px;
-  background: #fff;
+  background: var(--color-surface);
   color: rgba(51, 106, 41, 0.82);
   font-size: 0.82rem;
   font-weight: 700;
@@ -198,7 +198,7 @@
 }
 
 .block-editor-card__toolbar button:hover {
-  background: rgba(234, 245, 157, 0.68);
+  background: var(--color-primary-soft);
   box-shadow: 0 8px 16px rgba(51, 106, 41, 0.08);
 }
 
@@ -207,8 +207,8 @@
   padding: 20px 22px;
   border: 1px solid rgba(79, 132, 40, 0.14);
   border-radius: 20px;
-  background: #fff;
-  color: #173715;
+  background: var(--color-surface);
+  color: var(--color-text);
   line-height: 1.85;
   resize: vertical;
   box-shadow: 0 10px 24px rgba(51, 106, 41, 0.04);

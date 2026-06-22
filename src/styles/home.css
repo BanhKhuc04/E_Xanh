@@ -36,7 +36,7 @@
   left: -6%;
   width: 360px;
   height: 360px;
-  background: rgba(234, 245, 157, 0.62);
+  background: var(--color-primary-soft);
 }
 
 .home-hero__glow--right {
@@ -44,7 +44,7 @@
   bottom: 10%;
   width: 460px;
   height: 460px;
-  background: rgba(128, 177, 85, 0.24);
+  background: var(--color-primary-glow);
 }
 
 .home-hero__grid {
@@ -65,7 +65,7 @@
   padding: 10px 16px;
   border-radius: 999px;
   color: var(--color-primary-500);
-  background: rgba(128, 177, 85, 0.12);
+  background: var(--color-primary-glow);
   border: 1px solid rgba(128, 177, 85, 0.18);
   font-size: 0.92rem;
   font-weight: 700;
@@ -158,7 +158,7 @@
   position: absolute;
   inset: 26px;
   border-radius: 999px;
-  background: rgba(128, 177, 85, 0.24);
+  background: var(--color-primary-glow);
   filter: blur(54px);
   z-index: -1;
 }
@@ -188,7 +188,7 @@
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.68);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-surface-soft);
   backdrop-filter: blur(14px);
   box-shadow: 0 22px 44px rgba(79, 132, 40, 0.16);
 }
@@ -286,11 +286,11 @@
 }
 
 .home-feature-card__icon--yellow {
-  background: rgba(234, 245, 157, 0.4);
+  background: var(--color-primary-soft);
 }
 
 .home-feature-card__icon--green {
-  background: rgba(128, 177, 85, 0.18);
+  background: var(--color-primary-glow);
 }
 
 .home-feature-card__icon--dark {
@@ -413,7 +413,7 @@
   gap: 14px;
   padding: 28px;
   border-radius: 32px;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--color-surface-soft);
   box-shadow: 0 18px 40px rgba(25, 54, 17, 0.16);
 }
 
@@ -423,7 +423,7 @@
   gap: 16px;
   align-items: center;
   padding: 18px;
-  background: #f7faef;
+  background: var(--color-background);
   border: 1px solid rgba(79, 132, 40, 0.12);
 }
 
@@ -434,7 +434,7 @@
   height: 48px;
   border-radius: 16px;
   color: var(--color-primary-500);
-  background: #fff;
+  background: var(--color-surface);
   font-size: 0.82rem;
   font-weight: 800;
   box-shadow: 0 4px 14px rgba(79, 132, 40, 0.08);
@@ -478,7 +478,7 @@
   height: 10px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--color-surface-soft);
 }
 
 .electricity-preview__progress span {
@@ -563,7 +563,7 @@
   top: 18px;
   z-index: 1;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   box-shadow: 0 10px 24px rgba(79, 132, 40, 0.1);
 }
 
@@ -698,7 +698,7 @@
 
 .home-avatar--lime {
   color: var(--color-primary-500);
-  background: rgba(193, 217, 92, 0.54);
+  background: var(--color-primary-soft);
 }
 
 .community-preview {
@@ -709,7 +709,7 @@
   gap: 32px;
   padding: 42px;
   border-radius: 40px;
-  background: #e8f2d5;
+  background: var(--color-background);
 }
 
 .community-preview::before {
@@ -720,7 +720,7 @@
   width: 260px;
   height: 260px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.34);
+  background: var(--color-surface-soft);
   filter: blur(24px);
 }
 
@@ -749,12 +749,12 @@
 .community-preview__cta {
   padding: 24px;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.08);
 }
 
 .community-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 22px;
   padding: 20px;
@@ -1010,7 +1010,7 @@
   padding: 8px 12px;
   border-radius: 12px;
   color: var(--color-primary-500);
-  background: rgba(234, 245, 157, 0.6);
+  background: var(--color-primary-soft);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -1114,7 +1114,7 @@
   height: 18px;
   border-radius: 50%;
   color: #2f7d32;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
 }
 
@@ -1197,7 +1197,7 @@
   border: 0;
   border-radius: 999px;
   padding: 0 13px;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--color-surface-soft);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
   color: #12351f;
@@ -1212,7 +1212,7 @@
 }
 
 .share-pill:hover {
-  background: #ffffff;
+  background: var(--color-surface);
   color: #2f7d32;
 }
 
@@ -1251,7 +1251,7 @@
   bottom: -70px;
   width: 220px;
   height: 220px;
-  background: rgba(128, 177, 85, 0.18);
+  background: var(--color-primary-glow);
 }
 
 .home-final-cta__icon {
@@ -1261,7 +1261,7 @@
   height: 72px;
   border-radius: 50%;
   color: var(--color-primary-500);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   font-size: 2rem;
   box-shadow: 0 10px 24px rgba(79, 132, 40, 0.12);
 }
@@ -1540,7 +1540,7 @@
 
 .electricity-preview__device:hover {
   transform: scale(1.02);
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface-soft);
   box-shadow: 0 8px 24px rgba(79, 132, 40, 0.06);
   z-index: 10;
 }

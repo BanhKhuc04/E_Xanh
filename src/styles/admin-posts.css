@@ -39,7 +39,7 @@
   padding: 22px 20px;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 14px 30px rgba(79, 132, 40, 0.08);
   min-width: 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -89,7 +89,7 @@
 
 .ap-stats__card--success .ap-stats__icon {
   color: #336a29;
-  background: rgba(128, 177, 85, 0.22);
+  background: var(--color-primary-glow);
 }
 
 .ap-stats__card--muted .ap-stats__icon {
@@ -99,7 +99,7 @@
 
 .ap-stats__card--highlight .ap-stats__icon {
   color: #4f8428;
-  background: rgba(193, 217, 92, 0.34);
+  background: var(--color-primary-soft);
 }
 
 /* ---- Filter ---- */
@@ -109,7 +109,7 @@
   padding: 22px 24px;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   box-shadow: 0 14px 30px rgba(79, 132, 40, 0.06);
 }
 
@@ -230,7 +230,7 @@
   align-content: start;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   box-shadow: 0 16px 32px rgba(79, 132, 40, 0.08);
   overflow: hidden;
   min-width: 0;
@@ -301,7 +301,7 @@
 }
 
 .ap-list__item.is-active {
-  background: rgba(193, 217, 92, 0.16);
+  background: var(--color-primary-soft);
   box-shadow: inset 3px 0 0 var(--color-primary-300);
 }
 
@@ -374,7 +374,7 @@
 }
 
 .ap-list__view-btn:hover {
-  background: rgba(193, 217, 92, 0.38);
+  background: var(--color-primary-soft);
   transform: translateY(-1px);
 }
 
@@ -396,7 +396,7 @@
 
 .ap-badge.is-approved {
   color: #2a5e1f;
-  background: rgba(128, 177, 85, 0.26);
+  background: var(--color-primary-glow);
 }
 
 .ap-badge.is-rejected {
@@ -416,7 +416,7 @@
   align-self: start;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   box-shadow: 0 16px 32px rgba(79, 132, 40, 0.08);
   overflow: hidden;
   min-width: 0;
@@ -481,7 +481,7 @@
   width: fit-content;
   padding: 5px 14px;
   border-radius: 999px;
-  background: rgba(193, 217, 92, 0.3);
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
   font-size: 0.82rem;
   font-weight: 600;

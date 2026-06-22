@@ -10,6 +10,7 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from '../../services/userNotificationService'
+import ThemeToggle from '../../components/ui/ThemeToggle'
 
 function getShortName(name, email) {
   if (name) {
@@ -38,6 +39,7 @@ function formatNotificationTime(dateString) {
 
 function UserNavbar() {
   const navigate = useNavigate()
+
   const { openComposer } = usePostComposer()
   const menuRootRef = useRef(null)
   const [currentUser, setCurrentUser] = useState(null)
@@ -247,6 +249,8 @@ function UserNavbar() {
         </nav>
 
         <div className={`user-navbar__actions ${isMobileMenuOpen ? 'is-mobile-open' : ''}`}>
+          <ThemeToggle />
+
           {canAccessAdmin ? (
             <Link
               to="/admin"

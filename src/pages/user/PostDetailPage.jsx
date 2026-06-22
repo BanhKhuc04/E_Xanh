@@ -11,6 +11,7 @@ import AuthorSidebarCard from '../../components/posts/AuthorSidebarCard'
 import PromptModal from '../../components/common/PromptModal'
 import { getPostBySlug, getApprovedPosts, getTopCategories } from '../../services/postService'
 import PageLoader from '../../components/common/PageLoader'
+import ReadingProgress from '../../components/common/ReadingProgress'
 import '../../styles/post-detail.css'
 
 function PostDetailPage() {
@@ -364,6 +365,7 @@ function PostDetailPage() {
 
   return (
     <div className="post-detail-page">
+      <ReadingProgress />
       <SEO 
           title={post.title}
           description={post.description || post.content?.substring(0, 160)}

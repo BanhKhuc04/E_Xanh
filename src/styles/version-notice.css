@@ -4,7 +4,7 @@
   left: 24px;
   max-width: 360px;
   z-index: 9999;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface-soft);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(79, 132, 40, 0.2);
   border-radius: 16px;

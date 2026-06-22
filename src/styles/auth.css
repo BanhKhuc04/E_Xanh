@@ -76,7 +76,7 @@
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: rgba(193, 217, 92, 0.18);
+  background: var(--color-primary-soft);
   filter: blur(18px);
   pointer-events: none;
 }
@@ -158,7 +158,7 @@
   min-height: 36px;
   padding: 0 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.76);
+  background: var(--color-surface-soft);
   color: #24551f;
   font-size: 0.9rem;
   font-weight: 700;
@@ -181,7 +181,7 @@
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 24px;
-  background: #eef6df;
+  background: var(--color-background);
   line-height: 0;
   box-shadow: 0 18px 34px rgba(51, 106, 41, 0.12);
 }
@@ -222,7 +222,7 @@
   gap: 22px;
   min-height: 720px;
   padding: 38px 42px 34px;
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--color-surface-soft);
 }
 
 .auth-form-panel__header,
@@ -235,7 +235,7 @@
 .auth-card__header h2,
 .auth-success-state h2 {
   margin: 0;
-  color: #173715;
+  color: var(--color-text);
   font-size: clamp(2rem, 1.8rem + 0.8vw, 2.7rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
@@ -297,7 +297,7 @@
 .auth-card__message--success,
 .auth-card__toast--success {
   color: #2f7226;
-  background: rgba(234, 245, 157, 0.34);
+  background: var(--color-primary-soft);
   border: 1px solid rgba(79, 132, 40, 0.16);
 }
 
@@ -448,7 +448,7 @@
   z-index: 1;
   padding: 0 14px;
   color: rgba(23, 55, 21, 0.48);
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--color-surface-soft);
 }
 
 .auth-card__socials {
@@ -470,7 +470,7 @@
   min-height: 56px;
   border: 1px solid rgba(79, 132, 40, 0.14);
   border-radius: 18px;
-  background: #fff;
+  background: var(--color-surface);
   color: #21401b;
   font: inherit;
   font-weight: 800;
@@ -492,7 +492,7 @@
   justify-items: start;
   padding: 18px 20px;
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(247, 250, 239, 0.92), rgba(255, 255, 255, 0.96));
+  background: var(--bg-panel);
   border: 1px solid rgba(79, 132, 40, 0.08);
   text-align: left;
 }
@@ -576,7 +576,7 @@
 
 .auth-recovery-state strong {
   margin: 0;
-  color: #173715;
+  color: var(--color-text);
 }
 
 @media (max-width: 1100px) {

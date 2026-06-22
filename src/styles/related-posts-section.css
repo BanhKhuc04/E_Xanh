@@ -18,7 +18,7 @@
   font-size: 1.9rem;
   line-height: 1.22;
   letter-spacing: -0.04em;
-  color: #173715;
+  color: var(--color-text);
 }
 
 .exanh-related-grid {
@@ -33,7 +33,7 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: 22px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid rgba(79, 132, 40, 0.12);
   box-shadow: 0 14px 34px rgba(51, 106, 41, 0.08);
   transition: transform 180ms ease, box-shadow 180ms ease;
@@ -51,7 +51,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #eef6df;
+  background: var(--color-background);
   position: relative;
   flex-shrink: 0;
 }

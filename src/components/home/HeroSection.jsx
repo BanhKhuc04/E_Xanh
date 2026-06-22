@@ -30,9 +30,6 @@ function HeroSection() {
 
   return (
     <section className="home-hero">
-      <div className="home-hero__glow home-hero__glow--left" aria-hidden="true"></div>
-      <div className="home-hero__glow home-hero__glow--right" aria-hidden="true"></div>
-
       <div className="home-hero__grid">
         <div className="home-hero__content">
           <span className="home-chip">

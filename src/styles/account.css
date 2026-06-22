@@ -23,7 +23,7 @@
 .account-side-card,
 .account-guest-card {
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.08);
   box-shadow: var(--shadow-card);
 }
@@ -99,7 +99,7 @@
   padding: 8px 12px;
   border-radius: 999px;
   color: var(--color-primary-500);
-  background: rgba(193, 217, 92, 0.28);
+  background: var(--color-primary-soft);
   font-size: 0.86rem;
   font-weight: 700;
 }
@@ -193,7 +193,7 @@
 .account-history-list__item {
   padding: 16px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(234, 245, 157, 0.22), rgba(255, 255, 255, 0.96));
+  background: var(--bg-panel);
   border: 1px solid rgba(79, 132, 40, 0.08);
 }
 
@@ -233,7 +233,7 @@
 
 .account-my-posts__status.is-approved {
   color: var(--color-primary-500);
-  background: rgba(193, 217, 92, 0.3);
+  background: var(--color-primary-soft);
 }
 
 .account-my-posts__status.is-pending {
@@ -268,7 +268,7 @@
   padding: 8px 10px;
   border-radius: 999px;
   color: var(--color-primary-500);
-  background: rgba(193, 217, 92, 0.24);
+  background: var(--color-primary-soft);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -310,7 +310,7 @@
 .account-side-card__button {
   width: 100%;
   color: var(--color-primary-500);
-  background: rgba(193, 217, 92, 0.46);
+  background: var(--color-primary-soft);
 }
 
 .account-settings button {
@@ -343,7 +343,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   transition: transform 0.2s ease;
 }
 
@@ -479,7 +479,7 @@
 }
 
 .account-modal {
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 22px;
   width: 100%;
   max-width: 680px;
@@ -646,7 +646,7 @@
 }
 
 .account-modal__success {
-  background: rgba(193, 217, 92, 0.2);
+  background: var(--color-primary-soft);
   color: #27500a;
   padding: 12px 16px;
   border-radius: 8px;
@@ -801,7 +801,7 @@
 .settings-media-card,
 .settings-callout {
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.08);
   box-shadow: var(--shadow-card);
 }
@@ -855,7 +855,7 @@
   width: fit-content;
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(193, 217, 92, 0.34);
+  background: var(--color-primary-soft);
   color: #336a29;
   font-size: 0.82rem;
   font-weight: 800;
@@ -887,7 +887,7 @@
 .settings-section-card__header h2,
 .settings-section-card__header h3,
 .settings-disabled-panel strong {
-  color: #173715;
+  color: var(--color-text);
 }
 
 .settings-hero__snapshot span,
@@ -1001,7 +1001,7 @@
 
 .settings-sidebar__nav-item:hover {
   transform: translateY(-1px);
-  background: rgba(234, 245, 157, 0.36);
+  background: var(--color-primary-soft);
 }
 
 .settings-sidebar__nav-item.is-active {
@@ -1104,7 +1104,7 @@
   padding: 14px 16px;
   border: 1px solid rgba(79, 132, 40, 0.14);
   border-radius: 18px;
-  background: #fff;
+  background: var(--color-surface);
   font: inherit;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
@@ -1193,7 +1193,7 @@
 }
 
 .settings-inline-alert--success {
-  background: rgba(193, 217, 92, 0.2);
+  background: var(--color-primary-soft);
   color: #27500a;
 }
 
@@ -1234,7 +1234,7 @@
   border: 1px solid rgba(79, 132, 40, 0.12);
   padding: 18px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-surface-soft);
   text-align: left;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }

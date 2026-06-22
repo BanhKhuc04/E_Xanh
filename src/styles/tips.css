@@ -50,7 +50,7 @@
   justify-content: space-between;
   padding: 10px 16px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface-soft);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(115, 121, 106, 0.15);
   box-shadow: 0 2px 12px rgba(79, 132, 40, 0.05);
@@ -85,8 +85,8 @@
   border-radius: 12px;
   padding: 10px 14px;
   font-size: 0.9rem;
-  color: #173715;
-  background: #fff;
+  color: var(--color-text);
+  background: var(--color-surface);
   outline: none;
   height: 40px;
 }
@@ -118,7 +118,7 @@
   border-radius: 999px;
   padding: 8px 14px;
   color: rgba(23, 55, 21, 0.74);
-  background: #fff;
+  background: var(--color-surface);
   font-size: 0.85rem;
   font-weight: 600;
   transition: all 0.2s;
@@ -129,7 +129,7 @@
 }
 
 .tips-filter-chip:hover {
-  background: #f7faef;
+  background: var(--color-background);
   color: #4f8428;
   border-color: #4f8428;
 }
@@ -155,13 +155,13 @@
   gap: 12px;
   padding: 12px 20px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(234, 245, 157, 0.44);
   box-shadow: 0 2px 10px rgba(79, 132, 40, 0.04);
 }
 
 .tips-results-bar strong {
-  color: #173715;
+  color: var(--color-text);
   font-size: 1.05rem;
   font-weight: 800;
 }
@@ -213,7 +213,7 @@
   overflow: hidden;
   border-radius: 22px;
   border: 1px solid rgba(51, 106, 41, 0.12);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 12px 34px rgba(31, 73, 35, 0.08);
   cursor: pointer;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
@@ -233,7 +233,7 @@
   aspect-ratio: 16 / 9;
   height: 176px;
   overflow: hidden;
-  background: #eef6df;
+  background: var(--color-background);
   flex: 0 0 auto;
 }
 
@@ -260,7 +260,7 @@
   font-size: 0.75rem;
   font-weight: 800;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface-soft);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
@@ -280,7 +280,7 @@
   outline: none;
   border-radius: 50%;
   color: #336a29;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-surface-soft);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   cursor: pointer;
   transition: all 0.2s;
@@ -288,7 +288,7 @@
 
 .tips-post-card__save-btn:hover {
   transform: scale(1.05);
-  background: #fff;
+  background: var(--color-surface);
 }
 
 .tips-post-card__body {
@@ -362,7 +362,7 @@
 .tips-post-card__author-name {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #173715;
+  color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -390,6 +390,24 @@
   white-space: nowrap;
 }
 
+button.tips-post-card__stat-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin: -4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+button.tips-post-card__stat-btn:hover {
+  background: rgba(79, 132, 40, 0.08);
+}
+
+button.tips-post-card__stat-btn.is-liked {
+  color: #d13030;
+}
+
 .tips-post-card__overlay-link {
   position: absolute;
   inset: 0;
@@ -414,7 +432,7 @@
 .tips-empty-posts h3 {
   margin: 16px 0 8px;
   font-size: 1.2rem;
-  color: #173715;
+  color: var(--color-text);
 }
 
 .tips-empty-posts p {
@@ -462,7 +480,7 @@
   padding: 8px 16px;
   border-radius: 999px;
   border: 1px solid rgba(51, 106, 41, 0.2);
-  background: #fff;
+  background: var(--color-surface);
   color: #336a29;
   font-weight: 700;
   cursor: pointer;

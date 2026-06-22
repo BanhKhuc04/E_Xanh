@@ -36,7 +36,7 @@
   padding: 10px 20px;
   border: 1px solid rgba(79, 132, 40, 0.12);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-surface-soft);
   color: var(--color-text);
   font: inherit;
   font-size: 0.9rem;
@@ -47,7 +47,7 @@
 }
 
 .as-time-filter__btn:hover {
-  background: rgba(193, 217, 92, 0.2);
+  background: var(--color-primary-soft);
   border-color: rgba(79, 132, 40, 0.2);
 }
 
@@ -72,7 +72,7 @@
   padding: 22px 20px;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 14px 30px rgba(79, 132, 40, 0.08);
   min-width: 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -129,12 +129,12 @@
 /* Accent variants */
 .as-overview__card--success .as-overview__icon {
   color: #336a29;
-  background: rgba(128, 177, 85, 0.22);
+  background: var(--color-primary-glow);
 }
 
 .as-overview__card--highlight .as-overview__icon {
   color: #4f8428;
-  background: rgba(193, 217, 92, 0.34);
+  background: var(--color-primary-soft);
 }
 
 .as-overview__card--warning .as-overview__icon {
@@ -171,7 +171,7 @@
   padding: 24px;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 14px 30px rgba(79, 132, 40, 0.08);
   min-width: 0;
 }
@@ -280,7 +280,7 @@
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   display: grid;
   place-items: center;
   text-align: center;
@@ -342,7 +342,7 @@
   padding: 24px;
   border-radius: 24px;
   border: 1px solid rgba(79, 132, 40, 0.08);
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 14px 30px rgba(79, 132, 40, 0.08);
   min-width: 0;
 }
@@ -371,7 +371,7 @@
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  background: rgba(193, 217, 92, 0.35);
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
   font-weight: 700;
   font-size: 0.82rem;
@@ -411,7 +411,7 @@
 .as-ranking__bar-track {
   height: 6px;
   border-radius: 999px;
-  background: rgba(234, 245, 157, 0.3);
+  background: var(--color-primary-soft);
   overflow: hidden;
 }
 
@@ -440,7 +440,7 @@
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  background: rgba(193, 217, 92, 0.35);
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
   font-weight: 700;
   font-size: 0.82rem;
@@ -496,7 +496,7 @@
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  background: rgba(193, 217, 92, 0.35);
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
   font-weight: 700;
   font-size: 0.82rem;
@@ -509,7 +509,7 @@
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  background: rgba(193, 217, 92, 0.5);
+  background: var(--color-primary-soft);
   color: var(--color-primary-500);
   font-weight: 700;
   font-size: 0.9rem;
@@ -554,7 +554,7 @@
   height: 36px;
   margin: 0 auto;
   border-radius: 12px;
-  background: rgba(128, 177, 85, 0.22);
+  background: var(--color-primary-glow);
   color: #336a29;
 }
 
@@ -623,7 +623,7 @@
   position: relative;
   padding: 14px 16px 14px 34px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--color-surface-soft);
   border: 1px solid rgba(79, 132, 40, 0.06);
   color: var(--color-text);
   font-size: 0.9rem;

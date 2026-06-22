@@ -4,7 +4,7 @@
   padding: 0;
   overflow: hidden;
   border-radius: 24px;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   margin-bottom: 24px;
 }
@@ -31,7 +31,7 @@
 
 .profile-body {
   padding: 24px 32px 28px;
-  background: #fff;
+  background: var(--color-surface);
 }
 
 .profile-identity-row {
@@ -98,7 +98,7 @@
 }
 
 .profile-badge {
-  background: rgba(193, 217, 92, 0.2);
+  background: var(--color-primary-soft);
   color: #336a29;
   padding: 4px 10px;
   border-radius: 999px;

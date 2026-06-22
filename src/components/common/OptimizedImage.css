@@ -26,8 +26,8 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  color: #9ca3af; /* text-gray-400 */
-  background-color: #f9fafb; /* bg-gray-50 */
+  color: rgba(79, 132, 40, 0.5);
+  background-color: rgba(79, 132, 40, 0.04);
 }
 
 .optimized-image-fallback svg {

@@ -183,7 +183,7 @@ function CommunityPostDetailPage() {
     setPost(current => ({
       ...current,
       isLiked: !isCurrentlyLiked,
-      likes: isCurrentlyLiked ? current.likes - 1 : current.likes + 1,
+      likes: isCurrentlyLiked ? Math.max(0, current.likes - 1) : current.likes + 1,
     }))
 
     const { likePost, unlikePost } = await import('../../services/interactionService')
@@ -193,7 +193,7 @@ function CommunityPostDetailPage() {
       setPost(current => ({
         ...current,
         isLiked: isCurrentlyLiked,
-        likes: isCurrentlyLiked ? current.likes + 1 : current.likes - 1,
+        likes: isCurrentlyLiked ? current.likes + 1 : Math.max(0, current.likes - 1),
       }))
       showToast('Đã xảy ra lỗi, vui lòng thử lại.')
     }
