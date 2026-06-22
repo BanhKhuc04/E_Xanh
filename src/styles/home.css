@@ -816,7 +816,7 @@
 
 .community-preview__posts {
   display: grid;
-  gap: 16px;
+  gap: 40px;
 }
 
 .community-preview__post,
