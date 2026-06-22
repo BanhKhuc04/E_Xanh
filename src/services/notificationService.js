@@ -362,9 +362,15 @@ export async function getMyNotifications({ limit = 8 } = {}) {
     .order('created_at', { ascending: false })
     .limit(Math.max(limit * 3, 24))
 
+  // Fetch minimal columns for unread so we can apply preference filtering
+  // (HEAD count skips matchesNotificationPreference, causing badge vs. list mismatch)
   let unreadQuery = supabase
     .from(backend)
-    .select('id', { count: 'exact', head: true })
+    .select(
+      backend === TABLES.modernNotifications
+        ? 'id,type,related_type,revoked_at'
+        : 'id,type,related_type'
+    )
     .eq('is_read', false)
 
   if (backend === TABLES.modernNotifications) {
@@ -396,10 +402,15 @@ export async function getMyNotifications({ limit = 8 } = {}) {
     .filter((item) => matchesNotificationPreference(item, preferences))
     .slice(0, limit)
 
+  // Count only unread items that pass the same preference filter as the list
+  const filteredUnreadCount = unreadResult.error
+    ? 0
+    : (unreadResult.data || []).filter((item) => matchesNotificationPreference(item, preferences)).length
+
   return {
     data: {
       items: filteredItems,
-      unreadCount: unreadResult?.count || 0,
+      unreadCount: filteredUnreadCount,
       supported: true,
       backend,
     },
