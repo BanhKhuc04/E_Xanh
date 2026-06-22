@@ -164,10 +164,10 @@ function PostCard({ post, onToggleLike }) {
                 <Heart size={16} strokeWidth={2.5} fill={isLiked ? "currentColor" : "none"} />
                 {likesCount}
               </button>
-              <span className="tips-post-card__stat">
+              <Link to={`${postUrl}#comments`} className="tips-post-card__stat" style={{ textDecoration: 'none', color: 'inherit', zIndex: 2, position: 'relative' }}>
                 <MessageCircle size={16} strokeWidth={2} />
                 {post?.comments}
-              </span>
+              </Link>
               <span className="tips-post-card__stat">
                 <Bookmark size={16} strokeWidth={2} />
                 {post?.savedCount}

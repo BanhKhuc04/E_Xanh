@@ -10,7 +10,7 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from '../../services/userNotificationService'
-import ThemeToggle from '../../components/ui/ThemeToggle'
+
 
 function getShortName(name, email) {
   if (name) {
@@ -249,7 +249,6 @@ function UserNavbar() {
         </nav>
 
         <div className={`user-navbar__actions ${isMobileMenuOpen ? 'is-mobile-open' : ''}`}>
-          <ThemeToggle />
 
           {canAccessAdmin ? (
             <Link

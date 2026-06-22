@@ -263,7 +263,13 @@ function CommunityPostCard({
             <div className="community-post-card__footer">
               <div className="post-stats">
                 <span>{post.likes} lượt thích</span>
-                <span>{post.commentsCount} bình luận</span>
+                <span 
+                  onClick={(e) => { e.stopPropagation(); if (onToggleComment) onToggleComment(post.id) }}
+                  style={{ cursor: onToggleComment ? 'pointer' : 'default' }}
+                  className={onToggleComment ? "hover-underline" : ""}
+                >
+                  {post.commentsCount} bình luận
+                </span>
               </div>
 
               <div className="post-actions">

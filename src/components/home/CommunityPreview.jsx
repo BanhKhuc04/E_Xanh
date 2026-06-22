@@ -187,7 +187,13 @@ function CommunityPreview() {
                         <div className="community-post-card__footer">
                           <div className="post-stats">
                             <span>{post.likes_count || 0} lượt thích</span>
-                            <span>{post.comments_count || 0} bình luận</span>
+                            <Link 
+                              to={`/cong-dong/${post.id}#comments`}
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                              className="hover-underline"
+                            >
+                              {post.comments_count || 0} bình luận
+                            </Link>
                           </div>
 
                           <div className="post-actions">
