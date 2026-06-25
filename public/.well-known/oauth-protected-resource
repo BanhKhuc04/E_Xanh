@@ -1,7 +1,7 @@
 {
-  "resource": "https://e-xanh.com",
+  "resource": "https://exanh.online",
   "authorization_servers": [
-    "https://e-xanh.com"
+    "https://exanh.online"
   ],
   "scopes_supported": [
     "read",
