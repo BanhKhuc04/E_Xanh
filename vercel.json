@@ -28,6 +28,19 @@
       ]
     },
     {
+      "source": "/index.md",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        },
+        {
+          "key": "x-markdown-tokens",
+          "value": "120"
+        }
+      ]
+    },
+    {
       "source": "/",
       "headers": [
         {
@@ -80,6 +93,17 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "Accept",
+          "value": "(?i).*text/markdown.*"
+        }
+      ],
+      "destination": "/index.md"
+    },
     {
       "source": "/((?!cdn-cgi/|api/|.*\\.).*)",
       "destination": "/index.html"
