@@ -28,6 +28,15 @@
       ]
     },
     {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</.well-known/api-catalog>; rel=\"api-catalog\", </api/v1/docs>; rel=\"service-doc\""
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
