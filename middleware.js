@@ -1,11 +1,11 @@
 export const config = {
-  matcher: '/(.*)',
+  matcher: '/',
 };
 
 export default async function middleware(request) {
   const acceptHeader = request.headers.get('accept') || '';
   
-  if (acceptHeader.toLowerCase().includes('text/markdown')) {
+  if (new URL(request.url).pathname === '/' && acceptHeader.toLowerCase().includes('text/markdown')) {
     // Return markdown for agents
     return new Response(
 `# E-XANH — Sử dụng điện thông minh, tiết kiệm điện

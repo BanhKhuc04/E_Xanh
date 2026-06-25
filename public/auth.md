@@ -1,4 +1,4 @@
-# auth.md
+# Auth.md
 
 Welcome to the E-Xanh Agent Registration endpoint.
 
