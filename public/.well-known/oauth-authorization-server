@@ -14,6 +14,7 @@
   "agent_auth": {
     "skill": "https://isitagentready.com/.well-known/agent-skills/auth-md/SKILL.md",
     "register_uri": "https://exanh.online/agent/register",
+    "identity_endpoint": "https://exanh.online/agent/identity",
     "identity_types_supported": [
       "identity_assertion",
       "anonymous"
