@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "webmcp",
+      "type": "skill-md",
+      "description": "Expose site tools to AI agents via the browser using the WebMCP API.",
+      "url": "/.well-known/agent-skills/webmcp/SKILL.md",
+      "digest": "sha256:c9df61bf6cc95d3d2afc98d0cc54924297cbf6cf2d8c59b5c45e230bc6d33cdb"
+    }
+  ]
+}

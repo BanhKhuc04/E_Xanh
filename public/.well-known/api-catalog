@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://e-xanh.com/api/v1",
+      "service-desc": [
+        {
+          "href": "https://e-xanh.com/api/v1/openapi.json",
+          "type": "application/openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://e-xanh.com/api/v1/docs",
+          "type": "text/html"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://e-xanh.com/api/v1/health",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

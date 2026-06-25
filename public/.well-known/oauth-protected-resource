@@ -1,0 +1,13 @@
+{
+  "resource": "https://e-xanh.com",
+  "authorization_servers": [
+    "https://e-xanh.com"
+  ],
+  "scopes_supported": [
+    "read",
+    "write"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ]
+}

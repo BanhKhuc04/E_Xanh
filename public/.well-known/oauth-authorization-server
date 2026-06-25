@@ -1,0 +1,45 @@
+{
+  "issuer": "https://e-xanh.com",
+  "authorization_endpoint": "https://e-xanh.com/oauth/authorize",
+  "token_endpoint": "https://e-xanh.com/oauth/token",
+  "jwks_uri": "https://e-xanh.com/oauth/jwks",
+  "grant_types_supported": [
+    "authorization_code",
+    "client_credentials"
+  ],
+  "response_types_supported": [
+    "code",
+    "token"
+  ],
+  "agent_auth": {
+    "skill": "https://isitagentready.com/.well-known/agent-skills/auth-md/SKILL.md",
+    "register_uri": "https://e-xanh.com/agent/register",
+    "identity_types_supported": [
+      "identity_assertion",
+      "anonymous"
+    ],
+    "identity_assertion": {
+      "assertion_types_supported": [
+        "urn:ietf:params:oauth:token-type:id-jag",
+        "verified_email"
+      ],
+      "credential_types_supported": [
+        "oauth_client_credentials"
+      ]
+    },
+    "anonymous": {
+      "credential_types_supported": [
+        "oauth_client_credentials"
+      ]
+    },
+    "credential_types_supported": [
+      "oauth_client_credentials",
+      "bearer_token"
+    ],
+    "claim_uri": "https://e-xanh.com/agent/claim",
+    "revocation_uri": "https://e-xanh.com/agent/revoke",
+    "events_supported": [
+      "revocation"
+    ]
+  }
+}

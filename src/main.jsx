@@ -9,6 +9,7 @@ import './styles/global.css'
 import './styles/layout.css'
 import './styles/social-ui.css'
 import { isChunkLoadError, handleChunkErrorReload } from './utils/chunkError'
+import './utils/webmcp'
 
 // Bắt lỗi chunk load ngoài router context (VD: lỗi dynamic import chưa kịp vào ErrorBoundary)
 window.addEventListener('unhandledrejection', (event) => {

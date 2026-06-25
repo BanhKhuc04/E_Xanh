@@ -1,0 +1,14 @@
+{
+  "serverInfo": {
+    "name": "e-xanh-mcp-server",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "endpoint": "/mcp"
+  },
+  "capabilities": {
+    "tools": {},
+    "resources": {},
+    "prompts": {}
+  }
+}
