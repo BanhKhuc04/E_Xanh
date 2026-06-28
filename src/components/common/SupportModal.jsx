@@ -241,7 +241,7 @@ function SupportModal({
         {activeTab === 'contact' && (
           <div role="tabpanel" className="exanh-support-tab-content">
             <div className="exanh-support-contact">
-              <Mail size={48} strokeWidth={1.5} color="var(--color-primary-500)" style={{ marginBottom: '16px' }} />
+              <Mail size={48} strokeWidth={1.5} color="var(--color-primary-500)" style={{ margin: '0 auto 16px auto', display: 'block' }} />
               <h3>Liên hệ đội ngũ E-XANH</h3>
               <p>Mọi góp ý, hợp tác hoặc hỗ trợ khác, vui lòng gửi email về:<br/><strong>support@exanh.vn</strong></p>
               
