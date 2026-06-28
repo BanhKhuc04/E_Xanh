@@ -73,7 +73,7 @@ export async function uploadPostImage(file, userId) {
   // The database only has one column `image_url` or `cover_url`, so we return the best one
   // but if the component wants thumbnail, it should access it if we stored it as JSON, 
   // but for now we just return the detailUrl or publicUrl to avoid breaking old schema.
-  const bestUrl = result.postDetailUrl || result.postCardUrl || result.publicUrl
+  const bestUrl = result.detailUrl || result.cardUrl || result.thumbUrl || result.publicUrl
   
   return { publicUrl: bestUrl, error: null }
 }

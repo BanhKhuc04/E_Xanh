@@ -544,13 +544,16 @@ function PostManagementPage() {
                         if (res.error) {
                           showToast('Lỗi upload ảnh: ' + res.error.message)
                         } else {
-                          const originalUrl = res.original || res.publicUrl || ''
+                          const detailUrl = res.detailUrl || res.publicUrl || ''
+                          const cardUrl = res.cardUrl || res.publicUrl || ''
+                          const thumbUrl = res.thumbUrl || res.publicUrl || ''
+                          const originalUrl = detailUrl || cardUrl || thumbUrl || ''
                           setFormData({ 
                             ...formData, 
                             image_url: originalUrl,
-                            cover_card_url: res.card || originalUrl,
-                            cover_thumb_url: res.thumb || originalUrl,
-                            cover_detail_url: res.detail || originalUrl
+                            cover_card_url: cardUrl || originalUrl,
+                            cover_thumb_url: thumbUrl || originalUrl,
+                            cover_detail_url: detailUrl || originalUrl
                           })
                         }
                       } catch (err) {
