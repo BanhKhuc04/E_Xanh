@@ -122,7 +122,7 @@ function SettingsPage() {
     avatar: 'EX',
     name: 'Admin E-XANH',
     role: 'Quản trị viên',
-    email: 'admin@exanh.vn',
+    email: 'exanh.official@gmail.com',
     status: 'Đang hoạt động',
   })
   const [systemStatus, setSystemStatus] = useState([])

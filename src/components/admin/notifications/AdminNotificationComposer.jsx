@@ -86,7 +86,7 @@ export default function AdminNotificationComposer({
                 className="st-card__input"
                 value={form.targetValue}
                 onChange={(event) => handleFieldChange('targetValue', event.target.value)}
-                placeholder="vd: user@exanh.vn hoặc UUID"
+                placeholder="vd: exanh.official@gmail.com hoặc UUID"
               />
             </label>
           ) : null}

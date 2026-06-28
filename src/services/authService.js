@@ -299,13 +299,13 @@ export function getBlockedProfileMessage(profile) {
   if (!profile) return ''
 
   if (profile.status === 'deleted') {
-    return 'Tài khoản này đã bị vô hiệu hóa. Vui lòng liên hệ support@exanh.vn để được hỗ trợ.'
+    return 'Tài khoản này đã bị vô hiệu hóa. Vui lòng liên hệ exanh.official@gmail.com để được hỗ trợ.'
   }
 
   if (profile.status === 'locked' || profile.status === 'blocked') {
     return profile.ban_reason
       ? `Tài khoản của bạn đã bị khóa bởi quản trị viên.\n\nLý do: ${profile.ban_reason}`
-      : 'Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ support@exanh.vn nếu bạn cho rằng đây là nhầm lẫn.'
+      : 'Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ exanh.official@gmail.com nếu bạn cho rằng đây là nhầm lẫn.'
   }
 
   return ''

@@ -175,7 +175,7 @@ function ContactPage() {
             <div className="static-page__contact-info">
               <div>
                 <span>Email</span>
-                <strong>support@exanh.vn</strong>
+                <strong>exanh.official@gmail.com</strong>
               </div>
               <div>
                 <span>Khu vực</span>

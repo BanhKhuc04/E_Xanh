@@ -6,7 +6,7 @@ import { getCurrentSession, getCurrentUserProfile } from './authService'
 export const DEFAULT_PLATFORM_SETTINGS = {
   site_name: 'E-XANH',
   site_slogan: 'Dùng điện thông minh, sống xanh bền vững.',
-  support_email: 'support@exanh.vn',
+  support_email: 'exanh.official@gmail.com',
   site_description:
     'E-XANH giúp người trẻ tiết kiệm điện, chia sẻ kinh nghiệm sống xanh và theo dõi chi phí điện hằng tháng.',
   require_post_approval: true,
