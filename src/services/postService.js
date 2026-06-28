@@ -75,7 +75,13 @@ export async function uploadPostImage(file, userId) {
   // but for now we just return the detailUrl or publicUrl to avoid breaking old schema.
   const bestUrl = result.detailUrl || result.cardUrl || result.thumbUrl || result.publicUrl
   
-  return { publicUrl: bestUrl, error: null }
+  return { 
+    publicUrl: bestUrl, 
+    thumbUrl: result.thumbUrl,
+    cardUrl: result.cardUrl,
+    detailUrl: result.detailUrl,
+    error: null 
+  }
 }
 
 export async function uploadPostInlineImage(file, userId) {
@@ -119,19 +125,26 @@ export async function createPost(postData) {
   const validType = normalizedTypeMap[postData.type] || 'community'
 
   let imageUrl = null
+  let thumbUrl = null
+  let cardUrl = null
+  let detailUrl = null
 
   if (postData.coverFile) {
-    const { publicUrl, error: uploadError } = await uploadPostImage(postData.coverFile, userId)
-    if (uploadError) {
-      logError('Debug: Error uploading image:', uploadError?.message || uploadError)
-      return { data: null, error: new Error('Lỗi tải ảnh lên: ' + uploadError.message) }
+    const uploadResult = await uploadPostImage(postData.coverFile, userId)
+    if (uploadResult.error) {
+      logError('Debug: Error uploading image:', uploadResult.error?.message || uploadResult.error)
+      return { data: null, error: new Error('Lỗi tải ảnh lên: ' + uploadResult.error.message) }
     }
-    imageUrl = publicUrl
+    imageUrl = uploadResult.publicUrl
+    thumbUrl = uploadResult.thumbUrl || imageUrl
+    cardUrl = uploadResult.cardUrl || imageUrl
+    detailUrl = uploadResult.detailUrl || imageUrl
   } else if (postData.image_url) {
     imageUrl = postData.image_url
+    thumbUrl = postData.cover_thumb_url || imageUrl
+    cardUrl = postData.cover_card_url || imageUrl
+    detailUrl = postData.cover_detail_url || imageUrl
   }
-
-
 
   const payload = {
     author_id: userId,
@@ -143,6 +156,9 @@ export async function createPost(postData) {
     type: validType,
     status: postData.status || 'pending',
     image_url: imageUrl,
+    cover_thumb_url: thumbUrl,
+    cover_card_url: cardUrl,
+    cover_detail_url: detailUrl,
     // category_id: mapped if possible, null for now since form category is text
   }
 
@@ -734,13 +750,19 @@ export async function updatePost(postId, postData) {
   if (postData.coverFile) {
     const { data: sessionData } = await supabase.auth.getSession()
     if (sessionData?.session) {
-      const { publicUrl, error: uploadError } = await uploadPostImage(postData.coverFile, sessionData.session.user.id)
-      if (!uploadError) {
-        payload.image_url = publicUrl
+      const uploadResult = await uploadPostImage(postData.coverFile, sessionData.session.user.id)
+      if (!uploadResult.error) {
+        payload.image_url = uploadResult.publicUrl
+        payload.cover_thumb_url = uploadResult.thumbUrl || uploadResult.publicUrl
+        payload.cover_card_url = uploadResult.cardUrl || uploadResult.publicUrl
+        payload.cover_detail_url = uploadResult.detailUrl || uploadResult.publicUrl
       }
     }
-  } else if (postData.image_url !== undefined) {
-    payload.image_url = postData.image_url || null
+  } else {
+    if (postData.image_url !== undefined) payload.image_url = postData.image_url || null
+    if (postData.cover_thumb_url !== undefined) payload.cover_thumb_url = postData.cover_thumb_url || null
+    if (postData.cover_card_url !== undefined) payload.cover_card_url = postData.cover_card_url || null
+    if (postData.cover_detail_url !== undefined) payload.cover_detail_url = postData.cover_detail_url || null
   }
 
   const { data, error } = await supabase
