@@ -539,21 +539,22 @@ function PostManagementPage() {
                       if (!file) return
                       setFormLoading(true)
                       try {
-                        const { uploadOptimizedImage } = await import('../../services/mediaUploadService')
-                        const res = await uploadOptimizedImage({ file, bucket: 'post-images' })
+                        const { supabase } = await import('../../lib/supabase')
+                        const { data: { session } } = await supabase.auth.getSession()
+                        const userId = session?.user?.id || 'anonymous'
+                        
+                        const { uploadPostImage } = await import('../../services/postService')
+                        const res = await uploadPostImage(file, userId)
+                        
                         if (res.error) {
                           showToast('Lỗi upload ảnh: ' + res.error.message)
                         } else {
-                          const detailUrl = res.detailUrl || res.publicUrl || ''
-                          const cardUrl = res.cardUrl || res.publicUrl || ''
-                          const thumbUrl = res.thumbUrl || res.publicUrl || ''
-                          const originalUrl = detailUrl || cardUrl || thumbUrl || ''
                           setFormData({ 
                             ...formData, 
-                            image_url: originalUrl,
-                            cover_card_url: cardUrl || originalUrl,
-                            cover_thumb_url: thumbUrl || originalUrl,
-                            cover_detail_url: detailUrl || originalUrl
+                            image_url: res.publicUrl,
+                            cover_card_url: res.cardUrl || res.publicUrl,
+                            cover_thumb_url: res.thumbUrl || res.publicUrl,
+                            cover_detail_url: res.detailUrl || res.publicUrl
                           })
                         }
                       } catch (err) {

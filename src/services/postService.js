@@ -60,7 +60,7 @@ export async function uploadPostImage(file, userId) {
   const result = await uploadOptimizedImage({
     file,
     bucket: 'post-images',
-    folder: `posts`,
+    folder: `posts/${userId}`,
     preset: 'postDetail',
     variants: true,
     userId,
