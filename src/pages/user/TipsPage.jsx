@@ -14,6 +14,21 @@ import { useAuth } from '../../contexts/AuthContext'
 import heroImage from '../../assets/hero.png'
 import '../../styles/tips.css'
 
+// Ảnh fallback theo danh mục — dùng khi bài viết không có ảnh riêng
+const CATEGORY_FALLBACK_IMAGES = {
+  'Điều hòa':      '/images/bai-viet-01.png',
+  'Laptop':        '/images/bai-viet-13.png',
+  'Tủ lạnh':       '/images/bai-viet-21.png',
+  'Thiết bị điện': '/images/bai-viet-28.png',
+  'Thói quen':     '/images/bai-viet-38.png',
+  'Mẹo chung':     '/images/bai-viet-48.png',
+}
+
+function getCategoryImage(category) {
+  return CATEGORY_FALLBACK_IMAGES[category] || heroImage
+}
+
+
 const PREDEFINED_CATEGORIES = [
   'Tất cả',
   'Điều hòa',
@@ -120,26 +135,29 @@ function TipsPage() {
           setCategories(fetchedCategories)
 
           if (postsRes.data) {
-            const mapped = postsRes.data.map((post, index) => ({
-              id: post.id || post.slug || `tip-${index}`,
-              title: post.title || 'Bài viết',
-              slug: post.slug || '',
-              type: post.type,
-              author: post.profiles?.name || 'Thành viên E-XANH',
-              authorId: post.author_id,
-              authorAvatar: post.profiles?.avatar_url || '',
-              category: post.categories?.name || 'Mẹo tiết kiệm',
-              status: 'published',
-              image: post.image_url || heroImage,
-              description: post.description || 'Chưa có mô tả ngắn.',
-              content: post.content || '',
-              likes: post.likes_count || 0,
-              comments: post.comments_count || 0,
-              savedCount: post.saved_count || 0,
-              views: post.views_count || 0,
-              readTime: post.read_time || '3 phút',
-              date: post.created_at ? new Date(post.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            }))
+              const mapped = postsRes.data.map((post, index) => {
+                const categoryName = post.categories?.name || 'Mẹo tiết kiệm'
+                return {
+                  id: post.id || post.slug || `tip-${index}`,
+                  title: post.title || 'Bài viết',
+                  slug: post.slug || '',
+                  type: post.type,
+                  author: post.profiles?.name || 'Thành viên E-XANH',
+                  authorId: post.author_id,
+                  authorAvatar: post.profiles?.avatar_url || '',
+                  category: categoryName,
+                  status: 'published',
+                  image: post.cover_card_url || post.cover_url || post.image_url || getCategoryImage(categoryName),
+                  description: post.description || 'Chưa có mô tả ngắn.',
+                  content: post.content || '',
+                  likes: post.likes_count || 0,
+                  comments: post.comments_count || 0,
+                  savedCount: post.saved_count || 0,
+                  views: post.views_count || 0,
+                  readTime: post.read_time || '3 phút',
+                  date: post.created_at ? new Date(post.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                }
+              })
             if (page === 1) {
               setDbPosts(mapped)
             } else {
