@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -12,6 +12,7 @@ import RelatedPostsSection from '../../components/posts/RelatedPostsSection'
 import { getCategories, getTipPosts } from '../../services/postService'
 import { useAuth } from '../../contexts/AuthContext'
 import heroImage from '../../assets/hero.png'
+import { manualPosts } from '../../data/manualPosts'
 import '../../styles/tips.css'
 
 // Ảnh fallback theo danh mục — dùng khi bài viết không có ảnh riêng
@@ -186,7 +187,49 @@ function TipsPage() {
     return () => { isMounted = false }
   }, [page, selectedCategory, searchValue])
 
-  const visiblePosts = sortPosts(dbPosts, sortValue, searchValue)
+  // Chuẩn hoá manualPosts sang cùng shape với dbPosts
+  const normalizedManual = useMemo(() => {
+    return manualPosts.map((p) => ({
+      id: `manual-${p.id}`,
+      title: p.title,
+      slug: p.slug,
+      type: p.type || 'tip',
+      author: p.author,
+      authorId: null,
+      authorAvatar: '',
+      category: p.category,
+      status: 'published',
+      image: p.image || getCategoryImage(p.category),
+      description: p.description,
+      content: p.content,
+      likes: p.likes || 0,
+      comments: p.comments || 0,
+      savedCount: p.savedCount || 0,
+      views: 0,
+      readTime: p.readTime || '3 phút đọc',
+      date: p.date || '',
+    }))
+  }, [])
+
+  // Merge: bài Supabase trước, bài thủ công sau (bỏ bài trùng slug)
+  const dbSlugs = new Set(dbPosts.map((p) => p.slug))
+  const mergedPosts = [
+    ...dbPosts,
+    ...normalizedManual.filter((p) => !dbSlugs.has(p.slug)),
+  ]
+
+  // Áp dụng filter category + search lên toàn bộ merged
+  const filteredMerged = mergedPosts.filter((post) => {
+    const matchCat =
+      selectedCategory === 'Tất cả' || post.category === selectedCategory
+    const matchSearch = !searchValue ||
+      post.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+      post.description.toLowerCase().includes(searchValue.toLowerCase())
+    return matchCat && matchSearch
+  })
+
+  const visiblePosts = sortPosts(filteredMerged, sortValue, searchValue)
+
   const suggestedPosts = [] // No longer statically suggested here
 
 
