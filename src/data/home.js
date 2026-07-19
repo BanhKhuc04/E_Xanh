@@ -9,9 +9,10 @@ export const homeHero = {
   image: heroImage,
   imageAlt: 'Minh họa không gian sống xanh và học tập thân thiện',
   stats: [
-    { value: '120+', label: 'Bài viết' },
-    { value: '2.4K', label: 'Tương tác' },
-    { value: '850', label: 'Lưu bài' },
+    { value: '50+', label: 'Người dùng' },
+    { value: '55', label: 'Bài viết' },
+    { value: '300+', label: 'Tương tác' },
+    { value: '20', label: 'Lưu bài' },
   ],
   floatingSavings: {
     label: 'Tiết kiệm dự kiến',
